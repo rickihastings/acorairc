@@ -1,0 +1,157 @@
+<?php
+
+/*
+* Acora IRC Services
+* modules/info.cs.php: ChanServ info module
+* 
+* Copyright (c) 2008 Acora (http://gamergrid.net/acorairc)
+* Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
+*
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*/
+
+class cs_info implements module
+{
+	
+	const MOD_VERSION = '0.0.2';
+	const MOD_AUTHOR = 'Acora';
+	// module info
+	
+	public function __construct() {}
+	// __construct, makes everyone happy.
+	
+	/*
+	* modload (private)
+	* 
+	* @params
+	* void
+	*/
+	public function modload()
+	{
+		modules::init_module( 'cs_info', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		// these are standard in module constructors
+		
+		chanserv::add_help( 'cs_info', 'help', &chanserv::$help->CS_HELP_INFO_1 );
+		chanserv::add_help( 'cs_info', 'help info', &chanserv::$help->CS_HELP_INFO_ALL );
+		// add the help
+		
+		chanserv::add_command( 'info', 'cs_info', 'info_command' );
+		// add the info command
+	}
+	
+	/*
+	* info_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function info_command( $nick, $ircdata = array() )
+	{
+		$chan = core::get_chan( &$ircdata, 0 );
+		// get the channel.
+		
+		if ( $chan == '' || $chan[0] != '#' )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+			return false;
+			// wrong syntax
+		}
+		// make sure they've entered a channel
+		
+		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'founder', 'timestamp', 'last_timestamp', 'suspended', 'suspend_reason' ) ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			return false;
+		}
+		// make sure the channel exists
+		
+		if ( $channel->suspended == 1 )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_SUSPENDED_1, array( 'chan' => $channel->channel ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_SUSPENDED_2, array( 'reason' => $channel->suspend_reason ) );
+		}
+		else
+		{
+			$founder = services::user_exists_id( $channel->founder, false, array( 'display', 'id' ) );
+			// get the founder
+			
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_2, array( 'nick' => $founder->display ) );
+			
+			$desc = chanserv::get_flags( $channel->channel, 'd' );
+			if ( $desc != null )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
+			// description?
+			
+			$email = chanserv::get_flags( $channel->channel, 'e' );
+			if ( $email != null )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_4, array( 'email' => $email ) );
+			// is there an email?
+			
+			$url = chanserv::get_flags( $channel->channel, 'u' );
+			if ( $url != null )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_5, array( 'url' => $url ) );
+			// or a url?
+			
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_6, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
+			
+			$modelock = chanserv::get_flags( $channel->channel, 'm' );
+			if ( $modelock != null )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_8, array( 'mode_lock' => $modelock ) );
+			// is there a mode lock?
+			
+			$entrymsg = chanserv::get_flags( $channel->channel, 'w' );
+			if ( $entrymsg != null )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_9, array( 'entrymsg' => $entrymsg ) );
+			// is there an entry msg?
+			
+			$list = '';
+			
+			if ( chanserv::check_flags( $channel->channel, array( 'T' ) ) )
+				$list .= 'Topiclock, ';
+			if ( chanserv::check_flags( $channel->channel, array( 'K' ) ) )
+				$list .= 'Keeptopic, ';
+			if ( chanserv::check_flags( $channel->channel, array( 'G' ) ) )
+				$list .= 'Guard, ';
+			if ( chanserv::check_flags( $channel->channel, array( 'S' ) ) )
+				$list .= 'Secure, ';
+			if ( chanserv::check_flags( $channel->channel, array( 'F' ) ) )
+				$list .= 'Fantasy';
+			
+			if ( substr( $list, -2, 2 ) == ', ' ) 
+				$list = substr( $list, 0 ,-2 );
+			// compile our list of options
+			
+			if ( $list != '' )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_10, array( 'options' => $list ) );
+			// if our list doesn't equal '', eg. empty show the info.
+				
+			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->chanserv->expire != 0 )
+			{
+				$expiry_time = core::$config->chanserv->expire * 86400;
+				
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_11, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
+			}
+			// if the nick in question has staff powers, we show the expiry times.
+		}
+	}
+	
+	/*
+	* main (event hook)
+	* 
+	* @params
+	* $ircdata - ''
+	*/
+	public function main( &$ircdata, $startup = false )
+	{
+		return true;
+		// we don't need to listen for anything in this module
+		// so we just return true immediatly.
+	}
+}
+
+// EOF;

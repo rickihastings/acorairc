@@ -1,0 +1,84 @@
+#!/bin/sh
+
+#
+# Acora IRC Services
+# acora: Services remote control file
+#
+# Copyright (c) 2008 Acora (http://gamergrid.net/acorairc)
+# Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
+#
+# Permission to use, copy, modify, and/or distribute this software for any
+# purpose with or without fee is hereby granted, provided that the above
+# copyright notice and this permission notice appear in all copies.
+#
+
+run=`ps ux | awk '/php (.*?)services.php/ && !/awk/ {print $2}'`
+version="0.4.5beta+Cymric"
+
+if [ "$1" = "" ]
+then
+    	echo -e "Invalid use (start|stop|restart|debug|status|version)"
+	exit
+fi
+
+if [ "$1" = "start" ]
+then
+    	if [ "$run" ]
+    		then
+        	echo -e "Acora IRC Services are already running."
+		exit
+    	else
+       		php -q extra/start.php	
+		exit
+	fi
+elif [ "$1" = "stop" ]
+then
+    	if [ "$run" ]
+    	then
+        	kill -9 $run
+        	echo -e "Acora IRC Services shutting down."
+       		exit
+		else
+        	echo -e "Acora IRC Services are not running."
+        	exit
+		fi
+elif [ "$1" = "restart" ]
+then
+    	if [ "$run" ]
+    	then
+       		kill -9 $run
+        	php -q extra/start.php
+			exit
+    	else
+    		echo -e "Acora IRC Services are not running."
+		exit
+    	fi
+elif [ "$1" = "debug" ]
+then
+    	if [ "$run" ]
+    	then
+        	echo -e "Acora IRC Services are already running."
+			exit
+    	else
+		echo -e "Running in debug mode."
+       		php services.php debug	
+		exit
+	fi
+elif [ "$1" = "status" ]
+then
+	if [ "$run" ]
+    	then
+        	echo -e "Acora IRC Services are running."
+			exit
+    	else
+        	echo -e "Acora IRC Services are not running."
+		exit
+    	fi
+elif [ "$1" = "version" ]
+then
+    	echo -e "Acora IRC Services version $version\033[m"
+	exit
+else
+    	echo -e "Invalid use (start|stop|restart|debug|status|version)"
+	exit
+fi
