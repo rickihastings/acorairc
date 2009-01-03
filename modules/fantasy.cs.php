@@ -54,6 +54,20 @@ class cs_fantasy implements module
 			if ( chanserv::check_flags( $chan, array( 'F' ) ) === false ) return false;
 			// we gotta check if the channel has fantasy commands enabled first
 			
+			if ( commands::on_fantasy_cmd( &$ircdata, 'help', core::$config->chanserv->nick ) )
+			{
+				if ( ircd::$halfop )
+					$help = &chanserv::$help->CS_HELP_FANTASY_ALL1;
+				else
+					$help = &chanserv::$help->CS_HELP_FANTASY_ALL2;
+				
+				foreach ( $help as $line )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, $line, array( 'p' => core::$config->chanserv->fantasy_prefix ) );	
+				}
+			}
+			// !help command
+			
 			if ( commands::on_fantasy_cmd( &$ircdata, 'owner', core::$config->chanserv->nick ) && ircd::$owner )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'F' ) ) === false ) return false;
