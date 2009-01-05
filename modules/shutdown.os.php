@@ -113,7 +113,7 @@ class os_shutdown implements module
 			// exit the server
 			
 			if ( core::$debug )
-				exec( 'php -q '.BASEPATH.'/services.php debug' );
+				exec( 'php '.BASEPATH.'/services.php debug' );
 			else
 				exec( 'php -q '.BASEPATH.'/services.php > /dev/null &' );
 			// reboot
