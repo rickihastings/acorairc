@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS `system_core` (
 --
 
 INSERT INTO `system_core` (`id`, `max_users`, `max_userstime`) VALUES
-(1, 17, 1228424529);
+(1, 0, 0);
 
 -- --------------------------------------------------------
 
