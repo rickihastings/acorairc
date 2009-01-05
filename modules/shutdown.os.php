@@ -40,15 +40,15 @@ class os_shutdown implements module
 		operserv::add_command( 'shutdown', 'os_shutdown', 'shutdown_command' );
 		// add the shutdown command
 		
-		if ( substr( php_uname(), 0, 7 ) != 'Windows' )
-		{
+		//if ( substr( php_uname(), 0, 7 ) != 'Windows' )
+		//{
 			operserv::add_help( 'os_shutdown', 'help', &operserv::$help->OS_HELP_RESTART_1 );
 			operserv::add_help( 'os_shutdown', 'help restart', &operserv::$help->OS_HELP_RESTART_ALL );
 			// add the help
 			
 			operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
 			// add the command
-		}
+		//}
 		// if we're running anything BUT windows, add the restart command
 		// might sound ludacris, but windows is just shit, and it simply
 		// doesn't want to work.
@@ -112,11 +112,36 @@ class os_shutdown implements module
 			ircd::shutdown( 'shutdown command from '.$nick, false );
 			// exit the server
 			
-			if ( core::$debug )
-				exec( 'php '.BASEPATH.'/services.php debug' );
+			fclose( core::$socket );
+			// close the socket first.
+			
+			if ( substr( php_uname(), 0, 7 ) != 'Windows' )
+			{
+				if ( core::$debug )
+					system( 'php '.BASEPATH.'/services.php debug' );
+				else
+					exec( 'php '.BASEPATH.'/services.php > /dev/null &' );
+				// reboot if we're running anything but windows
+				// if debug we send the output back to the screen, else we send it to /dev/null
+			}
 			else
-				exec( 'php -q '.BASEPATH.'/services.php > /dev/null &' );
-			// reboot
+			{
+				if ( !isset( core::$config->settings->php_dir ) || core::$config->settings->php_dir == '' )
+					define( 'PHPDIR', 'C:\php\php.exe' );
+				else
+					define( 'PHPDIR', core::$config->settings->php_dir );
+				// define where the php binary is located.
+				
+				exec( '@cd '.BASEPATH );
+				// cd to the basedir
+				
+				if ( core::$debug )
+					system( '@'.PHPDIR.' services.php debug' );
+				else
+					exec( '@'.PHPDIR.' services.php' );
+				// if we run windows we do a different method of reboot
+				// again if we debug we send it to the screen, if not.. we don't
+			}
 			
 			exit;
 			// exit the program
