@@ -112,7 +112,10 @@ class os_shutdown implements module
 			ircd::shutdown( 'shutdown command from '.$nick, false );
 			// exit the server
 			
-			exec( 'php -q '.BASEPATH.'/services.php > /dev/null &' );
+			if ( core::$debug )
+				exec( 'php -q '.BASEPATH.'/services.php debug' );
+			else
+				exec( 'php -q '.BASEPATH.'/services.php > /dev/null &' );
 			// reboot
 			
 			exit;
