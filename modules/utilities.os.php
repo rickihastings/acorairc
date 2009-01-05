@@ -57,10 +57,11 @@ class os_utilities implements module
 	static public function jupe_command( $nick, $ircdata = array() )
 	{
 		$server = $ircdata[0];
+		$numeric = $ircdata[1];
 		// grab the ircdata, we only really need the server
-		// from here
+		// from here, and numeric.
 		
-		if ( trim( $server ) == '' )
+		if ( trim( $server ) == '' || trim( $numeric ) == '' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'JUPE' ) );
 			return false;	
@@ -82,7 +83,7 @@ class os_utilities implements module
 			core::$servers[$server] = $server;
 			// add it to the jupes & servers array
 			
-			ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick );
+			ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick, $numeric );
 			core::alog( core::$config->operserv->nick.': WARNING '.$nick.' juped '.$server );
 			ircd::globops( core::$config->operserv->nick, $nick.' juped '.$server );
 			

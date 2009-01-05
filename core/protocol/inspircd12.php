@@ -71,8 +71,6 @@ class ircd implements protocol
 	{
 		modules::init_module( 'inspircd11', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
 		// these are standard in module constructors
-		
-		self::$sid = core::$config->server->numeric;
 	}
 	
 	/*
@@ -550,9 +548,11 @@ class ircd implements protocol
 	* $name - name of server
 	* $pass - link pass
 	* $desc - server gecos
+	* $numeric - server numeric
 	*/
-	static public function init_server( $name, $pass, $desc )
+	static public function init_server( $name, $pass, $desc, $numeric )
 	{
+		self::$sid = $numeric;
 		self::send( 'SERVER '.$name.' '.$pass.' 0 '.self::$sid.' :'.$desc );
 		self::send( ':'.self::$sid.' BURST '.core::$network_time );
 		// init the server

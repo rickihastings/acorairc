@@ -196,10 +196,13 @@ $help = (object) array(
 	
 	'OS_HELP_JUPE_ALL'		=> array(
 		'=---- OperServ Help ----=',
-		'Syntax: JUPE server',
+		'Syntax: JUPE server numeric',
 		' ',
 		'Creates a "fake" server linked under the services',
 		'server. Useful for disallowing servers to relink.',
+		'You should consult your ircd documentation when entering',
+		'a numeric value, note that some ircds don\'t take this',
+		'into account so a dummy value can be entered.',
 		' ',
 		'Command limited to IRC Operators.',
 		'=---- End of OperServ Help ----=',

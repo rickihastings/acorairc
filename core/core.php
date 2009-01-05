@@ -326,7 +326,7 @@ class core
 		{
 			self::$booted = true;
 			
-			ircd::init_server( self::$config->server->name, self::$config->conn->password, self::$config->server->desc );
+			ircd::init_server( self::$config->server->name, self::$config->conn->password, self::$config->server->desc, self::$config->server->numeric );
 			// init the server
 			
 			foreach ( self::$service_bots as $bot )

@@ -534,8 +534,9 @@ class ircd implements protocol
 	* $name - name of server
 	* $pass - link pass
 	* $desc - server gecos
+	* $numeric - server numeric
 	*/
-	static public function init_server( $name, $pass, $desc )
+	static public function init_server( $name, $pass, $desc, $numeric )
 	{
 		self::send( 'SERVER '.$name.' '.$pass.' 0 :'.$desc );
 		self::send( 'BURST '.core::$network_time );
