@@ -433,12 +433,15 @@ class mode
 				// reset all our strings :D
 			}
 			// bit of maths, well, not much, lol.
+			
+			unset( $nicks[$id] );
 		}
 		// ok, so we've got our list, instead of sending the modes one by one, here's
 		// what we're gonna do, we're gonna compress it into a mode string, setting
 		// 6 at a time, sound good? indeed it does.
 		
-		ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
+		if ( count( $nicks ) > 0 )
+			ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
 		// send the remaining modes
 	}
 }
