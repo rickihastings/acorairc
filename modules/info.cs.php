@@ -15,7 +15,7 @@
 class cs_info implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -86,27 +86,31 @@ class cs_info implements module
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
 			// description?
 			
+			if ( core::$chans[$chan]['topic'] != '' )
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_4, array( 'topic' => core::$chans[$chan]['topic'] ) );
+			// topic
+			
 			$email = chanserv::get_flags( $channel->channel, 'e' );
 			if ( $email != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_4, array( 'email' => $email ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_5, array( 'email' => $email ) );
 			// is there an email?
 			
 			$url = chanserv::get_flags( $channel->channel, 'u' );
 			if ( $url != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_5, array( 'url' => $url ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_6, array( 'url' => $url ) );
 			// or a url?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_6, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_8, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
 			
 			$modelock = chanserv::get_flags( $channel->channel, 'm' );
 			if ( $modelock != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_8, array( 'mode_lock' => $modelock ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_9, array( 'mode_lock' => $modelock ) );
 			// is there a mode lock?
 			
 			$entrymsg = chanserv::get_flags( $channel->channel, 'w' );
 			if ( $entrymsg != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_9, array( 'entrymsg' => $entrymsg ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_10, array( 'entrymsg' => $entrymsg ) );
 			// is there an entry msg?
 			
 			$list = '';
@@ -127,14 +131,14 @@ class cs_info implements module
 			// compile our list of options
 			
 			if ( $list != '' )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_10, array( 'options' => $list ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 				
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->chanserv->expire != 0 )
 			{
 				$expiry_time = core::$config->chanserv->expire * 86400;
 				
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_11, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_12, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
 			}
 			// if the nick in question has staff powers, we show the expiry times.
 		}
