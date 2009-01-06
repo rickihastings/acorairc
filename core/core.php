@@ -225,7 +225,7 @@ class core
 				
 				if ( ircd::on_end_burst( &$ircdata ) )
 				{
-					self::$burst_time = round( microtime( true ) - self::$burst_time, 5 );
+					self::$burst_time = round( microtime( true ) - self::$burst_time, 4 );
 					// how long did the burst take?
 					
 					self::$end_burst = true;
