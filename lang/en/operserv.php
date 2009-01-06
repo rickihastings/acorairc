@@ -90,9 +90,8 @@ $help = (object) array(
 		'parameter. UPTIME will show technical information about',
 		'the services programs performance. NETWORK will show network',
 		'recorded information, such as number of users and channels.',
-		'SERVERS will show a list of currently linked servers and the',
-		'amount of users. OPERS will show a list of all opers, when',
-		'they connected and their full hostmask.',
+		'OPERS will show a list of all opers, when they connected and',
+		'their full hostmask.',
 		' ',
 		'Command limited to IRC Operators.',
 		'=---- End of OperServ Help ----=',
@@ -301,9 +300,6 @@ $help = (object) array(
 	'OS_STATS_N_4'		=> '  Current users: {users}',
 	'OS_STATS_N_5'		=> '  Current chans: {chans}',
 	// stats NETWORK
-	'OS_STATS_S_1'		=> '    #  Server                        Users',
-	'OS_STATS_S_2'		=> '    {num}. {name} {users}',
-	// stats SERVERS
 	'OS_STATS_O_1'		=> '    #  Hostmask                                     Online Since',
 	'OS_STATS_O_2'		=> '    {num}. {host} {time}',
 	// stats OPERS
