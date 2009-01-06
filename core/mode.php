@@ -335,8 +335,6 @@ class mode
 			// minus modes
 		}
 		// do we have any modes with parameters?
-		
-		print( core::$chans[$chan]['modes']."\r\n" );
 	}
 	
 	/*

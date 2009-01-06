@@ -34,15 +34,6 @@ class os_global implements module
 		{
 			ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
 		}
-		// introduce global.
-		
-		if ( isset( core::$config->settings->logchan ) || core::$config->settings->logchan != null )
-		{
-			timer::add( array( 'os_global', 'join_logchan', array() ), 1, 1 );
-			// because it wont let us do it here, we do it in the next iteration >.>
-		}
-		// logchan?
-		
 		// i decided to change global from a core feature into a module based feature
 		// seen as though global won't do anything really without this module it's going here
 		
@@ -141,6 +132,20 @@ class os_global implements module
 			
 			ircd::notice( core::$config->global->nick, $nick, 'Services are currently running in debug mode, please be careful when sending passwords.' );
 			// give them a quick notice that people can see their passwords.
+		}
+		
+		if ( ircd::on_chan_create( &$ircdata ) )
+		{
+			$chans = explode( ',', $ircdata[2] );
+			// chan
+			
+			foreach ( $chans as $chan )
+			{
+				if ( ( isset( core::$config->settings->logchan ) || core::$config->settings->logchan ) != null && isset( core::$chans[core::$config->settings->logchan] ) )
+					self::join_logchan();
+				// join global to the logchan.	
+			}
+			// on chan create bring our bot into it.
 		}
 	}
 }
