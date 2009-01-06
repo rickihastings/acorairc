@@ -159,15 +159,19 @@ class services
 			$mask = str_replace( '~', '', $mask );
 		if ( strpos( $hostname, '~' ) !== false )
 			$hostname = str_replace( '~', '', $hostname );
+		// strip out ~ of the ident
+		
 		if ( strpos( $mask, '/' ) !== false )
 			$mask = str_replace( '/', '', $mask );
-		// strip out ~
+		if ( strpos( $hostname, '/' ) !== false )
+			$hostname = str_replace( '/', '', $hostname );
+		// also strip out / which seems to cause problems
 		
 		$regex = $mask;
 		// set our regex.
 		
-		$regex = '/'.$regex.'/i';
-		$regex = preg_replace( '/\*/', '(.*)', $regex );
+		$regex = '/'.preg_quote( $regex ).'/i';
+		$regex = str_replace( '\*', '(.*)', $regex );
 		// match the hostname
 		
 		preg_match( $regex, $hostname, $r_matches );

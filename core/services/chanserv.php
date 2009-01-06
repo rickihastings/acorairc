@@ -229,7 +229,13 @@ class chanserv implements service
 			$cs_uid = array_search( core::$config->chanserv->nick, core::$uids );
 			// bleh.
 			
-			if ( ( stristr( $mode_queue, core::$config->chanserv->nick ) || stristr( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
+			if ( strpos( $mode_queue, '-'.ircd::$reg_modes['chan'] ) && services::chan_exists( $chan, array( 'channel' ) !== false ) )
+			{
+				ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$reg_modes['chan'] );
+			}
+			// -r, we need to set it back to +r
+			
+			if ( ( strpos( $mode_queue, core::$config->chanserv->nick ) || strpos( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
 			{
 				if ( ircd::$protect )
 					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick );
