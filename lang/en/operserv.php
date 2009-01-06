@@ -84,7 +84,7 @@ $help = (object) array(
 	
 	'OS_HELP_STATS_ALL' 		=> array(
 		'=---- OperServ Help ----=',
-		'Syntax: STATS [UPTIME|NETWORK|SERVERS|OPERS]',
+		'Syntax: STATS [UPTIME|NETWORK|OPERS]',
 		' ',
 		'Shows network and program statistics based on the second',
 		'parameter. UPTIME will show technical information about',

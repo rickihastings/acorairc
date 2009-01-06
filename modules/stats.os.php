@@ -74,35 +74,6 @@ class os_stats implements module
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_5, array( 'chans' => count( core::$chans ) ) );
 			// network info.
 		}
-		elseif ( strtolower( $type ) == 'servers' )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_S_1 );
-			
-			$x = 0;
-			foreach ( core::$servers as $server => $info )
-			{
-				$k = 0;
-				$x++;
-				$false_name = $info['name'];
-				
-				if ( !isset( $info['name'][30] ) )
-				{
-					$y = strlen( $info['name'] );
-					for ( $i = $y; $i <= 29; $i++ )
-						$false_name .= ' ';
-				}
-				// this is just a bit of fancy fancy, so everything displays neat
-				
-				foreach ( core::$nicks as $user => $u_info )
-				{
-					if ( $u_info['server'] == $info['name'] ) $k++;
-				}
-				// count the number of users using that server
-				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_S_2, array( 'num' => $x, 'name' => $false_name, 'users' => $k ) );
-			}
-			// servers info.	
-		}
 		elseif ( strtolower( $type ) == 'opers' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_1 );
