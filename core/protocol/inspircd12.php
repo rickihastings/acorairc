@@ -599,9 +599,10 @@ class ircd implements protocol
 	*
 	* @params
 	* $nick - who to send it from
+	* $mask - mask to use
 	* $message - message to send
 	*/
-	static public function global_notice( $nick, $message )
+	static public function global_notice( $nick, $mask, $message )
 	{
 		$unick = self::get_uid( $nick );
 		// get the uid.
@@ -614,7 +615,10 @@ class ircd implements protocol
 			$uuser = self::get_uid( $user );
 			// get the uid.
 			
-			if ( $data['server'] != core::$config->server_name )
+			$hostname = core::get_full_hostname( $user );
+			// hostname
+			
+			if ( $data['server'] != core::$config->server_name && services::match( $hostname, $mask ) )
 				services::communicate( $unick, $uuser, $message );
 		}
 	}

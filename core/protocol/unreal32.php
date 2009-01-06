@@ -560,16 +560,20 @@ class ircd implements protocol
 	*
 	* @params
 	* $nick - who to send it from
+	* $mask - mask to use
 	* $message - message to send
 	*/
-	static public function global_notice( $nick, $message )
+	static public function global_notice( $nick, $mask, $message )
 	{
 		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
 		// debug info
 		
 		foreach ( core::$nicks as $user => $data )
 		{
-			if ( $data['server'] != core::$config->server->name )
+			$hostname = core::get_full_hostname( $user );
+			// hostname
+			
+			if ( $data['server'] != core::$config->server->name && services::match( $hostname, $mask ) )
 				services::communicate( $nick, $user, $message );
 		}
 	}

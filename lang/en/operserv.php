@@ -50,10 +50,12 @@ $help = (object) array(
 	
 	'OS_HELP_GLOBAL_ALL' 		=> array(
 		'=---- OperServ Help ----=',
-		'Syntax: GLOBAL message',
+		'Syntax: GLOBAL hostmask message',
 		' ',
-		'Allows IRCops to send messages to all users on the network.',
-		'The message will be sent from the Global Messenger.',
+		'Allows IRCops to send messages to all users matching the',
+		'hostmask on the network. The message will be sent from the',
+		'Global Messenger. The hostmask shoudld be in the format of',
+		'nick!user@host',
 		' ',
 		'Command limited to IRC Operators.',
 		'=---- End of OperServ Help ----=',
@@ -333,6 +335,8 @@ $help = (object) array(
 	'OS_LOGONNEWS_NONE'	=> 'No matching logon news messages were found',
 	'OS_LOGONNEWS_EXISTS'	=> 'There is already a message with the same title',
 	// logonnews
+	'OS_GLOBAL_INVALID'	=> 'You have specified an invalid mask, the mask should be in the format of nick!user@host',
+	// global
 );
 
 // EOF;

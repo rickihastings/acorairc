@@ -94,22 +94,36 @@ class os_global implements module
 	*/
 	static public function global_command( $nick, $ircdata = array() )
 	{
-		$message = core::get_data_after( &$ircdata, 0 );
+		$mask = $ircdata[0];
+		$message = core::get_data_after( &$ircdata, 1 );
 		
-		if ( trim( $message ) == '' )
+		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX );
 			return false;
 		}
 		// are they sending a message?
 		
-		if ( core::$config->global->nick_on_global )
+		if ( strpos( $mask, '@' ) === false )
 		{
-			ircd::global_notice( core::$config->global->nick, '['.$nick.'] '.$message );
+			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_GLOBAL_INVALID );
+			return false;	
 		}
 		else
 		{
-			ircd::global_notice( core::$config->global->nick, $message );
+			if ( strpos( $mask, '!' ) === false )
+				$mask = '*!'.$mask;
+			// prepend the *! to the mask
+		}
+		// is the mask valid?
+		
+		if ( core::$config->global->nick_on_global )
+		{
+			ircd::global_notice( core::$config->global->nick, $mask, '['.$nick.'] '.$message );
+		}
+		else
+		{
+			ircd::global_notice( core::$config->global->nick, $mask, $message );
 		}
 		// send the message!!
 		

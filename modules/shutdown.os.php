@@ -70,7 +70,7 @@ class os_shutdown implements module
 		{
 			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			{
-				ircd::global_notice( core::$config->global->nick, core::$config->settings->shutdown_message );
+				ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
 			}
 			// is there a shutdown message?
 			
@@ -102,7 +102,7 @@ class os_shutdown implements module
 		{
 			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			{
-				ircd::global_notice( core::$config->global->nick, core::$config->settings->shutdown_message );
+				ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
 			}
 			// is there a shutdown message?
 			
