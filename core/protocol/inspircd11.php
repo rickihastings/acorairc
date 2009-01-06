@@ -4,7 +4,7 @@
 * Acora IRC Services
 * core/protocol/inspircd11.php: Provides support for InspIRCd 1.1
 * 
-* Copyright (c) 2008 Acora (http://gamergrid.net/acorairc)
+* Copyright (c) 2009 Acora (http://gamergrid.net/acorairc)
 * Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
 *
 * This project is licensed under the GNU Public License

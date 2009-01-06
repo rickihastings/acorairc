@@ -5,7 +5,7 @@
 * Acora IRC Services
 * services.php: Boots up the services package.
 * 
-* Copyright (c) 2008 Acora (http://gamergrid.net/acorairc)
+* Copyright (c) 2009 Acora (http://gamergrid.net/acorairc)
 * Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
 *
 * This project is licensed under the GNU Public License
