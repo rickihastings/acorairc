@@ -361,7 +361,7 @@ $help = (object) array(
 		' ',
 		'Clears ALL modes in a channel including all modes with parameters',
 		'such as channel keys, bans, status modes are all dropped. The',
-		'default channel modes are re-set onto the channel.'
+		'default channel modes are re-set onto the channel.',
 		'=---- End of ChanServ Help ----=',
 	),
 	// CLEAR
@@ -372,7 +372,7 @@ $help = (object) array(
 		' ',
 		'Changes a channel mode, if no parameter is given',
 		'all modes are dropped. The default channel modes',
-		'are re-set onto the channel'.
+		'are re-set onto the channel',
 		' ',
 		'Channel bans/keys/status/limit modes etc are not dropped.', 
 		'=---- End of ChanServ Help ----=',
