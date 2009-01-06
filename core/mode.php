@@ -87,11 +87,11 @@ class mode
 			'params'	=>	( is_array( $params ) ? $params : array() )
 		);
 		$mode_type	=	null;
-		// setup some key veriables
+		// setup some key variables
 		
 		$params = array();
 		$param_count = 1;
-		// more key veriables
+		// more key variables
 		
 		foreach ( $split_modes as $mode )
 		{
@@ -106,12 +106,21 @@ class mode
 			
 			if ( $force_modes )
 			{
-				if ( !strstr( ircd::$modes, $mode ) ) continue;
+				if ( strpos( ircd::$modes, $mode ) === false ) continue;
 				// we need to check if the mode that we're getting is valid, this is determined
 				// by what we're passed with the ircd
 				
-				if ( strstr( ircd::$modes_params, $mode ) != false ) $params[] = ( $mode_type == 'plus' ? '+'.$mode : '-'.$mode );
-				else $modes[$mode_type] .= $mode;
+				if ( strpos( ircd::$modes_params, $mode ) !== false )
+				{
+					if ( count( $params ) == 0 && $mode_type == 'minus' )
+						$modes[$mode_type] .= $mode;
+					else
+						$params[] = ( $mode_type == 'plus' ? '+'.$mode : '-'.$mode );
+				}
+				else
+				{
+					$modes[$mode_type] .= $mode;
+				}
 				// check if the mode is a parmeter mode
 				// if so put in a seperate array
 			}
@@ -131,11 +140,14 @@ class mode
 					$mode = $params[$num-1];
 					// get the mode related to the param
 					
-					if ( !is_array( $modes['params'][$param] ) ) $modes['params'][$param] = array( 'plus' => '', 'minus' => '' );
+					if ( !is_array( $modes['params'][$param] ) )
+						$modes['params'][$param] = array( 'plus' => '', 'minus' => '' );
 					// if the parameter hasen't been used before prepare it
 					
-					if ( strstr( $mode, '+' ) != false ) $modes['params'][$param]['plus'] .= str_replace( '+', '', $mode );
-					elseif ( strstr( $mode, '-' ) != false ) $modes['params'][$param]['minus'] .=  str_replace( '-', '', $mode );
+					if ( strpos( $mode, '+' ) !== false )
+						$modes['params'][$param]['plus'] .= str_replace( '+', '', $mode );
+					elseif ( strpos( $mode, '-' ) !== false )
+						$modes['params'][$param]['minus'] .=  str_replace( '-', '', $mode );
 					// put the mode in the correct array
 				}
 				// check there is a mode set with it
@@ -161,12 +173,15 @@ class mode
 					$modes['params'][$param]['minus'] = str_replace( $mode, '', $details['minus'] );
 					// remove all the duplicates
 					
-					if ( $plus_count > $minus_count ) $modes['params'][$param]['plus'] .= $mode;
-					elseif ( $plus_count < $minus_count ) $modes['params'][$param]['minus'] .= $mode;
+					if ( $plus_count > $minus_count )
+						$modes['params'][$param]['plus'] .= $mode;
+					elseif ( $plus_count < $minus_count )
+						$modes['params'][$param]['minus'] .= $mode;
 					// add in the mode in the correct string
 				}
 				
-				if ( $modes['params'][$param]['plus'] == '' && $modes['params'][$param]['minus'] == '' ) unset( $modes['params'][$param] );
+				if ( $modes['params'][$param]['plus'] == '' && $modes['params'][$param]['minus'] == '' )
+					unset( $modes['params'][$param] );
 				// if there are no modes for the param, remove it
 			}
 			// go through the new array to check for duplicates
@@ -191,8 +206,10 @@ class mode
 				$modes['minus'] = str_replace( $mode, '', $modes['minus'] );
 				// remove all the duplicates
 				
-				if ( $plus_count > $minus_count ) $modes['plus'] .= $mode;
-				elseif ( $plus_count < $minus_count ) $modes['minus'] .= $mode;
+				if ( $plus_count > $minus_count )
+					$modes['plus'] .= $mode;
+				elseif ( $plus_count < $minus_count )
+					$modes['minus'] .= $mode;
 				// add in the mode in the correct string
 			}
 		}
@@ -219,26 +236,107 @@ class mode
 		{
 			foreach ( str_split( $mode_array['plus'] ) as $mode )
 			{
-				if ( !strstr( core::$chans[$chan]['modes'], $mode ) )
+				if ( strpos( core::$chans[$chan]['modes'], $mode ) === false )
 					core::$chans[$chan]['modes'] .= $mode;
 			}
 		}
 		// if we have any plus modes, add them to the channel string
 		
-		$split_mode_string = str_split( core::$chans[$chan]['modes'] );
-		core::$chans[$chan]['modes'] = implode( '', $split_mode_string );
-		// append the mode string, now we need to split the minus
-		// string, and "subtract" them from the plus string, if found.
-		
 		if ( $mode_array['minus'] != '' )
 		{
 			foreach ( str_split( $mode_array['minus'] ) as $mode )
 			{
-				if ( strstr( core::$chans[$chan]['modes'], $mode ) )
-					core::$chans[$chan]['modes'] = str_replace( $mode, '', core::$chans[$chan]['modes'] );
+				$parts = explode( ' ', core::$chans[$chan]['modes'] );
+				
+				if ( strpos( $parts[0], $mode ) !== false )
+				{
+					$n_str = '';
+					// some values here
+					
+					foreach ( str_split( $parts[0] ) as $rm )
+						if ( strpos( ircd::$modes_params, $rm ) !== false ) $n_str .= $rm;
+					// generate our string, without non-paramtized modes
+					
+					$strpos = strpos( $n_str, $mode );
+					// find the location of the paramter.
+					unset( $parts[($strpos + 1)] );
+					// remove the parameter
+					
+					$parts[0] = str_replace( $mode, '', $parts[0] );
+					core::$chans[$chan]['modes'] = implode( ' ', $parts );
+					core::$chans[$chan]['modes'] = trim( core::$chans[$chan]['modes'] );
+					// remove the param
+				}
+				// minus it
 			}
 		}
 		// check if we have any minus modes, if so, take them from the plus modes
+		
+		foreach ( $mode_array['params'] as $param => $modes )
+		{
+			if ( $mode_array['params'][$param]['plus'] != '' )
+			{
+				foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+				{
+					if ( in_array( $pm, ircd::$status_modes ) || strpos( ircd::$restrict_modes, $pm ) !== false ) continue;
+					// ignore status modes etc, mode::handle_params() deals with these
+					
+					$parts = explode( ' ', core::$chans[$chan]['modes'] );
+					// parts
+					
+					if ( strpos( $parts[0], $pm ) === false )
+					{
+						$parts[0] .= $pm;
+						$parts[] = $param;
+						// append the mode to the parts
+						
+						core::$chans[$chan]['modes'] = implode( ' ', $parts );
+						core::$chans[$chan]['modes'] = trim( core::$chans[$chan]['modes'] );
+						// make the changes.
+					}
+					// plus it
+				}
+			}
+			// plus modes
+			
+			if ( $mode_array['params'][$param]['minus'] != '' )
+			{
+				foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
+				{
+					if ( in_array( $mm, ircd::$status_modes ) || strpos( ircd::$restrict_modes, $mm ) !== false ) continue;
+					// ignore status modes etc, mode::handle_params() deals with these
+					
+					$parts = explode( ' ', core::$chans[$chan]['modes'] );
+					// parts
+					
+					if ( strpos( $parts[0], $mm ) !== false )
+					{
+						$n_str = '';
+						// some values here
+						
+						foreach ( str_split( $parts[0] ) as $rm )
+							if ( strpos( ircd::$modes_params, $rm ) !== false ) $n_str .= $rm;
+						// generate our string, without non-paramtized modes
+						
+						$strpos = strpos( $n_str, $mm );
+						// find the location of the paramter.
+						unset( $parts[($strpos + 1)] );
+						// remove the parameter
+						
+						$parts[0] = str_replace( $mm, '', $parts[0] );
+						
+						core::$chans[$chan]['modes'] = implode( ' ', $parts );
+						core::$chans[$chan]['modes'] = trim( core::$chans[$chan]['modes'] );
+						// remove the param
+					}
+					// minus it
+				}
+			}
+			// minus modes
+		}
+		// do we have any modes with parameters?
+		
+		print( core::$chans[$chan]['modes']."\r\n" );
 	}
 	
 	/*
@@ -267,7 +365,7 @@ class mode
 						// we've found a user but be careful, this could be a key
 						// so we've gotta check for the qaohv modes
 						
-						if ( strpos( $pm, core::$chans[$chan]['users'][$param] ) === false )
+						if ( strpos( core::$chans[$chan]['users'][$param], $pm ) === false )
 							core::$chans[$chan]['users'][$param] .= $pm;
 						// we add it as normally
 					}
@@ -281,7 +379,7 @@ class mode
 						if ( !in_array( $mm, ircd::$status_modes ) ) continue;
 						// again we've found a user, but we need to check if it's a correct mode
 						
-						if ( strpos( $mm, core::$chans[$chan]['users'][$param] ) !== false ) 
+						if ( strpos( core::$chans[$chan]['users'][$param], $mm ) !== false ) 
 							core::$chans[$chan]['users'][$param] = str_replace( $mm, '', core::$chans[$chan]['users'][$param] );
 						// the mode is correct, so we do the replacing accordingly
 					}
@@ -299,7 +397,7 @@ class mode
 						if ( strpos( ircd::$restrict_modes, $pm ) === false ) continue;
 						// make sure the mode is a +bIe
 						
-						if ( strpos( $pm, core::$chans[$chan]['p_modes'][$param] ) === false )
+						if ( strpos( core::$chans[$chan]['p_modes'][$param], $pm ) === false )
 							core::$chans[$chan]['p_modes'][$param] .= $pm;
 						// we add it as normally
 					}
@@ -313,7 +411,7 @@ class mode
 						if ( strpos( ircd::$restrict_modes, $mm ) === false ) continue;
 						// make sure the mode is a +bIe
 						
-						if ( strpos( $mm, core::$chans[$chan]['p_modes'][$param] ) !== false ) 
+						if ( strpos( core::$chans[$chan]['p_modes'][$param], $mm ) !== false ) 
 							core::$chans[$chan]['p_modes'][$param] = str_replace( $mm, '', core::$chans[$chan]['p_modes'][$param] );
 						// the mode is correct, so we do the replacing accordingly
 						
