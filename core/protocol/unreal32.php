@@ -878,6 +878,9 @@ class ircd implements protocol
 		
 		core::alog( 'send(): '.$command, 'SERVER' );
 		// log SERVER
+		
+		core::$lines_sent++;
+		// ++ lines sent
 	}
 	
     /*

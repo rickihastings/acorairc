@@ -40,10 +40,13 @@ class core
 	
 	static public $end_burst = false;
 	static public $capab_start = false;
+	static public $lines_processed;
+	static public $lines_sent;
 	static public $buffer;
 	static public $nbuffer;
 	static public $service_bots;
 	static public $booted = false;
+	static public $burst_time;
 	// these HAVE to be declared unfortunatly
 	// never the less all these variables are here, buffer, flags etc.
 	
@@ -177,6 +180,7 @@ class core
 			{
 				$raw = trim( $raw );
 				$ircdata = explode( ' ', $raw );
+				self::$lines_processed++;
 				// grab the data
 				
 				self::alog( 'recv(): '.$raw, 'SERVER' );
@@ -211,11 +215,17 @@ class core
 					{
 						self::$network_time = $ircdata[2];
 					}
+					
+					self::$burst_time = microtime( true );
+					// how long did the burst take?
 				}
 				// if we recieve a start burst, we also adopt the time given to us
 				
 				if ( ircd::on_end_burst( &$ircdata ) )
 				{
+					self::$burst_time = round( microtime( true ) - self::$burst_time, 5 );
+					// how long did the burst take?
+					
 					self::$end_burst = true;
 					
 					ircd::end_burst();

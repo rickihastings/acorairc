@@ -58,15 +58,15 @@ class os_chanclear implements module
 		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'GLINE' ) ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
-			// wrong syntax
 			return false;
+			// wrong syntax
 		}
 		
 		if ( $chan[0] != '#' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
-			// wrong syntax
 			return false;
+			// wrong syntax
 		}
 		
 		if ( isset( core::$chans[$chan] ) )
