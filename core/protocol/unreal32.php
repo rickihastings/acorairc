@@ -24,6 +24,7 @@ class ircd implements protocol
 	static public $chghost = false;
 	static public $chgident = false;
 
+	static public $restrict_modes = 'bIe';
 	static public $status_modes = array();
 	static public $owner = true;
 	static public $protect = true;
@@ -373,6 +374,8 @@ class ircd implements protocol
 	{
 		$nick = core::get_nick( &$ircdata, 0 );
 		$chans = explode( ',', $ircdata[2] );
+		
+		core::$chans[$chan]['p_modes'] = array();
 		
 		foreach ( $chans as $chan )
 		{

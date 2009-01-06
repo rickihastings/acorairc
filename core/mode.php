@@ -257,39 +257,77 @@ class mode
 		
 		foreach ( $mode_array['params'] as $param => $modes )
 		{
-			if ( !isset( core::$chans[$chan]['users'][$param] ) ) continue;
-			
-			if ( $mode_array['params'][$param]['plus'] != '' )
+			if ( isset( core::$chans[$chan]['users'][$param] ) )
 			{
-				foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+				if ( $mode_array['params'][$param]['plus'] != '' )
 				{
-					if ( !in_array( $pm, ircd::$status_modes ) ) continue;
-					// we've found a user but be careful, this could be a key
-					// so we've gotta check for the qaohv modes
-					
-					if ( !strstr( core::$chans[$chan]['users'][$param], $pm ) )
-						core::$chans[$chan]['users'][$param] .= $pm;
-					// we add it as normally
+					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+					{
+						if ( !in_array( $pm, ircd::$status_modes ) ) continue;
+						// we've found a user but be careful, this could be a key
+						// so we've gotta check for the qaohv modes
+						
+						if ( strpos( $pm, core::$chans[$chan]['users'][$param] ) === false )
+							core::$chans[$chan]['users'][$param] .= $pm;
+						// we add it as normally
+					}
 				}
-			}
-			// loop through the plus modes if there are any
+				// loop through the plus modes if there are any
 			
-			if ( $mode_array['params'][$param]['minus'] != '' )
-			{	
-				foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
-				{
-					if ( !in_array( $mm, ircd::$status_modes ) ) continue;
-					// again we've found a user, but we need to check if it's a correct mode
-					
-					if ( strstr( core::$chans[$chan]['users'][$param], $mm ) ) 
-						core::$chans[$chan]['users'][$param] = str_replace( $mm, '', core::$chans[$chan]['users'][$param] );
-					// the mode is correct, so we do the replacing accordingly
+				if ( $mode_array['params'][$param]['minus'] != '' )
+				{	
+					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
+					{
+						if ( !in_array( $mm, ircd::$status_modes ) ) continue;
+						// again we've found a user, but we need to check if it's a correct mode
+						
+						if ( strpos( $mm, core::$chans[$chan]['users'][$param] ) !== false ) 
+							core::$chans[$chan]['users'][$param] = str_replace( $mm, '', core::$chans[$chan]['users'][$param] );
+						// the mode is correct, so we do the replacing accordingly
+					}
 				}
+				// same with minus
 			}
-			// same with minus
+			// this above part is only for user params, eg.. qaohv, and k, if people are fucking about
+			// but we also take care of k inside.
+			else
+			{
+				if ( $mode_array['params'][$param]['plus'] != '' )
+				{
+					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+					{
+						if ( strpos( ircd::$restrict_modes, $pm ) === false ) continue;
+						// make sure the mode is a +bIe
+						
+						if ( strpos( $pm, core::$chans[$chan]['p_modes'][$param] ) === false )
+							core::$chans[$chan]['p_modes'][$param] .= $pm;
+						// we add it as normally
+					}
+				}
+				// loop through the plus modes
+				
+				if ( $mode_array['params'][$param]['minus'] != '' )
+				{
+					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
+					{
+						if ( strpos( ircd::$restrict_modes, $mm ) === false ) continue;
+						// make sure the mode is a +bIe
+						
+						if ( strpos( $mm, core::$chans[$chan]['p_modes'][$param] ) !== false ) 
+							core::$chans[$chan]['p_modes'][$param] = str_replace( $mm, '', core::$chans[$chan]['p_modes'][$param] );
+						// the mode is correct, so we do the replacing accordingly
+						
+						if ( core::$chans[$chan]['p_modes'][$param] == '' )
+							unset( core::$chans[$chan]['p_modes'][$param] );
+						// if the param is empty, we unset it.
+					}
+				}
+				// loop through the minus modes
+			}
+			// here we handle +bIe, and any other that may occur, this is determined by ircd{}
 		}
 		// here we need to loop through the parameters, handling
-		// things like +qaohv, ignoring things like +b etc.
+		// things like +qaohv, also +bIe, as of 0.4.5
 	}
 	
 	/*

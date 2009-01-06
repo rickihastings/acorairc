@@ -23,7 +23,8 @@ class ircd implements protocol
 	static public $globops = false;
 	static public $chghost = false;
 	static public $chgident = false;
-
+	
+	static public $restrict_modes = 'bIe';
 	static public $status_modes = array();
 	static public $owner = false;
 	static public $protect = false;
@@ -360,6 +361,7 @@ class ircd implements protocol
 			$nusers = self::parse_users( $chan, $nusers_str, 1 );
 			
 			core::$chans[$chan]['timestamp'] = $ircdata[3];
+			core::$chans[$chan]['p_modes'] = array();
 			
 			if ( isset( core::$chans[$chan]['users'] ) )
 				core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );
