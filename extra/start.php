@@ -8,6 +8,8 @@
 * Copyright (c) 2008 Acora (http://gamergrid.net/acorairc)
 * Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
 *
+* This project is licensed under the GNU Public License
+*
 * Permission to use, copy, modify, and/or distribute this software for any
 * purpose with or without fee is hereby granted, provided that the above
 * copyright notice and this permission notice appear in all copies.
