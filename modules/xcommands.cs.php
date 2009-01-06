@@ -38,11 +38,17 @@ class cs_xcommands implements module
 		chanserv::add_help_fix( 'cs_xcommands', 'suffix', 'help commands', &chanserv::$help->CS_XCOMMANDS_SUFFIX );
 		chanserv::add_help( 'cs_xcommands', 'help', &chanserv::$help->CS_HELP_XCOMMANDS_1 );
 		
+		chanserv::add_help( 'cs_xcommands', 'help', &chanserv::$help->CS_HELP_CLEAR_1 );
+		// clear command
+		
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_KICK_1 );
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_KICKBAN_1 );
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_BAN_1 );
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_UNBAN_1 );
 		// add them to the "help commands" category
+		
+		chanserv::add_help( 'cs_xcommands', 'help clear', &chanserv::$help->CS_HELP_CLEAR_ALL );
+		// clear command
 		
 		chanserv::add_help( 'cs_xcommands', 'help kick', &chanserv::$help->CS_HELP_KICK_ALL );
 		chanserv::add_help( 'cs_xcommands', 'help kickban', &chanserv::$help->CS_HELP_KICK_ALL );
@@ -95,6 +101,9 @@ class cs_xcommands implements module
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_TYPEMASK_1 );
 		chanserv::add_help( 'cs_xcommands', 'help typemask', &chanserv::$help->CS_HELP_TYPEMASK_ALL );
 		// typemask
+		
+		chanserv::add_command( 'clear', 'cs_xcommands', 'clear_command' );
+		// clear command
 				
 		chanserv::add_command( 'kick', 'cs_xcommands', 'kick_command' );
 		chanserv::add_command( 'kickban', 'cs_xcommands', 'kickban_command' );
@@ -134,6 +143,68 @@ class cs_xcommands implements module
 	}
 	
 	/*
+	* clear_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function clear_command( $nick, $ircdata = array() )
+	{
+		$chan = $ircdata[0];
+		// standard data here.
+		
+		if ( self::check_channel( $nick, $chan, 'CLEAR' ) === false )
+			return false;
+		// check if the channel exists and stuff
+		
+		if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			return false;
+		}
+		// do they have access?
+		
+		ircd::mode( core::$config->chanserv->nick, $chan, '-'.core::$chans[$chan]['modes'] );
+		// remove standard modes
+		foreach ( core::$chans[$chan]['users'] as $user => $modes )
+		{
+			if ( $modes == '' )
+				continue;
+			// if modes is empty skip
+			if ( $user == core::$config->chanserv->nick || $user == core::$config->global->nick )
+				continue;
+			// if its chanserv or global, skip
+			
+			$c_modes = count( str_split( $modes ) );
+			$mode_string = '-'.$modes;
+			
+			for ( $i = 0; $i < $c_modes; $i++ )
+				$mode_string .= ' '.$user;
+			// generate a mode string.
+			
+			ircd::mode( core::$config->chanserv->nick, $chan, $mode_string );
+			// send the mode string
+		}
+		// status modes
+		foreach ( core::$chans[$chan]['p_modes'] as $mask => $modes )
+		{
+			$c_modes = count( str_split( $modes ) );
+			$mode_string = '-'.$modes;
+			
+			for ( $i = 0; $i < $c_modes; $i++ )
+				$mode_string .= ' '.$mask;
+			// generate a mode string.
+			
+			ircd::mode( core::$config->chanserv->nick, $chan, $mode_string );
+			// send the mode string
+		}
+		// bans etc.
+		ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes.ircd::$reg_modes['chan'] );
+		// reset default modes
+	}
+	
+	/*
 	* mode_command (command)
 	* 
 	* @params
@@ -149,7 +220,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -159,7 +230,7 @@ class cs_xcommands implements module
 		if ( $ircdata[1] == '' )
 		{
 			ircd::mode( core::$config->chanserv->nick, $chan, '-'.str_replace( 'r', '', core::$chans[$chan]['modes'] ) );
-			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
+			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes.ircd::$reg_modes['chan'] );
 			// we reset the channel modes if there is no first value
 		}
 		else

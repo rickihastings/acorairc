@@ -31,6 +31,7 @@ $help = (object) array(
 	),
 	// HELP PREFIX
 	
+	'CS_HELP_CLEAR_1'		=> '     CLEAR     - Clears ALL modes on a channel',
 	'CS_HELP_LEVELS_1' 		=> '     LEVELS    - Shows or modifies user access on a channel',
 	'CS_HELP_FLAGS_1' 		=> '     FLAGS     - Changes the flags on a channel',	
 	'CS_HELP_XCOMMANDS_1'	=> '     COMMANDS  - Channel management commands',
@@ -354,12 +355,24 @@ $help = (object) array(
 	),
 	// UNSUSPEND
 	
+	'CS_HELP_CLEAR_ALL'	=> array(
+		'=---- ChanServ Help ----=',
+		'Syntax: CLEAR channel',
+		' ',
+		'Clears ALL modes in a channel including all modes with parameters',
+		'such as channel keys, bans, status modes are all dropped. The',
+		'default channel modes are re-set onto the channel.'
+		'=---- End of ChanServ Help ----=',
+	),
+	// CLEAR
+	
 	'CS_HELP_MODE_ALL'	=> array(
 		'=---- ChanServ Help ----=',
 		'Syntax: MODE channel [modes]',
 		' ',
 		'Changes a channel mode, if no parameter is given',
-		'all modes are dropped and +nt is set on the channel.',
+		'all modes are dropped. The default channel modes',
+		'are re-set onto the channel'.
 		' ',
 		'Channel bans/keys/status/limit modes etc are not dropped.', 
 		'=---- End of ChanServ Help ----=',
