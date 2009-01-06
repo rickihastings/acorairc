@@ -20,9 +20,6 @@
 interface protocol
 {
 	
-	static public function log_changes( &$ircdata, $startup = false );
-	// log changes
-	
 	static public function handle_on_server( &$ircdata );
 	static public function handle_on_squit( &$ircdata );
 	static public function handle_on_connect( &$ircdata, $startup = false );

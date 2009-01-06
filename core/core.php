@@ -105,7 +105,7 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		self::main_loop();
+		$this->main_loop();
 		// execute the main program loop
 	}
 	
@@ -115,7 +115,7 @@ class core
 	* @params
 	* void
 	*/
-	function __destruct()
+	public function __destruct()
 	{
 		self::save_logs();
 		// we also save logs on destruct, incase of a crash etc normally this doesn't
@@ -144,7 +144,7 @@ class core
 					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
 					// log our incoming bandwidth
 					
-					if ( self::process( &$ircdata, true ) ) continue;
+					if ( $this->process( &$ircdata, true ) ) continue;
 					// process the data from the buffer
 					
 					unset( self::$nbuffer[$index], $index, $ircdata );
@@ -162,7 +162,7 @@ class core
 					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
 					// log our incoming bandwidth
 					
-					if ( self::process( &$ircdata, false ) ) continue;
+					if ( $this->process( &$ircdata, false ) ) continue;
 					// process normal incoming data
 					
 					unset( self::$buffer[$index], $index, $ircdata );
@@ -194,7 +194,7 @@ class core
 				{
 					self::$capab_start = false;
 					
-					self::boot_server();
+					$this->boot_server();
 				}
 				// we need to respectivly wait for capab end
 				// before we're suppost to boot everything
@@ -267,7 +267,7 @@ class core
 	*/
 	public function process( &$ircdata, $startup = false )
 	{
-		ircd::log_changes( &$ircdata, $startup );
+		self::log_changes( &$ircdata, $startup );
 		// log peoples hostnames, used for bans etc.
 		
 		if ( self::max_users( &$ircdata ) ) return true;
@@ -312,6 +312,71 @@ class core
 			$this->$bot->main( &$ircdata, $startup );
 		}
 		// we hook to each of our bots
+	}
+	
+	/*
+	* log_changes
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function log_changes( &$ircdata, $startup = false )
+	{
+		if ( ircd::on_server( &$ircdata ) )
+			ircd::handle_on_server( &$ircdata );
+		// let's us keep track of the linked servers
+		
+		if ( ircd::on_squit( &$ircdata ) )
+			ircd::handle_on_squit( &$ircdata );
+		// let's us keep track of the linked servers
+		
+		if ( ircd::on_connect( &$ircdata ) )
+			ircd::handle_on_connect( &$ircdata, $startup );
+		// log shit on connect, basically the users host etc.
+		
+		if ( ircd::on_nick_change( &$ircdata ) )
+			ircd::handle_nick_change( &$ircdata, $startup );
+		// on nick change, make sure the variable changes too.
+		
+		if ( ircd::on_quit( &$ircdata ) )
+			ircd::handle_quit( &$ircdata, $startup );
+		// on quit.
+		
+		if ( ircd::on_fhost( &$ircdata ) )
+			ircd::handle_host_change( &$ircdata );
+		// on hostname change.
+		
+		if ( ircd::on_mode( &$ircdata ) )
+			ircd::handle_mode( &$ircdata );	
+		// on mode
+		
+		if ( ircd::on_ftopic( &$ircdata ) )
+			ircd::handle_ftopic( &$ircdata );
+		// on ftopic
+		
+		if ( ircd::on_topic( &$ircdata ) )
+			ircd::handle_topic( &$ircdata );	
+		// on topic
+		
+		if ( ircd::on_chan_create( &$ircdata ) )
+			ircd::handle_channel_create( &$ircdata );
+		// on channel create
+		
+		if ( ircd::on_join( &$ircdata ) )
+			ircd::handle_join( &$ircdata );
+		// on join
+		
+		if ( ircd::on_part( &$ircdata ) )
+			ircd::handle_part( &$ircdata );
+		// and on part.
+		
+		if ( ircd::on_kick( &$ircdata ) )
+			ircd::handle_kick( &$ircdata );
+		// and on kick.
+		
+		if ( ircd::on_oper_up( &$ircdata ) )
+			ircd::handle_oper_up( &$ircdata );
+		// on oper ups
 	}
 	
 	/*

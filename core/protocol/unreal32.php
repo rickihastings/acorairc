@@ -74,71 +74,6 @@ class ircd implements protocol
 	}
 	
 	/*
-	* log_changes
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function log_changes( &$ircdata, $startup = false )
-	{
-		if ( self::on_server( &$ircdata ) )
-			self::handle_on_server( &$ircdata );
-		// let's us keep track of the linked servers
-		
-		if ( self::on_squit( &$ircdata ) )
-			self::handle_on_squit( &$ircdata );
-		// let's us keep track of the linked servers
-		
-		if ( self::on_connect( &$ircdata ) )
-			self::handle_on_connect( &$ircdata, $startup );
-		// log shit on connect, basically the users host etc.
-		
-		if ( self::on_nick_change( &$ircdata ) )
-			self::handle_nick_change( &$ircdata, $startup );
-		// on nick change, make sure the variable changes too.
-		
-		if ( self::on_quit( &$ircdata ) )
-			self::handle_quit( &$ircdata, $startup );
-		// on quit.
-		
-		if ( self::on_fhost( &$ircdata ) )
-			self::handle_host_change( &$ircdata );
-		// on hostname change.
-		
-		if ( ircd::on_mode( &$ircdata ) )
-			self::handle_mode( &$ircdata );	
-		// on mode
-		
-		if ( ircd::on_ftopic( &$ircdata ) )
-			self::handle_ftopic( &$ircdata );
-		// on ftopic
-		
-		if ( ircd::on_topic( &$ircdata ) )
-			self::handle_topic( &$ircdata );	
-		// on topic
-		
-		if ( self::on_chan_create( &$ircdata ) )
-			self::handle_channel_create( &$ircdata );
-		// on channel create
-		
-		if ( self::on_join( &$ircdata ) )
-			self::handle_join( &$ircdata );
-		// on join
-		
-		if ( self::on_part( &$ircdata ) )
-			self::handle_part( &$ircdata );
-		// and on part.
-		
-		if ( self::on_kick( &$ircdata ) )
-			self::handle_kick( &$ircdata );
-		// and on kick.
-		
-		if ( self::on_oper_up( &$ircdata ) )
-			self::handle_oper_up( &$ircdata );
-		// on oper ups
-	}
-	
-	/*
 	* handle_on_server
 	*
 	* @params
@@ -482,22 +417,6 @@ class ircd implements protocol
 	*/
 	static public function get_information( &$ircdata )
 	{
-		/*if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'MODULES' )
-		{
-			if ( strpos( $ircdata[2], 'm_globops.so' ) !== false )
-				self::$globops = true;
-			// we have globops!
-			
-			if ( strpos( $ircdata[2], 'm_chghost.so' ) !== false )
-				self::$chghost = true;
-			// we have chghost
-			
-			if ( strpos( $ircdata[2], 'm_chgident.so' ) !== false )
-				self::$chgident = true;
-			// and chgident
-		}
-		// only trigger when our modules info is coming through*/
-		
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'PROTOCTL' )
 		{
 			$data = explode( '=', $ircdata[13] );
