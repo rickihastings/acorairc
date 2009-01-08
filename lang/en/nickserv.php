@@ -347,8 +347,8 @@ $help = (object) array(
 	'NS_SUSPEND_5'			=>	'{nick} unsuspended',
 	// suspend messages
 	'NS_LIST_TOP'			=>	'Listing all registered nicknames',
-	'NS_LIST_TOP2'			=>	'    #  Nickname          Hostname',
-	'NS_LIST_ROW'			=>	'    {num}. {nick} ({info})',
+	'NS_LIST_TOP2'			=>	'    Nickname          Hostname',
+	'NS_LIST_ROW'			=>	'    {nick} ({info})',
 	'NS_LIST_BOTTOM'		=>	'End of list - {num}/{total} nickname(s) shown',
 	// list
 	'NS_INFO_1'				=>	'Information on {nick}:',

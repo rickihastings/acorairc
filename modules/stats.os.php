@@ -80,13 +80,11 @@ class os_stats implements module
 		{
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_1 );
 			
-			$x = 0;
 			foreach ( core::$nicks as $user => $info )
 			{
 				if ( !$info['ircop'] || $info['server'] == core::$config->server->name ) continue;
 				// skip if they aint an ircop
 				
-				$x++;
 				$false_host = core::get_full_hostname( $user );
 				
 				if ( !isset( $false_host[45] ) )
@@ -97,7 +95,7 @@ class os_stats implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_2, array( 'num' => $x, 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_2, array( 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
 			}
 			// opers info.
 		}
@@ -108,17 +106,6 @@ class os_stats implements module
 			// wrong syntax
 		}
 		// if/else for our type, if one isnt given we bail out.
-		
-		/*services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_1, array( 'network' => core::$config->server->network_name ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_2, array( 'version' => core::$version ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_3, array( 'users' => core::$max_users ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_4, array( 'users' => count( core::$nicks ) ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_5, array( 'chans' => count( core::$chans ) ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_6, array( 'time' => core::format_time( core::$uptime ) ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_7, array( 'memory' => core::get_size( memory_get_usage() ), 'real' => memory_get_usage() ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_8, array( 'memory' => core::get_size( core::$incoming ), 'real' => core::$incoming ) );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_9, array( 'memory' => core::get_size( core::$outgoing ), 'real' => core::$outgoing ) );
-		// send out our statistics*/
 	}
 	
 	/*

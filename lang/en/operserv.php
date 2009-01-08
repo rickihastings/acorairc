@@ -301,8 +301,8 @@ $help = (object) array(
 	'OS_VHOST_SET'		=> 'vHost for {nick} set to {host}',
 	'OS_VHOST_DELETED'	=> 'vHost for {nick} deleted',
 	'OS_VHOST_LIST_T'	=> 'Listing all vHosts',
-	'OS_VHOST_LIST_T2'	=> '    #  Nickname          Hostname',
-	'OS_VHOST_LIST_R'	=> '    {num}. {nick} ({info})',
+	'OS_VHOST_LIST_T2'	=> '    Nickname          Hostname',
+	'OS_VHOST_LIST_R'	=> '    {nick} ({info})',
 	'OS_VHOST_LIST_B'	=> 'End of list - {num}/{total} nickname(s) shown',
 	'OS_NO_VHOST'		=> '{nick} doesn\'t have a vhost set',
 	// vhosts
@@ -320,8 +320,8 @@ $help = (object) array(
 	'OS_STATS_N_4'		=> '  Current users: {users}',
 	'OS_STATS_N_5'		=> '  Current chans: {chans}',
 	// stats NETWORK
-	'OS_STATS_O_1'		=> '    #  Hostmask                                     Online Since',
-	'OS_STATS_O_2'		=> '    {num}. {host} {time}',
+	'OS_STATS_O_1'		=> '    Hostmask                                     Online Since',
+	'OS_STATS_O_2'		=> '    {host} {time}',
 	// stats OPERS
 	'OS_MODLIST_1'		=> 'Listing all loaded modules',
 	'OS_MODLIST_2'		=> '    Module         Version          Info',
@@ -339,8 +339,8 @@ $help = (object) array(
 	'OS_IGNORE_DEL'		=> '{nick} has been deleted from the services ignore list',
 	'OS_IGNORE_NONE'	=> '{nick} isn\'t on the services ignore list',
 	'OS_IGNORE_LIST_T'	=> 'Listing ignored users',
-	'OS_IGNORE_LIST_T2'	=> '    #  Nickname          Date Added',
-	'OS_IGNORE_LIST'	=> '    {num}. {nick} (Added: {time})',
+	'OS_IGNORE_LIST_T2'	=> '    Nickname          Date Added',
+	'OS_IGNORE_LIST'	=> '    {nick} (Added: {time})',
 	'OS_IGNORE_EXISTS'	=> '{nick} is already on the services ignore list',	
 	// ignore
 	'OS_LOGON_START'	=> '=---- Message(s) of the Day ----=',

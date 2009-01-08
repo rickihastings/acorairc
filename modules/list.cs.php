@@ -70,7 +70,7 @@ class cs_list implements module
 		}
 		// invalid syntax
 		
-		if ( substr_count( $limit, '-' ) > 1 )
+		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
@@ -93,10 +93,8 @@ class cs_list implements module
 		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_TOP2 );
 		// top of the list
 		
-		$x = 0;
 		while ( $channel = database::fetch( $chans ) )
 		{
-			$x++;
 			$false_chan = $channel->channel;
 			
 			if ( !isset( $channel->channel[18] ) )
@@ -113,7 +111,7 @@ class cs_list implements module
 				$info = $channel->suspend_reason;
 			// suspend reason, or description?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_ROW, array( 'num' => $x, 'chan' => $false_chan, 'info' => $info ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_ROW, array( 'chan' => $false_chan, 'info' => $info ) );
 		}
 		// loop through the channels
 		

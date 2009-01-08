@@ -70,7 +70,7 @@ class ns_list implements module
 		}
 		// invalid syntax
 		
-		if ( substr_count( $limit, '-' ) > 1 )
+		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
@@ -93,10 +93,8 @@ class ns_list implements module
 		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_TOP2 );
 		// top of list.
 		
-		$x = 0;
 		while ( $user = database::fetch( $nicks ) )
 		{
-			$x++;
 			$false_nick = $user->display;
 			
 			if ( !isset( $user->display[18] ) )
@@ -117,11 +115,11 @@ class ns_list implements module
 				$info = $user->suspend_reason;
 			}
 			
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_ROW, array( 'num' => $x, 'nick' => $false_nick, 'info' => $info ) );
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_ROW, array( 'nick' => $false_nick, 'info' => $info ) );
 		}
 		// loop through the nicks
 		
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $nicks ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
+		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $nicks ) == 0 ) ? 0 : database::num_rows( $nicks ), 'total' => $total ) );
 	}
 
 	/*

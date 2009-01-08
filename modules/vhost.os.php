@@ -162,7 +162,7 @@ class os_vhost implements module
 			}
 			// invalid syntax
 			
-			if ( substr_count( $limit, '-' ) > 1 )
+			if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 				return false;
@@ -193,10 +193,8 @@ class os_vhost implements module
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_T2 );
 			// list top.
 			
-			$x = 0;
 			while ( $users = database::fetch( $users_q ) )
 			{
-				$x++;
 				$false_nick = $users->display;
 				
 				if ( !isset( $users->display[18] ) )
@@ -207,7 +205,7 @@ class os_vhost implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_R, array( 'num' => $x, 'nick' => $false_nick, 'info' => $users->vhost ) );
+				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_R, array( 'nick' => $false_nick, 'info' => $users->vhost ) );
 			}
 			// loop through em, show the vhosts
 			
