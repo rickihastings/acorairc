@@ -28,6 +28,7 @@ class core
 	static public $log_data = array();
 	static public $debug_data = array();
 	static public $debug = false;
+	static public $services_account = false;
 	// our main static variables, these are all very important.
 	
 	static public $servers = array();
@@ -423,6 +424,28 @@ class core
 			timer::init();
 			// setup the timer, socket_blocking to 0 is required.
 		}
+	}
+	
+	/*
+	* check_services
+	*
+	* @params
+	* void
+	*/
+	static public function check_services()
+	{
+		if ( core::$services_account === false )
+		{
+			self::alog( 'ERROR: m_services_account.so is required, startup halted.', 'BASIC' );
+			// log it
+			
+			self::save_logs();
+			// save logs.
+			
+			ircd::shutdown( 'ERROR', true );
+			// exit
+		}
+		// services account isn't found, quit out letting them know.
 	}
 	
 	/*

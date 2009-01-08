@@ -419,6 +419,12 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'MODULES' )
 		{
+			if ( strpos( $ircdata[2], 'm_services_account.so' ) === false )
+				timer::add( array( 'core', 'check_services', array() ), 1, 1 );
+			else
+				core::$services_account = true;
+			// we have services_account
+			
 			if ( strpos( $ircdata[2], 'm_globops.so' ) !== false )
 				self::$globops = true;
 			// we have globops!
