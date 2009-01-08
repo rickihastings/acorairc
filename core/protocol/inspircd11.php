@@ -114,9 +114,10 @@ class ircd implements protocol
 		$gecos = core::get_data_after( &$ircdata, 9 );
 		// get nick, server, gecos
 		
+		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		if ( $gecos[0] == ':' ) $gecos = substr( $gecos, 1 );
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
-		// strip the : off the start of the gecos & server.
+		// strip :
 		
 		core::$nicks[$nick] = array(
 			'nick' => $nick,
@@ -134,9 +135,7 @@ class ircd implements protocol
 		);
 		
 		if ( core::$config->settings->logconnections && $startup === false )
-		{
 			core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
-		}
 		// log
 	}
 	
@@ -150,6 +149,10 @@ class ircd implements protocol
 	{
 		$nick = self::get_nick( &$ircdata, 0 );
 		$new_nick = $ircdata[2];
+		
+		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
+		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
+		// strip :
 		
 		if ( isset( core::$nicks[$nick] ) )
 		{
@@ -173,9 +176,7 @@ class ircd implements protocol
 		}
 		
 		if ( core::$config->settings->logconnections && $startup === false )
-		{
 			core::alog( 'NICK: '.$nick.' ('.core::$nicks[$new_nick]['ident'].'@'.core::$nicks[$new_nick]['oldhost'].' => '.core::$nicks[$new_nick]['host'].') ('.core::$nicks[$new_nick]['gecos'].') changed nick to '.$new_nick.' ('.core::$nicks[$new_nick]['server'].')' );
-		}
 		// log
 	}
 	
@@ -191,10 +192,11 @@ class ircd implements protocol
 		$nick = self::get_nick( &$ircdata, 0 );
 		// nick
 		
+		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
+		// strip :
+		
 		if ( core::$config->settings->logconnections && $startup === false )
-		{
 			core::alog( 'QUIT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') left the network ('.core::$nicks[$nick]['server'].')' );
-		}
 		// log
 		
 		unset( core::$nicks[$nick] );
