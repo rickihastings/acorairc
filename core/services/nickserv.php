@@ -35,6 +35,10 @@ class nickserv implements service
 		{
 			ircd::introduce_client( core::$config->nickserv->nick, core::$config->nickserv->user, core::$config->nickserv->host, core::$config->nickserv->real );
 		}
+		else
+		{
+			return;
+		}
 		// connect the bot
 		
 		foreach ( core::$config->nickserv_modules as $id => $module )

@@ -48,6 +48,7 @@ $help = (object) array(
 	'OS_HELP_KICK_1'		=> '     KICK      - Kick a user from a channel',
 	'OS_HELP_MODE_1'		=> '     MODE      - Change a channel\'s modes',
 	'OS_HELP_VHOST_1'		=> '     VHOST     - Manage nick vHosts',
+	'OS_HELP_OVERRIDE_1'	=> '     OVERRIDE  - Gives services roots override access',
 	// STANDARD HELP MESSAGES
 	
 	'OS_HELP_GLOBAL_ALL' 		=> array(
@@ -60,6 +61,21 @@ $help = (object) array(
 		'nick!user@host',
 		' ',
 		'Command limited to IRC Operators.',
+		'=---- End of OperServ Help ----=',
+	),
+	// GLOBAL
+	
+	'OS_HELP_OVERRIDE_ALL' 		=> array(
+		'=---- OperServ Help ----=',
+		'Syntax: OVERRIDE [ON|OFF]',
+		' ',
+		'Gives services roots the ability to override all channel access checks.',
+		'This command should be used if your ircd has override options disabled,',
+		'and you need to change channel specific settings or deal with a takeover',
+		'etc. It is recommended to turn this off once finished with, as it can easily',
+		'be constructed as a "power trip".',
+		' ',
+		'Command limited to Services Roots.',
 		'=---- End of OperServ Help ----=',
 	),
 	// SHUTDOWN
@@ -339,6 +355,11 @@ $help = (object) array(
 	// logonnews
 	'OS_GLOBAL_INVALID'	=> 'You have specified an invalid mask, the mask should be in the format of nick!user@host',
 	// global
+	'OS_OVERRIDE_ON'	=> 'Override mode has been enabled for your nickname',
+	'OS_OVERRIDE_OFF'	=> 'Override mode has been disabled for your nickname',
+	'OS_OVERRIDE_IS_ON'	=> 'You already have override mode enabled',
+	'OS_OVERRIDE_IS_OFF'=> 'You don\'t have override mode enabled',
+	// override
 );
 
 // EOF;

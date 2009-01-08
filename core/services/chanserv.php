@@ -36,6 +36,10 @@ class chanserv implements service
 		{
 			ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
 		}
+		else
+		{
+			return;
+		}
 		// connect the bot
 		
 		foreach ( core::$config->chanserv_modules as $id => $module )
@@ -466,7 +470,7 @@ class chanserv implements service
 		
 		while ( $chan_flags = database::fetch( $user_flags_q ) )
 		{
-			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
+			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) || core::$nicks[$nick]['override'] )
 			{
 				foreach ( $flags as $flag )
 				{

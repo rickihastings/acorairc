@@ -422,6 +422,10 @@ class commands
 		$new_params = array_reverse( $new_params );
 		// house keeping
 		
+		foreach ( $new_params as $ii => $pp )
+			if ( $pp == '' ) unset( $new_params[$ii] );
+		// more housekeeping
+		
 		if ( !isset( self::$commands[$hook][$new] ) )
 		{
 			self::$unknown_cmds++;
@@ -436,12 +440,13 @@ class commands
 		
 		if ( !is_callable( array( $class, $function ), true ) || !method_exists( $class, $function ) )
 		{
-			trigger_error( $class.'::'.$function.'() isn\'t callable, command rejected.', E_USER_ERROR );
+			core::alog( $class.'::'.$function.'() isn\'t callable, command rejected.', 'BASIC' );
 			return false;
 		}
 		// reject the command attempt. output an error
 		
-		modules::$list[$class]['class']->$function( $nick, $new_params );
+		//modules::$list[$class]['class']->$function( $nick, $new_params );
+		call_user_func_array( array( $class, $function ), array( $nick, $new_params ) );
 		// it does! execute the callback
 	}
 }

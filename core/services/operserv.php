@@ -36,6 +36,10 @@ class operserv implements service
 		{
 			ircd::introduce_client( core::$config->operserv->nick, core::$config->operserv->user, core::$config->operserv->host, core::$config->operserv->real );
 		}
+		else
+		{
+			return;
+		}
 		// connect the bot
 		
 		foreach ( core::$config->operserv_modules as $id => $module )
@@ -43,6 +47,82 @@ class operserv implements service
 			modules::load_module( 'os_'.$module, $module.'.os.php' );
 		}
 		// load the operserv modules
+		
+		if ( core::$config->operserv->override )
+		{
+			self::add_help( 'operserv', 'help', &self::$help->OS_HELP_OVERRIDE_1 );
+			self::add_help( 'operserv', 'help override', &self::$help->OS_HELP_OVERRIDE_ALL );
+			// add the help
+			
+			self::add_command( 'override', 'operserv', 'override_command' );
+			// add the override command
+		}
+		// if override is set to true
+	}
+	
+	/*
+	* override_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function override_command( $nick, $ircdata = array() )
+	{
+		$mode = strtolower( $ircdata[0] );
+		
+		if ( services::is_root( $nick ) )
+		{
+			if ( trim( $mode ) == '' || !in_array( $mode, array( 'on', 'off' ) ) )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'OVERRIDE' ) );
+				return false;
+			}
+			// is the format correct?
+			
+			if ( $mode == 'on' )
+			{
+				if ( core::$nicks[$nick]['override'] )
+				{
+					services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_IS_ON );
+					return false;
+				}
+				// override is already on..
+				
+				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_ON );
+				core::alog( 'override_command(): '.$nick.' is now using override mode.', 'BASIC' );
+				ircd::globops( core::$config->operserv->nick, $nick.' is now using override mode.' );
+				// log and stuff
+				
+				core::$nicks[$nick]['override'] = true;
+				return false;
+			}
+			// set override on
+			
+			if ( $mode == 'off' )
+			{
+				if ( !core::$nicks[$nick]['override'] )
+				{
+					services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_IS_OFF );
+					return false;
+				}
+				// override isnt even on..
+				
+				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_OFF );
+				core::alog( 'override_command(): '.$nick.' has turned override mode off.', 'BASIC' );
+				ircd::globops( core::$config->operserv->nick, $nick.' has turned override mode off.' );
+				// log and stuff
+				
+				core::$nicks[$nick]['override'] = false;
+				return false;
+			}
+			// set override off
+		}
+		else
+		{
+			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ACCESS_DENIED );	
+		}
+		// are they root?
 	}
 	
 	/*

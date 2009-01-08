@@ -157,7 +157,7 @@ class os_global implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( ( isset( core::$config->settings->logchan ) || core::$config->settings->logchan ) != null && isset( core::$chans[core::$config->settings->logchan] ) )
+				if ( core::$config->settings->logchan == $chan )
 					self::join_logchan();
 				// join global to the logchan.	
 			}
