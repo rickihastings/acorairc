@@ -41,11 +41,6 @@ class ircd implements protocol
 	static public $motd_end = 'End of {server} message of the day';
 	static public $default_c_modes = 'nt';
 	
-	static public $reg_modes = array(
-		'nick'	=>	'r',
-		'chan'	=>	'r',
-	);
-	
 	static public $prefix_modes = array(
 		'q'	=>	'~',
 		'a'	=>	'&',
