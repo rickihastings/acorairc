@@ -168,7 +168,6 @@ class nickserv implements service
 					{
 						unset( core::$chans[$channel->channel]['users'][core::$config->chanserv->nick] );
 						// unsetunsetunset
-						ircd::mode( core::$config->chanserv->nick, $channel->channel, '-'.ircd::$reg_modes['chan']);
 						ircd::part_chan( core::$config->chanserv->nick, $channel->channel );
 						// now lets leave the channel if we're in it
 							
@@ -186,7 +185,7 @@ class nickserv implements service
 			// logchan it
 				
 			if ( isset( core::$nicks[$nick->display] ) )
-				ircd::umode( core::$config->nickserv->nick, $nick->display, '-'.ircd::$reg_modes['nick'] );
+				ircd::on_user_logout( $nick->display );
 			// if the nick is being used unregister it, even though it shouldn't be, just to be safe.
 		}
 		// loop through all expiring nicks.

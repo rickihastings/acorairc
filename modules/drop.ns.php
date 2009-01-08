@@ -96,7 +96,6 @@ class ns_drop implements module
 						
 						if ( isset( core::$chans[$channel->channel] ) )
 						{
-							ircd::mode( core::$config->chanserv->nick, $channel->channel, '-'.ircd::$reg_modes['chan'] );
 							ircd::part_chan( core::$config->chanserv->nick, $channel->channel );
 							// now lets leave the channel if we're in it
 							
@@ -117,9 +116,7 @@ class ns_drop implements module
 				// log what we need to log.
 				
 				if ( isset( core::$nicks[$user->display] ) )
-				{
-					ircd::umode( core::$config->nickserv->nick, $user->display, '-'.ircd::$reg_modes['nick'] );
-				}
+					ircd::on_user_logout( $nick->display );
 				// if the nick is being used unregister it, even though it shouldn't be?
 				
 				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );

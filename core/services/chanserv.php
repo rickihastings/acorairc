@@ -231,12 +231,6 @@ class chanserv implements service
 			$cs_uid = array_search( core::$config->chanserv->nick, core::$uids );
 			// bleh.
 			
-			if ( strpos( $mode_queue, '-'.ircd::$reg_modes['chan'] ) && services::chan_exists( $chan, array( 'channel' ) !== false ) )
-			{
-				ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$reg_modes['chan'] );
-			}
-			// -r, we need to set it back to +r
-			
 			if ( ( strpos( $mode_queue, core::$config->chanserv->nick ) || strpos( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
 			{
 				if ( ircd::$protect )
@@ -322,7 +316,6 @@ class chanserv implements service
 				
 			if ( isset( core::$chans[$channel->channel] ) )
 			{
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '-'.ircd::$reg_modes['chan'] );
 				ircd::part_chan( core::$config->chanserv->nick, $channel->channel );
 				// now lets leave the channel if we're in it
 			}
@@ -340,17 +333,7 @@ class chanserv implements service
 	* $chan - The channel chanserv is to join
 	*/
 	static public function _join_channel( &$channel )
-	{
-		if ( isset( core::$chans[$channel->channel]['modes'] ) && !strstr( core::$chans[$channel->channel]['modes'], ircd::$reg_modes['chan'] ) )
-		{
-			ircd::mode( core::$config->chanserv->nick, $channel->channel, '+'.ircd::$reg_modes['chan'] );
-		}
-		elseif ( !isset( core::$chans[$channel->channel]['modes'] ) )
-		{
-			ircd::mode( core::$config->chanserv->nick, $channel->channel, '+'.ircd::$reg_modes['chan'] );
-		}
-		// registered mode the chan
-		
+	{	
 		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), "`channel` = '".$channel->channel."'" );
 		// lets update the last used timestamp
 	

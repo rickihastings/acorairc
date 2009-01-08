@@ -78,7 +78,6 @@ class cs_drop implements module
 		
 		if ( isset( core::$chans[$chan] ) )
 		{
-			ircd::mode( core::$config->chanserv->nick, $chan, '-'.ircd::$reg_modes['chan'] );
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
 			// now lets leave the channel if we're in it
 		}

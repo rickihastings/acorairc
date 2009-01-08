@@ -200,7 +200,7 @@ class cs_xcommands implements module
 			// send the mode string
 		}
 		// bans etc.
-		ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes.ircd::$reg_modes['chan'] );
+		ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
 	}
 	
@@ -230,7 +230,7 @@ class cs_xcommands implements module
 		if ( $ircdata[1] == '' )
 		{
 			ircd::mode( core::$config->chanserv->nick, $chan, '-'.str_replace( 'r', '', core::$chans[$chan]['modes'] ) );
-			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes.ircd::$reg_modes['chan'] );
+			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 			// we reset the channel modes if there is no first value
 		}
 		else

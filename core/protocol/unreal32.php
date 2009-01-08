@@ -894,6 +894,28 @@ class ircd implements protocol
 	*
 	* These are all the core event functions, core::on_start etc.
 	*/
+	
+	/*
+	* on_user_login
+	*
+	* @params
+	* $nick - nick
+	*/
+	static public function on_user_login( $nick )
+	{
+		self::umode( core::$config->nickserv->nick, $nick, '+r' );
+	}
+	
+	/*
+	* on_user_logout
+	*
+	* @params
+	* $nick - nick
+	*/
+	static public function on_user_logout( $nick )
+	{
+		self::umode( core::$config->nickserv->nick, $nick, '-r' );	
+	}
 
 	/*
 	* on_capab_start
