@@ -238,6 +238,42 @@ class ircd implements protocol
 	}
 	
 	/*
+	* handle_ident_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function handle_ident_change( &$ircdata )
+	{
+		if ( $ircdata[1] == 'CHGIDENT' )
+		{
+			$nick = self::get_nick( &$ircdata, 2 );
+			$ident = substr( $ircdata[3], 1 );
+		}
+		elseif ( $ircdata[1] == 'SETIDENT' )
+		{
+			$nick = self::get_nick( &$ircdata, 0 );
+			$ident = substr( $ircdata[2], 1 );
+		}
+		
+		core::$nicks[$nick]['ident'] = $ident;
+	}
+	
+	/*
+	* handle_gecos_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function handle_gecos_change( &$ircdata )
+	{
+		$nick = self::get_nick( &$ircdata, 0 );
+		$gecos = core::get_data_after( &$ircdata, 2 );
+		
+		core::$nicks[$nick]['gecos'] = substr( $gecos, 1 );
+	}
+	
+	/*
 	* handle_mode
 	*
 	* @params
@@ -1421,6 +1457,55 @@ class ircd implements protocol
 			return true;
 		}
 		// return true on any nick change.
+		
+		return false;
+	}
+	
+	/*
+	* on_ident_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function on_ident_change( &$ircdata )
+	{
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGIDENT' )
+		{
+			core::alog( 'on_ident_change(): '.self::get_nick( &$ircdata, 2 ).' changed ident to '.substr( $ircdata[3], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on chgident.
+		
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETIDENT' )
+		{
+			core::alog( 'on_ident_change(): '.self::get_nick( &$ircdata, 0 ).' changed ident to '.substr( $ircdata[2], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on setident.
+		
+		return false;
+	}
+	
+	/*
+	* on_gecos_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function on_gecos_change( &$ircdata )
+	{
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FNAME' )
+		{
+			core::alog( 'on_gecos_change(): '.self::get_nick( &$ircdata, 0 ).' changed gecos to '.substr( $ircdata[2], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on chgident.
 		
 		return false;
 	}

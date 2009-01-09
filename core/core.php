@@ -362,6 +362,14 @@ class core
 			ircd::handle_host_change( &$ircdata );
 		// on hostname change.
 		
+		if ( ircd::on_ident_change( &$ircdata ) )
+			ircd::handle_ident_change( &$ircdata );
+		// on ident change
+		
+		if ( ircd::on_gecos_change( &$ircdata ) )
+			ircd::handle_gecos_change( &$ircdata );
+		// on realname (gecos) change
+		
 		if ( ircd::on_mode( &$ircdata ) )
 			ircd::handle_mode( &$ircdata );	
 		// on mode

@@ -76,7 +76,7 @@ class parser
 	{
         if ( !file_exists( self::$filename ) && $check )
 		{
-			core::alog( 'parse(): '.self::$filename.' cannot be found.', 'BASIC' );
+			core::alog( 'ERROR: '.self::$filename.' cannot be found.', 'BASIC' );
 			core::save_logs();
 			// force a log save
 		}
@@ -233,7 +233,7 @@ class parser
 		{
 			if ( !isset( self::$config[$value] ) )
 			{
-				core::alog( 'parse(): '.$value.' is REQUIRED, startup halted', 'BASIC' );
+				core::alog( 'ERROR: '.$value.' is REQUIRED, startup halted', 'BASIC' );
 				core::save_logs();
 				// force a log save.
 			}
