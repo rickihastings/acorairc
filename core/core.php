@@ -753,8 +753,6 @@ class core
 		// socket information, if we haven't we'll be here, and here is where
 		// we tell them that we can't connect :D
 		
-		self::alog( 'connect(): failed to connect to any of the specified uplinks', 'BASIC' );
-		
 		self::save_logs();
 		// force a log save.
 	}
@@ -779,7 +777,8 @@ class core
 		{
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
-				if ( !in_array( $message, self::$log_data ) ) self::$log_data[] = $message;
+				if ( !in_array( $message, self::$log_data ) )
+					self::$log_data[] = $message;
 			}
 		}
 		// is logging to file enabled? if so, log to file.
@@ -788,10 +787,10 @@ class core
 		{
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
-				if ( !in_array( $message, self::$debug_data ) ) self::$debug_data[] = $message;
-				
-				if ( !self::$booted && self::$debug )
+				if ( !is_resource( self::$socket ) && self::$debug )
 					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+				elseif ( !in_array( $message, self::$debug_data ) )
+					self::$debug_data[] = $message;
 				// if we're not connected, and in debug mode
 				// just send it out, else they wont actually see the message and
 				// it'll just end up in the log file
