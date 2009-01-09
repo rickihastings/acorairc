@@ -91,7 +91,7 @@ class core
 		self::protocol_init();
 		// load the protocol class
 		
-		$select = database::select( 'core', array( 'max_users' ), '`id` = "1"' );
+		$select = database::select( 'core', array( 'max_users' ), array( 'id', '=', '1' ) );
 		$max_users = database::row( $select );
 		// get the max users
 		
@@ -491,7 +491,7 @@ class core
 					'max_userstime'	=>	self::$network_time
 				);
 				
-				$update = database::update( 'core', $update_array, "`id` = '1'" );
+				$update = database::update( 'core', $update_array, array( 'id', '=', '1' ) );
 				self::$max_users = count( self::$nicks );
 				// update the max users
 				

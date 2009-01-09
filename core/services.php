@@ -31,9 +31,9 @@ class services
 	static public function user_exists( $nick, $identified = true, $array )
 	{
 		if ( $identified )
-			$user_q = database::select( 'users', $array, "`display` = '".database::quote( $nick )."' AND `identified` = '1'" );
+			$user_q = database::select( 'users', $array, array( 'display', '=', $nick, 'AND', 'identified', '=', '1' ) );
 		else
-			$user_q = database::select( 'users', $array, "`display` = '".database::quote( $nick )."'" );
+			$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );
 
 		if ( $user_q == 0 )
 			return false;
@@ -56,9 +56,9 @@ class services
 	static public function user_exists_id( $uid, $identified = true, $array )
 	{
 		if ( $identified )
-			$user_q = database::select( 'users', $array, "`id` = '".database::quote( $uid )."' AND `identified` = '1'" );
+			$user_q = database::select( 'users', $array, array( 'id', '=', $uid, 'AND', 'identified', '=', '1' ) );
 		else
-			$user_q = database::select( 'users', $array, "`id` = '".database::quote( $uid )."'" );
+			$user_q = database::select( 'users', $array, array( 'id', '=', $uid ) );
 			
 		if ( $user_q == 0 )
 			return false;
@@ -79,7 +79,7 @@ class services
 	*/
 	static public function chan_exists( $chan, $array )
 	{
-		$channel_q = database::select( 'chans', $array, "`channel` = '".database::quote( $chan )."'" );
+		$channel_q = database::select( 'chans', $array, array( 'channel', '=', $chan ) );
 		
 		if ( database::num_rows( $channel_q ) == 0 )
 			return false;
@@ -132,19 +132,11 @@ class services
 		// IF there is a $data defined, we do some replacing
 		// otherwise leave it alone
 		
-		if ( $user = self::user_exists( $to, true, array( 'display', 'privmsg' ) ) )
-		{
-			if ( nickserv::check_flags( $to, array( 'P' ) ) )
-				ircd::msg( $from, $to, $ntemplate );
-			else
-				ircd::notice( $from, $to, $ntemplate );
-			// if they are registered, we check their means of contact
-		}
+		if ( nickserv::check_flags( $to, array( 'P' ) ) )
+			ircd::msg( $from, $to, $ntemplate );
 		else
-		{
 			ircd::notice( $from, $to, $ntemplate );
-		}
-		// if the user isn't registered we notice them by default
+		// if they are registered, we check their means of contact
 	}
 	
 	

@@ -91,7 +91,7 @@ class cs_levels implements module
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
 			// start of flag list
 			
-			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), "`channel` = '".database::quote( $chan )."'" );
+			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
 			// get the flag records
 			
 			$x = 0;
@@ -788,7 +788,7 @@ class cs_levels implements module
 	*/
 	static public function get_access( $channel )
 	{
-		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), "`channel` = '".$channel."'" );
+		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $channel ) );
 		// get our flags records
 		
 		$access_array = array();
@@ -928,7 +928,7 @@ class cs_levels implements module
 		
 		if ( chanserv::check_levels( $target, $chan, array( $r_flag ), false, false ) )
 		{
-			$user_flag_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );
+			$user_flag_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 			
 			if ( $mode == '-' )
 			{
@@ -945,9 +945,9 @@ class cs_levels implements module
 				$new_user_flags = str_replace( $r_flag, '', $user_flag->flags );
 					
 				if ( $new_user_flags == '' )
-					database::delete( 'chans_levels', "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );
+					database::delete( 'chans_levels', array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 				else
-					database::update( 'chans_levels', array( 'flags' => $new_user_flags ), "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );	
+					database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );	
 				// check if it's empty, if it is just delete the row
 					
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
@@ -963,7 +963,7 @@ class cs_levels implements module
 		}
 		else
 		{
-			$user_flag_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );
+			$user_flag_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 			
 			if ( $mode == '+' )
 			{
@@ -973,12 +973,12 @@ class cs_levels implements module
 					
 					if ( $r_flag == 'b' && $mode == '+' )
 					{
-						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'reason' => $param ), "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );
+						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'reason' => $param ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
 					}
 					else
 					{
-						database::update( 'chans_levels', array( 'flags' => $new_user_flags ), "`channel` = '".database::quote( $chan )."' AND `target` = '".database::quote( $target )."'" );
+						database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
 					}
 					

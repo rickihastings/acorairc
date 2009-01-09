@@ -86,7 +86,7 @@ class ns_password implements module
 		}
 		// the passwords are different
 			
-		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), "`display` = '".database::quote( $nick )."'" );
+		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $nick ) );
 		// we update the password here, with the users salt.
 		
 		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NEW_PASSWORD, array( 'pass' => $new_pass ) );
@@ -145,7 +145,7 @@ class ns_password implements module
 		}
 		// the passwords are different
 			
-		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), "`display` = '".database::quote( $unick )."'" );
+		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $unick ) );
 		// we update the password here, with the users salt.
 		
 		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NEW_PASSWORD_U, array( 'nick' => $unick, 'pass' => $new_pass ) );

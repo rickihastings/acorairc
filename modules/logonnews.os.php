@@ -113,7 +113,7 @@ class os_logonnews implements module
 		{
 			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
 			
-			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', "`time` DESC", array( 0 => 3 ) );
+			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ), array( 0 => 3 ) );
 			// get our news
 			
 			if ( database::num_rows( $get_news ) > 0 )
@@ -146,7 +146,7 @@ class os_logonnews implements module
 	*/
 	static public function _add_news( $nick, $title, $text )
 	{
-		$check = database::select( 'logon_news', array( 'title' ), "`title` = '".database::quote( $title )."'" );
+		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
 		
 		if ( database::num_rows( $check ) == 0 )
 		{
@@ -171,11 +171,11 @@ class os_logonnews implements module
 	*/
 	static public function _del_news( $nick, $title )
 	{
-		$check = database::select( 'logon_news', array( 'title' ), "`title` = '".database::quote( $title )."'" );
+		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
 		
 		if ( database::num_rows( $check ) > 0 )
 		{
-			database::delete( 'logon_news', "`title` = '".database::quote( $title )."'" );
+			database::delete( 'logon_news', array( 'title', '=', $title ) );
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$title.' from logonnews' );
 			// as simple, as.
@@ -195,7 +195,7 @@ class os_logonnews implements module
 	*/
 	static public function _list_news( $nick )
 	{
-		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', "`time` DESC" );
+		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ) );
 		// get our news
 			
 		if ( database::num_rows( $get_news ) > 0 )

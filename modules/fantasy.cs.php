@@ -43,12 +43,17 @@ class cs_fantasy implements module
 	*/
 	public function main( &$ircdata, $startup = false )
 	{
-		if ( ircd::on_msg( &$ircdata ) && $ircdata[2] != core::$config->chanserv->nick )
+		if ( ircd::on_msg( &$ircdata ) )
 		{
 			$nick = core::get_nick( &$ircdata, 0 );
 			$chan = core::get_chan( &$ircdata, 2 );
 			
-			if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) ) return false;
+			if ( core::search_nick( $chan ) !== false )
+				return false;
+			// bail if it thinks chan == nick.
+			
+			if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+				return false;
 			// channel isnt registered, halt immediatly.. 
 			// either something has cocked up or someone
 			// has forced us into a channel :S
@@ -229,7 +234,7 @@ class cs_fantasy implements module
 						$new_topic = str_replace( '\*', '*', $new_topic );
 							
 						ircd::topic( core::$config->chanserv->nick, $channel->channel, $new_topic );
-						database::update( 'chans', array( 'topic' => $new_topic, 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".$channel->channel."'" );
+						database::update( 'chans', array( 'topic' => $new_topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
 					}
 					// if there is a topicmask set?
 					else
@@ -237,7 +242,7 @@ class cs_fantasy implements module
 						$new_topic = trim( core::get_data_after( &$ircdata, 4 ) );
 							
 						ircd::topic( core::$config->chanserv->nick, $channel->channel, $new_topic );
-						database::update( 'chans', array( 'topic' => $new_topic, 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".$channel->channel."'" );
+						database::update( 'chans', array( 'topic' => $new_topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
 					}
 					// if there isnt, just set it normally.
 				}

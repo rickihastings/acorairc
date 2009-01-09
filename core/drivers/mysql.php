@@ -17,7 +17,7 @@
 class mysql implements driver
 {
 
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -162,11 +162,7 @@ class mysql implements driver
 	{
 		$query = "SELECT ";
 		
-		if ( $what == '*' )
-		{
-			$query .= '*';
-		}
-		elseif ( $what != '*' && is_array( $what ) )
+		if ( is_array( $what ) )
 		{
 			$i = 0;
 			foreach ( $what as $var )
@@ -177,14 +173,41 @@ class mysql implements driver
 				else $query .= "`".$var."`, ";
 			}
 		}
+		elseif ( $what == '*' )
+		{
+			$query .= '*';
+		}
 		// construct the what part, `max_users` etc.
 		
 		$query .= " FROM `".core::$config->database->prefix.$table."`";
 		// the table
 		
-		if ( $where != '' && !is_array( $where ) )
+		if ( $where != '' && is_array( $where ) )
 		{
-			$query .= " WHERE ".$where;
+			$query .= " WHERE ";
+			
+			$i = 0;
+			foreach ( $where as $index => $val )
+			{
+				$i++;
+				if ( $i == 1 )
+				{
+					$query .= "`".$val."`";
+				}
+				elseif ( $i == 3 )
+				{
+					$query .= "'".$val."'";
+				}
+				elseif ( $i == 4 )
+				{
+					$i = 0;
+					$query .= " ".$val." ";
+				}
+				else
+				{
+					$query .= " ".$val." ";
+				}
+			}
 		}
 		// and the where part: `id` = '1'
 		
@@ -221,7 +244,7 @@ class mysql implements driver
 	* $what - What to update, as an array
 	* $where - The WHERE clause
 	*/
-	static public function update( $table, $what, $where = '' )
+	static public function update( $table, $what, $where = array() )
 	{
 		$query = "UPDATE `".core::$config->database->prefix.$table."` SET";
 		// the table
@@ -235,9 +258,33 @@ class mysql implements driver
 		}
 		// the what part, SET `field` = '1'
 		
-		if ( $where != '' && !is_array( $where ) )
+		if ( $where != '' && is_array( $where ) )
 		{
-			$query .= " WHERE ".$where;
+			$query .= " WHERE ";
+			
+			$i = 0;
+			foreach ( $where as $index => $val )
+			{
+				$i++;
+				if ( $i == 1 )
+				{
+					$query .= "`".$val."`";
+				}
+				elseif ( $i == 3 )
+				{
+					$i = 0;
+					$query .= "'".$val."'";
+				}
+				elseif ( $i == 4 )
+				{
+					$i = 0;
+					$query .= " ".$val." ";
+				}
+				else
+				{
+					$query .= " ".$val." ";
+				}
+			}
 		}
 		// and the where part: `id` = '1'
 		
@@ -297,9 +344,33 @@ class mysql implements driver
 		$query = "DELETE FROM `".core::$config->database->prefix.$table."`";
 		// the table
 		
-		if ( $where != '' && !is_array( $where ) )
+		if ( $where != '' && is_array( $where ) )
 		{
-			$query .= " WHERE ".$where;
+			$query .= " WHERE ";
+			
+			$i = 0;
+			foreach ( $where as $index => $val )
+			{
+				$i++;
+				if ( $i == 1 )
+				{
+					$query .= "`".$val."`";
+				}
+				elseif ( $i == 3 )
+				{
+					$i = 0;
+					$query .= "'".$val."'";
+				}
+				elseif ( $i == 4 )
+				{
+					$i = 0;
+					$query .= " ".$val." ";
+				}
+				else
+				{
+					$query .= " ".$val." ";
+				}
+			}
 		}
 		// and the where part: `id` = '1'
 		

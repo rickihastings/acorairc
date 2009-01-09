@@ -120,7 +120,7 @@ class os_ignore implements module
 	*/
 	static public function _add_user( $nick, $who )
 	{
-		$check_nick_q = database::select( 'ignored_users', array( 'who' ), "`who` = '".database::quote( $who )."'" );
+		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
 		
 		if ( services::is_root( $who ) && !services::is_root( $nick ) )
 		{
@@ -160,11 +160,11 @@ class os_ignore implements module
 			$who = '*!'.$who;
 		// we need to check if it's a hostmask thats been written properly.
 		
-		$check_nick_q = database::select( 'ignored_users', array( 'who' ), "`who` = '".database::quote( $who )."'" );
+		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
 			
 		if ( database::num_rows( $check_nick_q ) > 0 )
 		{
-			database::delete( 'ignored_users', "`who` = '".database::quote( $who )."'" );
+			database::delete( 'ignored_users', array( 'who', '=', $who ) );
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$who.' from the services ignore list' );
 			// as simple, as.

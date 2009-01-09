@@ -87,7 +87,7 @@ class ns_suspend implements module
 			}
 			else
 			{
-				database::update( 'users', array( 'suspended' => 1, 'suspend_reason' => $reason ), "`display` = '".$user->display."'" );
+				database::update( 'users', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'display', '=', $user->display ) );
 				// channel isn't suspended, but it IS registered
 			}
 		}
@@ -151,11 +151,11 @@ class ns_suspend implements module
 			}
 			// nick isn't suspended
 			
-			database::update( 'users', array( 'suspended' => 0, 'suspend_reason' => null ), "`display` = '".database::quote( $unick )."'" );
+			database::update( 'users', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'display', '=', $unick ) );
 			
 			if ( $user->real_user == 0 )
 			{
-				database::delete( 'users', "`display` = '".database::quote( $unick )."'" );
+				database::delete( 'users', array( 'display', '=', $unick ) );
 			}
 			// nick wasen't registered by a real person, drop it
 		}

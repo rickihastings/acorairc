@@ -806,7 +806,7 @@ class cs_flags implements module
 		
 		if ( chanserv::check_flags( $chan, array( $r_flag ) ) )
 		{
-			$chan_flag_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), "`channel` = '".database::quote( $chan )."'" );
+			$chan_flag_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), array( 'channel', '=', $chan ) );
 			
 			if ( $mode == '-' )
 			{
@@ -817,12 +817,12 @@ class cs_flags implements module
 				
 				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), "`channel` = '".database::quote( $chan )."'" );	
+					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 				}
 				else
 				{
-					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), "`channel` = '".database::quote( $chan )."'" );	
+					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 				}
 				
@@ -841,7 +841,7 @@ class cs_flags implements module
 				$chan_flag = database::fetch( $chan_flag_q );
 				// get the flag record
 				
-				database::update( 'chans_flags', array( $param_field => $param ), "`channel` = '".database::quote( $chan )."'" );	
+				database::update( 'chans_flags', array( $param_field => $param ), array( 'channel', '=', $chan ) );	
 				// update the row with the new flags.
 				
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'chan' => $chan, 'value' => $param ) );
@@ -852,7 +852,7 @@ class cs_flags implements module
 		}
 		else
 		{
-			$chan_flag_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), "`channel` = '".database::quote( $chan )."'" );
+			$chan_flag_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), array( 'channel', '=', $chan ) );
 			
 			if ( $mode == '+' )
 			{
@@ -863,7 +863,7 @@ class cs_flags implements module
 				
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), "`channel` = '".database::quote( $chan )."'" );	
+					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 					
 					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'flag' => $flag, 'chan' => $chan ) );
@@ -871,7 +871,7 @@ class cs_flags implements module
 				}
 				else
 				{
-					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), "`channel` = '".database::quote( $chan )."'" );	
+					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 					
 					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'chan' => $chan, 'value' => $param ) );

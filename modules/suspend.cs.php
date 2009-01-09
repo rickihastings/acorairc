@@ -88,7 +88,7 @@ class cs_suspend implements module
 			}
 			else
 			{
-				database::update( 'chans', array( 'suspended' => 1, 'suspend_reason' => $reason ), "`channel` = '".$channel->channel."'" );
+				database::update( 'chans', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'channel', '=', $channel->channel ) );
 				// channel isn't suspended, but it IS registered
 			}
 		}
@@ -163,11 +163,11 @@ class cs_suspend implements module
 			}
 			// channel isn't even suspended
 			
-			database::update( 'chans', array( 'suspended' => 0, 'suspend_reason' => null ), "`channel` = '".database::quote( $chan )."'" );
+			database::update( 'chans', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'channel', '=', $chan ) );
 			
 			if ( $channel->founder == 0 )
 			{
-				database::delete( 'chans', "`channel` = '".database::quote( $chan )."'" );
+				database::delete( 'chans', array( 'channel', '=', $chan ) );
 			}
 			// the channel has no founder, DROP it.
 		}

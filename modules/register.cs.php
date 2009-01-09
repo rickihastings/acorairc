@@ -74,7 +74,7 @@ class cs_register implements module
 			
 			if ( core::$config->chanserv->max_chans != 0 )
 			{
-				$g_chans = database::select( 'chans', array( 'founder' ), "`founder` = '".$user->id."'" );
+				$g_chans = database::select( 'chans', array( 'founder' ), array( 'founder', '=', $user->id ) );
 				
 				if ( database::num_rows( $g_chans ) >= core::$config->chanserv->max_chans )
 				{

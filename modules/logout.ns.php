@@ -60,7 +60,7 @@ class ns_logout implements module
 			{
 				ircd::on_user_logout( $nick );
 				// here we set unregistered mode
-				database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), "`display` = '".database::quote( $nick )."'" );
+				database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
 				// unidentify them
 				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LOGGED_OUT );
 				// let them know

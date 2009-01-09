@@ -157,9 +157,9 @@ class ns_list implements module
 		// split up the limit and stuff ^_^
 			
 		if ( $mode == 'suspended' )
-			$results = database::select( 'users', array( 'id', 'display', 'last_hostmask', 'suspended', 'suspend_reason' ), "`suspended` = '1' AND `display` LIKE '".database::quote( $new_term )."'", '', array( $offset => $max ) );
+			$results = database::select( 'users', array( 'id', 'display', 'last_hostmask', 'suspended', 'suspend_reason' ), array( 'suspended', '=', '1', 'AND', 'display', 'LIKE', $new_term ), '', array( $offset => $max ) );
 		else
-			$results = database::select( 'users', array( 'id', 'display', 'last_hostmask', 'suspended', 'suspend_reason' ), "`suspended` = '0' AND `display` LIKE '".database::quote( $new_term )."'", '', array( $offset => $max ) );	
+			$results = database::select( 'users', array( 'id', 'display', 'last_hostmask', 'suspended', 'suspend_reason' ), array( 'suspended', '=', '0', 'AND', 'display', 'LIKE', $new_term ), '', array( $offset => $max ) );	
 			
 		return $results;
 	}

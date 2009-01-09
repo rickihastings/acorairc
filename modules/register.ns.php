@@ -93,7 +93,7 @@ class ns_register implements module
 		// are we registered?
 		// apprently not, let's move on!
 		
-		$check_e = database::select( 'users', array( 'email' ), "`email` = '".database::quote( $email )."'" );
+		$check_e = database::select( 'users', array( 'email' ), array( 'email', '=', $email ) );
 		
 		if ( database::num_rows( $check_e ) > 0 )
 		{
@@ -201,7 +201,7 @@ You will then be able to identify with the password you chose by typing
 		}
 		// unregistered
 		
-		$code_array = database::select( 'validation_codes', array( 'nick', 'code' ), "`nick` = '".database::quote( $nick )."' AND `code` = '".database::quote( $code )."'" );
+		$code_array = database::select( 'validation_codes', array( 'nick', 'code' ), array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
 		
 		if ( database::num_rows( $code_array ) == 0 )
 		{
@@ -212,10 +212,10 @@ You will then be able to identify with the password you chose by typing
 			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_VALIDATED );
 			// let them know.
 			
-			database::update( 'users', array( 'validated' => 1 ), "`id` = '".$user->id."'" );
+			database::update( 'users', array( 'validated' => 1 ), array( 'id', '=', $user->id ) );
 			// user is now validated.
 			
-			database::delete( 'validation_codes', "`nick` = '".database::quote( $nick )."' AND `code` = '".database::quote( $code )."'" );
+			database::delete( 'validation_codes', array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
 			// delete the code now that we've validated them
 			
 			core::alog( core::$config->nickserv->nick.': '.$nick.' activated' );

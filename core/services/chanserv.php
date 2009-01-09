@@ -180,7 +180,7 @@ class chanserv implements service
 			{
 				if ( services::chan_exists( $chan, array( 'channel' ) ) !== false )
 				{
-					database::update( 'chans', array( 'last_timestamp' => core::$network_time ), "`channel` = '".database::quote( $chan )."'" );
+					database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $chan ) );
 					// lets update the last used timestamp
 				}
 				// is the channel registered?
@@ -304,7 +304,7 @@ class chanserv implements service
 		$check_time = core::$network_time - $expiry_time;
 		// set up our times
 		
-		$channel_q = database::select( 'chans', array( 'channel', 'last_timestamp' ), "`last_timestamp` < '".$check_time."'" );
+		$channel_q = database::select( 'chans', array( 'channel', 'last_timestamp' ), array( 'last_timestamp', '<', $check_time ) );
 		
 		if ( database::num_rows( $channel_q ) == 0 )
 			return false;
@@ -312,8 +312,8 @@ class chanserv implements service
 		
 		while ( $channel = database::fetch( $channel_q ) )
 		{
-			database::delete( 'chans', "`channel` = '".$channel->channel."'" );
-			database::delete( 'chans_levels', "`channel` = '".$channel->channel."'" );
+			database::delete( 'chans', array( 'channel', '=', $channel->channel ) );
+			database::delete( 'chans_levels', array( 'channel', '=', $channel->channel ) );
 				
 			core::alog( core::$config->chanserv->nick.': '.$channel->channel.' has expired. Last used on '.date( 'F j, Y, g:i a', $channel->last_timestamp ) );
 			// logchan it
@@ -338,7 +338,7 @@ class chanserv implements service
 	*/
 	static public function _join_channel( &$channel )
 	{	
-		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), "`channel` = '".$channel->channel."'" );
+		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $channel->channel ) );
 		// lets update the last used timestamp
 	
 		if ( self::check_flags( $channel->channel, array( 'G' ) ) && $channel->suspended == 0 && isset( modules::$list['cs_fantasy'] ) && !isset( core::$chans[$channel->channel]['users'][core::$config->chanserv->nick] ) )
@@ -462,7 +462,7 @@ class chanserv implements service
 		}
 		// they aint even identified..
 		
-		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), "`channel` = '".database::quote( $chan )."'" );
+		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
 		// get our flags records
 		
 		$hostname = core::get_full_hostname( $nick );
@@ -503,7 +503,7 @@ class chanserv implements service
 	*/
 	static public function check_flags( $chan, $flags )
 	{
-		$chan_flags_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), "`channel` = '".database::quote( $chan )."'" );
+		$chan_flags_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags' ), array( 'channel', '=', $chan ) );
 		$chan_flags = database::fetch( $chan_flags_q );
 		// get our flags records
 		
@@ -543,7 +543,7 @@ class chanserv implements service
 			return false;
 		// translate. some craq.
 		
-		$chan_flags_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags', $param_field ), "`channel` = '".database::quote( $chan )."'" );
+		$chan_flags_q = database::select( 'chans_flags', array( 'id', 'channel', 'flags', $param_field ), array( 'channel', '=', $chan ) );
 		$chan_flags = database::fetch( $chan_flags_q );
 		// get our flags records
 		

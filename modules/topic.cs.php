@@ -89,7 +89,7 @@ class cs_topic implements module
 				$topic = str_replace( '\*', '*', $topic );
 							
 				ircd::topic( core::$config->chanserv->nick, $channel->channel, $topic );
-				database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".$channel->channel."'" );
+				database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
 			}
 			// is there a topic mask?
 			// if not just set a normal topic i reckon
@@ -100,13 +100,13 @@ class cs_topic implements module
 				if ( trim( $topic ) == '' )
 				{
 					ircd::topic( core::$config->chanserv->nick, $chan, '' );
-					database::update( 'chans', array( 'topic' => '', 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".database::quote( $chan )."'" );
+					database::update( 'chans', array( 'topic' => '', 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
 					// set us an empty topic
 				}
 				else
 				{
 					ircd::topic( core::$config->chanserv->nick, $chan, $topic );
-					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".database::quote( $chan )."'" );
+					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
 					// change the topic
 				}
 			}
@@ -134,13 +134,13 @@ class cs_topic implements module
 				if ( chanserv::check_flags( $chan, array( 'T' ) ) && chanserv::check_flags( $chan, array( 'K' ) ) && $channel->topic != $topic )
 				{
 					ircd::topic( core::$config->chanserv->nick, $channel->channel, $channel->topic );
-					database::update( 'chans', array( 'topic_setter' => core::$config->chanserv->nick ), "`channel` = '".database::quote( $chan )."'" );
+					database::update( 'chans', array( 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
 					return false;
 					// reset it i reckon.
 				}
 				elseif ( $channel->topiclock == 0 )
 				{
-					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => $setter ), "`channel` = '".database::quote( $chan )."'" );
+					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => $setter ), array( 'channel', '=', $chan ) );
 					// OTHERWISE, update it.
 				}
 				// some housekeepin.

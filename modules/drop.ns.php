@@ -81,18 +81,18 @@ class ns_drop implements module
 			
 			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false ) )
 			{
-				database::delete( 'users', "`display` = '".$user->display."'" );
-				database::delete( 'users_flags', "`nickname` = '".$user->display."'" );
+				database::delete( 'users', array( 'display', '=', $user->display ) );
+				database::delete( 'users_flags', array( 'nickname', '=', $user->display ) );
 				// delete the users record
 				
-				$chan_q = database::select( 'chans', array( 'channel', 'founder' ), "`founder` = '".$user->id."'" );
+				$chan_q = database::select( 'chans', array( 'channel', 'founder' ), array( 'founder', '=', $user->id ) );
 				
 				if ( database::num_rows( $chan_q ) != 0 )
 				{
 					while ( $channel = database::fetch( $chan_q ) )
 					{
-						database::delete( 'chans', "`channel` = '".$channel->channel."'" );
-						database::delete( 'chans_levels', "`channel` = '".$channel->channel."'" );
+						database::delete( 'chans', array( 'channel', '=', $channel->channel ) );
+						database::delete( 'chans_levels', array( 'channel', '=', $channel->channel ) );
 						
 						if ( isset( core::$chans[$channel->channel] ) )
 						{
@@ -106,7 +106,7 @@ class ns_drop implements module
 				// now we need to check if they own any channels, if they do..
 				// unregister it i guess.
 				
-				database::delete( 'chans_levels', "`target` = '".$user->display."'" );
+				database::delete( 'chans_levels', array( 'target', '=', $user->display ) );
 				// also delete this users channel access.
 				
 				core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ) );

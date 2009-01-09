@@ -87,7 +87,7 @@ class ns_identify implements module
 					ircd::on_user_login( $nick );
 					// registered mode
 					
-					database::update( 'users', array( 'identified' => 1, 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), "`display` = '".database::quote( $nick )."'" );
+					database::update( 'users', array( 'identified' => 1, 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $nick ) );
 					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_IDENTIFIED );
 					// right, standard identify crap
 					core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' identified for nick '.core::$nicks[$nick]['nick'] );
@@ -111,7 +111,7 @@ class ns_identify implements module
 					}
 					// first thing we do, check if they have a vhost, if they do, apply it.
 					
-					$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), "`nick` = '".database::quote( $nick )."'" );
+					$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $nick ) );
 					
 					if ( database::num_rows( $failed_attempts ) > 0 )
 					{
@@ -122,7 +122,7 @@ class ns_identify implements module
 							services::communicate( core::$config->nickserv->nick, $nick, 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
 						}
 						// loop through the failed attempts messaging them to the user
-						database::delete( 'failed_attempts', "`nick` = '".database::quote( $nick )."'" );
+						database::delete( 'failed_attempts', array( 'nick', '=', $nick ) );
 						// clear them now that they've been seen
 					}
 					// we got any failed attempts? HUMM
@@ -306,7 +306,7 @@ class ns_identify implements module
 			timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 			// remove the secured timer. if there is one
 			
-			database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), "`display` = '".database::quote( $nick )."'" );
+			database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
 			// change nick to unidentified imo
 		}
 	}
@@ -333,7 +333,7 @@ class ns_identify implements module
 	*/
 	static public function _registered_nick( $nick, $user )
 	{
-		database::update( 'users', array( 'identified' => 0 ), "`display` = '".database::quote( $nick )."'" );
+		database::update( 'users', array( 'identified' => 0 ), array( 'display', '=', $nick ) );
 		// set them to identified 0, this might fix that long term bug.
 		
 		ircd::on_user_logout( $nick );

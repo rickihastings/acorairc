@@ -407,7 +407,7 @@ class ns_flags implements module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $mode == '+' )
 		{
-			$check_e = database::select( 'users_flags', array( 'id', 'email' ), "`email` = '".database::quote( $param )."'" );
+			$check_e = database::select( 'users_flags', array( 'id', 'email' ), array( 'email', '=', $param ) );
 			
 			if ( $r_flag == 'e' && database::num_rows( $check_e ) > 0 )
 			{
@@ -434,7 +434,7 @@ class ns_flags implements module
 		
 		if ( nickserv::check_flags( $target, array( $r_flag ) ) )
 		{
-			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), "`nickname` = '".database::quote( $target )."'" );
+			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $target ) );
 			
 			if ( $mode == '-' )
 			{
@@ -445,12 +445,12 @@ class ns_flags implements module
 				
 				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), "`nickname` = '".database::quote( $target )."'" );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 				}
 				else
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), "`nickname` = '".database::quote( $target )."'" );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 				}
 				
@@ -469,7 +469,7 @@ class ns_flags implements module
 				$nick_flag = database::fetch( $nick_flag_q );
 				// get the flag record
 				
-				database::update( 'user_flags', array( $param_field => $param ), "`nickname` = '".database::quote( $target )."'" );	
+				database::update( 'user_flags', array( $param_field => $param ), array( 'nickname', '=', $target ) );	
 				// update the row with the new flags.
 				
 				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'target' => $target, 'value' => $param ) );
@@ -480,7 +480,7 @@ class ns_flags implements module
 		}
 		else
 		{
-			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), "`nickname` = '".database::quote( $target )."'" );
+			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $target ) );
 			
 			if ( $mode == '+' )
 			{
@@ -491,7 +491,7 @@ class ns_flags implements module
 				
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), "`nickname` = '".database::quote( $target )."'" );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 					
 					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET, array( 'flag' => $flag, 'target' => $target ) );
@@ -499,7 +499,7 @@ class ns_flags implements module
 				}
 				else
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), "`nickname` = '".database::quote( $target )."'" );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 					
 					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'target' => $target, 'value' => $param ) );

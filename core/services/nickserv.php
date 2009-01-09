@@ -144,7 +144,7 @@ class nickserv implements service
 		$check_time = core::$network_time - $expiry_time;
 		// set up our times.
 		
-		$nick_q = database::select( 'users', array( 'id', 'display', 'last_timestamp' ), "`last_timestamp` != '0' AND `last_timestamp` < '".$check_time."'" );
+		$nick_q = database::select( 'users', array( 'id', 'display', 'last_timestamp' ), array( 'last_timestamp', '!=', '0', 'AND', 'last_timestamp', '<', $check_time ) );
 		
 		if ( database::num_rows( $nick_q ) == 0 )
 			return false;
@@ -155,18 +155,18 @@ class nickserv implements service
 			// Mikeh gets most of the credit for helping
 			// me code this function
 			
-			database::delete( 'users', "`display` = '".$nick->display."'" );
-			database::delete( 'users_flags', "`nickname` = '".$user->display."'" );
+			database::delete( 'users', array( 'display', '=', $nick->display ) );
+			database::delete( 'users_flags', array( 'nickname', '=', $user->display ) );
 			// delete the users record
 				
-			$chan_q = database::select( 'chans', array( 'channel', 'founder' ), "`founder` = '".$nick->id."'" );
+			$chan_q = database::select( 'chans', array( 'channel', 'founder' ), array( 'founder', '=', $nick->id ) );
 				
 			if ( database::num_rows( $chan_q ) != 0 )
 			{
 				while ( $channel = database::fetch( $chan_q ) )
 				{
-					database::delete( 'chans', "`channel` = '".$channel->channel."'" );
-					database::delete( 'chans_levels', "`channel` = '".$channel->channel."'" );
+					database::delete( 'chans', array( 'channel', '=', $channel->channel ) );
+					database::delete( 'chans_levels', array( 'channel', '=', $channel->channel ) );
 						
 					if ( isset( core::$chans[$channel->channel] ) )
 					{
@@ -182,7 +182,7 @@ class nickserv implements service
 			// now we need to check if they own any channels, if they do..
 			// unregister it i guess.
 				
-			database::delete( 'chans_levels', "`target` = '".$nick->display."'" );
+			database::delete( 'chans_levels', array( 'target', '=', $nick->display ) );
 			// also delete this users channel access.
 				
 			core::alog( core::$config->nickserv->nick.': '.$nick->display.' has expired. Last used on '.date( 'F j, Y, g:i a', $nick->last_timestamp ) );
@@ -204,7 +204,7 @@ class nickserv implements service
 	*/
 	static public function check_flags( $nick, $flags )
 	{
-		$nick_flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), "`nickname` = '".database::quote( $nick )."'" );
+		$nick_flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $nick ) );
 		$nick_flags = database::fetch( $nick_flags_q );
 		// get our flags records
 		
@@ -238,7 +238,7 @@ class nickserv implements service
 			return false;
 		// translate. some craq.
 		
-		$nick_flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags', $param_field ), "`nickname` = '".database::quote( $nick )."'" );
+		$nick_flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags', $param_field ), array( 'nickname', '=', $nick ) );
 		$nick_flags = database::fetch( $nick_flags_q );
 		// get our flags records
 		

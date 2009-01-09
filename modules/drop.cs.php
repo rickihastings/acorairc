@@ -69,8 +69,8 @@ class cs_drop implements module
 		}
 		// is the channel suspended?
 		
-		database::delete( 'chans', "`channel` = '".database::quote( $chan )."'" );
-		database::delete( 'chans_levels', "`channel` = '".database::quote( $chan )."'" );
+		database::delete( 'chans', array( 'channel', '=', $chan ) );
+		database::delete( 'chans_levels', array( 'channel', '=', $chan ) );
 		// delete all associated records
 		
 		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_CHAN_DROPPED, array( 'chan' => $chan ) );

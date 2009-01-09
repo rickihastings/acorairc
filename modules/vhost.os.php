@@ -100,7 +100,7 @@ class os_vhost implements module
 			}
 			// is the hostname valid?
 			
-			database::update( 'users', array( 'vhost' => $realhost ), "`display` = '".$user->display."'" );
+			database::update( 'users', array( 'vhost' => $realhost ), array( 'display', '=', $user->display ) );
 			core::alog( core::$config->operserv->nick.': vHost for '.$unick.' set to '.$realhost.' by '.$nick );
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
 			// update it and log it
@@ -145,7 +145,7 @@ class os_vhost implements module
 			}
 			// is there a vhost?!
 						
-			database::update( 'users', array( 'vhost' => '' ), "`display` = '".$user->display."'" );
+			database::update( 'users', array( 'vhost' => '' ), array( 'display', '=', $user->display ) );
 			core::alog( core::$config->operserv->nick.': vHost for '.$unick.' deleted by '.$nick );
 			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_DELETED, array( 'nick' => $unick ) );
 			// update and logchan
@@ -169,7 +169,7 @@ class os_vhost implements module
 			}
 			// invalid syntax
 			
-			$total = database::select( 'users', array( 'id' ), "`vhost` != ''" );
+			$total = database::select( 'users', array( 'id' ), array( 'vhost', '!=', '' ) );
 			$total = database::num_rows( $total );
 			// get the total
 			
@@ -179,7 +179,7 @@ class os_vhost implements module
 			$max = $s_limit[1];
 			// split up the limit and stuff ^_^
 			
-			$users_q = database::select( 'users', array( 'display', 'vhost' ), "`vhost` != ''", '', array( $offset => $max ) );
+			$users_q = database::select( 'users', array( 'display', 'vhost' ), array( 'vhost', '!=', '' ), '', array( $offset => $max ) );
 			// get the vhosts
 			
 			if ( database::num_rows( $users_q ) == 0 )
