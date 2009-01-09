@@ -45,7 +45,9 @@ class database implements driver
 		else
 		{
 			core::alog( 'factory(): failed to open '.$driver.' database driver', 'BASIC' );
-            exit( 'cant initiate the specified database driver ('.$driver.')' );
+            
+            core::save_logs();
+            // force a log save
         }
         // see if we can require the file
         // if so initiate the class

@@ -294,7 +294,7 @@ $help = (object) array(
 	'OS_CHAN_INVALID'		=> '{chan} doesn\'t exist',	
 	'OS_UNREGISTERED_NICK'	=>	'{nick} isn\'t a registered nickname',
 	'OS_COMMAND_LIMIT_1'	=>	'You have triggered services flood protection',
-	'OS_COMMAND_LIMIT_2'	=>	'{message}, you will be ignored for approx 2 minutes',
+	'OS_COMMAND_LIMIT_2'	=>	'{message}, you will be ignored for 2 minutes',
 	'OS_ISNT_REGISTERED'	=>	'{nick} isn\'t registered',
 	'OS_INVALID_HOSTNAME'	=>	'Invalid characters in hostname',
 	// standard messages

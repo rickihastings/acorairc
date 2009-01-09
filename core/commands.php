@@ -130,7 +130,7 @@ class commands
 		$realdata = strtolower( $ircdata[3] );
 		$from = core::get_nick( &$ircdata, 0 );
 		
-		if ( isset( modules::$list['os_ignore'] ) && services::check_mask_ignore( $nick ) === true )
+		if ( services::check_mask_ignore( $nick ) === true )
 		{
 			return false;
 		}
@@ -166,7 +166,7 @@ class commands
 		
 		if ( substr( $command, 0, 4 ) != 'help' )
 		{
-			trigger_error( 'Command has to start with "help" when using _add_help_fix()', E_USER_NOTICE );
+			core::alog( 'add_help_fix(): command does not start with "help"', 'BASIC' );
 			return false;
 		}
 		// trigger an error
@@ -232,7 +232,7 @@ class commands
 		
 		if ( substr( $command, 0, 4 ) != 'help' )
 		{
-			trigger_error( 'Command has to start with "help" when using _add_help()', E_USER_NOTICE );
+			core::alog( 'add_help(): command does not start with "help"', 'BASIC' );
 			return false;
 		}
 		// trigger an error
@@ -277,7 +277,7 @@ class commands
 		// let this function do the looping and just send it
 		// straight to the client?
 		
-		if ( isset( modules::$list['os_ignore'] ) && services::check_mask_ignore( $nick ) === true )
+		if ( services::check_mask_ignore( $nick ) === true )
 		{
 			return false;
 		}
@@ -355,7 +355,7 @@ class commands
 		
 		if ( substr( $command, 0, 4 ) == 'help' )
 		{
-			trigger_error( 'Command cant start with "help" please use _add_help() for help commands.', E_USER_NOTICE );
+			core::alog( 'add_command(): command cant start with "help"', 'BASIC' );
 			return false;
 		}
 		// trigger an error if they're trying to make help commands with this..
@@ -380,7 +380,7 @@ class commands
 	{
 		// this works better than i imagined
 		
-		if ( isset( modules::$list['os_ignore'] ) && services::check_mask_ignore( $nick ) === true )
+		if ( services::check_mask_ignore( $nick ) === true )
 		{
 			return false;
 		}

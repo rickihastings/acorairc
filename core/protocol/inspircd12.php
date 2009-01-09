@@ -133,7 +133,6 @@ class ircd implements protocol
 			'timestamp' => $ircdata[3],
 			'commands' => null,
 			'floodcmds' => 0,
-			'ignore' => false,
 			'failed_attempts' => 0,
 			'offences' => 0,
 		);

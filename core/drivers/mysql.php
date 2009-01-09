@@ -38,14 +38,16 @@ class mysql implements driver
 		if ( !self::$link = @mysql_connect( core::$config->database->server, core::$config->database->user, core::$config->database->pass ) )
 		{
 			core::alog( 'database(): failed to connect to '.core::$config->database->server.' '.core::$config->database->user.':'.core::$config->database->pass, 'BASIC' );
-			exit( 'cant connect to the mysql server, please make sure the config values "server", "user" and "pass" are defined in the database block.' );
+			core::save_logs();
+			// force a log save
 		}
 		// can we connect to sql?
 		
 		if ( !@mysql_select_db( core::$config->database->name, self::$link ) )
 		{
 			core::alog( 'database(): failed to select database '.core::$config->database->name, 'BASIC' );
-			exit( 'cant select a database, please make sure the config value "name" is defined in the database block.' );
+			core::save_logs();
+			// force a log save
 		}
 		// can we select the database?
 		

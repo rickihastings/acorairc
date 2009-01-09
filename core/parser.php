@@ -76,7 +76,9 @@ class parser
 	{
         if ( !file_exists( self::$filename ) && $check )
 		{
-			exit( 'Fatal error: '.self::$filename.' cannot be found.' );
+			core::alog( 'parse(): '.self::$filename.' cannot be found.', 'BASIC' );
+			core::save_logs();
+			// force a log save
 		}
 		// check if it exists
 		
@@ -230,7 +232,11 @@ class parser
 		foreach ( self::$required as $var => $value )
 		{
 			if ( !isset( self::$config[$value] ) )
-				exit ( 'Fatal error: '.$value.' is REQUIRED, startup halted.' );
+			{
+				core::alog( 'parse(): '.$value.' is REQUIRED, startup halted', 'BASIC' );
+				core::save_logs();
+				// force a log save.
+			}
 		}
 		// check for required vars
 		

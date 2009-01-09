@@ -530,6 +530,12 @@ class core
 				fclose( $fp );	
 				// and we ALSO send it into the logfile
 				
+				if ( !self::$booted && self::$debug )
+					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+				// if we're not connected, and in debug mode
+				// just send it out, else they wont actually see the message
+				// it'll just end up in the log file
+				
 				unset( self::$log_data[$line] );
 			}
 		
@@ -567,11 +573,22 @@ class core
 		{
 			self::$nicks[$nick]['commands'] = null;
 			self::$nicks[$nick]['floodcmds'] = 0;
-			self::$nicks[$nick]['ignore'] = false;
 			self::$nicks[$nick]['failed_attempts'] = 0;
 		}
 		// loop though our users, setting everything to false/0/null
 		// everything flood related, ofc.
+	}
+	
+	/*
+	* remove_ignore
+	*
+	* @params
+	* void
+	*/
+	static public function remove_ignore( $who )
+	{
+		database::delete( 'ignored_users', array( 'who', '=', $who ) );
+		// remove it.
 	}
 	
 	/*
@@ -615,7 +632,7 @@ class core
 			self::$nicks[$nick]['commands'][] = time();
 			$from = self::get_nick( &$ircdata, 2 );
 			
-			if ( self::$nicks[$from]['ircop'] )
+			if ( self::$nicks[$nick]['ircop'] )
 			{
 				return false;
 			}
@@ -636,47 +653,42 @@ class core
  
 			if ( self::$nicks[$nick]['floodcmds'] > self::$config->settings->flood_msgs )
 			{
-				if ( self::$nicks[$nick]['ignore'] == false )
+				if ( services::check_mask_ignore( $nick ) === true )
 				{
-					if ( self::$nicks[$nick]['offences'] == 0 || self::$nicks[$nick]['offences'] == 1 )
-					{
-						self::$nicks[$nick]['ignore'] = true;
-						self::$nicks[$nick]['offences']++;
-						
-						$message = ( self::$nicks[$nick]['offences'] == 1 ) ? 'This is your first offence' : 'This is your last warning';
-						
-						services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_1 );
-						services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_2, array( 'message' => $message ) );
-						self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being ignored for approx 2 minutes' );
-						self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
-						
-						return true;
-					}
-					elseif ( self::$nicks[$nick]['offences'] >= 2 )
-					{
-						self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being glined for 10 minutes' );
-						self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
-						
-						ircd::gline( self::$config->operserv->nick, '*@'.self::$nicks[$nick]['oldhost'], 600, 'Flooding services, 10 minute ban.' );
-						// third offence, wtf? add a 10 minute gline.
-						
-						self::$nicks[$nick]['ignore'] = true;
-						self::$nicks[$nick]['offences'] = 0;
-						
-						return true;
-					}
+					return false;
 				}
-				else
+				
+				if ( self::$nicks[$nick]['offences'] == 0 || self::$nicks[$nick]['offences'] == 1 )
 				{
+					self::$nicks[$nick]['offences']++;
+					database::insert( 'ignored_users', array( 'who' => '*!*@'.self::$nicks[$nick]['host'], 'time' => core::$network_time ) );
+					timer::add( array( 'core', 'remove_ignore', array( '*!*@'.self::$nicks[$nick]['host'] ) ), 120, 1 );
+					// add them to the ignore list.
+					// also, add a timer to unset it in 2 minutes.
+					
+					$message = ( self::$nicks[$nick]['offences'] == 1 ) ? 'This is your first offence' : 'This is your last warning';
+					// compose a message.
+					
+					services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_1 );
+					services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_2, array( 'message' => $message ) );
+					self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being ignored for 2 minutes' );
+					self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
+					
+					return true;
+				}
+				elseif ( self::$nicks[$nick]['offences'] >= 2 )
+				{
+					self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being glined for 10 minutes' );
+					self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
+					
+					ircd::gline( self::$config->operserv->nick, '*@'.self::$nicks[$nick]['oldhost'], 600, 'Flooding services, 10 minute ban.' );
+					// third offence, wtf? add a 10 minute gline.
+					
 					return true;
 				}
 			}
 			// they're flooding
 		}
-		// commented this out, i'm unsure if it's needed tbh
-		// i think it's going to cause more trouble than it solves
-		// for instance most ircd's have an excess flood, anything that isn't going
-		// to trigger excess flood isn't going to bring the bot down.
 	}
 	
 	/*
@@ -690,7 +702,9 @@ class core
 		if ( !file_exists( BASEPATH.'/core/protocol/'.self::$config->server->ircd.'.php' ) )
 		{
 			self::alog( 'protocol_init(): failed to initiate protocol module '.self::$config->server->ircd, 'BASIC' );
-			exit( 'cant initiate the protocol module, see services.conf for information' );
+			
+			self::save_logs();
+			// force a log save.
 		}
 		else
 		{
@@ -743,7 +757,9 @@ class core
 		// we tell them that we can't connect :D
 		
 		self::alog( 'connect(): failed to connect to any of the specified uplinks', 'BASIC' );
-		exit( 'cannot connect to any of the specified uplinks' );
+		
+		self::save_logs();
+		// force a log save.
 	}
 	
 	/*
