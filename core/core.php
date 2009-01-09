@@ -111,7 +111,10 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		$this->main_loop();
+		if ( is_resource( self::$socket ) )
+			$this->main_loop();
+		else
+			exit;
 		// execute the main program loop
 	}
 	
@@ -530,12 +533,6 @@ class core
 				fclose( $fp );	
 				// and we ALSO send it into the logfile
 				
-				if ( !self::$booted && self::$debug )
-					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
-				// if we're not connected, and in debug mode
-				// just send it out, else they wont actually see the message
-				// it'll just end up in the log file
-				
 				unset( self::$log_data[$line] );
 			}
 		
@@ -792,6 +789,12 @@ class core
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
 				if ( !in_array( $message, self::$debug_data ) ) self::$debug_data[] = $message;
+				
+				if ( !self::$booted && self::$debug )
+					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+				// if we're not connected, and in debug mode
+				// just send it out, else they wont actually see the message and
+				// it'll just end up in the log file
 			}
 		}
 		// debug on?
