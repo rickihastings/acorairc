@@ -227,10 +227,63 @@ class ircd implements protocol
 	*/
 	static public function handle_host_change( &$ircdata )
 	{
-		$nick = core::get_nick( &$ircdata, 0 );
+		if ( $ircdata[1] == 'CHGHOST' )
+		{
+			$nick = core::get_nick( &$ircdata, 2 );
+			$host = $ircdata[3];
+		}
+		elseif ( $ircdata[1] == 'SETHOST' )
+		{
+			$nick = core::get_nick( &$ircdata, 0 );
+			$host = $ircdata[2];
+		}
 		
 		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];	
-		core::$nicks[$nick]['host'] = $ircdata[2];
+		core::$nicks[$nick]['host'] = $host;
+	}
+	
+	/*
+	* handle_ident_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function handle_ident_change( &$ircdata )
+	{
+		if ( $ircdata[1] == 'CHGIDENT' )
+		{
+			$nick = self::get_nick( &$ircdata, 2 );
+			$ident = $ircdata[3];
+		}
+		elseif ( $ircdata[1] == 'SETIDENT' )
+		{
+			$nick = self::get_nick( &$ircdata, 0 );
+			$ident = $ircdata[2];
+		}
+		
+		core::$nicks[$nick]['ident'] = $ident;
+	}
+	
+	/*
+	* handle_gecos_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function handle_gecos_change( &$ircdata )
+	{
+		if ( $ircdata[1] == 'CHGNAME' )
+		{
+			$nick = self::get_nick( &$ircdata, 2 );
+			$gecos = core::get_data_after( &$ircdata, 3 );
+		}
+		elseif ( $ircdata[1] == 'SETNAME' )
+		{
+			$nick = self::get_nick( &$ircdata, 0 );
+			$gecos = core::get_data_after( &$ircdata, 2 );
+		}
+		
+		core::$nicks[$nick]['gecos'] = substr( $gecos, 1 );
 	}
 	
 	/*
@@ -375,7 +428,7 @@ class ircd implements protocol
 	*/
 	static public function handle_oper_up( &$ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = core::get_nick( $ircdata, 2 );
 		
 		core::$nicks[$nick]['ircop'] = true;
 	}
@@ -1082,9 +1135,18 @@ class ircd implements protocol
 	*/
 	static public function on_fhost( &$ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FHOST' )
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGHOST' )
 		{
-			core::alog( 'on_fhost(): '.$ircdata[0].'\'s host changed to '.$ircdata[2], 'BASIC' );
+			core::alog( 'on_fhost(): '.$ircdata[2].'\'s host changed to '.$ircdata[3], 'BASIC' );
+			// i added this to make debbuing a bit more useful.
+			
+			return true;
+		}
+		// return true when the $ircdata finds a host change
+		
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETHOST' )
+		{
+			core::alog( 'on_fhost(): '.substr( $ircdata[2], 1 ).'\'s host changed to '.$ircdata[2], 'BASIC' );
 			// i added this to make debbuing a bit more useful.
 			
 			return true;
@@ -1242,9 +1304,9 @@ class ircd implements protocol
 	*/
 	static public function on_oper_up( &$ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'OPERTYPE' )
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MODE' && strpos( $ircdata[3], 'o' ) !== false )
 		{
-			core::alog( 'on_oper_up(): '.$ircdata[0].' opered up to '.str_replace( '_', ' ', $ircdata[2] ), 'BASIC' );
+			core::alog( 'on_oper_up(): '.$ircdata[2].' opered up', 'BASIC' );
 			// i added this to make debbuing a bit more useful.
 			
 			return true;
@@ -1322,6 +1384,65 @@ class ircd implements protocol
 			return true;
 		}
 		// return true on any nick change.
+		
+		return false;
+	}
+	
+	
+	/*
+	* on_ident_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function on_ident_change( &$ircdata )
+	{
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGIDENT' )
+		{
+			core::alog( 'on_ident_change(): '.self::get_nick( &$ircdata, 2 ).' changed ident to '.substr( $ircdata[3], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on chgident.
+		
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETIDENT' )
+		{
+			core::alog( 'on_ident_change(): '.self::get_nick( &$ircdata, 0 ).' changed ident to '.substr( $ircdata[2], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on setident.
+		
+		return false;
+	}
+	
+	/*
+	* on_gecos_change
+	*
+	* @params
+	* $ircdata - ..
+	*/
+	static public function on_gecos_change( &$ircdata )
+	{
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGNAME' )
+		{
+			core::alog( 'on_gecos_change(): '.self::get_nick( &$ircdata, 2 ).' changed gecos to '.substr( $ircdata[3], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on chgname.
+		
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETNAME' )
+		{
+			core::alog( 'on_gecos_change(): '.self::get_nick( &$ircdata, 0 ).' changed gecos to '.substr( $ircdata[2], 1 ), 'BASIC' );
+			// debug info
+			
+			return true;
+		}
+		// return true on chgname.
 		
 		return false;
 	}

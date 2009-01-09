@@ -1422,7 +1422,7 @@ class ircd implements protocol
 			
 			return true;
 		}
-		// return true on chgident.
+		// return true on fname.
 		
 		return false;
 	}
