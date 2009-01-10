@@ -198,7 +198,6 @@ CREATE TABLE IF NOT EXISTS `system_users_flags` (
   `flags` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL,
-  `msn` varchar(255) NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 

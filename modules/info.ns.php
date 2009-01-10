@@ -94,14 +94,9 @@ class ns_info implements module
 			// if the person doing /ns info has staff powers we show the email
 			// or if someone is doing /ns info on themselves we show it.
 			
-			$msn = nickserv::get_flags( $nick, 'm' );
-			if ( $msn != null )
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_6, array( 'msn' => $msn ) );
-			// msn
-			
 			$url = nickserv::get_flags( $nick, 'u' );
 			if ( $url != null )
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_7, array( 'url' => $url ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_6, array( 'url' => $url ) );
 			// url
 	
 			$list = '';
@@ -116,14 +111,14 @@ class ns_info implements module
 			// compile our list of options
 			
 			if ( $list != '' )
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_8, array( 'options' => $list ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_7, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 			
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->nickserv->expire != 0 )
 			{
 				$expiry_time = core::$config->nickserv->expire * 86400;
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_9, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time + $expiry_time ) ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_8, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time + $expiry_time ) ) );
 			}
 			// if the nick in question has staff powers, we show the expiry times.
 		}

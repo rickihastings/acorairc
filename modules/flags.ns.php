@@ -17,7 +17,7 @@
 class ns_flags implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -126,14 +126,6 @@ class ns_flags implements module
 			}
 			// ----------- +u ----------- //
 			
-			// ----------- +m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				self::set_flag( $nick, $nick, '+m', $params['m'] );
-				// +m the target in question
-			}
-			// ----------- +m ----------- //
-			
 			// non paramatized flags (uppercase)
 			
 			// ----------- +S ----------- //
@@ -172,14 +164,6 @@ class ns_flags implements module
 				// -u the target in question
 			}
 			// ----------- -u ----------- //
-			
-			// ----------- -m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				self::set_flag( $nick, $nick, '-m', $params['m'] );
-				// -m the target in question
-			}
-			// ----------- -m ----------- //
 			
 			// non paramatized flags (uppercase)
 			
@@ -281,14 +265,6 @@ class ns_flags implements module
 			}
 			// ----------- +u ----------- //
 			
-			// ----------- +m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				self::set_flag( $nick, $unick, '+m', $params['m'] );
-				// +m the target in question
-			}
-			// ----------- +m ----------- //
-			
 			// non paramatized flags (uppercase)
 			
 			// ----------- +S ----------- //
@@ -327,14 +303,6 @@ class ns_flags implements module
 				// -u the target in question
 			}
 			// ----------- -u ----------- //
-			
-			// ----------- -m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				self::set_flag( $nick, $unick, '-m', $params['m'] );
-				// -m the target in question
-			}
-			// ----------- -m ----------- //
 			
 			// non paramatized flags (uppercase)
 			
