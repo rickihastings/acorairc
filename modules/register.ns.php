@@ -126,8 +126,7 @@ class ns_register implements module
 		$flags = core::$config->nickserv->default_flags;
 		$flags = str_replace( 'u', '', $flags );
 		$flags = str_replace( 'e', '', $flags );
-		$flags = str_replace( 'm', '', $flags );
-			// ignore parameter flags
+		// ignore parameter flags
 		
 		database::insert( 'users', $user_info );
 		database::insert( 'users_flags', array( 'nickname' => $nick, 'flags' => $flags.'e', 'email' => $email ) );

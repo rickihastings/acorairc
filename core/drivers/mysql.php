@@ -191,6 +191,8 @@ class mysql implements driver
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
+				$val = self::quote( $val );
+				
 				$i++;
 				if ( $i == 1 )
 				{
@@ -219,6 +221,7 @@ class mysql implements driver
 			
 			foreach ( $order as $index => $val )
 			{
+				$val = self::quote( $val );
 				$query .= "`".$index."` ".$val;
 			}
 		}
@@ -230,6 +233,7 @@ class mysql implements driver
 			
 			foreach ( $limit as $index => $val )
 			{
+				$val = self::quote( $val );
 				$query .= $index.", ".$val;
 			}
 		}
@@ -267,6 +271,8 @@ class mysql implements driver
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
+				$val = self::quote( $val );
+				
 				$i++;
 				if ( $i == 1 )
 				{
@@ -353,6 +359,8 @@ class mysql implements driver
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
+				$val = self::quote( $val );
+				
 				$i++;
 				if ( $i == 1 )
 				{
