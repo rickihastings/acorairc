@@ -42,18 +42,12 @@ class os_shutdown implements module
 		operserv::add_command( 'shutdown', 'os_shutdown', 'shutdown_command' );
 		// add the shutdown command
 		
-		//if ( substr( php_uname(), 0, 7 ) != 'Windows' )
-		//{
-			operserv::add_help( 'os_shutdown', 'help', &operserv::$help->OS_HELP_RESTART_1 );
-			operserv::add_help( 'os_shutdown', 'help restart', &operserv::$help->OS_HELP_RESTART_ALL );
-			// add the help
+		operserv::add_help( 'os_shutdown', 'help', &operserv::$help->OS_HELP_RESTART_1 );
+		operserv::add_help( 'os_shutdown', 'help restart', &operserv::$help->OS_HELP_RESTART_ALL );
+		// add the help
 			
-			operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
-			// add the command
-		//}
-		// if we're running anything BUT windows, add the restart command
-		// might sound ludacris, but windows is just shit, and it simply
-		// doesn't want to work.
+		operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
+		// add the command
 	}
 	
 	/*
