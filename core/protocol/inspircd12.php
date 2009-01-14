@@ -1175,7 +1175,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'UID' )
 		{
-			core::alog( 'on_connect(): '.$ircdata[3].' connected to '.self::get_server( &$ircdata, 0 ), 'BASIC' );
+			core::alog( 'on_connect(): '.$ircdata[4].' connected to '.self::get_server( &$ircdata, 0 ), 'BASIC' );
 			// i added this to make debbuing a bit more useful.
 			
 			return true;
