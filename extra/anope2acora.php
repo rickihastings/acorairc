@@ -94,7 +94,6 @@ while ( $channels = mysql_fetch_array( $get_channels ) )
 	$cid++;
 	$data_channels[$channels['name']]['id'] = $cid;
 	$data_channels[$channels['name']]['channel'] = $channels['name'];
-	$data_channels[$channels['name']]['founder'] = $data_users[$channels['founder']]['id'];
 	$data_channels[$channels['name']]['timestamp'] = $channels['time_registered'];
 	$data_channels[$channels['name']]['last_timestamp'] = $channels['last_used'];
 	$data_channels[$channels['name']]['topic'] = $channels['last_topic'];
@@ -178,8 +177,8 @@ foreach ( $data_user_flags as $user => $array )
 foreach ( $data_channels as $channel => $array )
 {
 	mysql_query( "INSERT INTO `".$acora_prefix."chans`
-	(`id`,`channel`,`founder`,`timestamp`,`last_timestamp`,`topic`,`topic_setter`,)
-	VALUES('".$array['id']."','".$array['channel']."','".$array['founder']."','".$array['timestamp']."','".$array['last_timestamp']."','".$array['topic']."','".$array['topic_setter']."')" );
+	(`id`,`channel`,`timestamp`,`last_timestamp`,`topic`,`topic_setter`,)
+	VALUES('".$array['id']."','".$array['channel']."','".$array['timestamp']."','".$array['last_timestamp']."','".$array['topic']."','".$array['topic_setter']."')" );
 }
 // insert our channels
 

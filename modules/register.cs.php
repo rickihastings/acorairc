@@ -95,7 +95,6 @@ class cs_register implements module
 			
 			$chan_info = array(
 				'channel' 		=> 	$chan,
-				'founder' 		=> 	$user->id,
 				'timestamp' 	=> 	core::$network_time,
 				'last_timestamp'=> 	core::$network_time,
 				'topic' 		=> 	core::$chans[$chan]['topic'],

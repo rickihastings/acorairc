@@ -77,11 +77,18 @@ class cs_info implements module
 		}
 		else
 		{
-			$founder = services::user_exists_id( $channel->founder, false, array( 'display', 'id' ) );
-			// get the founder
+			$founder = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan ) );
+			$founders = '';
+			
+			while ( $f_row = database::fetch( $founder ) )
+			{
+				if ( strpos( $f_row->flags, 'F' ) !== false )
+					$founders .= $f_row->target.', ';
+			}
+			// get the founder(s)
 			
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_2, array( 'nick' => $founder->display ) );
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_2, array( 'nicks' => substr( $founders, 0, -2 ) ) );
 			
 			$desc = chanserv::get_flags( $channel->channel, 'd' );
 			if ( $desc != null )

@@ -22,7 +22,6 @@ SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 CREATE TABLE IF NOT EXISTS `system_chans` (
   `id` int(10) NOT NULL auto_increment,
   `channel` varchar(255) NOT NULL,
-  `founder` tinyint(11) NOT NULL,
   `timestamp` int(20) NOT NULL,
   `last_timestamp` int(20) NOT NULL,
   `topic` text,

@@ -534,7 +534,7 @@ $help = (object) array(
 	'CS_FLAGS_INVALID_M'	=>	'The value for {flag} contains modes you are not allowed to lock',
 	// flags
 	'CS_INFO_1'				=>	'Information on {chan}:',
-	'CS_INFO_2'				=>	'       Founder: {nick}',
+	'CS_INFO_2'				=>	'    Founder(s): {nicks}',
 	'CS_INFO_3'				=>	'   Description: {desc}',
 	'CS_INFO_4'				=>	'         Topic: {topic}',
 	'CS_INFO_5'				=>	'         Email: {email}',
