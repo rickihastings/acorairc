@@ -568,9 +568,11 @@ class mode
 				$nick_string = ' ';
 				// reset all our strings :D
 			}
+			else
+			{
+				unset( $nicks[$id] );
+			}
 			// bit of maths, well, not much, lol.
-			
-			unset( $nicks[$id] );
 		}
 		// ok, so we've got our list, instead of sending the modes one by one, here's
 		// what we're gonna do, we're gonna compress it into a mode string, setting
