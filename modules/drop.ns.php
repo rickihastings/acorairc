@@ -85,27 +85,6 @@ class ns_drop implements module
 				database::delete( 'users_flags', array( 'nickname', '=', $user->display ) );
 				// delete the users record
 				
-				$chan_q = database::select( 'chans', array( 'channel', 'founder' ), array( 'founder', '=', $user->id ) );
-				
-				if ( database::num_rows( $chan_q ) != 0 )
-				{
-					while ( $channel = database::fetch( $chan_q ) )
-					{
-						database::delete( 'chans', array( 'channel', '=', $channel->channel ) );
-						database::delete( 'chans_levels', array( 'channel', '=', $channel->channel ) );
-						
-						if ( isset( core::$chans[$channel->channel] ) )
-						{
-							ircd::part_chan( core::$config->chanserv->nick, $channel->channel );
-							// now lets leave the channel if we're in it
-							
-							core::alog( core::$config->chanserv->nick.': '.$channel->channel.' dropped because founder has been dropped' );
-						}
-					}
-				}
-				// now we need to check if they own any channels, if they do..
-				// unregister it i guess.
-				
 				database::delete( 'chans_levels', array( 'target', '=', $user->display ) );
 				// also delete this users channel access.
 				

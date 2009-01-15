@@ -72,19 +72,6 @@ class cs_register implements module
 			}
 			// check if its registered?
 			
-			if ( core::$config->chanserv->max_chans != 0 )
-			{
-				$g_chans = database::select( 'chans', array( 'founder' ), array( 'founder', '=', $user->id ) );
-				
-				if ( database::num_rows( $g_chans ) >= core::$config->chanserv->max_chans )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_MAX_CHANS_REG, array( 'num' => core::$config->chanserv->max_chans ) );
-					return false;
-					// too manaay chans registered
-				}
-			}
-			// we need to find out how many channels they have registered
-			
 			if ( !strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
 			{
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_NEED_CHAN_OP, array( 'chan' => $chan ) );	

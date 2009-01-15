@@ -97,16 +97,14 @@ class cs_suspend implements module
 			$chan_info = array(
 				'channel' 		=> 	$chan,
 				'description' 	=> 	$desc,
-				'founder' 		=> 	0,
 				'timestamp' 	=> 	core::$network_time,
 				'last_timestamp'=> 	core::$network_time,
-				'guard' 		=> 	0,
-				'fantasy' 		=> 	0,
 				'suspended' 	=> 	1,
 				'suspend_reason'=> 	$reason,
 			);
 			
 			database::insert( 'chans', $chan_info );
+			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => '' ) );
 			// if the channel isn't registered, we register it, with a founder value of 0
 			// so we can check when it's unsuspended THAT if the founder value is 0, we'll
 			// just drop it as well, this way nobody actually gets the founder status.
@@ -163,11 +161,12 @@ class cs_suspend implements module
 			}
 			// channel isn't even suspended
 			
-			database::update( 'chans', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'channel', '=', $chan ) );
+			$check_row = database::select( 'chans_levels', array( 'channel' ), array( 'channel', '=', $chan ) );
 			
-			if ( $channel->founder == 0 )
+			if ( database::num_rows( $check_row ) == 0 )
 			{
 				database::delete( 'chans', array( 'channel', '=', $chan ) );
+				database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
 			}
 			// the channel has no founder, DROP it.
 		}
