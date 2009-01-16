@@ -88,18 +88,18 @@ class cs_register implements module
 				'topic_setter' 	=> 	core::$chans[$chan]['topic_setter'],
 			);
 			
-			$flags = core::$config->chanserv->default_flags;
-			$flags = str_replace( 'd', '', $flags );
-			$flags = str_replace( 'u', '', $flags );
-			$flags = str_replace( 'e', '', $flags );
-			$flags = str_replace( 'w', '', $flags );
-			$flags = str_replace( 'm', '', $flags );
-			$flags = str_replace( 't', '', $flags );
+			$rflags = core::$config->chanserv->default_flags;
+			$rflags = str_replace( 'd', '', $rflags );
+			$rflags = str_replace( 'u', '', $rflags );
+			$rflags = str_replace( 'e', '', $rflags );
+			$rflags = str_replace( 'w', '', $rflags );
+			$rflags = str_replace( 'm', '', $rflags );
+			$rflags = str_replace( 't', '', $rflags );
 			// ignore parameter flags
 			
 			database::insert( 'chans', $chan_info );
 			database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $user->display, 'flags' => 'Ftfrsqao' ) );
-			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $flags.'d', 'desc' => $desc ) );
+			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
 			// create the channel! WOOOH
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
 			core::alog( core::$config->chanserv->nick.': '.$chan.' registered by '.core::get_full_hostname( $nick ) );

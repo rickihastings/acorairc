@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `system_chans_flags` (
   `modelock` text NOT NULL,
   `topicmask` text NOT NULL,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_chans_flags`
