@@ -200,7 +200,14 @@ class cs_xcommands implements module
 			// send the mode string
 		}
 		// bans etc.
-		ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
+		
+		$modelock = self::get_flags( $chan, 'm' );
+		// store some flag values in variables.
+		
+		if ( $modelock != null )
+			ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
+		else
+			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
 	}
 	
