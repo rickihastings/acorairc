@@ -43,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `system_chans` (
 --
 
 CREATE TABLE IF NOT EXISTS `system_chans_flags` (
-  `id` int(10) NOT NULL,
+  `id` int(10) NOT NULL auto_increment,
   `channel` varchar(255) NOT NULL,
   `flags` varchar(50) NOT NULL,
   `desc` varchar(255) NOT NULL,
