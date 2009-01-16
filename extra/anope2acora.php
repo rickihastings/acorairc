@@ -169,8 +169,8 @@ foreach ( $data_users as $user => $array )
 foreach ( $data_user_flags as $user => $array )
 {
 	mysql_query( "INSERT INTO `".$acora_prefix."users_flags`
-	(`nickname`,`flags`,`url`,`email`,`msn`)
-	VALUES('".$array['nickname']."','".$array['flags']."','".$array['url']."','".$array['email']."','".$array['msn']."')" );
+	(`nickname`,`flags`,`url`,`email`)
+	VALUES('".$array['nickname']."','".$array['flags']."','".$array['url']."','".$array['email']."')" );
 }
 // insert our access
 
