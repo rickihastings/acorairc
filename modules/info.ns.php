@@ -17,7 +17,7 @@
 class ns_info implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -94,16 +94,16 @@ class ns_info implements module
 			// if the person doing /ns info has staff powers we show the email
 			// or if someone is doing /ns info on themselves we show it.
 			
-			$url = nickserv::get_flags( $nick, 'u' );
+			$url = nickserv::get_flags( $unick, 'u' );
 			if ( $url != null )
 				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_6, array( 'url' => $url ) );
 			// url
 	
 			$list = '';
 			
-			if ( nickserv::check_flags( $nick, array( 'S' ) ) )
+			if ( nickserv::check_flags( $unick, array( 'S' ) ) )
 				$list .= 'Secure, ';
-			if ( nickserv::check_flags( $nick, array( 'P' ) ) )
+			if ( nickserv::check_flags( $unick, array( 'P' ) ) )
 				$list .= 'Private Message';
 			
 			if ( substr( $list, -2, 2 ) == ', ' ) 

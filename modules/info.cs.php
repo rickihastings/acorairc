@@ -63,7 +63,7 @@ class cs_info implements module
 		}
 		// make sure they've entered a channel
 		
-		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'founder', 'timestamp', 'last_timestamp', 'suspended', 'suspend_reason' ) ) )
+		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp', 'suspended', 'suspend_reason' ) ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
