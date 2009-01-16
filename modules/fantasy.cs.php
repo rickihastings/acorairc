@@ -48,8 +48,8 @@ class cs_fantasy implements module
 			$nick = core::get_nick( &$ircdata, 0 );
 			$chan = core::get_chan( &$ircdata, 2 );
 			
-			if ( core::search_nick( $chan ) !== false )
-				return false;
+			//if ( core::search_nick( $chan ) !== false )
+				//return false;
 			// bail if it thinks chan == nick.
 			
 			if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
