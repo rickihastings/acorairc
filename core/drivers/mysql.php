@@ -252,7 +252,7 @@ class mysql implements driver
 	*/
 	static public function update( $table, $what, $where = array() )
 	{
-		$query = "UPDATE `".core::$config->database->prefix.$table."` SET";
+		$query = "UPDATE `".core::$config->database->prefix.$table."` SET ";
 		// the table
 			
 		$i = 0;
@@ -280,7 +280,6 @@ class mysql implements driver
 				}
 				elseif ( $i == 3 )
 				{
-					$i = 0;
 					$query .= "'".$val."'";
 				}
 				elseif ( $i == 4 )
@@ -368,7 +367,6 @@ class mysql implements driver
 				}
 				elseif ( $i == 3 )
 				{
-					$i = 0;
 					$query .= "'".$val."'";
 				}
 				elseif ( $i == 4 )

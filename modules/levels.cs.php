@@ -240,7 +240,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+a' );
+				self::set_flag( $nick, $chan, $target, '+q' );
 				// +q the target in question
 			}
 			// ----------- +q ----------- //
@@ -463,7 +463,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-a' );
+				self::set_flag( $nick, $chan, $target, '-q' );
 				// -q the target in question
 			}
 			// ----------- -q ----------- //
@@ -943,7 +943,7 @@ class cs_levels implements module
 				// get the flag record
 					
 				$new_user_flags = str_replace( $r_flag, '', $user_flag->flags );
-					
+				
 				if ( $new_user_flags == '' )
 					database::delete( 'chans_levels', array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 				else

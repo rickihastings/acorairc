@@ -105,7 +105,7 @@ class database implements driver
 	/*
 	* select
 	*/
-	static public function select( $table, $what, $where = '', $order = '', $limit = '' )
+	static public function select( $table, $what, $where = array(), $order = '', $limit = '' )
 	{
 		return self::$driver->select( $table, $what, $where, $order, $limit );
 	}
@@ -113,7 +113,7 @@ class database implements driver
 	/*
 	* update
 	*/
-	static public function update( $table, $what, $where = '' )
+	static public function update( $table, $what, $where = array() )
 	{
 		return self::$driver->update( $table, $what, $where );
 	}
@@ -129,7 +129,7 @@ class database implements driver
 	/*
 	* delete
 	*/
-	static public function delete( $table, $where = '' )
+	static public function delete( $table, $where = array() )
 	{
 		return self::$driver->delete( $table, $where );
 	}

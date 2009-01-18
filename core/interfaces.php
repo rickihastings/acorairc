@@ -135,10 +135,10 @@ interface driver
 	static public function fetch( $resource );
 	static public function quote( $string );
 	static public function optimize();
-	static public function select( $table, $what, $where = '', $order = '', $limit = '' );
-	static public function update( $table, $what, $where = '' );
+	static public function select( $table, $what, $where = array(), $order = '', $limit = '' );
+	static public function update( $table, $what, $where = array() );
 	static public function insert( $table, $what );
-	static public function delete( $table, $where = '' );
+	static public function delete( $table, $where = array() );
 	// main functions
 }
 
