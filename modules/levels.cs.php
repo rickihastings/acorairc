@@ -969,6 +969,7 @@ class cs_levels implements module
 			{
 				if ( database::num_rows( $user_flag_q ) > 0 )
 				{
+					$user_flag = database::fetch( $user_flag_q );
 					$new_user_flags = $user_flag->flags.$r_flag;
 					
 					if ( $r_flag == 'b' && $mode == '+' )
