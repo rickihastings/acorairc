@@ -679,7 +679,7 @@ class cs_levels implements module
 					}
 					else
 					{
-						break;
+						continue 1;
 						// continue to next loop to check other access records
 					}
 					// we check if the user has access, if they do break;

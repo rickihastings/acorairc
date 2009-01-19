@@ -93,7 +93,7 @@ class ns_register implements module
 		// are we registered?
 		// apprently not, let's move on!
 		
-		$check_e = database::select( 'users', array( 'email' ), array( 'email', '=', $email ) );
+		$check_e = database::select( 'users_flags', array( 'email' ), array( 'email', '=', $email ) );
 		
 		if ( database::num_rows( $check_e ) > 0 )
 		{
