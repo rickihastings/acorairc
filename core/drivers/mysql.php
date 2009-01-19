@@ -250,7 +250,7 @@ class mysql implements driver
 	* $what - What to update, as an array
 	* $where - The WHERE clause
 	*/
-	static public function update( $table, $what, $where = array() )
+	static public function update( $table, $what, $where = '' )
 	{
 		$query = "UPDATE `".core::$config->database->prefix.$table."` SET ";
 		// the table
