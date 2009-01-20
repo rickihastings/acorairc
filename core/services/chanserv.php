@@ -178,7 +178,7 @@ class chanserv implements service
 			
 			foreach ( $chans as $chan )
 			{
-				if ( services::chan_exists( $chan, array( 'channel' ) ) !== false )
+				if ( services::chan_exists( $chan, array( 'channel', 'topic' ) ) !== false )
 				{
 					database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $chan ) );
 					// lets update the last used timestamp
@@ -411,9 +411,10 @@ class chanserv implements service
 		}
 		// any modelocks?
 		
-		if ( self::check_flags( $channel->channel, array( 'K' ) ) && !self::check_flags( $channel->channel, array( 'T' ) ) && ( trim( $channel->topic ) != trim( core::$chans[$channel->channel]['topic'] ) || $channel->topic != '' ) && isset( modules::$list['cs_flags'] ) && isset( modules::$list['cs_topic'] ) )
+		if ( self::check_flags( $channel->channel, array( 'K' ) ) && !self::check_flags( $channel->channel, array( 'T' ) ) && isset( modules::$list['cs_flags'] ) && isset( modules::$list['cs_topic'] ) )
 		{
-			ircd::topic( core::$config->chanserv->nick, $channel->channel, $channel->topic );
+			if ( trim( $channel->topic ) != trim( core::$chans[$channel->channel]['topic'] ) || $channel->topic != '' )
+				ircd::topic( core::$config->chanserv->nick, $channel->channel, $channel->topic );
 			// set the previous topic
 		}
 		// set the topic to the last known topic

@@ -17,7 +17,7 @@
 class cs_levels implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -139,6 +139,25 @@ class cs_levels implements module
 		}
 		// make sure the channel exists.
 		
+		if ( strpos( $target, '@' ) === false )
+		{
+			if ( !$user = services::user_exists( $target, false, array( 'id', 'display' ) ) )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
+				return false;
+			}
+			// they aint even identified..
+			// were dealing with a nickname, check if it is registered
+			// if not, back out
+		}
+		else
+		{
+			if ( strpos( $target, '!' ) === false )
+				$target = '*!'.$target;
+			// we're dealing with a mask, check if it a proper mask
+			// *!*@* < like so.
+		}
+		
 		foreach ( $flags as $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
@@ -153,6 +172,9 @@ class cs_levels implements module
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
 		
+		$presult = '';
+		$mresult = '';
+		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
 		{
 			// ----------- +k ----------- //
@@ -165,7 +187,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+k' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+k' );
 				// +k the target in question
 			}
 			// ----------- +k ----------- //
@@ -180,7 +202,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+v' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+v' );
 				// +v the target in question
 			}
 			// ----------- +v ----------- //
@@ -195,7 +217,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+h' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+h' );
 				// +h the target in question
 			}
 			// ----------- +h ----------- //
@@ -210,7 +232,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+o' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+o' );
 				// +o the target in question
 			}
 			// ----------- +o ----------- //
@@ -225,7 +247,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+a' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+a' );
 				// +a the target in question
 			}
 			// ----------- +a ----------- //
@@ -240,7 +262,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+q' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+q' );
 				// +q the target in question
 			}
 			// ----------- +q ----------- //
@@ -255,7 +277,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+s' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+s' );
 				// +s the target in question
 			}
 			// ----------- +s ----------- //
@@ -270,7 +292,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+r' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+r' );
 				// +r the target in question
 			}
 			// ----------- +r ----------- //
@@ -285,7 +307,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+r' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+r' );
 				// +r the target in question
 			}
 			// ----------- +r ----------- //
@@ -300,7 +322,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+f' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+f' );
 				// +f the target in question
 			}
 			// ----------- +f ----------- //
@@ -315,7 +337,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+t' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+t' );
 				// +t the target in question
 			}
 			// ----------- +t ----------- //
@@ -330,7 +352,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '+F' );
+				$presult .= self::set_flag( $nick, $chan, $target, '+F' );
 				// +F the target in question
 			}
 			// ----------- +F ----------- //
@@ -349,8 +371,12 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				if ( self::set_flag( $nick, $chan, $target, '+b', $reason ) )
+				$rresult = self::set_flag( $nick, $chan, $target, '+b', $reason );
+				
+				if ( $rresult !== false )
 				{
+					$presult .= $rresult;
+					
 					foreach ( core::$chans[$chan]['users'] as $user => $modes )
 					{
 						$hostname = core::get_full_hostname( $nick );
@@ -388,7 +414,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-k' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-k' );
 				// -k the target in question
 			}
 			// ----------- -k ----------- //
@@ -403,7 +429,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-v' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-v' );
 				// -v the target in question
 			}
 			// ----------- -v ----------- //
@@ -418,7 +444,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-h' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-h' );
 				// -h the target in question
 			}
 			// ----------- -h ----------- //
@@ -433,7 +459,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-o' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-o' );
 				// -o the target in question
 			}
 			// ----------- -o ----------- //
@@ -448,7 +474,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-a' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-a' );
 				// -a the target in question
 			}
 			// ----------- -a ----------- //
@@ -463,7 +489,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-q' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-q' );
 				// -q the target in question
 			}
 			// ----------- -q ----------- //
@@ -478,7 +504,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-s' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-s' );
 				// -s the target in question
 			}
 			// ----------- -s ----------- //
@@ -493,7 +519,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-r' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-r' );
 				// -r the target in question
 			}
 			// ----------- -r ----------- //
@@ -508,7 +534,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-r' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-r' );
 				// -r the target in question
 			}
 			// ----------- -r ----------- //
@@ -523,7 +549,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-f' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-f' );
 				// -f the target in question
 			}
 			// ----------- -f ----------- //
@@ -538,7 +564,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-t' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-t' );
 				// -t the target in question
 			}
 			// ----------- -t ----------- //
@@ -553,7 +579,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				self::set_flag( $nick, $chan, $target, '-F' );
+				$mresult .= self::set_flag( $nick, $chan, $target, '-F' );
 				// -F the target in question
 			}
 			// ----------- -F ----------- //
@@ -568,8 +594,12 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				if ( self::set_flag( $nick, $chan, $target, '-b' ) )
+				$rresult = self::set_flag( $nick, $chan, $target, '-b' );
+				
+				if ( $rresult !== false )
 				{
+					$mresult .= $rresult;
+					
 					if ( strpos( $target, '@' ) === false && $user = core::search_nick( $target ) )
 						ircd::mode( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );
 					else
@@ -579,8 +609,23 @@ class cs_levels implements module
 				// -b the target in question
 			}
 			// ----------- -b ----------- //
+			
+			
 		}
 		// loop through the minus flags
+		
+		if ( $mresult != '' || $presult != '' )
+		{
+			$result = '';
+			
+			if ( $presult != '' )
+				$result = '+'.$presult;
+			if ( $mresult != '' )
+				$result = '-'.$mresult;
+			// prepend with +/-
+			
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );
+		}
 	}
 	
 	/*
@@ -902,26 +947,7 @@ class cs_levels implements module
 	* $param - optional
 	*/
 	static public function set_flag( $nick, $chan, $target, $flag, $param = '' )
-	{
-		if ( strpos( $target, '@' ) === false )
-		{
-			if ( !$user = services::user_exists( $target, false, array( 'id', 'display' ) ) )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
-				return false;
-			}
-			// they aint even identified..
-			// were dealing with a nickname, check if it is registered
-			// if not, back out
-		}
-		else
-		{
-			if ( strpos( $target, '!' ) === false )
-				$target = '*!'.$target;
-			// we're dealing with a mask, check if it a proper mask
-			// *!*@* < like so.
-		}
-		
+	{	
 		$mode = $flag[0];
 		$r_flag = $flag[1];
 		// get the real flag, eg. V, v and mode
@@ -949,9 +975,8 @@ class cs_levels implements module
 				else
 					database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );	
 				// check if it's empty, if it is just delete the row
-					
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
-				return true;
+				
+				return $r_flag;
 			}
 			else
 			{
@@ -973,34 +998,24 @@ class cs_levels implements module
 					$new_user_flags = $user_flag->flags.$r_flag;
 					
 					if ( $r_flag == 'b' && $mode == '+' )
-					{
 						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'reason' => $param ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
-					}
 					else
-					{
 						database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
-					}
 					
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
-					return true;
+					return $r_flag;
 				}
 				else
 				{
 					if ( $r_flag == 'b' && $mode == '+' )
-					{
 						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag, 'reason' => $param ) );
 						// insert.
-					}
 					else
-					{
 						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag ) );
 						// insert.
-					}
 					
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
-					return true;
+					return $r_flag;
 				}
 			}
 			else
