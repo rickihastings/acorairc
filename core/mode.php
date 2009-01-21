@@ -581,6 +581,8 @@ class mode
 		if ( count( $nicks ) > 0 )
 			ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
 		// send the remaining modes
+
+		unset ( $nicks );
 	}
 }
 
