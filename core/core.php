@@ -222,14 +222,14 @@ class core
 						self::$network_time = $ircdata[2];
 					}
 					
-					self::$burst_time = microtime( true );
+					self::$burst_time = microtime();
 					// how long did the burst take?
 				}
 				// if we recieve a start burst, we also adopt the time given to us
 				
 				if ( ircd::on_end_burst( &$ircdata ) )
 				{
-					self::$burst_time = round( microtime( true ) - self::$burst_time, 4 );
+					self::$burst_time = round( microtime() - self::$burst_time, 4 );
 					// how long did the burst take?
 					
 					self::$end_burst = true;
