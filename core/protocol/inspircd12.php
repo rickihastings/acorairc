@@ -67,7 +67,7 @@ class ircd implements protocol
 	*/
 	public function __construct()
 	{
-		modules::init_module( 'inspircd11', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
+		modules::init_module( 'inspircd12', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
 		// these are standard in module constructors
 	}
 	
