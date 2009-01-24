@@ -625,9 +625,9 @@ class cs_flags implements module
 			
 			if ( $modelock != null )
 			{
-				$modelock = explode( ' ', $modelock );
+				$nmodelock = explode( ' ', $modelock );
 				
-				foreach ( str_split( $modelock[0] ) as $mode )
+				foreach ( str_split( $nmodelock[0] ) as $mode )
 				{
 					if ( strstr( $mode_queue, $mode ) )
 						ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
