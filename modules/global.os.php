@@ -61,13 +61,6 @@ class os_global implements module
 		ircd::join_chan( core::$config->global->nick, core::$config->settings->logchan );
 		// join the logchan
 		
-		if ( ircd::$protect )
-			ircd::mode( core::$config->global->nick, core::$config->settings->logchan, '+ao '.core::$config->global->nick.' '.core::$config->global->nick );
-		// +ao its self.
-		else
-			ircd::mode( core::$config->global->nick, core::$config->settings->logchan, '+o '.core::$config->global->nick );
-		// +o its self.
-		
 		core::alog( 'Now sending log messages to '.core::$config->settings->logchan );
 		// tell the chan we're logging shit.
 	}
