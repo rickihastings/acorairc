@@ -370,6 +370,39 @@ class cs_fantasy implements module
 				}
 			}
 			// !unban command
+			
+			if ( commands::on_fantasy_cmd( &$ircdata, 'flags', core::$config->chanserv->nick ) && isset( modules::$list['cs_flags'] ) )
+			{
+				$n_ircdata = $ircdata;
+				unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
+				array_unshift( $n_ircdata, $chan );
+				// construct a new ircdata array
+				
+				cs_flags::flags_command( $nick, $n_ircdata, true );
+				// execute the flags command with the new data
+				
+				unset( $n_ircdata );
+				// get rid of this, isn't longer needed
+			}
+			// !flags command (experimental)
+			
+			if ( commands::on_fantasy_cmd( &$ircdata, 'levels', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
+			{
+				$n_ircdata = $ircdata;
+				unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
+				array_unshift( $n_ircdata, $chan );
+				// construct a new ircdata array
+				
+				cs_levels::levels_command( $nick, $n_ircdata, true );
+				// execute the flags command with the new data
+				
+				unset( $n_ircdata );
+				// get rid of this, isn't longer needed
+			}
+			// !levels command (experimental)
+			
+			
+			// !sync command (will do this another time)
 		}
 		// only trigger on channel messages
 	}

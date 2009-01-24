@@ -54,21 +54,15 @@ class cs_levels implements module
 		// string of valid flags
 		
 		if ( !ircd::$halfop )
-		{
 			self::$flags = str_replace( 'h', '', self::$flags );
-		}
 		// if halfop isnt enabled, remove h and H
 		
 		if ( !ircd::$protect )
-		{
 			self::$flags = str_replace( 'a', '', self::$flags );
-		}
 		// same for protect
 		
 		if ( !ircd::$owner )
-		{
 			self::$flags = str_replace( 'q', '', self::$flags );
-		}
 		// and finally, owner
 	}
 	
@@ -78,8 +72,9 @@ class cs_levels implements module
 	* @params
 	* $nick - The nick of the person issuing the command
 	* $ircdata - Any parameters.
+	* $announce - If set to true, the channel will be noticed.
 	*/
-	static public function levels_command( $nick, $ircdata = array() )
+	static public function levels_command( $nick, $ircdata = array(), $announce = false )
 	{
 		$chan = core::get_chan( &$ircdata, 0 );
 		$target = $ircdata[2];
@@ -139,6 +134,17 @@ class cs_levels implements module
 		}
 		// make sure the channel exists.
 		
+		foreach ( str_split( $flags ) as $flag )
+		{
+			if ( strpos( self::$flags, $flag ) === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_UNKNOWN, array( 'flag' => $flag ) );
+				return false;
+			}
+			// flag is invalid.
+		}
+		// check if the flag is valid
+		
 		if ( strpos( $target, '@' ) === false )
 		{
 			if ( !$user = services::user_exists( $target, false, array( 'id', 'display' ) ) )
@@ -157,17 +163,6 @@ class cs_levels implements module
 			// we're dealing with a mask, check if it a proper mask
 			// *!*@* < like so.
 		}
-		
-		foreach ( $flags as $flag )
-		{
-			if ( strpos( self::$flags, $flag ) === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LEVELS' ) );
-				return false;
-			}
-			// flag is invalid.
-		}
-		// check if the flag is valid
 		
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
@@ -609,8 +604,6 @@ class cs_levels implements module
 				// -b the target in question
 			}
 			// ----------- -b ----------- //
-			
-			
 		}
 		// loop through the minus flags
 		
@@ -624,8 +617,13 @@ class cs_levels implements module
 				$result = '-'.$mresult;
 			// prepend with +/-
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );
+			if ( $announce )
+				services::communicate( core::$config->chanserv->nick, $chan, &chanserv::$help->CS_LEVELS_SET_CHAN, array( 'target' => $target, 'flag' => $result, 'nick' => $nick ) );
+			else
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );	
+			// who do we notice?
 		}
+		// send the results
 	}
 	
 	/*
