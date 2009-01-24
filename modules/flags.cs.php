@@ -580,7 +580,7 @@ class cs_flags implements module
 			// prepend with +/-
 			
 			if ( $announce )
-				services::communicate( core::$config->chanserv->nick, $chan, &chanserv::$help->CS_FLAGS_SET_CHAN, array( 'target' => $target, 'flag' => $result, 'nick' => $nick ) );
+				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.$result.'' );
 			else
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );	
 			// who do we notice?

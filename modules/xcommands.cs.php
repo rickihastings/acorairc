@@ -17,7 +17,7 @@
 class cs_xcommands implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	
 	public function __construct() {}
@@ -96,7 +96,10 @@ class cs_xcommands implements module
 		
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_MODE_1 );
 		chanserv::add_help( 'cs_xcommands', 'help mode', &chanserv::$help->CS_HELP_MODE_ALL );
-		// voice and mode
+		
+		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_SYNC_1 );
+		chanserv::add_help( 'cs_xcommands', 'help sync', &chanserv::$help->CS_HELP_SYNC_ALL );
+		// voice and mode & sync
 		
 		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_TYPEMASK_1 );
 		chanserv::add_help( 'cs_xcommands', 'help typemask', &chanserv::$help->CS_HELP_TYPEMASK_ALL );
@@ -139,7 +142,8 @@ class cs_xcommands implements module
 		chanserv::add_command( 'voice', 'cs_xcommands', 'voice_command' );
 		chanserv::add_command( 'devoice', 'cs_xcommands', 'devoice_command' );
 		chanserv::add_command( 'mode', 'cs_xcommands', 'mode_command' );
-		// and the rest, voice & mode.
+		chanserv::add_command( 'sync', 'cs_xcommands', 'sync_command' );
+		// and the rest, voice & mode & sync.
 	}
 	
 	/*
@@ -209,6 +213,35 @@ class cs_xcommands implements module
 		else
 			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
+	}
+	
+	/*
+	* sync_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function sync_command( $nick, $ircdata = array() )
+	{
+		$chan = $ircdata[0];
+		// standard data here.
+		
+		$channel = self::check_channel( $nick, $chan, 'SYNC' );
+		if ( $channel === false )
+			return false;
+		// check if the channel exists and stuff
+		
+		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			return false;
+		}
+		// do they have access?
+		
+		cs_levels::on_create( core::$chans[$chan]['users'], $channel );
+		// execute on_create, cause we just treat it as that
+		// this is kinda a shortcut, but well worth it.
 	}
 	
 	/*
@@ -744,12 +777,14 @@ class cs_xcommands implements module
 		}
 		// make sure they've entered a channel
 		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
+		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.
+		
+		return $channel;
 	}
 }
 

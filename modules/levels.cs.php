@@ -618,7 +618,7 @@ class cs_levels implements module
 			// prepend with +/-
 			
 			if ( $announce )
-				services::communicate( core::$config->chanserv->nick, $chan, &chanserv::$help->CS_LEVELS_SET_CHAN, array( 'target' => $target, 'flag' => $result, 'nick' => $nick ) );
+				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.$result.' on '.$target.'' );
 			else
 				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );	
 			// who do we notice?
@@ -720,6 +720,14 @@ class cs_levels implements module
 						continue 1;
 						// continue to next loop to check other access records
 					}
+					elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
+					{
+						$remove_access = true;
+						// set remove access to true
+						
+						continue 1;
+						// continue to next loop to check other access records
+					}
 					else
 					{
 						continue 1;
@@ -732,7 +740,7 @@ class cs_levels implements module
 				
 				if ( $remove_access )
 				{
-					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-o '.$nick );
+					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
 				}
 				// easy fix to stop stuff like this below happening.
 				// [20:27:19] * ChanServ sets mode: -o N0valyfe
@@ -802,6 +810,14 @@ class cs_levels implements module
 					continue 1;
 					// continue to next loop to check other access records
 				}
+				elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
+				{
+					$remove_access = true;
+					// set remove access to true
+						
+					continue 1;
+					// continue to next loop to check other access records
+				}
 				else
 				{
 					continue 1;
@@ -814,7 +830,7 @@ class cs_levels implements module
 			
 			if ( $remove_access )
 			{
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '-o '.$nick );
+				ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
 			}
 			// easy fix to stop stuff like this below happening.
 			// [20:27:19] * ChanServ sets mode: -o N0valyfe
@@ -932,6 +948,8 @@ class cs_levels implements module
 			ircd::mode( core::$config->chanserv->nick, $chan, '+'.$mode_string.' '.trim( $mode_params ) );
 		// finally, we set the mode string on the nick
 		// providing it isnt empty
+		
+		unset( $mode_string );
 	}
 	
 	/*

@@ -83,6 +83,7 @@ $help = (object) array(
 	'CS_HELP_VOICE_1'		=> '     VOICE     - Voices a user in the channel',
 	'CS_HELP_DEVOICE_1'		=> '     DEVOICE   - Devoices a user in the channel',
 	'CS_HELP_MODE_1' 		=> '     MODE      - Sets a mode in the channel',
+	'CS_HELP_SYNC_1'		=> '     SYNC      - Synchronizes the channel access list',
 	'CS_HELP_TYPEMASK_1' 	=> '     TYPEMASK  - Help on how to use the TYPE:MASK commands',
 	// COMMANDS
 	
@@ -107,6 +108,9 @@ $help = (object) array(
 		'    {p}kickban   - Kickbans a user from the channel',
 		'    {p}ban       - Bans a user or a host from the channel',
 		'    {p}unban     - Unbans a user or a host from the channel',
+		'    {p}flags     - Lets you set channel flags via a fantasy command',
+		'    {p}levels    - Lets you set channel levels via a fantasy command',
+		'    {p}sync      - Synchronizes the channel access list',
 		' ',
 		'Note owner/deowner and protect/deprotect commands will only work if your',
 		'server has them enabled.',
@@ -132,6 +136,9 @@ $help = (object) array(
 		'    {p}kickban   - Kickbans a user from the channel',
 		'    {p}ban       - Bans a user or a host from the channel',
 		'    {p}unban     - Unbans a user or a host from the channel',
+		'    {p}flags     - Lets you set channel flags via a fantasy command',
+		'    {p}levels    - Lets you set channel levels via a fantasy command',
+		'    {p}sync      - Synchronizes the channel access list',
 		' ',
 		'Note owner/deowner and protect/deprotect commands will only work if your',
 		'server has them enabled.',
@@ -379,6 +386,18 @@ $help = (object) array(
 	),
 	// MODE
 	
+	'CS_HELP_SYNC_ALL'	=> array(
+		'=---- ChanServ Help ----=',
+		'Syntax: SYNC channel',
+		' ',
+		'Changes the channel access list, anyone who isnt on the list',
+		'and has channel access will be removed, this only applies to',
+		'operators and half operators. People on the access list but',
+		'without access will be given access.',
+		'=---- End of ChanServ Help ----=',
+	),
+	// SYNC
+	
 	'CS_HELP_TYPEMASK_ALL'	=> array(
 		'=---- ChanServ Help ----=',
 		'Syntax: COMMAND TYPE:TARGET',
@@ -520,7 +539,6 @@ $help = (object) array(
 	'CS_LEVELS_ALREADY_SET'	=>	'{target} already has {flag} set on {chan}',
 	'CS_LEVELS_NOT_SET'		=>	'{target} does not have {flag} set on {chan}',
 	'CS_LEVELS_SET'			=>	'{flag} set on {target} on {chan}',
-	'CS_LEVELS_SET_CHAN'	=>	'{nick} set flags {flag} on {target}',
 	'CS_LEVELS_LIST_TOP'	=>	'    Flags         Nickname/Hostmask',
 	'CS_LEVELS_LIST'		=>	'    {flags} {target} {reason}',
 	'CS_LEVELS_BAD_FLAG'	=>	'You cannot set {flag} on yourself',

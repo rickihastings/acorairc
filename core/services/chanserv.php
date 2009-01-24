@@ -365,7 +365,7 @@ class chanserv implements service
 			// Going to have to do some fuffing around here, basically if the channel
 			// in question is mlocked +i, and somebody has joined it, while its empty
 			// +i will be set after they have joined the channel, so here we're gonna
-			// have to kick them out, same applies for +O and +k -- N0valyfe
+			// have to kick them out, same applies for +O and +k
 			$mode_array = mode::sort_modes( $modelock );
 			
 			if ( strstr( $mode_array['plus'], 'i' ) || strstr( $mode_array['plus'], 'k' ) )

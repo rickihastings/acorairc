@@ -17,7 +17,7 @@
 class cs_fantasy implements module
 {
 	
-	const MOD_VERSION = '0.0.6';
+	const MOD_VERSION = '0.0.7';
 	const MOD_AUTHOR = 'Acora';
 	
 	public function __construct() {}
@@ -401,8 +401,15 @@ class cs_fantasy implements module
 			}
 			// !levels command (experimental)
 			
-			
-			// !sync command (will do this another time)
+			if ( commands::on_fantasy_cmd( &$ircdata, 'sync', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
+			{
+				cs_levels::on_create( core::$chans[$chan]['users'], $channel );
+				// execute on_create, cause we just treat it as that
+				// this is kinda a shortcut, but well worth it.
+				
+				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' used SYNC' );
+			}
+			// !sync command (experimental)
 		}
 		// only trigger on channel messages
 	}
