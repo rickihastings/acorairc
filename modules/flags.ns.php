@@ -82,16 +82,29 @@ class ns_flags implements module
 		}
 		// are they identified?
 		
-		foreach ( $flags as $flag )
+		$flag_a = array();
+		foreach ( str_split( $flags ) as $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
 				return false;
 			}
 			// flag is invalid.
+			
+			$flag_a[$flag]++;
+			// plus
+			
+			if ( $flag_a[$flag] > 1 || $flag != '-' && $flag != '+' )
+				$flag_a[$flag]--;
+			// check for dupes
 		}
 		// check if the flag is valid
+		
+		$flags = '';
+		foreach ( $flag_a as $flag => $count )
+			$flags .= $flag;
+		// reconstruct the flags
 		
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
@@ -221,16 +234,29 @@ class ns_flags implements module
 		}
 		// do we have access to do this?
 		
-		foreach ( $flags as $flag )
+		$flag_a = array();
+		foreach ( str_split( $flags ) as $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
 				return false;
 			}
 			// flag is invalid.
+			
+			$flag_a[$flag]++;
+			// plus
+			
+			if ( $flag_a[$flag] > 1 || $flag != '-' && $flag != '+' )
+				$flag_a[$flag]--;
+			// check for dupes
 		}
 		// check if the flag is valid
+		
+		$flags = '';
+		foreach ( $flag_a as $flag => $count )
+			$flags .= $flag;
+		// reconstruct the flags
 		
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
@@ -430,7 +456,7 @@ class ns_flags implements module
 			{
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => $flag, 'target' => $target ) );
+					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => $r_flag, 'target' => $target ) );
 					return false;
 				}
 				
@@ -479,7 +505,7 @@ class ns_flags implements module
 			
 			if ( $mode == '-' )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => $flag, 'target' => $target ) );
+				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => $r_flag, 'target' => $target ) );
 				return false;
 			}
 		}

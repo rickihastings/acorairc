@@ -81,6 +81,7 @@ class cs_flags implements module
 		}
 		// missing params?
 		
+		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
@@ -89,8 +90,20 @@ class cs_flags implements module
 				return false;
 			}
 			// flag is invalid.
+			
+			$flag_a[$flag]++;
+			// plus
+			
+			if ( $flag_a[$flag] > 1 || $flag != '-' && $flag != '+' )
+				$flag_a[$flag]--;
+			// check for dupes
 		}
 		// check if the flag is valid
+		
+		$flags = '';
+		foreach ( $flag_a as $flag => $count )
+			$flags .= $flag;
+		// reconstruct the flags
 		
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
@@ -882,7 +895,7 @@ class cs_flags implements module
 			{
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => $flag, 'chan' => $chan ) );
+					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => $r_flag, 'chan' => $chan ) );
 					return false;
 				}
 				
@@ -928,7 +941,7 @@ class cs_flags implements module
 			
 			if ( $mode == '-' )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => $flag, 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => $r_flag, 'chan' => $chan ) );
 				return false;
 			}
 		}

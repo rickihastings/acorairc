@@ -134,7 +134,8 @@ class cs_levels implements module
 		}
 		// make sure the channel exists.
 		
-		foreach ( str_split( $flags ) as $flag )
+		$flag_a = array();
+		foreach ( str_split( $flags ) as $pos => $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
@@ -142,6 +143,13 @@ class cs_levels implements module
 				return false;
 			}
 			// flag is invalid.
+			
+			$flag_a[$flag]++;
+			// plus
+			
+			if ( $flag_a[$flag] > 1 || $flag != '-' && $flag != '+' )
+				$flag_a[$flag]--;
+			// check for dupes
 		}
 		// check if the flag is valid
 		
@@ -163,6 +171,11 @@ class cs_levels implements module
 			// we're dealing with a mask, check if it a proper mask
 			// *!*@* < like so.
 		}
+		
+		$flags = '';
+		foreach ( $flag_a as $flag => $count )
+			$flags .= $flag;
+		// reconstruct the flags
 		
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
@@ -996,7 +1009,7 @@ class cs_levels implements module
 			}
 			else
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => $r_flag, 'chan' => $chan ) );
 				return false;
 			}
 			// the user has the flag, so, if it's - remove it, if it is +
@@ -1036,7 +1049,7 @@ class cs_levels implements module
 			}
 			else
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => $flag, 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => $r_flag, 'chan' => $chan ) );
 				return false;
 			}
 			// the user doesn't have the flag, so if it's + add it, if it is -
