@@ -25,6 +25,10 @@ class cs_flags implements module
 	static public $p_flags;
 	// valid flags.
 	
+	static public $set = array();
+	static public $not_set = array();
+	static public $already_set = array();
+	
 	public function __construct() {}
 	// __construct, makes everyone happy.
 	
@@ -117,9 +121,6 @@ class cs_flags implements module
 			// we do!
 		}
 		// check if we have any paramtized flags, eg +mw
-		
-		$presult = '';
-		$mresult = '';
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
 		{
@@ -227,7 +228,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$presult .= self::set_flag( $nick, $chan, '+S', '' );
+				self::set_flag( $nick, $chan, '+S', '' );
 				// +S the target in question
 			}
 			// ----------- +S ----------- //
@@ -242,7 +243,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$presult .= self::set_flag( $nick, $chan, '+F', '' );
+				self::set_flag( $nick, $chan, '+F', '' );
 				// +F the target in question
 			}
 			// ----------- +F ----------- //
@@ -257,12 +258,8 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$rresult = self::set_flag( $nick, $chan, '+G', '' );
-				
-				if ( $rresult !== false && count( core::$chans[$chan]['users'] ) > 0 )
+				if ( self::set_flag( $nick, $chan, '+G', '' ) !== false && count( core::$chans[$chan]['users'] ) > 0 )
 				{
-					$presult .= $rresult;
-					
 					ircd::join_chan( core::$config->chanserv->nick, $chan );
 					// join the chan.
 					
@@ -288,7 +285,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$presult .= self::set_flag( $nick, $chan, '+T', '' );
+				self::set_flag( $nick, $chan, '+T', '' );
 				// +F the target in question
 			}
 			// ----------- +T ----------- //
@@ -303,7 +300,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$presult .= self::set_flag( $nick, $chan, '+K', '' );
+				self::set_flag( $nick, $chan, '+K', '' );
 				// +K the target in question
 			}
 			// ----------- +K ----------- //
@@ -318,12 +315,8 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$rresult = self::set_flag( $nick, $chan, '+L', '' );
-				
-				if ( $rresult != false )
+				if ( self::set_flag( $nick, $chan, '+L', '' ) != false )
 				{
-					$presult .= $rresult;
-					
 					self::increase_limit( $chan );
 					// execute it directly.
 				}
@@ -341,12 +334,8 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$rresult = self::set_flag( $nick, $chan, '+I', '' );
-				
-				if ( $rresult != false )
+				if ( self::set_flag( $nick, $chan, '+I', '' ) != false )
 				{
-					$presult .= $rresult;
-					
 					foreach ( core::$chans[$chan]['users'] as $unick => $mode )
 					{
 						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'F' ), true, false ) === false )
@@ -469,7 +458,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$mresult .= self::set_flag( $nick, $chan, '-S', '' );
+				self::set_flag( $nick, $chan, '-S', '' );
 				// +S the target in question
 			}
 			// ----------- -S ----------- //
@@ -484,7 +473,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$mresult .= self::set_flag( $nick, $chan, '-F', '' );
+				self::set_flag( $nick, $chan, '-F', '' );
 				// -F the target in question
 			}
 			// ----------- -F ----------- //
@@ -499,12 +488,8 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$rresult = self::set_flag( $nick, $chan, '-G', '' );
-				
-				if ( $rresult != false )
+				if ( self::set_flag( $nick, $chan, '-G', '' ) != false )
 				{
-					$mresult .= $rresult;
-					
 					ircd::part_chan( core::$config->chanserv->nick, $chan );
 					// leave the channel
 				}
@@ -522,7 +507,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$mresult .= self::set_flag( $nick, $chan, '-T', '' );
+				self::set_flag( $nick, $chan, '-T', '' );
 				// -T the target in question
 			}
 			// ----------- -T ----------- //
@@ -537,7 +522,7 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$mresult .= self::set_flag( $nick, $chan, '-K', '' );
+				self::set_flag( $nick, $chan, '-K', '' );
 				// -K the target in question
 			}
 			// ----------- -K ----------- //
@@ -552,12 +537,8 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$rresult = self::set_flag( $nick, $chan, '-L', '' );
-				
-				if ( $rresult != false )
+				if ( self::set_flag( $nick, $chan, '-L', '' ) != false )
 				{
-					$mresult .= $rresult;
-					
 					ircd::mode( core::$config->chanserv->nick, $chan, '-l' );
 					// -l the channel
 				}
@@ -575,30 +556,37 @@ class cs_flags implements module
 				}
 				// do they have access to alter this?
 				
-				$mresult .= self::set_flag( $nick, $chan, '-I', '' );
+				self::set_flag( $nick, $chan, '-I', '' );
 				// -I the target in question
 			}
 			// ----------- -I ----------- //
 		}
 		// loop through the flags being unset, and do what we need to do with them.
 		
-		if ( $mresult != '' || $presult != '' )
+		if ( isset( self::$set[$chan] ) )
 		{
-			$result = '';
-			
-			if ( $presult != '' )
-				$result = '+'.$presult;
-			if ( $mresult != '' )
-				$result = '-'.$mresult;
-			// prepend with +/-
-			
 			if ( $announce )
-				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.$result.'' );
+				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.self::$set[$chan].'' );
 			else
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'target' => $target, 'flag' => $result, 'chan' => $chan ) );	
+				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
 			// who do we notice?
+			unset( self::$set[$chan] );
 		}
-		// send the results
+		// send back the target stuff..
+		
+		if ( isset( self::$already_set[$chan] ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
+			unset( self::$already_set[$chan] );
+		}
+		// send back the target stuff..
+		
+		if ( isset( self::$not_set[$chan] ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
+			unset( self::$not_set[$chan] );
+		}
+		// send back the target stuff..
 	}
 	
 	/*
@@ -872,6 +860,10 @@ class cs_flags implements module
 			
 			if ( $mode == '-' )
 			{
+				if ( strpos( self::$set[$target], '+' ) === false )
+					self::$set[$target] .= '+';
+				// ok, no + ?
+				
 				$chan_flag = database::fetch( $chan_flag_q );
 				// get the flag record
 				
@@ -888,16 +880,23 @@ class cs_flags implements module
 					// update the row with the new flags.
 				}
 				
-				return $r_flag;
+				self::$set[$chan] .= $r_flag;
+				// some magic :O
+				return true;
 			}
 			
 			if ( $mode == '+' )
 			{
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => $r_flag, 'chan' => $chan ) );
+					self::$already_set[$chan] .= $r_flag;
+					// some magic :O
 					return false;
 				}
+				
+				if ( strpos( self::$set[$target], '+' ) === false )
+					self::$set[$target] .= '+';
+				// ok, no + ?
 				
 				$chan_flag = database::fetch( $chan_flag_q );
 				// get the flag record
@@ -905,7 +904,9 @@ class cs_flags implements module
 				database::update( 'chans_flags', array( $param_field => $param ), array( 'channel', '=', $chan ) );	
 				// update the row with the new flags.
 				
-				return $r_flag;
+				self::$set[$chan] .= $r_flag;
+				// some magic :O
+				return true;
 			}
 			// the flag IS set, so now we check whether they are trying to -, or + it
 			// if they are trying to - it, go ahead, error if they are trying to + it.
@@ -916,6 +917,10 @@ class cs_flags implements module
 			
 			if ( $mode == '+' )
 			{
+				if ( strpos( self::$set[$target], '+' ) === false )
+					self::$set[$target] .= '+';
+				// ok, no + ?
+				
 				$chan_flag = database::fetch( $chan_flag_q );
 				// get the flag record
 				
@@ -926,14 +931,18 @@ class cs_flags implements module
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 					
-					return $r_flag;
+					self::$set[$chan] .= $r_flag;
+					// some magic :O
+					return true;
 				}
 				else
 				{
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.
 					
-					return $r_flag;
+					self::$set[$chan] .= $r_flag;
+					// some magic :O
+					return true;
 				}
 			}
 			// the flag ISNT set, so now we check whether they are trying to -, or + it
@@ -941,7 +950,8 @@ class cs_flags implements module
 			
 			if ( $mode == '-' )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => $r_flag, 'chan' => $chan ) );
+				self::$not_set[$chan] .= $r_flag;
+				// some magic :O
 				return false;
 			}
 		}

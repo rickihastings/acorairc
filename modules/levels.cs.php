@@ -986,17 +986,17 @@ class cs_levels implements module
 			$user_flag_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 			
 			if ( $mode == '-' )
-			{
-				if ( strpos( self::$set[$target], '-' ) === false )
-					self::$set[$target] .= '-';
-				// ok, no - ?
-				
+			{		
 				if ( $nick == $target && $r_flag == 'F' )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_BAD_FLAG, array( 'flag' => $flag ) );
 					return false;
 				}
 				// someone is trying to de-founder themselves?
+				
+				if ( strpos( self::$set[$target], '-' ) === false )
+					self::$set[$target] .= '-';
+				// ok, no - ?
 				
 				$user_flag = database::fetch( $user_flag_q );
 				// get the flag record

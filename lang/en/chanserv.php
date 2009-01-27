@@ -546,10 +546,8 @@ $help = (object) array(
 	// levels
 	'CS_FLAGS_NEEDS_PARAM'	=>	'{flag} requires a parameter to be set',
 	'CS_FLAGS_ALREADY_SET'	=>	'{flag} is already set on {chan}',
-	'CS_FLAGS_NOT_SET'		=>	'{chan} does not have {flag} set',
+	'CS_FLAGS_NOT_SET'		=>	'{flag} is not set on {chan}',
 	'CS_FLAGS_SET'			=>	'{flag} set on {chan}',
-	'CS_FLAGS_SET_PARAM'	=>	'{flag} set to {value} on {chan}',
-	'CS_FLAGS_SET_CHAN'		=>	'{nick} set flags {flag}',
 	'CS_FLAGS_INVALID_T'	=>	'The value for {flag} must contain a wildcard (*)',
 	'CS_FLAGS_INVALID_E'	=>	'The value for {flag} must be a valid email address',
 	'CS_FLAGS_INVALID_M'	=>	'The value for {flag} contains modes you are not allowed to lock',
