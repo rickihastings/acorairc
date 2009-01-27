@@ -370,7 +370,6 @@ $help = (object) array(
 	'NS_FLAGS_ALREADY_SET'	=>	'{flag} is already set on {target}',
 	'NS_FLAGS_NOT_SET'		=>	'{target} does not have {flag} set',
 	'NS_FLAGS_SET'			=>	'{flag} set on {target}',
-	'NS_FLAGS_SET_PARAM'	=>	'{flag} set to {value} on {target}',
 	'NS_FLAGS_INVALID_E'	=>	'The value for {flag} must be a valid email address',
 	'NS_FLAGS_CANT_UNSET'	=>	'You cannot unset {flag}',
 	'NS_FLAGS_UNKNOWN'		=>	'{flag} isn\'t a valid flag',

@@ -25,6 +25,10 @@ class ns_flags implements module
 	static public $p_flags;
 	// valid flags.
 	
+	static public $set;
+	static public $already_set;
+	static public $not_set;
+	
 	public function __construct() {}
 	// __construct, makes everyone happy.
 	
@@ -195,7 +199,28 @@ class ns_flags implements module
 				// -P the target in question
 			}
 			// ----------- -P ----------- //
-		}		
+		}
+		
+		if ( isset( self::$set[$nick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => $nick ) );
+			unset( self::$set[$nick] );
+		}
+		// send back the target stuff..
+		
+		if ( isset( self::$already_set[$nick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => $nick ) );
+			unset( self::$already_set[$nick] );
+		}
+		// send back the target stuff..
+		
+		if ( isset( self::$not_set[$nick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => $nick ) );
+			unset( self::$not_set[$nick] );
+		}
+		// send back the target stuff..			
 	}
 	
 	/*
@@ -347,7 +372,28 @@ class ns_flags implements module
 				// -P the target in question
 			}
 			// ----------- -P ----------- //
-		}		
+		}
+		
+		if ( isset( self::$set[$unick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$unick], 'target' => $unick ) );
+			unset( self::$set[$unick] );
+		}
+		// send back the target stuff..
+		
+		if ( isset( self::$already_set[$unick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$unick], 'target' => $unick ) );
+			unset( self::$already_set[$unick] );
+		}
+		// send back the target stuff..
+		
+		if ( isset( self::$not_set[$unick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$unick], 'target' => $unick ) );
+			unset( self::$not_set[$unick] );
+		}
+		// send back the target stuff..	
 	}
 	
 	/*
@@ -432,6 +478,10 @@ class ns_flags implements module
 			
 			if ( $mode == '-' )
 			{
+				if ( strpos( self::$set[$target], '-' ) === false )
+					self::$set[$target] .= '-';
+				// ok, no - ?
+				
 				$nick_flag = database::fetch( $nick_flag_q );
 				// get the flag record
 				
@@ -448,7 +498,8 @@ class ns_flags implements module
 					// update the row with the new flags.
 				}
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET, array( 'flag' => $flag, 'target' => $target ) );
+				self::$set[$target] .= $r_flag;
+				// some magic :O
 				return true;
 			}
 			
@@ -456,9 +507,14 @@ class ns_flags implements module
 			{
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => $r_flag, 'target' => $target ) );
+					self::$already_set[$target] .= $r_flag;
+					// some magic :O
 					return false;
 				}
+				
+				if ( strpos( self::$set[$target], '+' ) === false )
+					self::$set[$target] .= '+';
+				// ok, no + ?
 				
 				$nick_flag = database::fetch( $nick_flag_q );
 				// get the flag record
@@ -466,7 +522,8 @@ class ns_flags implements module
 				database::update( 'user_flags', array( $param_field => $param ), array( 'nickname', '=', $target ) );	
 				// update the row with the new flags.
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'target' => $target, 'value' => $param ) );
+				self::$set[$target] .= $r_flag;
+				// some magic :O
 				return true;
 			}
 			// the flag IS set, so now we check whether they are trying to -, or + it
@@ -478,6 +535,10 @@ class ns_flags implements module
 			
 			if ( $mode == '+' )
 			{
+				if ( strpos( self::$set[$target], '+' ) === false )
+					self::$set[$target] .= '+';
+				// ok, no + ?
+				
 				$nick_flag = database::fetch( $nick_flag_q );
 				// get the flag record
 				
@@ -488,7 +549,8 @@ class ns_flags implements module
 					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET, array( 'flag' => $flag, 'target' => $target ) );
+					self::$set[$target] .= $r_flag;
+					// some magic :O
 					return true;
 				}
 				else
@@ -496,7 +558,8 @@ class ns_flags implements module
 					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', $target ) );	
 					// update the row with the new flags.
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_SET_PARAM, array( 'flag' => $flag, 'target' => $target, 'value' => $param ) );
+					self::$set[$target] .= $r_flag;
+					// some magic :O
 					return true;
 				}
 			}
@@ -505,7 +568,8 @@ class ns_flags implements module
 			
 			if ( $mode == '-' )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => $r_flag, 'target' => $target ) );
+				self::$not_set[$target] .= $r_flag;
+				// some magic :O
 				return false;
 			}
 		}
