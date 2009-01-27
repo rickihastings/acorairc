@@ -454,8 +454,9 @@ class chanserv implements service
 	* $force - whether to check hostnames or not, defaults to true
 	* $ident - whether to check for identifications
 	* $return - whether to return the ban reason
+	* $or_check - whether to check for override
 	*/
-	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false )
+	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true )
 	{
 		if ( $ident && !$user = services::user_exists( $nick, true, array( 'id', 'display' ) ) )
 		{
@@ -471,7 +472,13 @@ class chanserv implements service
 		
 		while ( $chan_flags = database::fetch( $user_flags_q ) )
 		{
-			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) || core::$nicks[$nick]['override'] )
+			if ( $or_check && core::$nicks[$nick]['override'] )
+			{
+				return true;
+			}
+			// is override enabled for this user?
+			
+			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
 			{
 				foreach ( $flags as $flag )
 				{
