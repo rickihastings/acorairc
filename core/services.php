@@ -35,7 +35,7 @@ class services
 		else
 			$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );
 
-		if ( $user_q == 0 )
+		if ( database::num_rows( $user_q ) == 0 )
 			return false;
 		// chan isnt even registered.
 		

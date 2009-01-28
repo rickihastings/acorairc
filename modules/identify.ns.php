@@ -232,7 +232,7 @@ class ns_identify implements module
 			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
 			// get nick
 			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'secure', 'suspended' ) ) )
+			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
 			{
 				if ( $user->validated == 0 && $user->suspended == 0 )
 				{
@@ -273,7 +273,7 @@ class ns_identify implements module
 			ircd::on_user_logout( $nick );
 			// we remove the registered mode
 			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'secure', 'suspended' ) ) )
+			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
 			{
 				if ( $user->validated == 0 && $user->suspended == 0 )
 				{
@@ -342,9 +342,7 @@ class ns_identify implements module
 		if ( is_array( nickserv::$help->NS_REGISTERED_NICK ) )
 		{
 			foreach ( nickserv::$help->NS_REGISTERED_NICK as $line )
-			{
 				services::communicate( core::$config->nickserv->nick, $nick, $line );
-			}
 		}
 		else
 		{
