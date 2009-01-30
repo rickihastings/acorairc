@@ -222,14 +222,17 @@ class core
 						self::$network_time = $ircdata[2];
 					}
 					
-					self::$burst_time = microtime();
+					self::$burst_time = microtime( true );
 					// how long did the burst take?
 				}
 				// if we recieve a start burst, we also adopt the time given to us
 				
 				if ( ircd::on_end_burst( &$ircdata ) )
 				{
-					self::$burst_time = round( microtime() - self::$burst_time, 4 );
+					self::$burst_time = round( microtime( true ) - self::$burst_time, 4 );
+					if ( self::$burst_time[0] == '-' ) substr( self::$burst_time, 1 );
+					// nasty hack to get rid of minus values.. they are sometimes displayed
+					// i don't know why.. maybe on clock shifts..
 					// how long did the burst take?
 					
 					self::$end_burst = true;
