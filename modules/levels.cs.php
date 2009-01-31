@@ -615,10 +615,7 @@ class cs_levels implements module
 		
 		if ( isset( self::$set[$target] ) )
 		{
-			if ( $announce )
-				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.self::$set[$target].' on '.$target.'' );
-			else
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );	
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );	
 			// who do we notice?
 			unset( self::$set[$target] );
 		}

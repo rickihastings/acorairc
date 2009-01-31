@@ -565,10 +565,7 @@ class cs_flags implements module
 		
 		if ( isset( self::$set[$chan] ) )
 		{
-			if ( $announce )
-				ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' set flags '.self::$set[$chan].'' );
-			else
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
+			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
 			// who do we notice?
 			unset( self::$set[$chan] );
 		}
