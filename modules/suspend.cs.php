@@ -96,7 +96,6 @@ class cs_suspend implements module
 		{
 			$chan_info = array(
 				'channel' 		=> 	$chan,
-				'description' 	=> 	$desc,
 				'timestamp' 	=> 	core::$network_time,
 				'last_timestamp'=> 	core::$network_time,
 				'suspended' 	=> 	1,
@@ -104,7 +103,7 @@ class cs_suspend implements module
 			);
 			
 			database::insert( 'chans', $chan_info );
-			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => '' ) );
+			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => 'd', 'desc' => $reason ) );
 			// if the channel isn't registered, we register it, with a founder value of 0
 			// so we can check when it's unsuspended THAT if the founder value is 0, we'll
 			// just drop it as well, this way nobody actually gets the founder status.
@@ -152,7 +151,7 @@ class cs_suspend implements module
 		}
 		// make sure they've entered a channel
 		
-		if ( $channel = services::chan_exists( $chan, array( 'channel', 'founder', 'suspended' ) ) )
+		if ( $channel = services::chan_exists( $chan, array( 'channel', 'suspended' ) ) )
 		{
 			if ( $channel->suspended == 0 )
 			{
@@ -168,7 +167,7 @@ class cs_suspend implements module
 				database::delete( 'chans', array( 'channel', '=', $chan ) );
 				database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
 			}
-			// the channel has no founder, DROP it.
+			// the channel has no access records, drop it.
 		}
 		else
 		{
@@ -204,7 +203,7 @@ class cs_suspend implements module
 					if ( $channel->suspended == 1 )
 					{
 						if ( !core::$nicks[$nick]['ircop'] )
-							ircd::kick( core::$config->chanserv->nick, $user, $channel->channel, $channel->suspend_reason );
+							ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
 							// boot
 					}
 					// it's also suspended
