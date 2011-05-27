@@ -35,13 +35,13 @@ class ns_register implements module
 		modules::init_module( 'ns_register', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_register', 'help', &nickserv::$help->NS_HELP_REGISTER_1 );
-		nickserv::add_help( 'ns_register', 'help register', &nickserv::$help->NS_HELP_REGISTER_ALL );
+		nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_REGISTER_1 );
+		nickserv::add_help( 'ns_register', 'help register', nickserv::$help->NS_HELP_REGISTER_ALL );
 		
 		if ( core::$config->nickserv->force_validation )
 		{
-			nickserv::add_help( 'ns_register', 'help', &nickserv::$help->NS_HELP_CONFIRM_1 );
-			nickserv::add_help( 'ns_register', 'help confirm', &nickserv::$help->NS_HELP_CONFIRM_ALL );
+			nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_CONFIRM_1 );
+			nickserv::add_help( 'ns_register', 'help confirm', nickserv::$help->NS_HELP_CONFIRM_ALL );
 		}
 		// add the help
 		
@@ -66,28 +66,28 @@ class ns_register implements module
 		
 		if ( trim( $password ) == '' || trim( $email ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
 			return false;
 		}
 		// wrong syntax
 		
 		if ( strtolower( $password ) == strtolower( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_PASSWORD_NICK );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_NICK );
 			return false;
 		}
 		// are they using a reasonable password, eg. != their nick, lol.
 		
 		if ( services::valid_email( $email ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_EMAIL );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_EMAIL );
 			return false;
 		}
 		// is the email valid?
 		
 		if ( $user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ALREADY_REGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_REGISTERED );
 			return false;
 		}
 		// are we registered?
@@ -97,7 +97,7 @@ class ns_register implements module
 		
 		if ( database::num_rows( $check_e ) > 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_EMAIL_IN_USE );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_EMAIL_IN_USE );
 			return false;
 		}
 		// check if the email is in use.
@@ -162,11 +162,11 @@ You will then be able to identify with the password you chose by typing
 			@mail( $to, $subject, $message, $headers );
 			// let's send the email
 			
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_REQUESTED, array( 'email' => $email ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_REQUESTED, array( 'email' => $email ) );
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_REGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_REGISTERED );
 			core::alog( core::$config->nickserv->nick.': '.$nick.' registered by '.core::get_full_hostname( $nick ) );
 			// logchan
 			
@@ -188,14 +188,14 @@ You will then be able to identify with the password you chose by typing
 		
 		if ( trim( $code ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );
 			return false;
 		}
 		// wrong syntax
 		
 		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_UNREGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
 			return false;
 		}
 		// unregistered
@@ -204,11 +204,11 @@ You will then be able to identify with the password you chose by typing
 		
 		if ( database::num_rows( $code_array ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSCODE );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSCODE );
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_VALIDATED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_VALIDATED );
 			// let them know.
 			
 			database::update( 'users', array( 'validated' => 1 ), array( 'id', '=', $user->id ) );
@@ -229,7 +229,7 @@ You will then be able to identify with the password you chose by typing
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{		
 		return true;
 		// nothing to do here.

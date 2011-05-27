@@ -35,15 +35,15 @@ class os_shutdown implements module
 		modules::init_module( 'os_shutdown', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_shutdown', 'help', &operserv::$help->OS_HELP_SHUTDOWN_1 );
-		operserv::add_help( 'os_shutdown', 'help shutdown', &operserv::$help->OS_HELP_SHUTDOWN_ALL );
+		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_SHUTDOWN_1 );
+		operserv::add_help( 'os_shutdown', 'help shutdown', operserv::$help->OS_HELP_SHUTDOWN_ALL );
 		// add the help
 		
 		operserv::add_command( 'shutdown', 'os_shutdown', 'shutdown_command' );
 		// add the shutdown command
 		
-		operserv::add_help( 'os_shutdown', 'help', &operserv::$help->OS_HELP_RESTART_1 );
-		operserv::add_help( 'os_shutdown', 'help restart', &operserv::$help->OS_HELP_RESTART_ALL );
+		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_RESTART_1 );
+		operserv::add_help( 'os_shutdown', 'help restart', operserv::$help->OS_HELP_RESTART_ALL );
 		// add the help
 			
 		operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
@@ -78,7 +78,7 @@ class os_shutdown implements module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ACCESS_DENIED );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 		}
 	}
 	
@@ -144,7 +144,7 @@ class os_shutdown implements module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ACCESS_DENIED );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 		}
 	}
 	
@@ -154,7 +154,7 @@ class os_shutdown implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

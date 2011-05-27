@@ -35,8 +35,8 @@ class ns_list implements module
 		modules::init_module( 'ns_list', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_list', 'help', &nickserv::$help->NS_HELP_LIST_1, true );
-		nickserv::add_help( 'ns_list', 'help list', &nickserv::$help->NS_HELP_LIST_ALL, true );
+		nickserv::add_help( 'ns_list', 'help', nickserv::$help->NS_HELP_LIST_1, true );
+		nickserv::add_help( 'ns_list', 'help list', nickserv::$help->NS_HELP_LIST_ALL, true );
 		// add the help
 		
 		nickserv::add_command( 'list', 'ns_list', 'list_command' );
@@ -58,21 +58,21 @@ class ns_list implements module
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
 		
 		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
 		}
 		// invalid syntax
 		
 		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
 		}
 		// invalid syntax
@@ -84,13 +84,13 @@ class ns_list implements module
 		
 		if ( database::num_rows( $nicks ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
 			return false;
 		}
 		// no nicks?
 		
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_TOP );
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_TOP2 );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_TOP );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_TOP2 );
 		// top of list.
 		
 		while ( $user = database::fetch( $nicks ) )
@@ -115,11 +115,11 @@ class ns_list implements module
 				$info = $user->suspend_reason;
 			}
 			
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_ROW, array( 'nick' => $false_nick, 'info' => $info ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_ROW, array( 'nick' => $false_nick, 'info' => $info ) );
 		}
 		// loop through the nicks
 		
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $nicks ) == 0 ) ? 0 : database::num_rows( $nicks ), 'total' => $total ) );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $nicks ) == 0 ) ? 0 : database::num_rows( $nicks ), 'total' => $total ) );
 	}
 
 	/*
@@ -128,7 +128,7 @@ class ns_list implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

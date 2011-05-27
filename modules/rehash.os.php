@@ -35,8 +35,8 @@ class os_rehash implements module
 		modules::init_module( 'os_rehash', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_rehash', 'help', &operserv::$help->OS_HELP_REHASH_1 );
-		operserv::add_help( 'os_rehash', 'help rehash', &operserv::$help->OS_HELP_REHASH_ALL );
+		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1 );
+		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL );
 		// add the help
 		
 		operserv::add_command( 'rehash', 'os_rehash', 'rehash_command' );
@@ -139,7 +139,7 @@ class os_rehash implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

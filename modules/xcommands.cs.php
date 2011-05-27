@@ -34,75 +34,75 @@ class cs_xcommands implements module
 		modules::init_module( 'cs_xcommands', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help_fix( 'cs_xcommands', 'prefix', 'help commands', &chanserv::$help->CS_XCOMMANDS_PREFIX );
-		chanserv::add_help_fix( 'cs_xcommands', 'suffix', 'help commands', &chanserv::$help->CS_XCOMMANDS_SUFFIX );
-		chanserv::add_help( 'cs_xcommands', 'help', &chanserv::$help->CS_HELP_XCOMMANDS_1 );
+		chanserv::add_help_fix( 'cs_xcommands', 'prefix', 'help commands', chanserv::$help->CS_XCOMMANDS_PREFIX );
+		chanserv::add_help_fix( 'cs_xcommands', 'suffix', 'help commands', chanserv::$help->CS_XCOMMANDS_SUFFIX );
+		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_XCOMMANDS_1 );
 		
-		chanserv::add_help( 'cs_xcommands', 'help', &chanserv::$help->CS_HELP_CLEAR_1 );
+		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_CLEAR_1 );
 		// clear command
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_KICK_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_KICKBAN_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_BAN_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_UNBAN_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICK_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICKBAN_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_BAN_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_UNBAN_1 );
 		// add them to the "help commands" category
 		
-		chanserv::add_help( 'cs_xcommands', 'help clear', &chanserv::$help->CS_HELP_CLEAR_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help clear', chanserv::$help->CS_HELP_CLEAR_ALL );
 		// clear command
 		
-		chanserv::add_help( 'cs_xcommands', 'help kick', &chanserv::$help->CS_HELP_KICK_ALL );
-		chanserv::add_help( 'cs_xcommands', 'help kickban', &chanserv::$help->CS_HELP_KICK_ALL );
-		chanserv::add_help( 'cs_xcommands', 'help ban', &chanserv::$help->CS_HELP_BAN_ALL );
-		chanserv::add_help( 'cs_xcommands', 'help unban', &chanserv::$help->CS_HELP_BAN_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help kick', chanserv::$help->CS_HELP_KICK_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help kickban', chanserv::$help->CS_HELP_KICK_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help ban', chanserv::$help->CS_HELP_BAN_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help unban', chanserv::$help->CS_HELP_BAN_ALL );
 		// and add their seperate help docs
 		
 		if ( ircd::$owner )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_OWNER_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_DEOWNER_1 );
-			chanserv::add_help( 'cs_xcommands', 'help owner', &chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
-			chanserv::add_help( 'cs_xcommands', 'help deowner', &chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OWNER_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOWNER_1 );
+			chanserv::add_help( 'cs_xcommands', 'help owner', chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
+			chanserv::add_help( 'cs_xcommands', 'help deowner', chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
 		}
 		// add help for owner commands
 		
 		if ( ircd::$protect )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_PROTECT_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_DEPROTECT_1 );
-			chanserv::add_help( 'cs_xcommands', 'help protect', &chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
-			chanserv::add_help( 'cs_xcommands', 'help deprotect', &chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_PROTECT_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEPROTECT_1 );
+			chanserv::add_help( 'cs_xcommands', 'help protect', chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
+			chanserv::add_help( 'cs_xcommands', 'help deprotect', chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
 		}
 		// add help for protect commands
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_OP_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_DEOP_1 );
-		chanserv::add_help( 'cs_xcommands', 'help op', &chanserv::$help->CS_HELP_XCOMMANDS_OP );
-		chanserv::add_help( 'cs_xcommands', 'help deop', &chanserv::$help->CS_HELP_XCOMMANDS_OP );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OP_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOP_1 );
+		chanserv::add_help( 'cs_xcommands', 'help op', chanserv::$help->CS_HELP_XCOMMANDS_OP );
+		chanserv::add_help( 'cs_xcommands', 'help deop', chanserv::$help->CS_HELP_XCOMMANDS_OP );
 		// now op
 		
 		if ( ircd::$halfop )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_HALFOP_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_DEHALFOP_1 );
-			chanserv::add_help( 'cs_xcommands', 'help halfop', &chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
-			chanserv::add_help( 'cs_xcommands', 'help dehalfop', &chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_HALFOP_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEHALFOP_1 );
+			chanserv::add_help( 'cs_xcommands', 'help halfop', chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
+			chanserv::add_help( 'cs_xcommands', 'help dehalfop', chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
 		}
 		// halfop
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_VOICE_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_DEVOICE_1 );
-		chanserv::add_help( 'cs_xcommands', 'help voice', &chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
-		chanserv::add_help( 'cs_xcommands', 'help devoice', &chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_VOICE_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEVOICE_1 );
+		chanserv::add_help( 'cs_xcommands', 'help voice', chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
+		chanserv::add_help( 'cs_xcommands', 'help devoice', chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_MODE_1 );
-		chanserv::add_help( 'cs_xcommands', 'help mode', &chanserv::$help->CS_HELP_MODE_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_MODE_1 );
+		chanserv::add_help( 'cs_xcommands', 'help mode', chanserv::$help->CS_HELP_MODE_ALL );
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_SYNC_1 );
-		chanserv::add_help( 'cs_xcommands', 'help sync', &chanserv::$help->CS_HELP_SYNC_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_SYNC_1 );
+		chanserv::add_help( 'cs_xcommands', 'help sync', chanserv::$help->CS_HELP_SYNC_ALL );
 		// voice and mode & sync
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', &chanserv::$help->CS_HELP_TYPEMASK_1 );
-		chanserv::add_help( 'cs_xcommands', 'help typemask', &chanserv::$help->CS_HELP_TYPEMASK_ALL );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_TYPEMASK_1 );
+		chanserv::add_help( 'cs_xcommands', 'help typemask', chanserv::$help->CS_HELP_TYPEMASK_ALL );
 		// typemask
 		
 		chanserv::add_command( 'clear', 'cs_xcommands', 'clear_command' );
@@ -164,7 +164,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -234,7 +234,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -262,7 +262,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -274,7 +274,7 @@ class cs_xcommands implements module
 		}
 		else
 		{
-			$mode_queue = core::get_data_after( &$ircdata, 1 );
+			$mode_queue = core::get_data_after( $ircdata, 1 );
 			// get the mode queue
 			
 			if ( !core::$nicks[$nick]['ircop'] )
@@ -304,7 +304,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -335,7 +335,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -368,7 +368,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -399,7 +399,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -432,7 +432,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -463,7 +463,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -496,7 +496,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -527,7 +527,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -558,7 +558,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -589,7 +589,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -621,7 +621,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -630,7 +630,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.		
 		
-		$reason = core::get_data_after( &$ircdata, 2 );
+		$reason = core::get_data_after( $ircdata, 2 );
 					
 		ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 		// kick them with the reason
@@ -655,7 +655,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -664,7 +664,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.		
 		
-		$reason = core::get_data_after( &$ircdata, 2 );
+		$reason = core::get_data_after( $ircdata, 2 );
 		
 		if ( $user = core::search_nick( $ircdata[1] ) )
 		{
@@ -698,7 +698,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -733,7 +733,7 @@ class cs_xcommands implements module
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -751,7 +751,7 @@ class cs_xcommands implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// straight out of this function
@@ -771,7 +771,7 @@ class cs_xcommands implements module
 	{
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => $help ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => $help ) );
 			return false;
 			// wrong syntax
 		}
@@ -779,7 +779,7 @@ class cs_xcommands implements module
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.

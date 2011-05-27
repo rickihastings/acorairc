@@ -35,8 +35,8 @@ class os_ignore implements module
 		modules::init_module( 'os_ignore', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_ignore', 'help', &operserv::$help->OS_HELP_IGNORE_1 );
-		operserv::add_help( 'os_ignore', 'help ignore', &operserv::$help->OS_HELP_IGNORE_ALL );
+		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1 );
+		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL );
 		// add the help
 		
 		operserv::add_command( 'ignore', 'os_ignore', 'ignore_command' );
@@ -58,7 +58,7 @@ class os_ignore implements module
 		
 			if ( trim( $who ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
 				return false;
 			}
 			// wrong syntax
@@ -72,7 +72,7 @@ class os_ignore implements module
 		
 			if ( trim( $who ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
 				return false;
 			}
 			// wrong syntax
@@ -92,7 +92,7 @@ class os_ignore implements module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
 			// wrong syntax
 			return false;
 		}
@@ -104,7 +104,7 @@ class os_ignore implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module
@@ -124,7 +124,7 @@ class os_ignore implements module
 		
 		if ( services::is_root( $who ) && !services::is_root( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &operserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, operserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to drop a root?
@@ -136,13 +136,13 @@ class os_ignore implements module
 			// we need to check if it's a hostmask thats been written properly.
 			
 			database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' added '.$who.' to services ignore list' );
 			// as simple, as.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_EXISTS, array( 'nick' => $who ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_EXISTS, array( 'nick' => $who ) );
 			// already being ignored? :O NEVER!
 		}
 	}
@@ -165,13 +165,13 @@ class os_ignore implements module
 		if ( database::num_rows( $check_nick_q ) > 0 )
 		{
 			database::delete( 'ignored_users', array( 'who', '=', $who ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$who.' from the services ignore list' );
 			// as simple, as.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_NONE );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_NONE );
 			// empty list.
 		}
 	}
@@ -188,8 +188,8 @@ class os_ignore implements module
 		
 		if ( database::num_rows( $check_nick_q ) > 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_LIST_T2 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_T );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_T2 );
 			// t-o-l
 			
 			while ( $ignored = database::fetch( $check_nick_q ) )
@@ -204,13 +204,13 @@ class os_ignore implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_LIST, array( 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST, array( 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
 			}
 			// loop through the records
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_EMPTY );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_EMPTY );
 			// empty list.
 		}
 	}
@@ -224,7 +224,7 @@ class os_ignore implements module
 	static public function _clear_users( $nick )
 	{
 		database::delete( 'ignored_users' );
-		services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_IGNORE_CLEARED, array( 'users' => database::num_rows( $nicks_q ) ) );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_CLEARED, array( 'users' => database::num_rows( $nicks_q ) ) );
 		// list cleared.
 	}
 }

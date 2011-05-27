@@ -35,8 +35,8 @@ class os_stats implements module
 		modules::init_module( 'os_stats', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_stats', 'help', &operserv::$help->OS_HELP_STATS_1 );
-		operserv::add_help( 'os_stats', 'help stats', &operserv::$help->OS_HELP_STATS_ALL );
+		operserv::add_help( 'os_stats', 'help', operserv::$help->OS_HELP_STATS_1 );
+		operserv::add_help( 'os_stats', 'help stats', operserv::$help->OS_HELP_STATS_ALL );
 		// add the help
 		
 		operserv::add_command( 'stats', 'os_stats', 'stats_command' );
@@ -58,27 +58,27 @@ class os_stats implements module
 		
 		if ( strtolower( $type ) == 'uptime' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_1, array( 'time' => core::format_time( core::$uptime ) ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_2, array( 'memory' => core::get_size( memory_get_usage() ), 'real' => memory_get_usage() ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_3, array( 'memory' => core::get_size( core::$incoming ), 'real' => core::$incoming ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_4, array( 'memory' => core::get_size( core::$outgoing ), 'real' => core::$outgoing ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_5, array( 'lines' => core::$lines_processed ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_6, array( 'lines' => core::$lines_sent ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_U_7, array( 'time' => core::$burst_time.'s' ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_1, array( 'time' => core::format_time( core::$uptime ) ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_2, array( 'memory' => core::get_size( memory_get_usage() ), 'real' => memory_get_usage() ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_3, array( 'memory' => core::get_size( core::$incoming ), 'real' => core::$incoming ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_4, array( 'memory' => core::get_size( core::$outgoing ), 'real' => core::$outgoing ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_5, array( 'lines' => core::$lines_processed ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_6, array( 'lines' => core::$lines_sent ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_7, array( 'time' => core::$burst_time.'s' ) );
 			// uptime info, etc.
 		}
 		elseif ( strtolower( $type ) == 'network' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_1, array( 'network' => core::$config->server->network_name ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_2, array( 'version' => core::$version ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_3, array( 'users' => core::$max_users ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_4, array( 'users' => count( core::$nicks ) ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_N_5, array( 'chans' => count( core::$chans ) ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_1, array( 'network' => core::$config->server->network_name ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_2, array( 'version' => core::$version ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_3, array( 'users' => core::$max_users ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_4, array( 'users' => count( core::$nicks ) ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_5, array( 'chans' => count( core::$chans ) ) );
 			// network info.
 		}
 		elseif ( strtolower( $type ) == 'opers' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_1 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_1 );
 			
 			foreach ( core::$nicks as $user => $info )
 			{
@@ -95,13 +95,13 @@ class os_stats implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_STATS_O_2, array( 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_2, array( 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
 			}
 			// opers info.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'STATS' ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'STATS' ) );
 			return false;
 			// wrong syntax
 		}
@@ -114,7 +114,7 @@ class os_stats implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

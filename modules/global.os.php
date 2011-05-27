@@ -42,8 +42,8 @@ class os_global implements module
 		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_global', 'help', &operserv::$help->OS_HELP_GLOBAL_1 );
-		operserv::add_help( 'os_global', 'help global', &operserv::$help->OS_HELP_GLOBAL_ALL );
+		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1 );
+		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL );
 		// add the help
 		
 		operserv::add_command( 'global', 'os_global', 'global_command' );
@@ -90,18 +90,18 @@ class os_global implements module
 	static public function global_command( $nick, $ircdata = array() )
 	{
 		$mask = $ircdata[0];
-		$message = core::get_data_after( &$ircdata, 1 );
+		$message = core::get_data_after( $ircdata, 1 );
 		
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
 			return false;
 		}
 		// are they sending a message?
 		
 		if ( strpos( $mask, '@' ) === false )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_GLOBAL_INVALID );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_GLOBAL_INVALID );
 			return false;	
 		}
 		else
@@ -132,18 +132,18 @@ class os_global implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && ircd::on_connect( &$ircdata ) )
+		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && ircd::on_connect( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
+			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
 			// get nick
 			
 			ircd::notice( core::$config->global->nick, $nick, 'Services are currently running in debug mode, please be careful when sending passwords.' );
 			// give them a quick notice that people can see their passwords.
 		}
 		
-		if ( ircd::on_chan_create( &$ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chan

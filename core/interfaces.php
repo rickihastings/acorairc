@@ -100,11 +100,11 @@ interface service
 {
 	
 	public function main( $ircdata, $startup = false );
-	static public function add_help_fix( $module, $what, $command, &$help );
-	static public function add_help( $module, $command, &$help, $oper_help = false );
-	static public function get_help( &$nick, &$command );
+	static public function add_help_fix( $module, $what, $command, $help );
+	static public function add_help( $module, $command, $help, $oper_help = false );
+	static public function get_help( $nick, $command );
 	static public function add_command( $command, $class, $function );
-	static public function get_command( &$nick, &$command );
+	static public function get_command( $nick, $command );
 	// main functions
 }
 

@@ -41,12 +41,12 @@ class cs_fantasy implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_msg( &$ircdata ) )
+		if ( ircd::on_msg( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$chan = core::get_chan( &$ircdata, 2 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$chan = core::get_chan( $ircdata, 2 );
 			
 			//if ( core::search_nick( $chan ) !== false )
 				//return false;
@@ -61,12 +61,12 @@ class cs_fantasy implements module
 			if ( chanserv::check_flags( $chan, array( 'F' ) ) === false ) return false;
 			// we gotta check if the channel has fantasy commands enabled first
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'help', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'help', core::$config->chanserv->nick ) )
 			{
 				if ( ircd::$halfop )
-					$help = &chanserv::$help->CS_HELP_FANTASY_ALL1;
+					$help = chanserv::$help->CS_HELP_FANTASY_ALL1;
 				else
-					$help = &chanserv::$help->CS_HELP_FANTASY_ALL2;
+					$help = chanserv::$help->CS_HELP_FANTASY_ALL2;
 				
 				foreach ( $help as $line )
 				{
@@ -75,7 +75,7 @@ class cs_fantasy implements module
 			}
 			// !help command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'owner', core::$config->chanserv->nick ) && ircd::$owner )
+			if ( commands::on_fantasy_cmd( $ircdata, 'owner', core::$config->chanserv->nick ) && ircd::$owner )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -89,7 +89,7 @@ class cs_fantasy implements module
 			}
 			// !owner command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'deowner', core::$config->chanserv->nick ) && ircd::$owner )
+			if ( commands::on_fantasy_cmd( $ircdata, 'deowner', core::$config->chanserv->nick ) && ircd::$owner )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -103,7 +103,7 @@ class cs_fantasy implements module
 			}
 			// !deowner command
 						
-			if ( commands::on_fantasy_cmd( &$ircdata, 'protect', core::$config->chanserv->nick ) && ircd::$protect )
+			if ( commands::on_fantasy_cmd( $ircdata, 'protect', core::$config->chanserv->nick ) && ircd::$protect )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -117,7 +117,7 @@ class cs_fantasy implements module
 			}
 			// !protect command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'deprotect', core::$config->chanserv->nick ) && ircd::$protect )
+			if ( commands::on_fantasy_cmd( $ircdata, 'deprotect', core::$config->chanserv->nick ) && ircd::$protect )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				if ( strtolower( $ircdata[4] ) == strtolower( core::$config->chanserv->nick ) ) return false;
@@ -132,7 +132,7 @@ class cs_fantasy implements module
 			}
 			// !protect command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'op', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'op', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -146,7 +146,7 @@ class cs_fantasy implements module
 			}
 			// !op command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'deop', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'deop', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				if ( strtolower( $ircdata[4] ) == strtolower( core::$config->chanserv->nick ) ) return false;
@@ -161,7 +161,7 @@ class cs_fantasy implements module
 			}
 			// !deop command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'halfop', core::$config->chanserv->nick ) && ircd::$halfop )
+			if ( commands::on_fantasy_cmd( $ircdata, 'halfop', core::$config->chanserv->nick ) && ircd::$halfop )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -175,7 +175,7 @@ class cs_fantasy implements module
 			}
 			// !hop command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'dehalfop', core::$config->chanserv->nick ) && ircd::$halfop )
+			if ( commands::on_fantasy_cmd( $ircdata, 'dehalfop', core::$config->chanserv->nick ) && ircd::$halfop )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				if ( strtolower( $ircdata[4] ) == strtolower( core::$config->chanserv->nick ) ) return false;
@@ -190,7 +190,7 @@ class cs_fantasy implements module
 			}
 			// !dehop command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'voice', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'voice', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -204,7 +204,7 @@ class cs_fantasy implements module
 			}
 			// !voice command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'devoice', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'devoice', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
 				
@@ -218,7 +218,7 @@ class cs_fantasy implements module
 			}
 			// !devoice command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'topic', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'topic', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'F' ) ) === false ) return false;
 				
@@ -229,7 +229,7 @@ class cs_fantasy implements module
 					
 					if ( $topicmask != null )
 					{
-						$new_topic = core::get_data_after( &$ircdata, 4 );
+						$new_topic = core::get_data_after( $ircdata, 4 );
 						$new_topic = str_replace( ' *', ' '.$new_topic, $topicmask );
 						$new_topic = str_replace( '\*', '*', $new_topic );
 							
@@ -239,7 +239,7 @@ class cs_fantasy implements module
 					// if there is a topicmask set?
 					else
 					{
-						$new_topic = trim( core::get_data_after( &$ircdata, 4 ) );
+						$new_topic = trim( core::get_data_after( $ircdata, 4 ) );
 							
 						ircd::topic( core::$config->chanserv->nick, $channel->channel, $new_topic );
 						database::update( 'chans', array( 'topic' => $new_topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
@@ -250,13 +250,13 @@ class cs_fantasy implements module
 			}
 			// !topic command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'mode', core::$config->chanserv->nick ) || commands::on_fantasy_cmd( &$ircdata, 'm', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'mode', core::$config->chanserv->nick ) || commands::on_fantasy_cmd( $ircdata, 'm', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'F' ) ) === false ) return false;
 				
 				if ( isset( $ircdata[4] ) )
 				{
-					$mode_queue = core::get_data_after( &$ircdata, 4 );
+					$mode_queue = core::get_data_after( $ircdata, 4 );
 					// get the mode queue
 						
 					if ( !core::$nicks[$nick]['ircop'] )
@@ -270,7 +270,7 @@ class cs_fantasy implements module
 			}
 			// !mode command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'kick', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'kick', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
@@ -283,7 +283,7 @@ class cs_fantasy implements module
 					
 					if ( isset( $ircdata[5] ) )
 					{
-						$reason = core::get_data_after( &$ircdata, 5 );
+						$reason = core::get_data_after( $ircdata, 5 );
 						
 						ircd::kick( core::$config->chanserv->nick, $ircdata[4], $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 						// kick them with the reason
@@ -298,7 +298,7 @@ class cs_fantasy implements module
 			}
 			// !kick command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'kickban', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'kickban', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
@@ -315,7 +315,7 @@ class cs_fantasy implements module
 						
 						if ( isset( $ircdata[5] ) )
 						{
-							$reason = core::get_data_after( &$ircdata, 5 );
+							$reason = core::get_data_after( $ircdata, 5 );
 							
 							ircd::kick( core::$config->chanserv->nick, $ircdata[4], $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 							// kick them with the reason
@@ -336,7 +336,7 @@ class cs_fantasy implements module
 			}
 			// !ban command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'ban', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'ban', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
@@ -356,7 +356,7 @@ class cs_fantasy implements module
 			}
 			// !ban command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'unban', core::$config->chanserv->nick ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'unban', core::$config->chanserv->nick ) )
 			{
 				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
 				
@@ -371,7 +371,7 @@ class cs_fantasy implements module
 			}
 			// !unban command
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'flags', core::$config->chanserv->nick ) && isset( modules::$list['cs_flags'] ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'flags', core::$config->chanserv->nick ) && isset( modules::$list['cs_flags'] ) )
 			{
 				$n_ircdata = $ircdata;
 				unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
@@ -386,7 +386,7 @@ class cs_fantasy implements module
 			}
 			// !flags command (experimental)
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'levels', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'levels', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
 			{
 				$n_ircdata = $ircdata;
 				unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
@@ -401,7 +401,7 @@ class cs_fantasy implements module
 			}
 			// !levels command (experimental)
 			
-			if ( commands::on_fantasy_cmd( &$ircdata, 'sync', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
+			if ( commands::on_fantasy_cmd( $ircdata, 'sync', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
 			{
 				cs_levels::on_create( core::$chans[$chan]['users'], $channel );
 				// execute on_create, cause we just treat it as that

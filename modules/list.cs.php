@@ -35,8 +35,8 @@ class cs_list implements module
 		modules::init_module( 'cs_list', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_list', 'help', &chanserv::$help->CS_HELP_LIST_1, true );
-		chanserv::add_help( 'cs_list', 'help list', &chanserv::$help->CS_HELP_LIST_ALL, true );
+		chanserv::add_help( 'cs_list', 'help', chanserv::$help->CS_HELP_LIST_1, true );
+		chanserv::add_help( 'cs_list', 'help list', chanserv::$help->CS_HELP_LIST_ALL, true );
 		// add the help
 		
 		chanserv::add_command( 'list', 'cs_list', 'list_command' );
@@ -58,21 +58,21 @@ class cs_list implements module
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
 		
 		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
 			return false;
 		}
 		// invalid syntax
 		
 		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
 		}
 		// invalid syntax
@@ -84,13 +84,13 @@ class cs_list implements module
 		
 		if ( database::num_rows( $chans ) == 0 )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
 			return false;
 		}
 		// no channels?
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_TOP );
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_TOP2 );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_TOP );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_TOP2 );
 		// top of the list
 		
 		while ( $channel = database::fetch( $chans ) )
@@ -111,11 +111,11 @@ class cs_list implements module
 				$info = $channel->suspend_reason;
 			// suspend reason, or description?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_ROW, array( 'chan' => $false_chan, 'info' => $info ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_ROW, array( 'chan' => $false_chan, 'info' => $info ) );
 		}
 		// loop through the channels
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $chans ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $chans ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
 	}
 
 	/*
@@ -124,7 +124,7 @@ class cs_list implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

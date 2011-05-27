@@ -29,7 +29,7 @@ class nickserv implements service
 	public function __construct()
 	{
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/nickserv.php' );
-		self::$help = &$help;
+		self::$help = $help;
 		
 		if ( isset( core::$config->nickserv ) )
 		{
@@ -57,21 +57,21 @@ class nickserv implements service
 	* @params
 	* $ircdata - ..
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{			
 		foreach ( modules::$list as $module => $data )
 		{
 			if ( $data['type'] == 'nickserv' )
 			{
-				modules::$list[$module]['class']->main( &$ircdata, $startup );
+				modules::$list[$module]['class']->main( $ircdata, $startup );
 				// loop through the modules for nickserv.
 			}
 		}
 		
-		if ( ircd::on_msg( &$ircdata, core::$config->nickserv->nick ) )
+		if ( ircd::on_msg( $ircdata, core::$config->nickserv->nick ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$command = substr( core::get_data_after( &$ircdata, 3 ), 1 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			self::get_command( $nick, $command );
@@ -79,9 +79,9 @@ class nickserv implements service
 		// this is what we use to handle command listens
 		// should be quite epic.
 		
-		if ( ircd::on_mode( &$ircdata ) && core::$config->server->help_chan )
+		if ( ircd::on_mode( $ircdata ) && core::$config->server->help_chan )
 		{
-			$chan = core::get_chan( &$ircdata, 2 );
+			$chan = core::get_chan( $ircdata, 2 );
 			
 			if ( $chan == strtolower( core::$config->server->help_chan ) )
 			{
@@ -100,7 +100,7 @@ class nickserv implements service
 		}
 		// here we deal with giving umode +h to ops :D
 		
-		if ( ircd::on_chan_create( &$ircdata ) && core::$config->server->help_chan )
+		if ( ircd::on_chan_create( $ircdata ) && core::$config->server->help_chan )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chans
@@ -230,9 +230,9 @@ class nickserv implements service
 	* $module - The name of the module.
 	* $help - The prefix to add.
 	*/
-	static public function add_help_fix( $module, $what, $command, &$help )
+	static public function add_help_fix( $module, $what, $command, $help )
 	{
-		commands::add_help_fix( 'nickserv', $module, $what, $command, &$help );
+		commands::add_help_fix( 'nickserv', $module, $what, $command, $help );
 	}
 	
 	/*
@@ -243,9 +243,9 @@ class nickserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, &$help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $oper_help = false )
 	{
-		commands::add_help( 'nickserv', $module, $command, &$help, $oper_help );
+		commands::add_help( 'nickserv', $module, $command, $help, $oper_help );
 	}
 	
 	/*
@@ -255,9 +255,9 @@ class nickserv implements service
 	* $nick - Who to send the help too?
 	* $command - The command to get the help for.
 	*/
-	static public function get_help( &$nick, &$command )
+	static public function get_help( $nick, $command )
 	{
-		commands::get_help( 'nickserv', &$nick, &$command );
+		commands::get_help( 'nickserv', $nick, $command );
 	}
 	
 	/*
@@ -280,9 +280,9 @@ class nickserv implements service
 	* $nick - The nick requesting the command
 	* $command - The command to hook to
 	*/
-	static public function get_command( &$nick, &$command )
+	static public function get_command( $nick, $command )
 	{
-		commands::get_command( 'nickserv', &$nick, &$command );
+		commands::get_command( 'nickserv', $nick, $command );
 	}
 }
 

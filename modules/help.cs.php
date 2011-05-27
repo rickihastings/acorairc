@@ -34,8 +34,8 @@ class cs_help implements module
 		modules::init_module( 'cs_help', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'static' );
 		// these are standard in module constructors
 		
-		chanserv::add_help_fix( 'cs_help', 'prefix', 'help', &chanserv::$help->CS_HELP_PREFIX );
-		chanserv::add_help_fix( 'cs_help', 'suffix', 'help', &chanserv::$help->CS_HELP_SUFFIX );
+		chanserv::add_help_fix( 'cs_help', 'prefix', 'help', chanserv::$help->CS_HELP_PREFIX );
+		chanserv::add_help_fix( 'cs_help', 'suffix', 'help', chanserv::$help->CS_HELP_SUFFIX );
 		// add teh help docs
 	}
 	
@@ -45,12 +45,12 @@ class cs_help implements module
 	* @params
 	* $ircdata - ''
 	*/
-    public function main( &$ircdata, $startup = false )
+    public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_msg( &$ircdata, core::$config->chanserv->nick ) )
+		if ( ircd::on_msg( $ircdata, core::$config->chanserv->nick ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$query = substr( core::get_data_after( &$ircdata, 3 ), 1 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$query = substr( core::get_data_after( $ircdata, 3 ), 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			$query = strtolower( $query );
 			

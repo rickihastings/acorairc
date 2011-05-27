@@ -35,10 +35,10 @@ class ns_suspend implements module
 		modules::init_module( 'ns_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_suspend', 'help', &nickserv::$help->NS_HELP_SUSPEND_1, true );
-		nickserv::add_help( 'ns_suspend', 'help', &nickserv::$help->NS_HELP_UNSUSPEND_1, true );
-		nickserv::add_help( 'ns_suspend', 'help suspend', &nickserv::$help->NS_HELP_SUSPEND_ALL, true );
-		nickserv::add_help( 'ns_suspend', 'help unsuspend', &nickserv::$help->NS_HELP_UNSUSPEND_ALL, true );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, true );
+		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, true );
+		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, true );
 		// add the help
 		
 		nickserv::add_command( 'suspend', 'ns_suspend', 'suspend_command' );
@@ -55,21 +55,21 @@ class ns_suspend implements module
 	*/
 	static public function suspend_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( &$ircdata, 0 );
-		$reason = core::get_data_after( &$ircdata, 1 );
+		$unick = core::get_nick( $ircdata, 0 );
+		$reason = core::get_data_after( $ircdata, 1 );
 		$user_info = array();
 		// get the nick etc.
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
 		
 		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to drop a root?
@@ -81,7 +81,7 @@ class ns_suspend implements module
 		{
 			if ( $user->suspended == 1 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_2, array( 'nick' => $unick ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_2, array( 'nick' => $unick ) );
 				return false;
 				// channel is already suspended lol
 			}
@@ -108,7 +108,7 @@ class ns_suspend implements module
 			// insert it into the database.
 		}
 		
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
 		core::alog( core::$config->nickserv->nick.': '.$nick.' SUSPENDED '.$unick.' with the reason: '.$reason );
 		ircd::globops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
 		
@@ -116,8 +116,8 @@ class ns_suspend implements module
 		{
 			$random_nick = 'Unknown'.rand( 10000, 99999 );
 			
-			services::communicate( core::$config->nickserv->nick, $unick, &nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
-			services::communicate( core::$config->nickserv->nick, $unick, &nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
 			ircd::svsnick( $unick, $random_nick, core::$network_time );
 		}
 		// is the nick in use? we need to force change it.
@@ -132,12 +132,12 @@ class ns_suspend implements module
 	*/
 	static public function unsuspend_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( &$ircdata, 0 );
+		$unick = core::get_nick( $ircdata, 0 );
 		// get the nick etc.
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
@@ -146,7 +146,7 @@ class ns_suspend implements module
 		{
 			if ( $user->suspended == 0 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
 				return false;
 			}
 			// nick isn't suspended
@@ -161,12 +161,12 @@ class ns_suspend implements module
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
 			return false;
 		}
 		// nick isn't even registered.
 		
-		services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
 		core::alog( core::$config->nickserv->nick.': '.$nick.' UNSUSPENDED '.$unick );
 		ircd::globops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
 		// oh well, was fun while it lasted eh?
@@ -179,11 +179,11 @@ class ns_suspend implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_connect( &$ircdata ) )
+		if ( ircd::on_connect( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
+			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'suspended' ) ) )
 			{
@@ -191,8 +191,8 @@ class ns_suspend implements module
 				{
 					$random_nick = 'Unknown'.rand( 10000, 99999 );
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
 					ircd::svsnick( $nick, $random_nick, core::$network_time );
 				}
 			}
@@ -200,7 +200,7 @@ class ns_suspend implements module
 		}
 		// trigger on connect
 		
-		if ( ircd::on_nick_change( &$ircdata ) )
+		if ( ircd::on_nick_change( $ircdata ) )
 		{
 			$nick = core::get_nick( $ircdata, 2 );
 			// get the nicknames
@@ -211,8 +211,8 @@ class ns_suspend implements module
 				{
 					$random_nick = 'Unknown'.rand( 10000, 99999 );
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
 					ircd::svsnick( $nick, $random_nick, core::$network_time );
 				}
 			}

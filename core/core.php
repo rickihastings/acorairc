@@ -182,7 +182,7 @@ class core
 			}
 			// this is for normal data, eg. post burst.
 				
-			if ( $raw = stream_get_line( self::$socket, 4092, "\r\n" ) )
+			if ( $raw = stream_get_line( self::$socket, 4092, "\n" ) )
 			{
 				$raw = trim( $raw );
 				$ircdata = explode( ' ', $raw );
@@ -205,6 +205,7 @@ class core
 					self::$capab_start = false;
 					
 					$this->boot_server();
+
 				}
 				// we need to respectivly wait for capab end
 				// before we're suppost to boot everything
@@ -217,7 +218,7 @@ class core
 				{
 					self::$end_burst = false;
 					
-					if ( self::$config->server->ircd == 'inspircd12' )
+					if ( strstr(core::$config->server->ircd, 'inspircd') )
 					{
 						self::$network_time = $ircdata[2];
 					}
@@ -564,7 +565,7 @@ class core
 	{
 		foreach ( self::$chans as $chan => $data )
 		{
-			if ( count( self::$chans[$chan]['users'] ) == 0 || ( self::$config->server->ircd == 'inspircd12' && !strstr( self::$chans[$chan]['modes'], 'P' ) ) ) 
+			if ( count( self::$chans[$chan]['users'] ) == 0 || ( strstr(core::$config->server->ircd, 'inspircd') && !strstr( self::$chans[$chan]['modes'], 'P' ) ) ) 
 				unset( self::$chans[$chan] );
 		}
 	}

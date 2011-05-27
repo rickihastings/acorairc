@@ -42,13 +42,13 @@ class cs_levels implements module
 		modules::init_module( 'cs_levels', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_levels', 'help', &chanserv::$help->CS_HELP_LEVELS_1 );
+		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1 );
 		// add the help
 		
 		if ( ircd::$halfop ) 
-			chanserv::add_help( 'cs_levels', 'help levels', &chanserv::$help->CS_HELP_LEVELS_ALL );
+			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL );
 		else 
-			chanserv::add_help( 'cs_levels', 'help levels', &chanserv::$help->CS_HELP_LEVELS_ALL2 );
+			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL2 );
 		// if we have halfop enabled the help we add is different.
 		
 		chanserv::add_command( 'levels', 'cs_levels', 'levels_command' );
@@ -80,14 +80,14 @@ class cs_levels implements module
 	*/
 	static public function levels_command( $nick, $ircdata = array(), $announce = false )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 0 );
 		$target = $ircdata[2];
 		$flags = $ircdata[1];
 		// get the channel.
 		
 		if ( $target == '' && $flags == '' && chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
 			// start of flag list
 			
 			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
@@ -114,7 +114,7 @@ class cs_levels implements module
 				else
 					$extra = '';
 				
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'reason' => $extra ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'reason' => $extra ) );
 				// show the flag
 			}
 			// loop through them
@@ -126,14 +126,14 @@ class cs_levels implements module
 		
 		if ( $target == '' || $flags == '' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LEVELS' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LEVELS' ) );
 			return false;
 		}
 		// missing params?
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.
@@ -143,7 +143,7 @@ class cs_levels implements module
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_UNKNOWN, array( 'flag' => $flag ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_UNKNOWN, array( 'flag' => $flag ) );
 				return false;
 			}
 			// flag is invalid.
@@ -161,7 +161,7 @@ class cs_levels implements module
 		{
 			if ( !$user = services::user_exists( $target, false, array( 'id', 'display' ) ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
 				return false;
 			}
 			// they aint even identified..
@@ -191,7 +191,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -206,7 +206,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -221,7 +221,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -236,7 +236,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -251,7 +251,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -266,7 +266,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -281,7 +281,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -296,7 +296,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -311,7 +311,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -326,7 +326,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -341,7 +341,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -356,7 +356,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -369,13 +369,13 @@ class cs_levels implements module
 			// ----------- +b ----------- //
 			elseif ( $flag == 'b' )
 			{
-				$reason = core::get_data_after( &$ircdata, 3 );
+				$reason = core::get_data_after( $ircdata, 3 );
 				$reason = ( $reason == '' ) ? 'No reason' : $reason;
 				// grab the reason
 				
 				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -414,7 +414,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -429,7 +429,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -444,7 +444,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -459,7 +459,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -474,7 +474,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -489,7 +489,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -504,7 +504,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -519,7 +519,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -534,7 +534,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -549,7 +549,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -564,7 +564,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -579,7 +579,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -594,7 +594,7 @@ class cs_levels implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -615,7 +615,7 @@ class cs_levels implements module
 		
 		if ( isset( self::$set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );	
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );	
 			// who do we notice?
 			unset( self::$set[$target] );
 		}
@@ -623,14 +623,14 @@ class cs_levels implements module
 		
 		if ( isset( self::$already_set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => self::$already_set[$target], 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => self::$already_set[$target], 'chan' => $chan ) );
 			unset( self::$already_set[$target] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => self::$not_set[$target], 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => self::$not_set[$target], 'chan' => $chan ) );
 			unset( self::$not_set[$target] );
 		}
 		// send back the target stuff..
@@ -642,9 +642,9 @@ class cs_levels implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_chan_create( &$ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// the chans
@@ -667,9 +667,9 @@ class cs_levels implements module
 		}
 		// we give out the nessicary access when a channel is created :)
 		
-		if ( ircd::on_join( &$ircdata ) )
+		if ( ircd::on_join( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			$chans = explode( ',', $ircdata[2] );
 			// get the channel & nick
 			
@@ -986,7 +986,7 @@ class cs_levels implements module
 			{		
 				if ( $nick == $target && $r_flag == 'F' )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_LEVELS_BAD_FLAG, array( 'flag' => $flag ) );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_BAD_FLAG, array( 'flag' => $flag ) );
 					return false;
 				}
 				// someone is trying to de-founder themselves?

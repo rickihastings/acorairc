@@ -35,8 +35,8 @@ class os_logonnews implements module
 		modules::init_module( 'os_logonnews', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_logonnews', 'help', &operserv::$help->OS_HELP_LOGONNEWS_1 );
-		operserv::add_help( 'os_logonnews', 'help logonnews', &operserv::$help->OS_HELP_LOGONNEWS_ALL );
+		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1 );
+		operserv::add_help( 'os_logonnews', 'help logonnews', operserv::$help->OS_HELP_LOGONNEWS_ALL );
 		// add the help
 		
 		operserv::add_command( 'logonnews', 'os_logonnews', 'logonnews_command' );
@@ -55,11 +55,11 @@ class os_logonnews implements module
 		if ( strtolower( $ircdata[0] ) == 'add' )
 		{
 			$title = $ircdata[1];
-			$text = core::get_data_after( &$ircdata, 2 );
+			$text = core::get_data_after( $ircdata, 2 );
 			
 			if ( trim( $title ) == '' || trim( $text ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
 				// wrong syntax
 				return false;
 			}
@@ -73,7 +73,7 @@ class os_logonnews implements module
 			
 			if ( trim( $title ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
 				// wrong syntax
 				return false;
 			}
@@ -88,7 +88,7 @@ class os_logonnews implements module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
 			// wrong syntax
 			return false;
 		}
@@ -100,7 +100,7 @@ class os_logonnews implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		if ( $startup )
 		{
@@ -109,9 +109,9 @@ class os_logonnews implements module
 		// we're booting, fuck sending messages to everyone, they don't want to see
 		// it if it's just a restart, and we don't want to waste the resources on it.
 		
-		if ( ircd::on_connect( &$ircdata ) )
+		if ( ircd::on_connect( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
+			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
 			
 			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ), array( 0 => 3 ) );
 			// get our news
@@ -119,17 +119,17 @@ class os_logonnews implements module
 			if ( database::num_rows( $get_news ) > 0 )
 			{
 				if ( isset( operserv::$help->OS_LOGON_START ) )
-					services::communicate( core::$config->global->nick, $nick, &operserv::$help->OS_LOGON_START );
+					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_START );
 				
 				while ( $news = database::fetch( $get_news ) )
 				{
-					services::communicate( core::$config->global->nick, $nick, &operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-					services::communicate( core::$config->global->nick, $nick, &operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
 				}
 				// loop through the news
 				
 				if ( isset( operserv::$help->OS_LOGON_END ) )
-					services::communicate( core::$config->global->nick, $nick, &operserv::$help->OS_LOGON_END );
+					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_END );
 			}
 			// there is news! epic
 		}
@@ -151,13 +151,13 @@ class os_logonnews implements module
 		if ( database::num_rows( $check ) == 0 )
 		{
 			database::insert( 'logon_news', array( 'nick' => $nick, 'time' => core::$network_time, 'title' => $title, 'message' => $text ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_ADD );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_ADD );
 			core::alog( core::$config->operserv->nick.': '.$nick.' added a logon news message entitled '.$title );
 			// as simple, as.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_EXISTS );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_EXISTS );
 		}
 		// let's check if an article with a similar title exists.
 	}
@@ -176,13 +176,13 @@ class os_logonnews implements module
 		if ( database::num_rows( $check ) > 0 )
 		{
 			database::delete( 'logon_news', array( 'title', '=', $title ) );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$title.' from logonnews' );
 			// as simple, as.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_NONE );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_NONE );
 		}
 		// let's check if we can find what they are lookin phowar
 	}
@@ -202,14 +202,14 @@ class os_logonnews implements module
 		{
 			while ( $news = database::fetch( $get_news ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
 			}
 			// loop through the news
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_LOGONNEWS_EMPTY );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_EMPTY );
 		}
 		// there is news! epic
 	}

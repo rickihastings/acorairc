@@ -35,7 +35,7 @@ class mode
 		{
 			if ( $mode == '+' || $mode == '-' ) continue;
 			
-			if ( strpos( $ircdata::$modes, $mode ) === false )
+			if ( strpos( $ircdata->modes, $mode ) === false )
 			{
 				$first_part[0] = str_replace( $mode, '', $first_part[0] );
 				unset( $first_part[$index] );
@@ -69,7 +69,7 @@ class mode
 		
 		if ( strstr( $modes, ' ' ) != false )
 		{
-			$params = split( ' ', $modes );
+			$params = explode( ' ', $modes );
 			// split the space
 			
 			$modes = $params[0];

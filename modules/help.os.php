@@ -34,8 +34,8 @@ class os_help implements module
 		modules::init_module( 'os_help', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help_fix( 'os_help', 'prefix', 'help', &operserv::$help->OS_HELP_PREFIX );
-		operserv::add_help_fix( 'os_help', 'suffix', 'help', &operserv::$help->OS_HELP_SUFFIX );
+		operserv::add_help_fix( 'os_help', 'prefix', 'help', operserv::$help->OS_HELP_PREFIX );
+		operserv::add_help_fix( 'os_help', 'suffix', 'help', operserv::$help->OS_HELP_SUFFIX );
 		// add teh help docs
 	}
 	
@@ -45,12 +45,12 @@ class os_help implements module
 	* @params
 	* $ircdata - ''
 	*/
-    public function main( &$ircdata, $startup = false )
+    public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_msg( &$ircdata, core::$config->operserv->nick ) )
+		if ( ircd::on_msg( $ircdata, core::$config->operserv->nick ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$query = substr( core::get_data_after( &$ircdata, 3 ), 1 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$query = substr( core::get_data_after( $ircdata, 3 ), 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			$query = strtolower( $query );
 			

@@ -35,8 +35,8 @@ class cs_info implements module
 		modules::init_module( 'cs_info', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_info', 'help', &chanserv::$help->CS_HELP_INFO_1 );
-		chanserv::add_help( 'cs_info', 'help info', &chanserv::$help->CS_HELP_INFO_ALL );
+		chanserv::add_help( 'cs_info', 'help', chanserv::$help->CS_HELP_INFO_1 );
+		chanserv::add_help( 'cs_info', 'help info', chanserv::$help->CS_HELP_INFO_ALL );
 		// add the help
 		
 		chanserv::add_command( 'info', 'cs_info', 'info_command' );
@@ -52,12 +52,12 @@ class cs_info implements module
 	*/
 	static public function info_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 0 );
 		// get the channel.
 		
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
 			return false;
 			// wrong syntax
 		}
@@ -65,15 +65,15 @@ class cs_info implements module
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp', 'suspended', 'suspend_reason' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists
 		
 		if ( $channel->suspended == 1 )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_SUSPENDED_1, array( 'chan' => $channel->channel ) );
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_SUSPENDED_2, array( 'reason' => $channel->suspend_reason ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_SUSPENDED_1, array( 'chan' => $channel->channel ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_SUSPENDED_2, array( 'reason' => $channel->suspend_reason ) );
 		}
 		else
 		{
@@ -87,39 +87,39 @@ class cs_info implements module
 			}
 			// get the founder(s)
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_2, array( 'nicks' => substr( $founders, 0, -2 ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_2, array( 'nicks' => substr( $founders, 0, -2 ) ) );
 			
 			$desc = chanserv::get_flags( $channel->channel, 'd' );
 			if ( $desc != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
 			// description?
 			
 			if ( core::$chans[$chan]['topic'] != '' )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_4, array( 'topic' => core::$chans[$chan]['topic'] ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_4, array( 'topic' => core::$chans[$chan]['topic'] ) );
 			// topic
 			
 			$email = chanserv::get_flags( $channel->channel, 'e' );
 			if ( $email != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_5, array( 'email' => $email ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_5, array( 'email' => $email ) );
 			// is there an email?
 			
 			$url = chanserv::get_flags( $channel->channel, 'u' );
 			if ( $url != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_6, array( 'url' => $url ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_6, array( 'url' => $url ) );
 			// or a url?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_8, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_8, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
 			
 			$modelock = chanserv::get_flags( $channel->channel, 'm' );
 			if ( $modelock != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_9, array( 'mode_lock' => $modelock ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_9, array( 'mode_lock' => $modelock ) );
 			// is there a mode lock?
 			
 			$entrymsg = chanserv::get_flags( $channel->channel, 'w' );
 			if ( $entrymsg != null )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_10, array( 'entrymsg' => $entrymsg ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_10, array( 'entrymsg' => $entrymsg ) );
 			// is there an entry msg?
 			
 			$list = '';
@@ -140,14 +140,14 @@ class cs_info implements module
 			// compile our list of options
 			
 			if ( $list != '' )
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 				
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->chanserv->expire != 0 )
 			{
 				$expiry_time = core::$config->chanserv->expire * 86400;
 				
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INFO_12, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_12, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
 			}
 			// if the nick in question has staff powers, we show the expiry times.
 		}
@@ -159,7 +159,7 @@ class cs_info implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

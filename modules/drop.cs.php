@@ -35,8 +35,8 @@ class cs_drop implements module
 		modules::init_module( 'cs_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_drop', 'help', &chanserv::$help->CS_HELP_DROP_1 );
-		chanserv::add_help( 'cs_drop', 'help drop', &chanserv::$help->CS_HELP_DROP_ALL );
+		chanserv::add_help( 'cs_drop', 'help', chanserv::$help->CS_HELP_DROP_1 );
+		chanserv::add_help( 'cs_drop', 'help drop', chanserv::$help->CS_HELP_DROP_ALL );
 		// add the help
 		
 		chanserv::add_command( 'drop', 'cs_drop', 'drop_command' );
@@ -52,7 +52,7 @@ class cs_drop implements module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 0 );
 		// get the channel.
 		
 		if ( self::_drop_check( $nick, $chan ) === false )
@@ -63,7 +63,7 @@ class cs_drop implements module
 		{
 			if ( $channel->suspended == 1 )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_1, array( 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_1, array( 'chan' => $chan ) );
 				return false;
 			}
 		}
@@ -73,7 +73,7 @@ class cs_drop implements module
 		database::delete( 'chans_levels', array( 'channel', '=', $chan ) );
 		// delete all associated records
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_CHAN_DROPPED, array( 'chan' => $chan ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROPPED, array( 'chan' => $chan ) );
 		// let the user know
 		
 		if ( isset( core::$chans[$chan] ) )
@@ -98,7 +98,7 @@ class cs_drop implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module
@@ -116,7 +116,7 @@ class cs_drop implements module
 	{
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
 			return false;
 			// wrong syntax
 		}
@@ -124,7 +124,7 @@ class cs_drop implements module
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.
@@ -139,7 +139,7 @@ class cs_drop implements module
 			return true;
 		}
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 		return false;
 		// do they have access?
 	}

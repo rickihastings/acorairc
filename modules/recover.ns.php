@@ -40,10 +40,10 @@ class ns_recover implements module
 		modules::init_module( 'ns_recover', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_recover', 'help', &nickserv::$help->NS_HELP_RECOVER_1 );
-		nickserv::add_help( 'ns_recover', 'help recover', &nickserv::$help->NS_HELP_RECOVER_ALL );
-		nickserv::add_help( 'ns_recover', 'help', &nickserv::$help->NS_HELP_RELEASE_1 );
-		nickserv::add_help( 'ns_recover', 'help release', &nickserv::$help->NS_HELP_RELEASE_ALL );
+		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1 );
+		nickserv::add_help( 'ns_recover', 'help recover', nickserv::$help->NS_HELP_RECOVER_ALL );
+		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RELEASE_1 );
+		nickserv::add_help( 'ns_recover', 'help release', nickserv::$help->NS_HELP_RELEASE_ALL );
 		// add the help
 		
 		nickserv::add_command( 'recover', 'ns_recover', 'recover_command' );
@@ -68,14 +68,14 @@ class ns_recover implements module
 		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
 			return false;
 		}
 		// invalid syntax
 		
 		if ( !isset( core::$nicks[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
 			return false;
 			// nickname isn't in use
 		}
@@ -101,13 +101,13 @@ class ns_recover implements module
 			}
 			else
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSWORD );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
 				// password isn't correct
 			}
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 			// doesn't even exist..
 		}
@@ -128,7 +128,7 @@ class ns_recover implements module
 		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
 			return false;
 		}
 		// invalid syntax
@@ -139,7 +139,7 @@ class ns_recover implements module
 			{
 				if ( !isset( self::$held_nicks[$unick] ) )
 				{
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
 					return false;
 					// nickname isnt locked.
 				}
@@ -150,18 +150,18 @@ class ns_recover implements module
 				// if they are, remove client, respectively
 				// unsetting data and removing them.
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
 				// tell the user their nick has been released (Y)
 			}
 			else
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSWORD );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
 				// password isn't correct
 			}
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 			// doesn't even exist..
 		}
@@ -173,7 +173,7 @@ class ns_recover implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

@@ -35,8 +35,8 @@ class cs_topic implements module
 		modules::init_module( 'cs_topic', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_topic', 'help commands', &chanserv::$help->CS_HELP_TOPIC_1 );
-		chanserv::add_help( 'cs_topic', 'help topic', &chanserv::$help->CS_HELP_TOPIC_ALL );
+		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1 );
+		chanserv::add_help( 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
 		// add the help
 		
 		chanserv::add_command( 'topic', 'cs_topic', 'topic_command' );
@@ -52,13 +52,13 @@ class cs_topic implements module
 	*/
 	static public function topic_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
-		$topic = core::get_data_after( &$ircdata, 1 );
+		$chan = core::get_chan( $ircdata, 0 );
+		$topic = core::get_data_after( $ircdata, 1 );
 		// get the channel.
 		
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );
 			return false;
 			// wrong syntax
 		}
@@ -66,14 +66,14 @@ class cs_topic implements module
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.
 		
 		if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
@@ -120,11 +120,11 @@ class cs_topic implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_topic( &$ircdata ) || ircd::on_ftopic( &$ircdata ) )
+		if ( ircd::on_topic( $ircdata ) || ircd::on_ftopic( $ircdata ) )
 		{
-			$chan = core::get_chan( &$ircdata, 2 );
+			$chan = core::get_chan( $ircdata, 2 );
 			$topic = core::$chans[$chan]['topic'];
 			$setter = core::$chans[$chan]['topic_setter'];
 			// i forgot this was done by the protocol modules

@@ -29,23 +29,17 @@ class chanserv implements service
 	public function __construct()
 	{
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/chanserv.php' );
-		self::$help = &$help;
+		self::$help = $help;
 		// load the help file
 		
 		if ( isset( core::$config->chanserv ) )
-		{
 			ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
-		}
 		else
-		{
 			return;
-		}
 		// connect the bot
 		
 		foreach ( core::$config->chanserv_modules as $id => $module )
-		{
 			modules::load_module( 'cs_'.$module, $module.'.cs.php' );
-		}
 		// load the chanserv modules
 		
 		timer::add( array( 'chanserv', 'check_expire', array() ), 300, 0 );
@@ -58,39 +52,35 @@ class chanserv implements service
 	* @params
 	* $ircdata - ..
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		self::on_chan_create( &$ircdata );
+		self::on_chan_create( $ircdata );
 		// when a channel is created, NOT registered :)
 		
-		self::on_join( &$ircdata );
+		self::on_join( $ircdata );
 		// onjoin hook
 		
-		self::on_part( &$ircdata );
+		self::on_part( $ircdata );
 		// is the chan empty? gtfo.
 			
-		self::on_quit( &$ircdata );
+		self::on_quit( $ircdata );
 		// is the channel empty?
 			
-		self::on_mode( &$ircdata );
+		self::on_mode( $ircdata );
 		// check mode changes
 			
-		self::on_kick( &$ircdata );
+		self::on_kick( $ircdata );
 		// on kick event.
 		
 		foreach ( modules::$list as $module => $data )
-		{
 			if ( $data['type'] == 'chanserv' )
-			{
-				modules::$list[$module]['class']->main( &$ircdata, $startup );
+				modules::$list[$module]['class']->main( $ircdata, $startup );
 				// loop through the modules for chanserv.
-			}
-		}
-		
-		if ( ircd::on_msg( &$ircdata, core::$config->chanserv->nick ) )
+
+		if ( ircd::on_msg( $ircdata, core::$config->chanserv->nick ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$command = substr( core::get_data_after( &$ircdata, 3 ), 1 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			self::get_command( $nick, $command );
@@ -108,9 +98,7 @@ class chanserv implements service
 	static public function part_chan_callback( $chan )
 	{
 		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
-		{
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
-		}
 		// if we're the only person in the channel, leave it.
 	}
 	
@@ -120,9 +108,9 @@ class chanserv implements service
 	* @params
 	* $ircdata - ''
 	*/
-	static public function on_chan_create( &$ircdata )
+	static public function on_chan_create( $ircdata )
 	{
-		if ( ircd::on_chan_create( &$ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chans
@@ -131,7 +119,7 @@ class chanserv implements service
 			{
 				if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic', 'suspended' ) ) )
 				{
-					self::_join_channel( &$channel );
+					self::_join_channel( $channel );
 					// join the channel
 				}
 				// does the channel exist?
@@ -146,11 +134,11 @@ class chanserv implements service
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_part( &$ircdata )
+	static public function on_part( $ircdata )
 	{
-		if ( ircd::on_part( &$ircdata ) )
+		if ( ircd::on_part( $ircdata ) )
 		{
-			$chan = core::get_chan( &$ircdata, 2 );
+			$chan = core::get_chan( $ircdata, 2 );
 			// get the channel
 			
 			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
@@ -169,9 +157,9 @@ class chanserv implements service
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_join( &$ircdata )
+	static public function on_join( $ircdata )
 	{
-		if ( ircd::on_join( &$ircdata ) )
+		if ( ircd::on_join( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// find the chans.
@@ -196,11 +184,11 @@ class chanserv implements service
 	* @params
 	* $ircdata - ''
 	*/
-	static public function on_quit( &$ircdata )
+	static public function on_quit( $ircdata )
 	{
-		if ( ircd::on_quit( &$ircdata ) )
+		if ( ircd::on_quit( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			
 			foreach ( core::$chans as $chan => $data )
 			{
@@ -222,13 +210,13 @@ class chanserv implements service
 	* @params
 	* $ircdata - ''
 	*/
-	static public function on_mode( &$ircdata )
+	static public function on_mode( $ircdata )
 	{
-		if ( ircd::on_mode( &$ircdata ) )
+		if ( ircd::on_mode( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$chan = core::get_chan( &$ircdata, 2 );
-			$mode_queue = core::get_data_after( &$ircdata, 4 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$chan = core::get_chan( $ircdata, 2 );
+			$mode_queue = core::get_data_after( $ircdata, 4 );
 			
 			$a_mode = strpos( $mode_queue, 'a' );
 			$o_mode = strpos( $mode_queue, 'o' );
@@ -254,13 +242,13 @@ class chanserv implements service
 	* @params
 	* $ircdata - ''
 	*/
-	static public function on_kick( &$ircdata )
+	static public function on_kick( $ircdata )
 	{
-		if ( ircd::on_kick( &$ircdata ) )
+		if ( ircd::on_kick( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$chan = core::get_chan( &$ircdata, 2 );
-			$who = core::get_nick( &$ircdata, 3 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$chan = core::get_chan( $ircdata, 2 );
+			$who = core::get_nick( $ircdata, 3 );
 			
 			if ( $who == core::$config->chanserv->nick || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
 			{
@@ -336,7 +324,7 @@ class chanserv implements service
 	* @params
 	* $chan - The channel chanserv is to join
 	*/
-	static public function _join_channel( &$channel )
+	static public function _join_channel( $channel )
 	{	
 		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $channel->channel ) );
 		// lets update the last used timestamp
@@ -473,9 +461,8 @@ class chanserv implements service
 		while ( $chan_flags = database::fetch( $user_flags_q ) )
 		{
 			if ( $or_check && core::$nicks[$nick]['override'] )
-			{
 				return true;
-			}
+
 			// is override enabled for this user?
 			
 			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
@@ -566,9 +553,9 @@ class chanserv implements service
 	* $module - The name of the module.
 	* $help - The prefix to add.
 	*/
-	static public function add_help_fix( $module, $what, $command, &$help )
+	static public function add_help_fix( $module, $what, $command, $help )
 	{
-		commands::add_help_fix( 'chanserv', $module, $what, $command, &$help );
+		commands::add_help_fix( 'chanserv', $module, $what, $command, $help );
 	}
 	
 	/*
@@ -579,9 +566,9 @@ class chanserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, &$help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $oper_help = false )
 	{
-		commands::add_help( 'chanserv', $module, $command, &$help, $oper_help );
+		commands::add_help( 'chanserv', $module, $command, $help, $oper_help );
 	}
 	
 	/*
@@ -591,9 +578,9 @@ class chanserv implements service
 	* $nick - Who to send the help too?
 	* $command - The command to get the help for.
 	*/
-	static public function get_help( &$nick, &$command )
+	static public function get_help( $nick, $command )
 	{
-		commands::get_help( 'chanserv', &$nick, &$command );
+		commands::get_help( 'chanserv', $nick, $command );
 	}
 	
 	/*
@@ -616,9 +603,9 @@ class chanserv implements service
 	* $nick - The nick requesting the command
 	* $command - The command to hook to
 	*/
-	static public function get_command( &$nick, &$command )
+	static public function get_command( $nick, $command )
 	{
-		commands::get_command( 'chanserv', &$nick, &$command );
+		commands::get_command( 'chanserv', $nick, $command );
 	}
 }
 

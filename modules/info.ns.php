@@ -35,8 +35,8 @@ class ns_info implements module
 		modules::init_module( 'ns_info', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_info', 'help', &nickserv::$help->NS_HELP_INFO_1 );
-		nickserv::add_help( 'ns_info', 'help info', &nickserv::$help->NS_HELP_INFO_ALL );
+		nickserv::add_help( 'ns_info', 'help', nickserv::$help->NS_HELP_INFO_1 );
+		nickserv::add_help( 'ns_info', 'help info', nickserv::$help->NS_HELP_INFO_ALL );
 		// add the help
 		
 		nickserv::add_command( 'info', 'ns_info', 'info_command' );
@@ -52,12 +52,12 @@ class ns_info implements module
 	*/
 	static public function info_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( &$ircdata, 0 );
+		$unick = core::get_nick( $ircdata, 0 );
 		// get the nickname.
 		
 		if ( $unick == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
 			// wrong syntax
 			return false;
 		}
@@ -65,15 +65,15 @@ class ns_info implements module
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'suspended', 'suspend_reason', 'last_hostmask', 'timestamp', 'last_timestamp' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 		}
 		// make sure the user exists
 		
 		if ( $user->suspended == 1 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_SUSPENDED_1, array( 'nick' => $user->display ) );
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_SUSPENDED_2, array( 'reason' => $user->suspend_reason ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_SUSPENDED_1, array( 'nick' => $user->display ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_SUSPENDED_2, array( 'reason' => $user->suspend_reason ) );
 		}
 		else
 		{
@@ -81,22 +81,22 @@ class ns_info implements module
 			$hostmask = $hostmask[1];
 			// get the hostmask
 			
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_1, array( 'nick' => $user->display ) );
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_2, array( 'time' => date( "F j, Y, g:i a", $user->timestamp ) ) );
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_3, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time ) ) );
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_4, array( 'host' => $hostmask ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_1, array( 'nick' => $user->display ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_2, array( 'time' => date( "F j, Y, g:i a", $user->timestamp ) ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_3, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time ) ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_4, array( 'host' => $hostmask ) );
 			// standard messages
 			
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false || $unick == $nick && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_5, array( 'email' => nickserv::get_flags( $nick, 'e' ) ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_5, array( 'email' => nickserv::get_flags( $nick, 'e' ) ) );
 			}
 			// if the person doing /ns info has staff powers we show the email
 			// or if someone is doing /ns info on themselves we show it.
 			
 			$url = nickserv::get_flags( $unick, 'u' );
 			if ( $url != null )
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_6, array( 'url' => $url ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_6, array( 'url' => $url ) );
 			// url
 	
 			$list = '';
@@ -111,14 +111,14 @@ class ns_info implements module
 			// compile our list of options
 			
 			if ( $list != '' )
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_7, array( 'options' => $list ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_7, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 			
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->nickserv->expire != 0 )
 			{
 				$expiry_time = core::$config->nickserv->expire * 86400;
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INFO_8, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time + $expiry_time ) ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_8, array( 'time' => date( "F j, Y, g:i a", ( $user->last_timestamp != 0 ) ? $user->last_timestamp : core::$network_time + $expiry_time ) ) );
 			}
 			// if the nick in question has staff powers, we show the expiry times.
 		}
@@ -130,7 +130,7 @@ class ns_info implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

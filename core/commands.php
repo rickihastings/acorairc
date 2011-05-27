@@ -159,7 +159,7 @@ class commands
 	* $command - The command to add a prefix for.
 	* $help - The prefix to add.
 	*/
-	static public function add_help_fix( $hook, $module, $what, $command, &$help )
+	static public function add_help_fix( $hook, $module, $what, $command, $help )
 	{
 		$command = strtolower( $command );
 		// make it lowercase
@@ -225,7 +225,7 @@ class commands
 	* $help - The array to hook.
 	* $oper_help - should be a true or false boolean
 	*/
-	static public function add_help( $hook, $module, $command, &$help, $oper_help = false )
+	static public function add_help( $hook, $module, $command, $help, $oper_help = false )
 	{
 		$command = strtolower( $command );
 		// make it lowercase
@@ -271,7 +271,7 @@ class commands
 	* $nick - Who to send the help too?
 	* $command - The command to get the help for.
 	*/
-	static public function get_help( $hook, &$nick, &$command )
+	static public function get_help( $hook, $nick, $command )
 	{
 		// not too sure how to deal with this, probably will
 		// let this function do the looping and just send it
@@ -376,7 +376,7 @@ class commands
 	* $nick - The nick requesting the command
 	* $command - The command to hook to
 	*/
-	static public function get_command( $hook, &$nick, &$command )
+	static public function get_command( $hook, $nick, $command )
 	{
 		// this works better than i imagined
 		

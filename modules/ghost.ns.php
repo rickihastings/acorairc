@@ -35,8 +35,8 @@ class ns_ghost implements module
 		modules::init_module( 'ns_ghost', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_ghost', 'help', &nickserv::$help->NS_HELP_GHOST_1 );
-		nickserv::add_help( 'ns_ghost', 'help ghost', &nickserv::$help->NS_HELP_GHOST_ALL );
+		nickserv::add_help( 'ns_ghost', 'help', nickserv::$help->NS_HELP_GHOST_1 );
+		nickserv::add_help( 'ns_ghost', 'help ghost', nickserv::$help->NS_HELP_GHOST_ALL );
 		// add the help
 		
 		nickserv::add_command( 'ghost', 'ns_ghost', 'ghost_command' );
@@ -58,14 +58,14 @@ class ns_ghost implements module
 		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );
 			return false;
 		}
 		// invalid syntax
 		
 		if ( !isset( core::$nicks[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
 			return false;
 			// nickname isn't in use
 		}
@@ -79,13 +79,13 @@ class ns_ghost implements module
 			}
 			else
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSWORD );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
 				// password isn't correct
 			}
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 			// doesn't even exist..
 		}
@@ -97,7 +97,7 @@ class ns_ghost implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

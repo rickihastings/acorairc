@@ -35,14 +35,14 @@ class ns_identify implements module
 		modules::init_module( 'ns_identify', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_identify', 'help', &nickserv::$help->NS_HELP_IDENTIFY_1 );
-		nickserv::add_help( 'ns_identify', 'help identify', &nickserv::$help->NS_HELP_IDENTIFY_ALL );
+		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1 );
+		nickserv::add_help( 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
 		// add the help
 		
 		nickserv::add_command( 'identify', 'ns_identify', 'identify_command' );
 		// add the command
 		
-		nickserv::add_help( 'ns_identify', 'help id', &nickserv::$help->NS_HELP_IDENTIFY_ALL );
+		nickserv::add_help( 'ns_identify', 'help id', nickserv::$help->NS_HELP_IDENTIFY_ALL );
 		nickserv::add_command( 'id', 'ns_identify', 'identify_command' );
 		// "id" alias, help and command
 	}
@@ -60,7 +60,7 @@ class ns_identify implements module
 		
 		if ( trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
 			return false;
 		}
 		// wrong syntax damit!
@@ -69,12 +69,12 @@ class ns_identify implements module
 		{
 			if ( $user->validated == 0 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_AWAITING_VALIDATION );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 				return false;
 			}
 			elseif ( $user->identified == 1 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ALREADY_IDENTIFIED );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_IDENTIFIED );
 				return false;
 			}
 			else
@@ -88,7 +88,7 @@ class ns_identify implements module
 					// registered mode
 					
 					database::update( 'users', array( 'identified' => 1, 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $nick ) );
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_IDENTIFIED );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
 					// right, standard identify crap
 					core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' identified for nick '.core::$nicks[$nick]['nick'] );
 					// logchan
@@ -192,7 +192,7 @@ class ns_identify implements module
 				}
 				else
 				{
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSWORD );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
 					core::alog( core::$config->nickserv->nick.': Invalid password from '.core::get_full_hostname( $nick ) );
 					// some logging stuff
 					
@@ -212,7 +212,7 @@ class ns_identify implements module
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_UNREGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
 			return false;
 			// doesn't even exist..
 		}
@@ -225,11 +225,11 @@ class ns_identify implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_connect( &$ircdata ) )
+		if ( ircd::on_connect( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
+			$nick = core::get_nick( $ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
 			// get nick
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
@@ -239,7 +239,7 @@ class ns_identify implements module
 					ircd::on_user_logout( $nick );
 					// they shouldn't really have registered mode
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_AWAITING_VALIDATION );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 				}
 				elseif ( $user->identified == 0 && $user->suspended == 0 )
 				{
@@ -262,7 +262,7 @@ class ns_identify implements module
 		// on connect let them know that they're using
 		// an identified nickname
 		
-		if ( ircd::on_nick_change( &$ircdata ) )
+		if ( ircd::on_nick_change( $ircdata ) )
 		{
 			$nick = core::get_nick( $ircdata, 2 );
 			$old_nick = core::$nicks[$nick]['onick'];
@@ -280,7 +280,7 @@ class ns_identify implements module
 					ircd::on_user_logout( $nick );
 					// they shouldn't really have registered mode
 					
-					services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_AWAITING_VALIDATION );
+					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 				}
 				elseif ( $user->identified == 0 && $user->suspended == 0 )
 				{
@@ -299,9 +299,9 @@ class ns_identify implements module
 			// is the new nick registered? let them know
 		}
 		
-		if ( ircd::on_quit( &$ircdata ) )
+		if ( ircd::on_quit( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			
 			timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 			// remove the secured timer. if there is one
@@ -346,7 +346,7 @@ class ns_identify implements module
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_REGISTERED_NICK );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REGISTERED_NICK );
 		}
 		// this is just a crappy function, basically just parses the NS_REGISTERED thing
 		// we check for arrays and single lines, even though the default is array
@@ -355,7 +355,7 @@ class ns_identify implements module
 		if ( nickserv::check_flags( $nick, array( 'S' ) ) && isset( modules::$list['ns_flags'] ) )
 		{
 			timer::add( array( 'ns_identify', 'secured_callback', array( $nick ) ), core::$config->nickserv->secure_time, 1 );
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SECURED_NICK, array( 'seconds' => core::$config->nickserv->secure_time ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SECURED_NICK, array( 'seconds' => core::$config->nickserv->secure_time ) );
 		}
 		// if the nickname has secure enabled, we let them know that we're watching them :o
 	}

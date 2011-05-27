@@ -35,8 +35,8 @@ class os_vhost implements module
 		modules::init_module( 'os_vhost', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_vhost', 'help', &operserv::$help->OS_HELP_VHOST_1 );
-		operserv::add_help( 'os_vhost', 'help vhost', &operserv::$help->OS_HELP_VHOST_ALL );
+		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1 );
+		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL );
 		// add the help
 		
 		operserv::add_command( 'vhost', 'os_vhost', 'vhost_command' );
@@ -63,14 +63,14 @@ class os_vhost implements module
 			
 			if ( trim( $unick ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 				return false;
 			}
 			// are we missing nick? invalid syntax if so.
 			
 			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 				return false;
 			}
 			// is the nick registered?
@@ -84,7 +84,7 @@ class os_vhost implements module
 			}
 			elseif ( substr_count( $host, '@' ) > 1 )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_HOSTNAME );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_HOSTNAME );
 				return false;
 			}
 			else
@@ -95,14 +95,14 @@ class os_vhost implements module
 			
 			if ( services::valid_host( $host ) === false )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_HOSTNAME );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_HOSTNAME );
 				return false;
 			}
 			// is the hostname valid?
 			
 			database::update( 'users', array( 'vhost' => $realhost ), array( 'display', '=', $user->display ) );
 			core::alog( core::$config->operserv->nick.': vHost for '.$unick.' set to '.$realhost.' by '.$nick );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
 			// update it and log it
 			
 			if ( isset( core::$nicks[$unick] ) && $user->identified == 1 )
@@ -126,28 +126,28 @@ class os_vhost implements module
 			
 			if ( trim( $unick ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 				return false;
 			}
 			// are we missing nick? invalid syntax if so.
 			
 			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 				return false;
 			}
 			// is the nick registered?
 			
 			if ( $user->vhost == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_NO_VHOST, array( 'nick' => $unick ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_NO_VHOST, array( 'nick' => $unick ) );
 				return false;
 			}
 			// is there a vhost?!
 						
 			database::update( 'users', array( 'vhost' => '' ), array( 'display', '=', $user->display ) );
 			core::alog( core::$config->operserv->nick.': vHost for '.$unick.' deleted by '.$nick );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_DELETED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_DELETED, array( 'nick' => $unick ) );
 			// update and logchan
 		}
 		elseif ( strtolower( $mode ) == 'list' )
@@ -157,14 +157,14 @@ class os_vhost implements module
 			
 			if ( trim( $limit ) == ''  )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 				return false;
 			}
 			// invalid syntax
 			
 			if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 				return false;
 			}
 			// invalid syntax
@@ -184,13 +184,13 @@ class os_vhost implements module
 			
 			if ( database::num_rows( $users_q ) == 0 )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_B, array( 'num' => database::num_rows( $users_q ), 'total' => $total ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_B, array( 'num' => database::num_rows( $users_q ), 'total' => $total ) );
 				return false;
 			}
 			// no vhosts
 			
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_T2 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_T );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_T2 );
 			// list top.
 			
 			while ( $users = database::fetch( $users_q ) )
@@ -205,16 +205,16 @@ class os_vhost implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_R, array( 'nick' => $false_nick, 'info' => $users->vhost ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_R, array( 'nick' => $false_nick, 'info' => $users->vhost ) );
 			}
 			// loop through em, show the vhosts
 			
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_VHOST_LIST_B, array( 'num' => ( database::num_rows( $users_q ) == 0 ) ? 0 : database::num_rows( $users_q ), 'total' => $total ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_B, array( 'num' => ( database::num_rows( $users_q ) == 0 ) ? 0 : database::num_rows( $users_q ), 'total' => $total ) );
 			// end of list.
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
 			return false;
 			// invalid syntax.
 		}
@@ -226,7 +226,7 @@ class os_vhost implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

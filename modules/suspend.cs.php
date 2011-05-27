@@ -35,10 +35,10 @@ class cs_suspend implements module
 		modules::init_module( 'cs_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_suspend', 'help', &chanserv::$help->CS_HELP_SUSPEND_1, true );
-		chanserv::add_help( 'cs_suspend', 'help', &chanserv::$help->CS_HELP_UNSUSPEND_1, true );
-		chanserv::add_help( 'cs_suspend', 'help suspend', &chanserv::$help->CS_HELP_SUSPEND_ALL, true );
-		chanserv::add_help( 'cs_suspend', 'help unsuspend', &chanserv::$help->CS_HELP_UNSUSPEND_ALL, true );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, true );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_UNSUSPEND_1, true );
+		chanserv::add_help( 'cs_suspend', 'help suspend', chanserv::$help->CS_HELP_SUSPEND_ALL, true );
+		chanserv::add_help( 'cs_suspend', 'help unsuspend', chanserv::$help->CS_HELP_UNSUSPEND_ALL, true );
 		// add the help
 		
 		chanserv::add_command( 'suspend', 'cs_suspend', 'suspend_command' );
@@ -55,21 +55,21 @@ class cs_suspend implements module
 	*/
 	static public function suspend_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
-		$reason = core::get_data_after( &$ircdata, 1 );
+		$chan = core::get_chan( $ircdata, 0 );
+		$reason = core::get_data_after( $ircdata, 1 );
 		$chan_info = array();
 		// get the channel.
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
 		
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
 			return false;
 			// wrong syntax
 		}
@@ -82,7 +82,7 @@ class cs_suspend implements module
 		{
 			if ( $channel->suspended == 1 )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_2, array( 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_2, array( 'chan' => $chan ) );
 				return false;
 				// channel is already suspended lol
 			}
@@ -109,7 +109,7 @@ class cs_suspend implements module
 			// just drop it as well, this way nobody actually gets the founder status.
 		}
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
 		core::alog( core::$config->chanserv->nick.': '.$nick.' SUSPENDED '.$chan.' with the reason: '.$reason );
 		ircd::globops( core::$config->chanserv->nick, $nick.' SUSPENDED '.$chan );
 		
@@ -133,19 +133,19 @@ class cs_suspend implements module
 	*/
 	static public function unsuspend_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 0 );
 		// get the channel.
 		
 		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified.
 		
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
 			return false;
 			// wrong syntax
 		}
@@ -155,7 +155,7 @@ class cs_suspend implements module
 		{
 			if ( $channel->suspended == 0 )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
 				return false;	
 			}
 			// channel isn't even suspended
@@ -171,11 +171,11 @@ class cs_suspend implements module
 		}
 		else
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
 			return false;
 		}
 		
-		services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
 		core::alog( core::$config->chanserv->nick.': '.$nick.' UNSUSPENDED '.$chan );
 		ircd::globops( core::$config->chanserv->nick, $nick.' UNSUSPENDED '.$chan );
 		// oh well, was fun while it lasted eh?
@@ -188,11 +188,11 @@ class cs_suspend implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_join( &$ircdata ) )
+		if ( ircd::on_join( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			$chans = explode( ',', $ircdata[2] );
 			// find the nick & chan
 			
@@ -213,7 +213,7 @@ class cs_suspend implements module
 		}
 		// on_join trigger for forbidden channels
 		
-		if ( ircd::on_chan_create( &$ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chans

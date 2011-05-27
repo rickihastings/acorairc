@@ -35,8 +35,8 @@ class ns_drop implements module
 		modules::init_module( 'ns_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_drop', 'help', &nickserv::$help->NS_HELP_DROP_1 );
-		nickserv::add_help( 'ns_drop', 'help drop', &nickserv::$help->NS_HELP_DROP_ALL );
+		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1 );
+		nickserv::add_help( 'ns_drop', 'help drop', nickserv::$help->NS_HELP_DROP_ALL );
 		// add the help
 		
 		nickserv::add_command( 'drop', 'ns_drop', 'drop_command' );
@@ -52,20 +52,20 @@ class ns_drop implements module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( &$ircdata, 0 );
+		$unick = core::get_nick( $ircdata, 0 );
 		$password = $ircdata[1];
 		// get the nick.
 		
 		if ( trim( $unick ) == '' || ( trim( $password ) == '' && ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
 			return false;
 		}
 		// invalid syntax
 		
 		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to drop a root?
@@ -74,7 +74,7 @@ class ns_drop implements module
 		{
 			if ( $user->suspended == 1 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
 				return false;
 			}
 			// are they suspended?
@@ -98,18 +98,18 @@ class ns_drop implements module
 					ircd::on_user_logout( $nick->display );
 				// if the nick is being used unregister it, even though it shouldn't be?
 				
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );
 				// let the nick know the account has been dropped.
 			}
 			else
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_INVALID_PASSWORD );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
 				// password isn't correct
 			}
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 			// doesn't even exist..
 		}
@@ -121,7 +121,7 @@ class ns_drop implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't need to listen for anything in this module

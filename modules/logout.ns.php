@@ -35,8 +35,8 @@ class ns_logout implements module
 		modules::init_module( 'ns_logout', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_logout', 'help', &nickserv::$help->NS_HELP_LOGOUT_1 );
-		nickserv::add_help( 'ns_logout', 'help logout', &nickserv::$help->NS_HELP_LOGOUT_ALL );
+		nickserv::add_help( 'ns_logout', 'help', nickserv::$help->NS_HELP_LOGOUT_1 );
+		nickserv::add_help( 'ns_logout', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
 		// add the help
 		
 		nickserv::add_command( 'logout', 'ns_logout', 'logout_command' );
@@ -62,20 +62,20 @@ class ns_logout implements module
 				// here we set unregistered mode
 				database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
 				// unidentify them
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_LOGGED_OUT );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
 				// let them know
 				core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' logged out of '.core::$nicks[$nick]['nick'] );
 				// and log it.
 			}
 			else
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_NOT_IDENTIFIED );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
 				// not even identified
 			}
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, &nickserv::$help->NS_UNREGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
 			// unregistered nick name
 		}
 	}
@@ -86,7 +86,7 @@ class ns_logout implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// we don't listen for anything here	

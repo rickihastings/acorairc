@@ -29,7 +29,7 @@ class operserv implements service
 	public function __construct()
 	{
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/operserv.php' );
-		self::$help = &$help;
+		self::$help = $help;
 		// load the help file
 		
 		if ( isset( core::$config->operserv ) )
@@ -50,8 +50,8 @@ class operserv implements service
 		
 		if ( core::$config->operserv->override )
 		{
-			self::add_help( 'operserv', 'help', &self::$help->OS_HELP_OVERRIDE_1 );
-			self::add_help( 'operserv', 'help override', &self::$help->OS_HELP_OVERRIDE_ALL );
+			self::add_help( 'operserv', 'help', self::$help->OS_HELP_OVERRIDE_1 );
+			self::add_help( 'operserv', 'help override', self::$help->OS_HELP_OVERRIDE_ALL );
 			// add the help
 			
 			self::add_command( 'override', 'operserv', 'override_command' );
@@ -75,7 +75,7 @@ class operserv implements service
 		{
 			if ( trim( $mode ) == '' || !in_array( $mode, array( 'on', 'off' ) ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'OVERRIDE' ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'OVERRIDE' ) );
 				return false;
 			}
 			// is the format correct?
@@ -84,12 +84,12 @@ class operserv implements service
 			{
 				if ( core::$nicks[$nick]['override'] )
 				{
-					services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_IS_ON );
+					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_IS_ON );
 					return false;
 				}
 				// override is already on..
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_ON );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_ON );
 				core::alog( 'override_command(): '.$nick.' is now using override mode.', 'BASIC' );
 				ircd::globops( core::$config->operserv->nick, $nick.' is now using override mode.' );
 				// log and stuff
@@ -103,12 +103,12 @@ class operserv implements service
 			{
 				if ( !core::$nicks[$nick]['override'] )
 				{
-					services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_IS_OFF );
+					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_IS_OFF );
 					return false;
 				}
 				// override isnt even on..
 				
-				services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_OVERRIDE_OFF );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_OFF );
 				core::alog( 'override_command(): '.$nick.' has turned override mode off.', 'BASIC' );
 				ircd::globops( core::$config->operserv->nick, $nick.' has turned override mode off.' );
 				// log and stuff
@@ -120,7 +120,7 @@ class operserv implements service
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, &operserv::$help->OS_ACCESS_DENIED );	
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );	
 		}
 		// are they root?
 	}
@@ -131,21 +131,21 @@ class operserv implements service
 	* @params
 	* $ircdata - ..
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		foreach ( modules::$list as $module => $data )
 		{
 			if ( $data['type'] == 'operserv' )
 			{
-				modules::$list[$module]['class']->main( &$ircdata, $startup );
+				modules::$list[$module]['class']->main( $ircdata, $startup );
 				// loop through the modules for operserv.
 			}
 		}
 		
-		if ( ircd::on_msg( &$ircdata, core::$config->operserv->nick ) )
+		if ( ircd::on_msg( $ircdata, core::$config->operserv->nick ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$command = substr( core::get_data_after( &$ircdata, 3 ), 1 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			core::alog( core::$config->operserv->nick.': '.$nick.': '.$command );
@@ -154,7 +154,7 @@ class operserv implements service
 			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) !== false ) )
 				self::get_command( $nick, $command );
 			else
-				services::communicate( core::$config->operserv->nick, $nick, &self::$help->OS_DENIED_ACCESS );
+				services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );
 			// theyre an oper.
 		}
 		// this is what we use to handle command listens
@@ -169,9 +169,9 @@ class operserv implements service
 	* $module - The name of the module.
 	* $help - The prefix to add.
 	*/
-	static public function add_help_fix( $module, $what, $command, &$help )
+	static public function add_help_fix( $module, $what, $command, $help )
 	{
-		commands::add_help_fix( 'operserv', $module, $what, $command, &$help );
+		commands::add_help_fix( 'operserv', $module, $what, $command, $help );
 	}
 	
 	/*
@@ -182,9 +182,9 @@ class operserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, &$help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $oper_help = false )
 	{
-		commands::add_help( 'operserv', $module, $command, &$help, $oper_help );
+		commands::add_help( 'operserv', $module, $command, $help, $oper_help );
 	}
 	
 	/*
@@ -194,9 +194,9 @@ class operserv implements service
 	* $nick - Who to send the help too?
 	* $command - The command to get the help for.
 	*/
-	static public function get_help( &$nick, &$command )
+	static public function get_help( $nick, $command )
 	{
-		commands::get_help( 'operserv', &$nick, &$command );
+		commands::get_help( 'operserv', $nick, $command );
 	}
 	
 	/*
@@ -219,9 +219,9 @@ class operserv implements service
 	* $nick - The nick requesting the command
 	* $command - The command to hook to
 	*/
-	static public function get_command( &$nick, &$command )
+	static public function get_command( $nick, $command )
 	{
-		commands::get_command( 'operserv', &$nick, &$command );
+		commands::get_command( 'operserv', $nick, $command );
 	}
 }
 

@@ -43,8 +43,8 @@ class cs_flags implements module
 		modules::init_module( 'cs_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_flags', 'help', &chanserv::$help->CS_HELP_FLAGS_1 );
-		chanserv::add_help( 'cs_flags', 'help flags', &chanserv::$help->CS_HELP_FLAGS_ALL );
+		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1 );
+		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL );
 		// add the help
 		
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
@@ -65,22 +65,22 @@ class cs_flags implements module
 	*/
 	static public function flags_command( $nick, $ircdata = array(), $announce = false )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 0 );
 		$flags = $ircdata[1];
-		$param = core::get_data_after( &$ircdata, 2 );
+		$param = core::get_data_after( $ircdata, 2 );
 		$rparams = explode( '||', $param );
 		// get the channel.
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
 		}
 		// make sure the channel exists.
 		
 		if ( $flags == '' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
 			return false;
 		}
 		// missing params?
@@ -90,7 +90,7 @@ class cs_flags implements module
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
 				return false;
 			}
 			// flag is invalid.
@@ -131,7 +131,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -146,7 +146,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -161,7 +161,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -176,7 +176,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -191,7 +191,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -206,7 +206,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -223,7 +223,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -238,7 +238,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -253,7 +253,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -280,7 +280,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -295,7 +295,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -310,7 +310,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -329,7 +329,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -361,7 +361,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -376,7 +376,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -391,7 +391,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -406,7 +406,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -421,7 +421,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -436,7 +436,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -453,7 +453,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -468,7 +468,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -483,7 +483,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -502,7 +502,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -517,7 +517,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -532,7 +532,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -551,7 +551,7 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_levels( $nick, $chan, array( 's', 'F' ) ) === false )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_ACCESS_DENIED );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
 				}
 				// do they have access to alter this?
@@ -565,7 +565,7 @@ class cs_flags implements module
 		
 		if ( isset( self::$set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
 			// who do we notice?
 			unset( self::$set[$chan] );
 		}
@@ -573,14 +573,14 @@ class cs_flags implements module
 		
 		if ( isset( self::$already_set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
 			unset( self::$already_set[$chan] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
 			unset( self::$not_set[$chan] );
 		}
 		// send back the target stuff..
@@ -592,17 +592,17 @@ class cs_flags implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_mode( &$ircdata ) )
+		if ( ircd::on_mode( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$chan = core::get_chan( &$ircdata, 2 );
-			$mode_queue = core::get_data_after( &$ircdata, 4 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$chan = core::get_chan( $ircdata, 2 );
+			$mode_queue = core::get_data_after( $ircdata, 4 );
 			
-			if ( strpos( $nick, '.' ) !== false && core::$config->server->ircd != 'inspircd12' )
+			if ( strpos( $nick, '.' ) !== false && strstr(core::$config->server->ircd, 'inspircd') )
 				$server = $nick;
-			elseif ( strlen( $nick ) == 3 && core::$config->server->ircd == 'inspircd12' )
+			elseif ( strlen( $nick ) == 3 && strstr(core::$config->server->ircd, 'inspircd') )
 				$server = core::$servers[$nick]['sid'];
 				// UNTESTED
 			else
@@ -636,9 +636,9 @@ class cs_flags implements module
 		}
 		// we need to check for any modechanges here, for modelocking
 		
-		if ( ircd::on_part( &$ircdata ) )
+		if ( ircd::on_part( $ircdata ) )
 		{
-			$chan = core::get_chan( &$ircdata, 2 );
+			$chan = core::get_chan( $ircdata, 2 );
 			// get the channel
 			
 			if ( chanserv::check_flags( $chan, array( 'L' ) ) )
@@ -650,7 +650,7 @@ class cs_flags implements module
 		}
 		// on part we check for
 		
-		if ( ircd::on_quit( &$ircdata ) )
+		if ( ircd::on_quit( $ircdata ) )
 		{
 			foreach ( core::$chans as $chan => $data )
 			{
@@ -664,9 +664,9 @@ class cs_flags implements module
 		}
 		// on part we check for
 		
-		if ( ircd::on_join( &$ircdata ) )
+		if ( ircd::on_join( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			$chans = explode( ',', $ircdata[2] );
 			// find the nick & chan
 			
@@ -709,7 +709,7 @@ class cs_flags implements module
 		// on_join entry msg
 		// this is just a basic JOIN trigger
 		
-		if ( ircd::on_chan_create( &$ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chan
@@ -801,7 +801,7 @@ class cs_flags implements module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
 		}
 		// are they issuing a flag, that HAS to have a parameter?
@@ -825,14 +825,14 @@ class cs_flags implements module
 		{
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the email invalid?
 			
 			if ( $r_flag == 't' && strpos( $param, '*' ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the topicmask invalid?
@@ -843,7 +843,7 @@ class cs_flags implements module
 				
 				if ( strstr( $mode_string[0], 'r' ) || strstr( $mode_string[0], 'q' ) || strstr( $mode_string[0], 'a' ) || strstr( $mode_string[0], 'o' ) || strstr( $mode_string[0], 'h' ) || strstr( $mode_string[0], 'v' ) || strstr( $mode_string[0], 'b' ) )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
 					return false;
 				}
 			}
