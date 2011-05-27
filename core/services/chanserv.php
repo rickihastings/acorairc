@@ -422,13 +422,9 @@ class chanserv implements service
 		// we just grab it.
 		
 		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'id', 'display' ) ) !== false ) )
-		{
 			return true;
-		}
 		else
-		{
 			return false;
-		}
 		// here we just check for flag F
 	}
 	
@@ -447,9 +443,7 @@ class chanserv implements service
 	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true )
 	{
 		if ( $ident && !$user = services::user_exists( $nick, true, array( 'id', 'display' ) ) )
-		{
 			return false;
-		}
 		// they aint even identified..
 		
 		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
@@ -543,6 +537,7 @@ class chanserv implements service
 		// get our flags records
 		
 		return $chan_flags->$param_field;
+		print ' WILL FIND U';
 	}
 	
 	/*
