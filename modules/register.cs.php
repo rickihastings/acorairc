@@ -35,8 +35,8 @@ class cs_register implements module
 		modules::init_module( 'cs_register', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_register', 'help', &chanserv::$help->CS_HELP_REGISTER_1 );
-		chanserv::add_help( 'cs_register', 'help register', &chanserv::$help->CS_HELP_REGISTER_ALL );
+		chanserv::add_help( 'cs_register', 'help', chanserv::$help->CS_HELP_REGISTER_1 );
+		chanserv::add_help( 'cs_register', 'help register', chanserv::$help->CS_HELP_REGISTER_ALL );
 		// add the help
 		
 		chanserv::add_command( 'register', 'cs_register', 'register_command' );
@@ -52,29 +52,29 @@ class cs_register implements module
 	*/
 	static public function register_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( &$ircdata, 0 );
-		$desc = core::get_data_after( &$ircdata, 1 );
+		$chan = core::get_chan( $ircdata, 0 );
+		$desc = core::get_data_after( $ircdata, 1 );
 		// get the channel.
 		
 		if ( $user = services::user_exists( $nick, true, array( 'display', 'id' ) ) )
 		{
 			if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' || stristr( $channel, ' ' ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
 				// wrong syntax
 				return false;
 			}
 			
 			if ( services::chan_exists( $chan, array( 'channel' ) ) !== false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_REGISTERED_CHAN, array( 'chan' => $chan ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_REGISTERED_CHAN, array( 'chan' => $chan ) );
 				return false;
 			}
 			// check if its registered?
 			
 			if ( !strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_NEED_CHAN_OP, array( 'chan' => $chan ) );	
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_NEED_CHAN_OP, array( 'chan' => $chan ) );	
 				return false;
 			}
 			// we need to check if the user trying to register it has +o
@@ -101,7 +101,7 @@ class cs_register implements module
 			database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $user->display, 'flags' => 'Ftfrsqao' ) );
 			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
 			// create the channel! WOOOH
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
 			core::alog( core::$config->chanserv->nick.': '.$chan.' registered by '.core::get_full_hostname( $nick ) );
 			// logchan
 			
@@ -110,14 +110,14 @@ class cs_register implements module
 			
 			if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic', 'suspended' ) ) )
 			{
-				chanserv::_join_channel( &$channel );
+				chanserv::_join_channel( $channel );
 				// join the channel
 			}
 			// does the channel exist?
 		}
 		else
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, &chanserv::$help->CS_UNREGISTERED );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED );
 			return false;
 			// ph00s aint even registered..
 		}
@@ -129,7 +129,7 @@ class cs_register implements module
 	* @params
 	* $ircdata - ''
 	*/
-	public function main( &$ircdata, $startup = false )
+	public function main( $ircdata, $startup = false )
 	{
 		return true;
 		// the main core registered stuff is in chanserv core
