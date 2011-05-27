@@ -33,12 +33,12 @@ class commands
 	* @params
 	* $ircdata - ..
 	*/
-	static public function ctcp( &$ircdata )
+	static public function ctcp( $ircdata )
 	{
-		if ( ircd::on_msg( &$ircdata ) )
+		if ( ircd::on_msg( $ircdata ) )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
-			$who = ircd::get_nick( &$ircdata, 2 );
+			$nick = core::get_nick( $ircdata, 0 );
+			$who = ircd::get_nick( $ircdata, 2 );
 			
 			if ( substr( $ircdata[3], 1 ) == 'VERSION' )
 			{
@@ -75,11 +75,11 @@ class commands
 	* @params
 	* $ircdata - ..
 	*/
-	static public function motd( &$ircdata )
+	static public function motd( $ircdata )
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MOTD' )
 		{
-			$nick = core::get_nick( &$ircdata, 0 );
+			$nick = core::get_nick( $ircdata, 0 );
 			
 			if ( !file_exists( CONFPATH.'services.motd' ) )
 			{
@@ -122,13 +122,13 @@ class commands
 	* $command - The command to listen for, !op, !deop
 	* $nick - The bot which listens for the command.
 	*/
-	static public function on_fantasy_cmd( &$ircdata, $command, $nick )
+	static public function on_fantasy_cmd( $ircdata, $command, $nick )
 	{
 		$prefix = ':'.core::$config->chanserv->fantasy_prefix;
-		$chan = core::get_chan( &$ircdata, 2 );
+		$chan = core::get_chan( $ircdata, 2 );
 		$command = strtolower( $command );
 		$realdata = strtolower( $ircdata[3] );
-		$from = core::get_nick( &$ircdata, 0 );
+		$from = core::get_nick( $ircdata, 0 );
 		
 		if ( services::check_mask_ignore( $nick ) === true )
 		{

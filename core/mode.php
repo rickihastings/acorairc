@@ -35,7 +35,7 @@ class mode
 		{
 			if ( $mode == '+' || $mode == '-' ) continue;
 			
-			if ( strpos( ircd::$modes, $mode ) === false )
+			if ( strpos( $ircdata::$modes, $mode ) === false )
 			{
 				$first_part[0] = str_replace( $mode, '', $first_part[0] );
 				unset( $first_part[$index] );
@@ -108,11 +108,11 @@ class mode
 			
 			if ( $force_modes )
 			{
-				if ( strpos( ircd::$modes, $mode ) === false ) continue;
+				if ( strpos( $ircdata::$modes, $mode ) === false ) continue;
 				// we need to check if the mode that we're getting is valid, this is determined
-				// by what we're passed with the ircd
+				// by what we're passed with the $ircdata
 				
-				if ( strpos( ircd::$modes_params, $mode ) !== false )
+				if ( strpos( $ircdata::$modes_params, $mode ) !== false )
 				{
 					if ( count( $params ) == 0 && $mode_type == 'minus' )
 						$modes[$mode_type] .= $mode;
@@ -256,7 +256,7 @@ class mode
 					// some values here
 					
 					foreach ( str_split( $parts[0] ) as $rm )
-						if ( strpos( ircd::$modes_params, $rm ) !== false ) $n_str .= $rm;
+						if ( strpos( $ircdata::$modes_params, $rm ) !== false ) $n_str .= $rm;
 					// generate our string, without non-paramtized modes
 					
 					$strpos = strpos( $n_str, $mode );
@@ -280,7 +280,7 @@ class mode
 			{
 				foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
 				{
-					if ( in_array( $pm, ircd::$status_modes ) || strpos( ircd::$restrict_modes, $pm ) !== false ) continue;
+					if ( in_array( $pm, $ircdata::$status_modes ) || strpos( $ircdata::$restrict_modes, $pm ) !== false ) continue;
 					// ignore status modes etc, mode::handle_params() deals with these
 					
 					$parts = explode( ' ', core::$chans[$chan]['modes'] );
@@ -305,7 +305,7 @@ class mode
 			{
 				foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
 				{
-					if ( in_array( $mm, ircd::$status_modes ) || strpos( ircd::$restrict_modes, $mm ) !== false ) continue;
+					if ( in_array( $mm, $ircdata::$status_modes ) || strpos( $ircdata::$restrict_modes, $mm ) !== false ) continue;
 					// ignore status modes etc, mode::handle_params() deals with these
 					
 					$parts = explode( ' ', core::$chans[$chan]['modes'] );
@@ -317,7 +317,7 @@ class mode
 						// some values here
 						
 						foreach ( str_split( $parts[0] ) as $rm )
-							if ( strpos( ircd::$modes_params, $rm ) !== false ) $n_str .= $rm;
+							if ( strpos( $ircdata::$modes_params, $rm ) !== false ) $n_str .= $rm;
 						// generate our string, without non-paramtized modes
 						
 						$strpos = strpos( $n_str, $mm );
@@ -361,7 +361,7 @@ class mode
 				{
 					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
 					{
-						if ( !in_array( $pm, ircd::$status_modes ) ) continue;
+						if ( !in_array( $pm, $ircdata::$status_modes ) ) continue;
 						// we've found a user but be careful, this could be a key
 						// so we've gotta check for the qaohv modes
 						
@@ -376,7 +376,7 @@ class mode
 				{	
 					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
 					{
-						if ( !in_array( $mm, ircd::$status_modes ) ) continue;
+						if ( !in_array( $mm, $ircdata::$status_modes ) ) continue;
 						// again we've found a user, but we need to check if it's a correct mode
 						
 						if ( strpos( core::$chans[$chan]['users'][$param], $mm ) !== false ) 
@@ -394,7 +394,7 @@ class mode
 				{
 					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
 					{
-						if ( strpos( ircd::$restrict_modes, $pm ) === false ) continue;
+						if ( strpos( $ircdata::$restrict_modes, $pm ) === false ) continue;
 						// make sure the mode is a +bIe
 						
 						if ( strpos( core::$chans[$chan]['p_modes'][$param], $pm ) === false )
@@ -408,7 +408,7 @@ class mode
 				{
 					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
 					{
-						if ( strpos( ircd::$restrict_modes, $mm ) === false ) continue;
+						if ( strpos( $ircdata::$restrict_modes, $mm ) === false ) continue;
 						// make sure the mode is a +bIe
 						
 						if ( strpos( core::$chans[$chan]['p_modes'][$param], $mm ) !== false ) 
@@ -422,7 +422,7 @@ class mode
 				}
 				// loop through the minus modes
 			}
-			// here we handle +bIe, and any other that may occur, this is determined by ircd{}
+			// here we handle +bIe, and any other that may occur, this is determined by $ircdata{}
 		}
 		// here we need to loop through the parameters, handling
 		// things like +qaohv, also +bIe, as of 0.4.5
@@ -467,25 +467,25 @@ class mode
 				// loop through, finding users that are level 0, or more
 				// commonly, don't have any status modes.
 			}
-			elseif ( $part[1] == 'v' || $part[1] == ircd::$prefix_modes['v'] )
+			elseif ( $part[1] == 'v' || $part[1] == $ircdata::$prefix_modes['v'] )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 					if ( strpos( $modes, 'v' ) !== false ) $nicks[] .= $nick;
 				// again we loop, finding users that have voice.	
 			}
-			elseif ( ( $part[1] == 'h' || $part[1] == ircd::$prefix_modes['h'] ) && ircd::$halfop  )
+			elseif ( ( $part[1] == 'h' || $part[1] == $ircdata::$prefix_modes['h'] ) && $ircdata::$halfop  )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 					if ( strpos( $modes, 'h' ) !== false ) $nicks[] .= $nick;
 				// again we loop, finding users that have halfop.	
 			}
-			elseif ( $part[1] == 'o' || $part[1] == ircd::$prefix_modes['o'] )
+			elseif ( $part[1] == 'o' || $part[1] == $ircdata::$prefix_modes['o'] )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 					if ( strpos( $modes, 'o' ) !== false ) $nicks[] .= $nick;
 				// again we loop, finding users that have operator.	
 			}
-			elseif ( ( $part[1] == 'a' || $part[1] == ircd::$prefix_modes['a'] ) && ircd::$protect )
+			elseif ( ( $part[1] == 'a' || $part[1] == $ircdata::$prefix_modes['a'] ) && $ircdata::$protect )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 				{
@@ -493,7 +493,7 @@ class mode
 				}
 				// again we loop, finding users that have admin.	
 			}
-			elseif ( ( $part[1] == 'q' || $part[1] == ircd::$prefix_modes['q'] ) && ircd::$owner )
+			elseif ( ( $part[1] == 'q' || $part[1] == $ircdata::$prefix_modes['q'] ) && $ircdata::$owner )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 					if ( strpos( $modes, 'q' ) !== false ) $nicks[] .= $nick;
@@ -558,9 +558,9 @@ class mode
 			$nick_string .= $nick.' ';
 			// add stuff to the strings.
 			
-			if ( $i == ircd::$max_params || $i == $x ) 
+			if ( $i == $ircdata::$max_params || $i == $x ) 
 			{
-				ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
+				$ircdata::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
 				// send the modes
 				
 				$i = 0;
@@ -579,7 +579,7 @@ class mode
 		// 6 at a time, sound good? indeed it does.
 		
 		if ( count( $nicks ) > 0 )
-			ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
+			$ircdata::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
 		// send the remaining modes
 
 		unset ( $nicks );

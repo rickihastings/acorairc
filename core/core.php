@@ -153,7 +153,7 @@ class core
 					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
 					// log our incoming bandwidth
 					
-					if ( $this->process( &$ircdata, true ) ) continue;
+					if ( $this->process( $ircdata, true ) ) continue;
 					// process the data from the buffer
 					
 					unset( self::$nbuffer[$index], $index, $ircdata );
@@ -171,7 +171,7 @@ class core
 					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
 					// log our incoming bandwidth
 					
-					if ( $this->process( &$ircdata, false ) ) continue;
+					if ( $this->process( $ircdata, false ) ) continue;
 					// process normal incoming data
 					
 					unset( self::$buffer[$index], $index, $ircdata );
@@ -196,11 +196,11 @@ class core
 				// we also logfile here, and stop logfiling until we've
 				// reached the end of the burst, then we do it every 5 mins
 				
-				if ( ircd::on_capab_start( &$ircdata ) ) self::$capab_start = true;
+				if ( ircd::on_capab_start( $ircdata ) ) self::$capab_start = true;
 				// if capab has started we set a true flag, just like
 				// we do with burst
 				
-				if ( ircd::on_capab_end( &$ircdata ) )
+				if ( ircd::on_capab_end( $ircdata ) )
 				{
 					self::$capab_start = false;
 					
@@ -210,10 +210,10 @@ class core
 				// before we're suppost to boot everything
 				// we also set the flag to false cause capab has ended.
 				
-				ircd::get_information( &$ircdata );
+				ircd::get_information( $ircdata );
 				// modes and stuff we check for here.
 				
-				if ( ircd::on_start_burst( &$ircdata ) )
+				if ( ircd::on_start_burst( $ircdata ) )
 				{
 					self::$end_burst = false;
 					
@@ -227,7 +227,7 @@ class core
 				}
 				// if we recieve a start burst, we also adopt the time given to us
 				
-				if ( ircd::on_end_burst( &$ircdata ) )
+				if ( ircd::on_end_burst( $ircdata ) )
 				{
 					self::$burst_time = round( microtime( true ) - self::$burst_time, 4 );
 					if ( self::$burst_time[0] == '-' ) substr( self::$burst_time, 1 );
@@ -242,9 +242,9 @@ class core
 				// here we check if we're recieving an endburst
 				
 				if ( !self::$end_burst ) 
-					self::$nbuffer[] = &$ircdata;
+					self::$nbuffer[] = $ircdata;
 				else
-					self::$buffer[] = &$ircdata;
+					self::$buffer[] = $ircdata;
 				// we should really only be processing the data if the burst has finished
 				// so we add it to a buffer and process it in each main loop :)
 				
@@ -284,28 +284,28 @@ class core
 	* $ircdata - ..
 	* $startup - boolean to indicate if we're booting or not.
 	*/
-	public function process( &$ircdata, $startup = false )
+	public function process( $ircdata, $startup = false )
 	{
-		self::log_changes( &$ircdata, $startup );
+		self::log_changes( $ircdata, $startup );
 		// log peoples hostnames, used for bans etc.
 		
-		if ( self::max_users( &$ircdata ) ) return true;
+		if ( self::max_users( $ircdata ) ) return true;
 		// check for max users.
 		
-		if ( self::flood_check( &$ircdata ) ) return true;
+		if ( self::flood_check( $ircdata ) ) return true;
 		// this just does some checking, this is quite
 		// important as it deals with the main anti-flood support
 		
-		ircd::ping( &$ircdata );
+		ircd::ping( $ircdata );
 		// pingpong my name is tingtong
 		
-		if ( commands::ctcp( &$ircdata ) ) return true;
+		if ( commands::ctcp( $ircdata ) ) return true;
 		// ctcp stuff :D
 		
-		if ( commands::motd( &$ircdata ) ) return true;
+		if ( commands::motd( $ircdata ) ) return true;
 		// motd
 		
-		if ( ircd::on_timeset( &$ircdata ) && $ircdata[3] == 'FORCE' )
+		if ( ircd::on_timeset( $ircdata ) && $ircdata[3] == 'FORCE' )
 		{
 			self::$network_time = $ircdata[2];
 		}
@@ -322,13 +322,13 @@ class core
 		foreach ( modules::$list as $module => $data )
 		{
 			if ( $data['type'] == 'core' )
-				modules::$list[$module]['class']->main( &$ircdata, $startup );
+				modules::$list[$module]['class']->main( $ircdata, $startup );
 		}	
 		// any core modules? humm
 			
 		foreach ( self::$service_bots as $bot )
 		{
-			$this->$bot->main( &$ircdata, $startup );
+			$this->$bot->main( $ircdata, $startup );
 		}
 		// we hook to each of our bots
 	}
@@ -339,70 +339,70 @@ class core
 	* @params
 	* $ircdata - ..
 	*/
-	static public function log_changes( &$ircdata, $startup = false )
+	static public function log_changes( $ircdata, $startup = false )
 	{
-		if ( ircd::on_server( &$ircdata ) )
-			ircd::handle_on_server( &$ircdata );
+		if ( ircd::on_server( $ircdata ) )
+			ircd::handle_on_server( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_squit( &$ircdata ) )
-			ircd::handle_on_squit( &$ircdata );
+		if ( ircd::on_squit( $ircdata ) )
+			ircd::handle_on_squit( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_connect( &$ircdata ) )
-			ircd::handle_on_connect( &$ircdata, $startup );
+		if ( ircd::on_connect( $ircdata ) )
+			ircd::handle_on_connect( $ircdata, $startup );
 		// log shit on connect, basically the users host etc.
 		
-		if ( ircd::on_nick_change( &$ircdata ) )
-			ircd::handle_nick_change( &$ircdata, $startup );
+		if ( ircd::on_nick_change( $ircdata ) )
+			ircd::handle_nick_change( $ircdata, $startup );
 		// on nick change, make sure the variable changes too.
 		
-		if ( ircd::on_quit( &$ircdata ) )
-			ircd::handle_quit( &$ircdata, $startup );
+		if ( ircd::on_quit( $ircdata ) )
+			ircd::handle_quit( $ircdata, $startup );
 		// on quit.
 		
-		if ( ircd::on_fhost( &$ircdata ) )
-			ircd::handle_host_change( &$ircdata );
+		if ( ircd::on_fhost( $ircdata ) )
+			ircd::handle_host_change( $ircdata );
 		// on hostname change.
 		
-		if ( ircd::on_ident_change( &$ircdata ) )
-			ircd::handle_ident_change( &$ircdata );
+		if ( ircd::on_ident_change( $ircdata ) )
+			ircd::handle_ident_change( $ircdata );
 		// on ident change
 		
-		if ( ircd::on_gecos_change( &$ircdata ) )
-			ircd::handle_gecos_change( &$ircdata );
+		if ( ircd::on_gecos_change( $ircdata ) )
+			ircd::handle_gecos_change( $ircdata );
 		// on realname (gecos) change
 		
-		if ( ircd::on_mode( &$ircdata ) )
-			ircd::handle_mode( &$ircdata );	
+		if ( ircd::on_mode( $ircdata ) )
+			ircd::handle_mode( $ircdata );	
 		// on mode
 		
-		if ( ircd::on_ftopic( &$ircdata ) )
-			ircd::handle_ftopic( &$ircdata );
+		if ( ircd::on_ftopic( $ircdata ) )
+			ircd::handle_ftopic( $ircdata );
 		// on ftopic
 		
-		if ( ircd::on_topic( &$ircdata ) )
-			ircd::handle_topic( &$ircdata );	
+		if ( ircd::on_topic( $ircdata ) )
+			ircd::handle_topic( $ircdata );	
 		// on topic
 		
-		if ( ircd::on_chan_create( &$ircdata ) )
-			ircd::handle_channel_create( &$ircdata );
+		if ( ircd::on_chan_create( $ircdata ) )
+			ircd::handle_channel_create( $ircdata );
 		// on channel create
 		
-		if ( ircd::on_join( &$ircdata ) )
-			ircd::handle_join( &$ircdata );
+		if ( ircd::on_join( $ircdata ) )
+			ircd::handle_join( $ircdata );
 		// on join
 		
-		if ( ircd::on_part( &$ircdata ) )
-			ircd::handle_part( &$ircdata );
+		if ( ircd::on_part( $ircdata ) )
+			ircd::handle_part( $ircdata );
 		// and on part.
 		
-		if ( ircd::on_kick( &$ircdata ) )
-			ircd::handle_kick( &$ircdata );
+		if ( ircd::on_kick( $ircdata ) )
+			ircd::handle_kick( $ircdata );
 		// and on kick.
 		
-		if ( ircd::on_oper_up( &$ircdata ) )
-			ircd::handle_oper_up( &$ircdata );
+		if ( ircd::on_oper_up( $ircdata ) )
+			ircd::handle_oper_up( $ircdata );
 		// on oper ups
 	}
 	
@@ -494,9 +494,9 @@ class core
 	* @params
 	* $ircdata - ..
 	*/
-	static public function max_users( &$ircdata )
+	static public function max_users( $ircdata )
 	{
-		if ( ircd::on_connect( &$ircdata ) )
+		if ( ircd::on_connect( $ircdata ) )
 		{
 			if ( count( self::$nicks ) > self::$max_users )
 			{
@@ -605,7 +605,7 @@ class core
 	* @params
 	* $ircdata - ..
 	*/
-	static public function flood_check( &$ircdata )
+	static public function flood_check( $ircdata )
 	{
 		if ( trim( $ircdata[0] ) == '' )
 		{
@@ -613,21 +613,21 @@ class core
 		}
 		// the data is empty, omgwtf..
 		
-		if ( ircd::on_msg( &$ircdata ) && $ircdata[2][0] == '#' && $ircdata[3][1] != self::$config->chanserv->fantasy_prefix )
+		if ( ircd::on_msg( $ircdata ) && $ircdata[2][0] == '#' && $ircdata[3][1] != self::$config->chanserv->fantasy_prefix )
 		{
 			return true;
 		}
 		// this is just here to instantly ignore any normal channel messages 
 		// otherwise we get lagged up on flood attempts
 		
-		if ( ircd::on_notice( &$ircdata ) )
+		if ( ircd::on_notice( $ircdata ) )
 		{
 			return true;
 		}
 		// and ignore notices, since we shouldnt respond to any 
 		// notices what so ever, just saves wasting cpu cycles when we get a notice
 		
-		if ( ircd::on_msg( &$ircdata ) && $ircdata[2][0] != '#' )
+		if ( ircd::on_msg( $ircdata ) && $ircdata[2][0] != '#' )
 		{
 			if ( self::$config->settings->flood_msgs == 0 || self::$config->settings->flood_time == 0 )
 			{
@@ -635,10 +635,10 @@ class core
 			}
 			// check if it's disabled.
 			
-			$nick = self::get_nick( &$ircdata, 0 );
+			$nick = self::get_nick( $ircdata, 0 );
 			$time_limit = time() - self::$config->settings->flood_time;
 			self::$nicks[$nick]['commands'][] = time();
-			$from = self::get_nick( &$ircdata, 2 );
+			$from = self::get_nick( $ircdata, 2 );
 			
 			if ( self::$nicks[$nick]['ircop'] )
 			{
@@ -856,9 +856,9 @@ class core
 	* $ircdata - ..
 	* $number - ..
 	*/
-	static public function get_nick( &$ircdata, $number )
+	static public function get_nick( $ircdata, $number )
 	{
-		return ircd::get_nick( &$ircdata, $number );
+		return ircd::get_nick( $ircdata, $number );
 		// moved this into the protocol module
 	}
 	
@@ -869,7 +869,7 @@ class core
 	* $ircdata - ..
 	* $number - ..
 	*/
-	static public function get_chan( &$ircdata, $number )
+	static public function get_chan( $ircdata, $number )
 	{
 		$chan = $ircdata[$number];
 		
@@ -883,7 +883,7 @@ class core
 	* $ircdata - ..
 	* $number - ..
 	*/
-	static public function get_data_after( &$ircdata, $number )
+	static public function get_data_after( $ircdata, $number )
 	{
 		$new_ircdata = $ircdata;
 		
