@@ -69,7 +69,7 @@ class mode
 		
 		if ( strstr( $modes, ' ' ) != false )
 		{
-			$params = split( ' ', $modes );
+			$params = explode( ' ', $modes );
 			// split the space
 			
 			$modes = $params[0];

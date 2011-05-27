@@ -33,19 +33,13 @@ class chanserv implements service
 		// load the help file
 		
 		if ( isset( core::$config->chanserv ) )
-		{
 			ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
-		}
 		else
-		{
 			return;
-		}
 		// connect the bot
 		
 		foreach ( core::$config->chanserv_modules as $id => $module )
-		{
 			modules::load_module( 'cs_'.$module, $module.'.cs.php' );
-		}
 		// load the chanserv modules
 		
 		timer::add( array( 'chanserv', 'check_expire', array() ), 300, 0 );
@@ -108,9 +102,7 @@ class chanserv implements service
 	static public function part_chan_callback( $chan )
 	{
 		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
-		{
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
-		}
 		// if we're the only person in the channel, leave it.
 	}
 	
@@ -434,13 +426,9 @@ class chanserv implements service
 		// we just grab it.
 		
 		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'id', 'display' ) ) !== false ) )
-		{
 			return true;
-		}
 		else
-		{
 			return false;
-		}
 		// here we just check for flag F
 	}
 	
@@ -459,9 +447,7 @@ class chanserv implements service
 	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true )
 	{
 		if ( $ident && !$user = services::user_exists( $nick, true, array( 'id', 'display' ) ) )
-		{
 			return false;
-		}
 		// they aint even identified..
 		
 		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
@@ -473,9 +459,7 @@ class chanserv implements service
 		while ( $chan_flags = database::fetch( $user_flags_q ) )
 		{
 			if ( $or_check && core::$nicks[$nick]['override'] )
-			{
 				return true;
-			}
 			// is override enabled for this user?
 			
 			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
@@ -556,6 +540,7 @@ class chanserv implements service
 		// get our flags records
 		
 		return $chan_flags->$param_field;
+		print ' WILL FIND U';
 	}
 	
 	/*
