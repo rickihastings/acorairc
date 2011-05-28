@@ -284,9 +284,9 @@ class ircd implements protocol
 		$chan = core::get_chan( $ircdata, 2 );
 		$mode_queue = core::get_data_after( $ircdata, 4 );
 		
-		//$mode_array = mode::sort_modes( $mode_queue );
-		//mode::append_modes( $chan, $mode_array );
-		//mode::handle_params( $chan, $mode_array );
+		$mode_array = mode::sort_modes( $mode_queue );
+		mode::append_modes( $chan, $mode_array );
+		mode::handle_params( $chan, $mode_array );
 	}
 	
 	/*
@@ -711,8 +711,12 @@ class ircd implements protocol
 		// get the uid.
 		
 		if ( $mode[0] != '-' && $mode[0] != '+' ) $mode = '+'.$mode;
-		
+
+		echo "We are in function mode before something, mode = ".$mode." nick = ".$nick."\r\n";
 		$mode = mode::check_modes( $mode );
+		
+
+		echo "We are in function mode after something, mode = ".$mode." nick = ".$nick."\r\n";
 		// we don't want nobody messing about
 
 		if ( $mode != '' )
@@ -721,7 +725,8 @@ class ircd implements protocol
 				core::$chans[$chan]['timestamp'] = core::$network_time;
 			
 			self::send( ':'.$unick.' FMODE '.$chan.' '.core::$chans[$chan]['timestamp'].' '.$mode );
-			
+	
+				
 			$mode_array = mode::sort_modes( $mode );
 			mode::append_modes( $chan, $mode_array );
 			mode::handle_params( $chan, $mode_array );
