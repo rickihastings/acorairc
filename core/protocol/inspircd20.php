@@ -84,7 +84,11 @@ class ircd implements protocol
 		
 		if ( !core::$end_burst )
 			self::send( ':'.self::$sid.' BURST '.core::$network_time );
+<<<<<<< HEAD
 		// send burst eh..
+=======
+		// send burst eh.
+>>>>>>> 7e4386989fe4329554a3af3f55f62e221e1b7e2d
 	}
 	
 	/*
