@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/protocol/inspircd11.php: Provides support for InspIRCd 1.2
+* core/protocol/inspircd20.php: Provides support for InspIRCd 2.0 (EXPERIMENTAL)
 * 
 * Copyright (c) 2009 Acora (http://gamergrid.net/acorairc)
 * Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
