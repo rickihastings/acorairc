@@ -41,6 +41,7 @@ interface protocol
 	static public function ping( $ircdata );
 	static public function get_information( $ircdata );
 	static public function init_server( $name, $pass, $desc, $numeric );
+	static public function send_version( $version, $name, $ircd );
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false );
 	static public function remove_client( $nick, $message );
 	static public function globops( $nick, $message );

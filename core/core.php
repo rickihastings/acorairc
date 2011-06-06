@@ -205,7 +205,7 @@ class core
 					self::$capab_start = false;
 					
 					$this->boot_server();
-
+					// introduce server etc
 				}
 				// we need to respectivly wait for capab end
 				// before we're suppost to boot everything
@@ -214,17 +214,20 @@ class core
 				ircd::get_information( $ircdata );
 				// modes and stuff we check for here.
 				
+				$this->log_changes( $ircdata, false );
+				
 				if ( ircd::on_start_burst( $ircdata ) )
 				{
 					self::$end_burst = false;
 					
-					if ( strstr(core::$config->server->ircd, 'inspircd') )
-					{
+					if ( strstr( core::$config->server->ircd, 'inspircd' ) )
 						self::$network_time = $ircdata[2];
-					}
 					
 					self::$burst_time = microtime( true );
 					// how long did the burst take?
+					
+					$this->post_boot_server();
+					// post boot
 				}
 				// if we recieve a start burst, we also adopt the time given to us
 				
@@ -269,7 +272,7 @@ class core
 			{
 				self::$debug_data = array();
 			}
-			// here we output debug data, if there is any.
+			// here we output debug data, if there is any.*/
 			
 			usleep( 45000 );
 			// 40000 is the highest i'm willing to go, as 50000
@@ -421,24 +424,35 @@ class core
 			
 			ircd::init_server( self::$config->server->name, self::$config->conn->password, self::$config->server->desc, self::$config->server->numeric );
 			// init the server
-			
-			foreach ( self::$service_bots as $bot )
-			{
-				require( BASEPATH.'/core/services/'.$bot.'.php' );
-				$this->$bot = new $bot();
-			}
-			// start our bots up.
-			
-			foreach ( self::$config->core_modules as $id => $module )
-			{
-				modules::load_module( 'core_'.$module, $module.'.core.php' );
-			}
-			// we load core modules before the bots, incase there
-			// is a module that changes an existing function w/e
-			
-			timer::init();
-			// setup the timer, socket_blocking to 0 is required.
 		}
+	}
+	
+	/*
+	* post_boot_server (private)
+	*
+	* @params
+	* void
+	*/
+	public function post_boot_server()
+	{
+		ircd::send_version( self::$version, self::$config->server_name, self::$config->ircd );
+	
+		foreach ( self::$service_bots as $bot )
+		{
+			require( BASEPATH.'/core/services/'.$bot.'.php' );
+			$this->$bot = new $bot();
+		}
+		// start our bots up.
+		
+		foreach ( self::$config->core_modules as $id => $module )
+		{
+			modules::load_module( 'core_'.$module, $module.'.core.php' );
+		}
+		// we load core modules before the bots, incase there
+		// is a module that changes an existing function w/e
+			
+		timer::init();
+		// setup the timer, socket_blocking to 0 is required.
 	}
 	
 	/*
