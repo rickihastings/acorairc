@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -80,6 +80,9 @@ class ircd implements protocol
 	static public function handle_on_server( $ircdata )
 	{
 		core::$servers[$ircdata[1]] = array( 'name' => $ircdata[1], 'sid' => $ircdata[4] );
+				
+		if ( !core::$end_burst )
+			self::send( ':'.self::$sid.' BURST '.core::$network_time );
 	}
 	
 	/*
@@ -531,14 +534,23 @@ class ircd implements protocol
 	{
 		self::$sid = $numeric;
 		self::send( 'SERVER '.$name.' '.$pass.' 0 '.self::$sid.' :'.$desc );
-		self::send( ':'.self::$sid.' BURST '.core::$network_time );
-		// init the server
-		
-		self::send( ':'.self::$sid.' VERSION :acora-'.core::$version.' '.core::$config->server_name.' '.core::$config->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
-		// ooh, version?
 		
 		core::alog( 'init_server(): '.$name.' introduced :'.$desc, 'BASIC' );
 		// log it
+	}
+		
+	/*
+	* send_version
+	*
+	* @params
+	* $version - version
+	* $name - server name
+	* $ircd - ircd
+	*/
+	static public function send_version( $version, $name, $ircd )
+	{
+		self::send( ':'.self::$sid.' VERSION :acora-'.core::$version.' '.core::$config->server_name.' '.core::$config->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+		// ooh, version?
 	}
 	
 	/*

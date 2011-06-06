@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/protocol/unreal32.php: Provides support for UnrealIRCd 3.2.x
+* core/protocol/unreal32.php: Provides support for UnrealIRCd 3.2.x (EXPERIMENTAL)
 * 
 * Copyright (c) 2009 Acora (http://gamergrid.net/acorairc)
 * Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
