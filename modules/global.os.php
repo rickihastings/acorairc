@@ -17,7 +17,7 @@
 class os_global implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -136,7 +136,8 @@ class os_global implements module
 	{
 		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && ircd::on_connect( $ircdata ) )
 		{
-			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
+			$part = strstr( core::$config->server->ircd, 'inspircd11' ) ? 3 : 2;
+			$nick = core::get_nick( $ircdata, $part );
 			// get nick
 			
 			ircd::notice( core::$config->global->nick, $nick, 'Services are currently running in debug mode, please be careful when sending passwords.' );

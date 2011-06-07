@@ -27,14 +27,14 @@ class ircd implements protocol
 	static public $chgident = false;
 	static public $sid;
 
-	static public $restrict_modes = 'bIe';
+	static public $restrict_modes;
 	static public $status_modes = array();
 	static public $owner = false;
 	static public $protect = false;
 	static public $halfop = false;
 	
 	static public $modes_params = 'qaohvbIegjfJLlk';
-	static public $modes_p_unrequired = 'l';
+	static public $modes_p_unrequired;
 	static public $modes;
 	static public $max_params = 6;
 	
@@ -43,13 +43,7 @@ class ircd implements protocol
 	static public $motd_end = 'End of message of the day.';
 	static public $default_c_modes = 'nt';
 	
-	static public $prefix_modes = array(
-		'q'	=>	'~',
-		'a'	=>	'&',
-		'o'	=>	'@',
-		'h'	=>	'%',
-		'v'	=>	'+',
-	);
+	static public $prefix_modes = array();
 	
 	static public $service_modes = array(
 		'enforcer' 	=> '+Ii',
@@ -121,7 +115,9 @@ class ircd implements protocol
 	{
 		$nick = $ircdata[4];
 		$server = self::get_server( $ircdata, 0 );
-		$gecos = core::get_data_after( $ircdata, 12 );
+		$gecos = core::get_data_after( $ircdata, 11 );
+		$gecos = explode( ':', $gecos );
+		$gecos = $gecos[1];
 		// get nick, server, gecos
 		
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
@@ -499,42 +495,59 @@ class ircd implements protocol
 		
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'CAPABILITIES' )
 		{
+			$pdata = explode( '=', $ircdata[15] );
+			$pdata = $pdata[1];
 			$data = explode( '=', $ircdata[16] );
 			$data = $data[1];
-			$new_mdata = ( isset( $mdata ) ) ? explode( '=', $mdata ) : '';
 			$rmodes = '';
-						
-			if ( strpos( $data, 'q' ) !== false )
-			{
-				self::$owner = true;
-				self::$status_modes[] .= 'q';
-				$rmodes .= 'q';
-			}
-			// check if +q is there
+			// set some variables
 			
-			if ( strpos( $data, 'a' ) !== false )
-			{
-				self::$protect = true;
-				self::$status_modes[] .= 'a';
-				$rmodes .= 'a';
-			}
-			// and +a
-			
-			$hdata = implode( ' ', $ircdata );
+			$split_data = explode( ',', $data );
+			self::$status_modes = preg_replace( '/[^A-Za-z]/', '', $pdata );
+			self::$restrict_modes = $split_data[0];
+			self::$modes_p_unrequired = $split_data[2];
+			self::$modes_params = $split_data[0] . $split_data[1] . $split_data[2];
+			self::$modes = self::$modes_params . $split_data[3];
+			// explode our modes up and assign them
 			
 			if ( strpos( $hdata, 'HALFOP=1' ) !== false )
 			{
 				self::$halfop = true;
-				self::$status_modes[] .= 'h';
-				$rmodes .= 'h';
+				self::$status_modes = 'h' . self::$status_modes;
 			}
 			// we check halfop differently
 			
-			self::$status_modes[] .= 'o';
-			self::$status_modes[] .= 'v';
+			if ( strpos( self::$restrict_modes, 'a' ) !== false )
+			{
+				self::$status_modes = 'a' . self::$status_modes;
+				self::$restrict_modes = str_replace( 'a', '', self::$restrict_modes );
+				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
+			}
+			// search restrict modes for 'aq' as we want them in status modes
 			
-			$modes = str_replace( ',', '', $data );
-			self::$modes = $rmodes.$modes.'ov';
+			if ( strpos( self::$restrict_modes, 'q' ) !== false )
+			{
+				self::$status_modes = 'q' . self::$status_modes;
+				self::$restrict_modes = str_replace( 'q', '', self::$restrict_modes );
+				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
+			}
+			// search restrict modes for 'aq' as we want them in status modes
+			
+			$parsed_pdata = explode( ')', $pdata );
+			$pdata_modes = str_split( str_replace( '(', '', $parsed_pdata[0] ) );
+			$pdata_prefix = str_split( $parsed_pdata[1] );
+			// parse up PREFIX=(ohv) data etc
+			
+			if ( strpos( $parsed_pdata[0], 'q' ) === false )
+				self::$prefix_modes['q'] = $pdata_prefix[0];
+			if ( strpos( $parsed_pdata[0], 'a' ) === false )
+				self::$prefix_modes['a'] = $pdata_prefix[0];
+			// if q and a arn't in $parsed_pdata[0] that means there are no prefixes for them modes set
+			// so standard @ (well, not technically, but in our case, yes.
+			
+			foreach ( $pdata_modes as $i => $ix )
+				self::$prefix_modes[$ix] = $pdata_prefix[$i];
+			// loop em n sort it out
 		}
 		// only trigger when the capab capabilities is coming through
 		
