@@ -34,6 +34,7 @@ class ircd implements protocol
 	static public $halfop = false;
 	
 	static public $modes_params = 'qaohvbIegjfJLlk';
+	static public $modes_p_unrequired = 'l';
 	static public $modes;
 	static public $max_params = 6;
 	
@@ -83,6 +84,9 @@ class ircd implements protocol
 				
 		if ( !core::$end_burst )
 			self::send( ':'.self::$sid.' BURST '.core::$network_time );
+			
+		core::$pullout = true;
+		// MUST MUST MUST be true, otherwise a whole world of problems occur (trust me!)
 	}
 	
 	/*
@@ -117,7 +121,7 @@ class ircd implements protocol
 	{
 		$nick = $ircdata[4];
 		$server = self::get_server( $ircdata, 0 );
-		$gecos = core::get_data_after( $ircdata, 11 );
+		$gecos = core::get_data_after( $ircdata, 12 );
 		// get nick, server, gecos
 		
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
@@ -158,22 +162,26 @@ class ircd implements protocol
 	static public function handle_nick_change( $ircdata, $startup = false )
 	{
 		$uuid = str_replace( ':', '', $ircdata[0] );
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		$new_nick = $ircdata[2];
 		
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
 		// strip :
 		
+		if ( $new_nick == '' || $nick == $new_nick )
+			return false;
+		// fixing this function being called twice, not sure why thats happening..
+		
 		if ( isset( core::$nicks[$nick] ) )
 		{
 			core::$nicks[$new_nick] = core::$nicks[$nick];
+			unset( core::$nicks[$nick] );
+			// change the nick records
+			
 			core::$nicks[$new_nick]['nick'] = $new_nick;
 			core::$nicks[$new_nick]['onick'] = $nick;
 			core::$uids[$uuid] = $new_nick;
-			
-			unset( core::$nicks[$nick] );
-			// change the nick records
 			
 			foreach ( core::$chans as $chan => $data )
 			{
@@ -201,7 +209,7 @@ class ircd implements protocol
 	*/
 	static public function handle_quit( $ircdata, $startup = false )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		// nick
 		
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
@@ -234,7 +242,7 @@ class ircd implements protocol
 	*/
 	static public function handle_host_change( $ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		
 		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];	
 		core::$nicks[$nick]['host'] = $ircdata[2];
@@ -288,6 +296,7 @@ class ircd implements protocol
 		$mode_queue = core::get_data_after( $ircdata, 4 );
 		
 		$mode_array = mode::sort_modes( $mode_queue );
+		
 		mode::append_modes( $chan, $mode_array );
 		mode::handle_params( $chan, $mode_array );
 	}
@@ -319,7 +328,7 @@ class ircd implements protocol
 	*/
 	static public function handle_topic( $ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
 		$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
 		// grab the topic
@@ -346,6 +355,11 @@ class ircd implements protocol
 			// of the way 1.2 handles FJOINs
 			$nusers = self::parse_users( $chan, $nusers_str, 1 );
 			
+			$mode_queue = core::get_data_after( $ircdata, 4 );
+			$mode_queue = explode( ':', $mode_queue );
+			$mode_queue = $mode_queue[0];
+			// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
+			
 			core::$chans[$chan]['timestamp'] = $ircdata[3];
 			core::$chans[$chan]['p_modes'] = array();
 			
@@ -355,6 +369,12 @@ class ircd implements protocol
 				core::$chans[$chan]['users'] = $nusers;
 			// basically check if we already have an array, because FJOIN can happen on
 			// existing channels, idk why, maybe on bursts etc?
+			
+			$mode_array = mode::sort_modes( $mode_queue );
+			mode::append_modes( $chan, $mode_array );
+			mode::handle_params( $chan, $mode_array );
+			// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in FJOIN now, upon bursts, and also resent
+			// when users join channels (not sure why here, probably just because they can and it shouldn't break a good parser)
 		}
 	}
 	
@@ -366,7 +386,7 @@ class ircd implements protocol
 	*/
 	static public function handle_join( $ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		$chans = explode( ',', $ircdata[2] );
 		
 		foreach ( $chans as $chan )
@@ -385,7 +405,7 @@ class ircd implements protocol
 	*/
 	static public function handle_part( $ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
 			
 		unset( core::$chans[$chan]['users'][$nick] );
@@ -401,7 +421,7 @@ class ircd implements protocol
 	static public function handle_kick( $ircdata )
 	{
 		$chan = core::get_chan( $ircdata, 2 );
-		$who = core::get_nick( $ircdata, 3 );
+		$who = self::get_nick( $ircdata, 3 );
 			
 		unset( core::$chans[$chan]['users'][$who] );
 		// again, move them out.
@@ -415,7 +435,7 @@ class ircd implements protocol
 	*/
 	static public function handle_oper_up( $ircdata )
 	{
-		$nick = core::get_nick( $ircdata, 0 );
+		$nick = self::get_nick( $ircdata, 0 );
 		
 		core::$nicks[$nick]['ircop'] = true;
 	}
@@ -1461,7 +1481,7 @@ class ircd implements protocol
 	*/
 	static public function on_nick_change( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 3 )
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 4 )
 		{
 			core::alog( 'on_nick_change(): '.self::get_nick( $ircdata, 0 ).' changed nick to '.$ircdata[2], 'BASIC' );
 			// debug info
@@ -1552,10 +1572,7 @@ class ircd implements protocol
 	{
 		$uuid = str_replace( ':', '', $ircdata[$number] );
 		
-		if ( is_numeric( $uuid[0] ) )
-			return core::$uids[$uuid];
-		else
-			return $uuid;
+		return core::$uids[$uuid];
 		// we always display the uid nick here, ALWAYS
 		// therefore when we need the uid, we'll change the
 		// nick to a uid.	
