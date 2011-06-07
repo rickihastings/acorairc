@@ -26,6 +26,7 @@ class ircd implements protocol
 	static public $chghost = false;
 	static public $chgident = false;
 	static public $sid;
+	static public $uid_count = 'AAAAAA';
 
 	static public $restrict_modes;
 	static public $status_modes = array();
@@ -295,6 +296,9 @@ class ircd implements protocol
 		
 		mode::append_modes( $chan, $mode_array );
 		mode::handle_params( $chan, $mode_array );
+		// handle modes
+		
+		print_r (core::$chans[$chan]);
 	}
 	
 	/*
@@ -507,38 +511,35 @@ class ircd implements protocol
 			// set some variables
 			
 			$split_data = explode( ',', $data );
-			self::$status_modes = preg_replace( '/[^A-Za-z]/', '', $pdata );
 			self::$restrict_modes = $split_data[0];
 			self::$modes_p_unrequired = $split_data[2];
 			// explode our modes up and assign them
 			
-			if ( strpos( $hdata, 'HALFOP=1' ) !== false )
-			{
-				self::$halfop = true;
-				self::$status_modes = 'h' . self::$status_modes;
-			}
-			// we check halfop differently
-			
-			if ( strpos( self::$restrict_modes, 'a' ) !== false )
-			{
-				self::$protect = true;
-				self::$status_modes = 'a' . self::$status_modes;
-				self::$restrict_modes = str_replace( 'a', '', self::$restrict_modes );
-				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
-			}
-			// search restrict modes for 'aq' as we want them in status modes
-			
 			if ( strpos( self::$restrict_modes, 'q' ) !== false )
 			{
 				self::$owner = true;
-				self::$status_modes = 'q' . self::$status_modes;
+				self::$status_modes[] .= 'q';
 				self::$restrict_modes = str_replace( 'q', '', self::$restrict_modes );
 				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
 			}
 			// search restrict modes for 'aq' as we want them in status modes
 			
-			self::$modes_params = self::$restrict_modes . $split_data[1] . self::$modes_p_unrequired;
-			self::$modes = self::$status_modes . self::$modes_params . $split_data[3];
+			if ( strpos( self::$restrict_modes, 'a' ) !== false )
+			{
+				self::$protect = true;
+				self::$status_modes[] .= 'a';
+				self::$restrict_modes = str_replace( 'a', '', self::$restrict_modes );
+				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
+			}
+			// search restrict modes for 'aq' as we want them in status modes
+			
+			if ( strpos( $hdata, 'HALFOP=1' ) !== false )
+				self::$halfop = true;
+			// we check halfop differently
+			
+			self::$status_modes = array_merge( self::$status_modes, str_split( preg_replace( '/[^A-Za-z]/', '', $pdata ) ) );			
+			self::$modes_params = implode( '', self::$status_modes ) . self::$restrict_modes . $split_data[1] . self::$modes_p_unrequired;
+			self::$modes = self::$modes_params . $split_data[3];
 			// causing status modes not to be in ircd::$modes
 			
 			$parsed_pdata = explode( ')', $pdata );
@@ -606,8 +607,10 @@ class ircd implements protocol
 	*/
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false )
 	{
-		$uid = self::$sid.'AAAA'.chr( rand( ord( 'A' ), ord( 'Z' ) ) ).chr( rand( ord( 'A' ), ord( 'Z' ) ) );
+		++self::$uid_count;
+		$uid = self::$sid . self::$uid_count;
 		// produce our random UUID.
+		
 		core::$times[$nick] = core::$network_time;
 		// just so if we do need to change anything, we've still got it.
 		
