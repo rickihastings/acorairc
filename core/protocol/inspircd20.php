@@ -34,6 +34,7 @@ class ircd implements protocol
 	static public $halfop = false;
 	
 	static public $modes_params = 'qaohvbIegjfJLlk';
+	static public $modes_p_unrequired = 'l';
 	static public $modes;
 	static public $max_params = 6;
 	
@@ -51,8 +52,8 @@ class ircd implements protocol
 	);
 	
 	static public $service_modes = array(
-		'enforcer' 	=> '+Ii',
-		'service'	=> '+Iio',
+		'enforcer' 	=> '+i',
+		'service'	=> '+io',
 	);
 	// we have a bunch of variables here
 	// most of these are defined when we boot up
@@ -83,7 +84,10 @@ class ircd implements protocol
 		// init the server
 		
 		if ( !core::$end_burst )
-			self::send( ':'.self::$sid.' BURST '.core::$network_time );
+			self::send( ':'.self::$sid.' BURST '.core::$network_time );			
+		
+		core::$pullout = true;
+		// MUST MUST MUST be true, otherwise a whole world of problems occur (trust me!)
 	}
 	
 	/*

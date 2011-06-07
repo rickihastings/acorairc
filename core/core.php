@@ -43,6 +43,7 @@ class core
 	
 	static public $end_burst = false;
 	static public $capab_start = false;
+	static public $pullout = false;
 	static public $lines_processed;
 	static public $lines_sent;
 	static public $buffer;
@@ -214,7 +215,8 @@ class core
 				ircd::get_information( $ircdata );
 				// modes and stuff we check for here.
 				
-				$this->log_changes( $ircdata, false );
+				if ( !self::$pullout )
+					$this->log_changes( $ircdata, false );
 				
 				if ( ircd::on_start_burst( $ircdata ) )
 				{
@@ -272,7 +274,7 @@ class core
 			{
 				self::$debug_data = array();
 			}
-			// here we output debug data, if there is any.*/
+			// here we output debug data, if there is any.
 			
 			usleep( 45000 );
 			// 40000 is the highest i'm willing to go, as 50000
@@ -577,11 +579,11 @@ class core
 	*/
 	static public function check_unused_chans()
 	{
-		foreach ( self::$chans as $chan => $data )
+		/*foreach ( self::$chans as $chan => $data )
 		{
 			if ( count( self::$chans[$chan]['users'] ) == 0 || ( strstr(core::$config->server->ircd, 'inspircd') && !strstr( self::$chans[$chan]['modes'], 'P' ) ) ) 
 				unset( self::$chans[$chan] );
-		}
+		}*/
 	}
 	
 	/*

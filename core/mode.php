@@ -96,7 +96,7 @@ class mode
 		// more key variables
 		
 		foreach ( $split_modes as $mode )
-		{
+		{	
 			if ( $mode == '+' ) { $mode_type = 'plus'; continue; }
 			elseif ( $mode == '-' ) { $mode_type = 'minus'; continue; }
 			// check if the letter is a + or a -
@@ -112,17 +112,12 @@ class mode
 				// we need to check if the mode that we're getting is valid, this is determined
 				// by what we're passed with the $ircdata
 				
-				if ( strpos( ircd::$modes_params, $mode ) !== false )
-				{
-					if ( count( $params ) == 0 && $mode_type == 'minus' )
-						$modes[$mode_type] .= $mode;
-					else
-						$params[] = ( $mode_type == 'plus' ? '+'.$mode : '-'.$mode );
-				}
-				else
-				{
+				if ( strpos( ircd::$modes_p_unrequired, $mode ) !== false && $mode_type == 'minus' )
 					$modes[$mode_type] .= $mode;
-				}
+				else if ( strpos( ircd::$modes_params, $mode ) !== false )
+					$params[] = ( $mode_type == 'plus' ? '+'.$mode : '-'.$mode );
+				else
+					$modes[$mode_type] .= $mode;
 				// check if the mode is a parmeter mode
 				// if so put in a seperate array
 			}
@@ -256,8 +251,11 @@ class mode
 					// some values here
 					
 					foreach ( str_split( $parts[0] ) as $rm )
-						if ( strpos( ircd::$modes_params, $rm ) !== false ) $n_str .= $rm;
+						if ( strpos( ircd::$modes_p_unrequired, $rm ) !== false ) $n_str .= $rm;
 					// generate our string, without non-paramtized modes
+					
+					$strpos = strpos( $n_str, $mode );
+					// find the location of the paramter.
 					
 					$strpos = strpos( $n_str, $mode );
 					// find the location of the paramter.

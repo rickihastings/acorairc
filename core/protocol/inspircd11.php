@@ -33,6 +33,7 @@ class ircd implements protocol
 	static public $halfop = false;
 	
 	static public $modes_params = 'qaohvbIegjfJLlk';
+	static public $modes_p_unrequired = 'l';
 	static public $modes;
 	static public $max_params = 6;
 	
@@ -82,6 +83,9 @@ class ircd implements protocol
 		
 		if ( !core::$end_burst )
 			self::send( 'BURST '.core::$network_time );
+			
+		core::$pullout = true;
+		// MUST MUST MUST be true, otherwise a whole world of problems occur (trust me!)
 	}
 	
 	/*
@@ -333,7 +337,10 @@ class ircd implements protocol
 			$nusers = self::parse_users( $chan, $nusers_str, 1 );
 			
 			core::$chans[$chan]['timestamp'] = $ircdata[3];
-			core::$chans[$chan]['p_modes'] = array();
+			if ( !isset( core::$chans[$chan]['p_modes'] ) )
+				core::$chans[$chan]['p_modes'] = array();
+			if ( !isset( core::$chans[$chan]['users'] ) )
+				core::$chans[$chan]['users'] = array();
 			
 			if ( isset( core::$chans[$chan]['users'] ) )
 				core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );

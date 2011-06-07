@@ -17,7 +17,7 @@
 class cs_register implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -71,6 +71,7 @@ class cs_register implements module
 				return false;
 			}
 			// check if its registered?
+			
 			
 			if ( !strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
 			{

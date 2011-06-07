@@ -33,6 +33,7 @@ class ircd implements protocol
 	static public $halfop = false;
 	
 	static public $modes_params = 'qaohvbIegjfJLlk';
+	static public $modes_p_unrequired = 'l';
 	static public $modes;
 	static public $max_params = 6;
 	
@@ -520,6 +521,9 @@ class ircd implements protocol
 		
 		//self::send( ':'.core::$config->server->name.' VERSION :' );
 		// ooh, version?
+		
+		core::$pullout = true;
+		// not sure how this will work with unreal?
 		
 		core::alog( 'init_server(): '.$name.' introduced :'.$desc, 'BASIC' );
 		// log it
