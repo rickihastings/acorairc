@@ -12,3 +12,4 @@
 * Parse MAXMODES into $max_params (DONE)
 * Parse m_hidechans.so, as we do need this, well not need but certainly should be using it! atm it just crashes without it (can parse it in ircd, don't want to as it means editing all, but probably should because not all ircd's use modules for modes like this (and some even use different modes!))
 * Report an error and boot when module isn't found, instead of crashing
+* Fix bug with /os global
