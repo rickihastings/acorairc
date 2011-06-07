@@ -114,7 +114,7 @@ class mode
 				
 				if ( strpos( ircd::$modes_p_unrequired, $mode ) !== false && $mode_type == 'minus' )
 					$modes[$mode_type] .= $mode;
-				else if ( strpos( ircd::$modes_params, $mode ) !== false )
+				if ( strpos( ircd::$modes_params, $mode ) !== false )
 					$params[] = ( $mode_type == 'plus' ? '+'.$mode : '-'.$mode );
 				else
 					$modes[$mode_type] .= $mode;
@@ -225,9 +225,7 @@ class mode
 	static public function append_modes( $chan, $mode_array )
 	{
 		if ( !isset( core::$chans[$chan] ) || !is_array( $mode_array ) )
-		{
 			return false;
-		}
 		
 		if ( $mode_array['plus'] != '' )
 		{
@@ -347,17 +345,23 @@ class mode
 	static public function handle_params( $chan, $mode_array )
 	{
 		if ( !isset( core::$chans[$chan] ) || !is_array( $mode_array ) )
-		{
 			return false;
-		}
 		
 		foreach ( $mode_array['params'] as $param => $modes )
 		{
+			$oparam = $param;
+			if ( is_numeric( $param[0] ) )
+			{
+				$uparam = array( $param );
+				$param = core::get_nick( $uparam, 0 );
+			}
+			// try to make param into a nick. if its a uid and nothing else
+			
 			if ( isset( core::$chans[$chan]['users'][$param] ) )
 			{
-				if ( $mode_array['params'][$param]['plus'] != '' )
+				if ( $mode_array['params'][$oparam]['plus'] != '' )
 				{
-					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+					foreach ( str_split( $mode_array['params'][$oparam]['plus'] ) as $pm )
 					{
 						if ( !in_array( $pm, ircd::$status_modes ) ) continue;
 						// we've found a user but be careful, this could be a key
@@ -370,9 +374,9 @@ class mode
 				}
 				// loop through the plus modes if there are any
 			
-				if ( $mode_array['params'][$param]['minus'] != '' )
+				if ( $mode_array['params'][$oparam]['minus'] != '' )
 				{	
-					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
+					foreach ( str_split( $mode_array['params'][$oparam]['minus'] ) as $mm )
 					{
 						if ( !in_array( $mm, ircd::$status_modes ) ) continue;
 						// again we've found a user, but we need to check if it's a correct mode
@@ -388,9 +392,9 @@ class mode
 			// but we also take care of k inside.
 			else
 			{
-				if ( $mode_array['params'][$param]['plus'] != '' )
+				if ( $mode_array['params'][$oparam]['plus'] != '' )
 				{
-					foreach ( str_split( $mode_array['params'][$param]['plus'] ) as $pm )
+					foreach ( str_split( $mode_array['params'][$oparam]['plus'] ) as $pm )
 					{
 						if ( strpos( ircd::$restrict_modes, $pm ) === false ) continue;
 						// make sure the mode is a +bIe
@@ -402,9 +406,9 @@ class mode
 				}
 				// loop through the plus modes
 				
-				if ( $mode_array['params'][$param]['minus'] != '' )
+				if ( $mode_array['params'][$oparam]['minus'] != '' )
 				{
-					foreach ( str_split( $mode_array['params'][$param]['minus'] ) as $mm )
+					foreach ( str_split( $mode_array['params'][$oparam]['minus'] ) as $mm )
 					{
 						if ( strpos( ircd::$restrict_modes, $mm ) === false ) continue;
 						// make sure the mode is a +bIe
@@ -431,7 +435,7 @@ class mode
 	* 
 	* @params
 	* $chan - the channel to deal with.
-	* $level - level:0 etc.
+	* $level - level:o etc.
 	* $mode - the mode(s) we have to set
 	* $cnick - and who is to set these modes.
 	*/
@@ -458,6 +462,8 @@ class mode
 		
 		if ( $part[0] == 'level' )
 		{
+			print_r ( core::$chans[$chan] );
+		
 			if ( $part[1] == '0' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
