@@ -462,8 +462,6 @@ class mode
 		
 		if ( $part[0] == 'level' )
 		{
-			print_r ( core::$chans[$chan] );
-		
 			if ( $part[1] == '0' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )

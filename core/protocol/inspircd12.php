@@ -297,8 +297,6 @@ class ircd implements protocol
 		mode::append_modes( $chan, $mode_array );
 		mode::handle_params( $chan, $mode_array );
 		// handle modes
-		
-		print_r (core::$chans[$chan]);
 	}
 	
 	/*

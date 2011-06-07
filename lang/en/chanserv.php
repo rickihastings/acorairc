@@ -246,7 +246,7 @@ $help = (object) array(
 	),
 	// LEVELS W/HOP
 	
-	'CS_HELP_LEVELS_ALL' 	=> array(
+	'CS_HELP_LEVELS_ALL2' 	=> array(
 		'=---- ChanServ Help ----=',
 		'Syntax: LEVELS channel flags { nickname | hostmask }',
 		'        LEVELS channel',
