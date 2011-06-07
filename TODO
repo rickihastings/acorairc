@@ -9,3 +9,5 @@
 * Fix an issue with global.os module, on_connect looks like (DONE)
 * Fix an issue with empty data being put in recv(): log (DONE)
 * Also parse prefix's from capab and putting them into $prefix_modes as they can change with newer inspircd modules ! etc (DONE)
+* Parse MAXMODES into $max_params (DONE)
+* Parse m_hidechans.so, as we do need this, well not need but certainly should be using it! atm it just crashes without it (can parse it in ircd, don't want to as it means editing all, but probably should because not all ircd's use modules for modes like this (and some even use different modes!))
