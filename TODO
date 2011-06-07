@@ -4,7 +4,5 @@
 //
 
 * core::check_unused_chans() broken, commented out for the time being. This is quite a critical function in freeing unused data, so priority. (DONE)
-* Reasonable testing on inspircd 1.2
 * Parse modes from capab replacing $modes_p_unrequired, $modes_params and $restrict_modes, as these CAN change, and shouldn't really be defined in the ircd protocol
 * Also parse prefix's from capab and putting them into $prefix_modes as they can change with newer inspircd modules ! etc
-* Stabalise inspircd2.0
