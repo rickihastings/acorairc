@@ -104,9 +104,7 @@ class core
 		// 120 seconds, indefinatly
 		
 		if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
-		{
 			timer::add( array( 'core', 'save_logs', array() ), 300, 0 );	
-		}
 		// add another timer to save logs every 5 mins
 		
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
@@ -190,7 +188,8 @@ class core
 				self::$lines_processed++;
 				// grab the data
 				
-				self::alog( 'recv(): '.$raw, 'SERVER' );
+				if ( $raw != '' )
+					self::alog( 'recv(): '.$raw, 'SERVER' );
 				// log SERVER
 				
 				if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) && self::$end_burst ) self::save_logs();
@@ -247,9 +246,9 @@ class core
 				}
 				// here we check if we're recieving an endburst
 				
-				if ( !self::$end_burst ) 
+				if ( !self::$end_burst && trim( $ircdata ) != '' ) 
 					self::$nbuffer[] = $ircdata;
-				else
+				else if ( self::$end_burst && trim( $ircdata ) != '' )
 					self::$buffer[] = $ircdata;
 				// we should really only be processing the data if the burst has finished
 				// so we add it to a buffer and process it in each main loop :)
