@@ -7,5 +7,5 @@
 * Parse modes from capab replacing $modes_p_unrequired, $modes_params and $restrict_modes, as these CAN change, and shouldn't really be defined in the ircd protocol (DONE INSPIRCD12)
 * Do the same above for other protocol modes (gonna be a pain!)
 * Fix an issue with global.os module, on_connect looks like (DONE)
-* Fix an issue with empty data being put in recv(): log
+* Fix an issue with empty data being put in recv(): log (DONE)
 * Also parse prefix's from capab and putting them into $prefix_modes as they can change with newer inspircd modules ! etc (DONE)
