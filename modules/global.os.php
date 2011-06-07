@@ -113,13 +113,9 @@ class os_global implements module
 		// is the mask valid?
 		
 		if ( core::$config->global->nick_on_global )
-		{
 			ircd::global_notice( core::$config->global->nick, $mask, '['.$nick.'] '.$message );
-		}
 		else
-		{
 			ircd::global_notice( core::$config->global->nick, $mask, $message );
-		}
 		// send the message!!
 		
 		ircd::globops( core::$config->operserv->nick, $nick.' just used GLOBAL command.' );
