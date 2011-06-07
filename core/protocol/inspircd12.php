@@ -33,7 +33,7 @@ class ircd implements protocol
 	static public $protect = false;
 	static public $halfop = false;
 	
-	static public $modes_params = 'qaohvbIegjfJLlk';
+	static public $modes_params;
 	static public $modes_p_unrequired;
 	static public $modes;
 	static public $max_params = 6;
@@ -510,8 +510,6 @@ class ircd implements protocol
 			self::$status_modes = preg_replace( '/[^A-Za-z]/', '', $pdata );
 			self::$restrict_modes = $split_data[0];
 			self::$modes_p_unrequired = $split_data[2];
-			self::$modes_params = $split_data[0] . $split_data[1] . $split_data[2];
-			self::$modes = self::$modes_params . $split_data[3];
 			// explode our modes up and assign them
 			
 			if ( strpos( $hdata, 'HALFOP=1' ) !== false )
@@ -523,6 +521,7 @@ class ircd implements protocol
 			
 			if ( strpos( self::$restrict_modes, 'a' ) !== false )
 			{
+				self::$protect = true;
 				self::$status_modes = 'a' . self::$status_modes;
 				self::$restrict_modes = str_replace( 'a', '', self::$restrict_modes );
 				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
@@ -531,11 +530,16 @@ class ircd implements protocol
 			
 			if ( strpos( self::$restrict_modes, 'q' ) !== false )
 			{
+				self::$owner = true;
 				self::$status_modes = 'q' . self::$status_modes;
 				self::$restrict_modes = str_replace( 'q', '', self::$restrict_modes );
 				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
 			}
 			// search restrict modes for 'aq' as we want them in status modes
+			
+			self::$modes_params = self::$restrict_modes . $split_data[1] . self::$modes_p_unrequired;
+			self::$modes = self::$status_modes . self::$modes_params . $split_data[3];
+			// causing status modes not to be in ircd::$modes
 			
 			$parsed_pdata = explode( ')', $pdata );
 			$pdata_modes = str_split( str_replace( '(', '', $parsed_pdata[0] ) );
@@ -761,6 +765,7 @@ class ircd implements protocol
 		
 		if ( $mode[0] != '-' && $mode[0] != '+' ) $mode = '+'.$mode;
 		
+		$old_mode = $mode;
 		$mode = mode::check_modes( $mode );
 		// we don't want nobody messing about
 		

@@ -246,9 +246,9 @@ class core
 				}
 				// here we check if we're recieving an endburst
 				
-				if ( !self::$end_burst && trim( $ircdata ) != '' ) 
+				if ( !self::$end_burst ) 
 					self::$nbuffer[] = $ircdata;
-				else if ( self::$end_burst && trim( $ircdata ) != '' )
+				else
 					self::$buffer[] = $ircdata;
 				// we should really only be processing the data if the burst has finished
 				// so we add it to a buffer and process it in each main loop :)
