@@ -579,11 +579,20 @@ class core
 	*/
 	static public function check_unused_chans()
 	{
-		/*foreach ( self::$chans as $chan => $data )
+		foreach ( self::$chans as $chan => $data )
 		{
-			if ( count( self::$chans[$chan]['users'] ) == 0 || ( strstr(core::$config->server->ircd, 'inspircd') && !strstr( self::$chans[$chan]['modes'], 'P' ) ) ) 
+			if ( count( self::$chans[$chan]['users'] ) == 0 )
+			{
+				if ( strstr( core::$config->server->ircd, 'inspircd' ) && strstr( self::$chans[$chan]['modes'], 'P' ) )
+					continue;
+				// there isnt any users, BUT, does the channel have +P set?
+				// if it does, continue;
+			
 				unset( self::$chans[$chan] );
-		}*/
+				// unset it
+			}
+			// no users, unset chan
+		}
 	}
 	
 	/*
