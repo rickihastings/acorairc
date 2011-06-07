@@ -495,6 +495,10 @@ class ircd implements protocol
 		
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'CAPABILITIES' )
 		{
+			$max_modes = explode( '=', $ircdata[5] );
+			self::$max_params = $max_modes[1];
+			// set $max_params to MAXMODES everything below is mode related
+		
 			$pdata = explode( '=', $ircdata[15] );
 			$pdata = $pdata[1];
 			$data = explode( '=', $ircdata[16] );
