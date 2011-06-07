@@ -1,6 +1,7 @@
 // TODO LIST
 // 
 // Update as you wish, this is just a roadmap/reminder thing!
+//
 
 * core::check_unused_chans() broken, commented out for the time being. This is quite a critical function in freeing unused data, so priority.
 * Reasonable testing on inspircd 1.2
