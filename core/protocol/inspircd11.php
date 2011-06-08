@@ -450,21 +450,35 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'MODULES' )
 		{
-			if ( strpos( $ircdata[2], 'm_services_account.so' ) === false )
-				timer::add( array( 'core', 'check_services', array() ), 1, 1 );
+			$ircd_modules = explode( ',', $ircdata[2] );
+			
+			if ( !in_array( 'm_services_account.so', $ircd_modules ) )
+				timer::add( array( 'core', 'check_services', array() ), 3, 1 );
 			else
 				core::$services_account = true;
 			// we have services_account
 			
-			if ( strpos( $ircdata[2], 'm_globops.so' ) !== false )
+			if ( !in_array( 'm_hidechans.so', $ircd_modules ) )
+			{
+				foreach ( self::$service_modes as $s_type => $s_mode )
+					self::$service_modes[$s_type] = str_replace( 'I', '', $s_mode );
+				// remove +I
+				
+				timer::add( array( 'core', 'check_services', array() ), 3, 1 );
+				core::$hide_chans = false;
+				// hide chans isnt found, call check_services to notify the opers
+			}
+			// we don't have m_hidechans, not a major issue, just remove +I from self::$service_modes
+			
+			if ( in_array( 'm_globops.so', $ircd_modules ) )
 				self::$globops = true;
 			// we have globops!
 			
-			if ( strpos( $ircdata[2], 'm_chghost.so' ) !== false )
+			if ( in_array( 'm_chghost.so', $ircd_modules ) )
 				self::$chghost = true;
 			// we have chghost
 			
-			if ( strpos( $ircdata[2], 'm_chgident.so' ) !== false )
+			if ( in_array( 'm_chgident.so' ) !== false )
 				self::$chgident = true;
 			// and chgident
 		}

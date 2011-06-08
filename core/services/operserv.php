@@ -33,19 +33,13 @@ class operserv implements service
 		// load the help file
 		
 		if ( isset( core::$config->operserv ) )
-		{
 			ircd::introduce_client( core::$config->operserv->nick, core::$config->operserv->user, core::$config->operserv->host, core::$config->operserv->real );
-		}
 		else
-		{
 			return;
-		}
 		// connect the bot
 		
 		foreach ( core::$config->operserv_modules as $id => $module )
-		{
 			modules::load_module( 'os_'.$module, $module.'.os.php' );
-		}
 		// load the operserv modules
 		
 		if ( core::$config->operserv->override )

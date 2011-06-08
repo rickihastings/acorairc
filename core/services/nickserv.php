@@ -32,19 +32,13 @@ class nickserv implements service
 		self::$help = $help;
 		
 		if ( isset( core::$config->nickserv ) )
-		{
 			ircd::introduce_client( core::$config->nickserv->nick, core::$config->nickserv->user, core::$config->nickserv->host, core::$config->nickserv->real );
-		}
 		else
-		{
 			return;
-		}
 		// connect the bot
 		
 		foreach ( core::$config->nickserv_modules as $id => $module )
-		{
 			modules::load_module( 'ns_'.$module, $module.'.ns.php' );
-		}
 		// load the nickserv modules
 		
 		timer::add( array( 'nickserv', 'check_expire', array() ), 300, 0 );
