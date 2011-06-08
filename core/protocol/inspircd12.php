@@ -1083,7 +1083,8 @@ class ircd implements protocol
 	*/
 	static public function on_user_login( $nick )
 	{
-		self::send( ':'.self::$sid.' METADATA '.$nick.' accountname :'.$nick );
+		$uid = self::get_uid( $nick );
+		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :'.$nick );
 	}
 	
 	/*
@@ -1094,7 +1095,8 @@ class ircd implements protocol
 	*/
 	static public function on_user_logout( $nick )
 	{
-		self::send( ':'.self::$sid.' METADATA '.$nick.' accountname :' );	
+		$uid = self::get_uid( $nick );
+		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :' );	
 	}
 
 	/*

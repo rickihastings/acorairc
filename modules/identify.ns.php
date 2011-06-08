@@ -17,7 +17,7 @@
 class ns_identify implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -154,7 +154,7 @@ class ns_identify implements module
 									cs_levels::give_access( $chan, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
 									// give them access
 									
-									continue 2;
+									continue;
 									// continue to next loop cause we've found a match
 								}
 								elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
@@ -165,7 +165,7 @@ class ns_identify implements module
 									cs_levels::give_access( $chan, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
 									// give them access
 									
-									continue 2;
+									continue;
 									// continue to next loop cause we've found a match
 								}
 								elseif ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
@@ -173,12 +173,12 @@ class ns_identify implements module
 									$remove_access = true;
 									// set remove access to true
 									
-									continue 1;
+									continue;
 									// continue to next loop to check other access records
 								}
 								else
 								{
-									continue 1;
+									continue;
 									// continue to next loop to check other access records
 								}
 								// we check if the user has access, if they do break;
@@ -264,7 +264,7 @@ class ns_identify implements module
 		
 		if ( ircd::on_nick_change( $ircdata ) )
 		{
-			$nick = core::get_nick( $ircdata, 2 );
+			$nick = $ircdata[2];
 			$old_nick = core::$nicks[$nick]['onick'];
 			// get the nicknames
 			
