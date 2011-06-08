@@ -17,7 +17,7 @@
 class cs_levels implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -83,9 +83,10 @@ class cs_levels implements module
 		$chan = core::get_chan( $ircdata, 0 );
 		$target = $ircdata[2];
 		$flags = $ircdata[1];
+		$levels_result = chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'F' ) );
 		// get the channel.
 		
-		if ( $target == '' && $flags == '' && chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'F' ) ) )
+		if ( $target == '' && $flags == '' && $levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
 			// start of flag list
@@ -123,6 +124,12 @@ class cs_levels implements module
 		}
 		// no params
 		// lets show the current flags.
+		else if ( $target == '' && $flags == '' && !$levels_result )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+			return false;
+		}
+		// i don't think they have access to see the channel list..
 		
 		if ( $target == '' || $flags == '' )
 		{
