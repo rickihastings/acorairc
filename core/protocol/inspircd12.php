@@ -698,22 +698,16 @@ class ircd implements protocol
 	*/
 	static public function global_notice( $nick, $mask, $message )
 	{
-		$unick = self::get_uid( $nick );
-		// get the uid.
-		
 		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
 		// debug info
 		
 		foreach ( core::$nicks as $user => $data )
 		{
-			$uuser = self::get_uid( $user );
-			// get the uid.
-			
 			$hostname = core::get_full_hostname( $user );
 			// hostname
 			
 			if ( $data['server'] != core::$config->server_name && services::match( $hostname, $mask ) )
-				services::communicate( $unick, $uuser, $message );
+				self::notice( $nick, $user, $message );
 		}
 	}
 	
