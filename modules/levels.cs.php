@@ -86,6 +86,13 @@ class cs_levels implements module
 		$levels_result = chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'F' ) );
 		// get the channel.
 		
+		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			return false;
+		}
+		// make sure the channel exists.
+		
 		if ( $target == '' && $flags == '' && $levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
@@ -712,8 +719,8 @@ class cs_levels implements module
 						$remove_access = false;
 						// don't remove access
 						
-						self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
-						// give them access
+						self::give_access( $channel->channel, $nick, $access, false );
+						// give them access, false is always set here otherwise we end up giving unidentified nicks access, which nobody wants
 						
 						break;
 						// break cause we've found a match
@@ -734,7 +741,7 @@ class cs_levels implements module
 						$remove_access = true;
 						// set remove access to true
 						
-						continue 1;
+						continue;
 						// continue to next loop to check other access records
 					}
 					elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
@@ -742,12 +749,12 @@ class cs_levels implements module
 						$remove_access = true;
 						// set remove access to true
 						
-						continue 1;
+						continue;
 						// continue to next loop to check other access records
 					}
 					else
 					{
-						continue 1;
+						continue;
 						// continue to next loop to check other access records
 					}
 					// we check if the user has access, if they do break;
@@ -756,9 +763,7 @@ class cs_levels implements module
 				// loop through the access records
 				
 				if ( $remove_access )
-				{
 					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
-				}
 				// easy fix to stop stuff like this below happening.
 				// [20:27:19] * ChanServ sets mode: -o N0valyfe
 				// [20:27:19] * ChanServ sets mode: +o N0valyfe	
@@ -792,6 +797,7 @@ class cs_levels implements module
 			{
 				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+b *@'.core::$nicks[$nick]['host'] );
 				ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $reason );
+				continue;
 			}
 			// check for bans before access
 			
@@ -802,10 +808,10 @@ class cs_levels implements module
 					$remove_access = false;
 					// don't remove access
 					
-					self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
-					// give them access
+					self::give_access( $channel->channel, $nick, $access, false );
+					// give them access, false is always set here otherwise we end up giving unidentified nicks access, which nobody wants
 					
-					continue 2;
+					continue;
 					// continue to next loop cause we've found a match
 				}
 				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
@@ -816,7 +822,7 @@ class cs_levels implements module
 					self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
 					// give them access
 					
-					continue 2;
+					continue;
 					// continue to next loop cause we've found a match
 				}
 				elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'o' ) !== false )
@@ -824,7 +830,7 @@ class cs_levels implements module
 					$remove_access = true;
 					// set remove access to true
 					
-					continue 1;
+					continue;
 					// continue to next loop to check other access records
 				}
 				elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
@@ -832,12 +838,12 @@ class cs_levels implements module
 					$remove_access = true;
 					// set remove access to true
 						
-					continue 1;
+					continue;
 					// continue to next loop to check other access records
 				}
 				else
 				{
-					continue 1;
+					continue;
 					// continue to next loop to check other access records
 				}
 				// we check if the user has access, if they do break;
@@ -846,9 +852,7 @@ class cs_levels implements module
 			// loop through the access records
 			
 			if ( $remove_access )
-			{
 				ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
-			}
 			// easy fix to stop stuff like this below happening.
 			// [20:27:19] * ChanServ sets mode: -o N0valyfe
 			// [20:27:19] * ChanServ sets mode: +o N0valyfe	
@@ -910,7 +914,7 @@ class cs_levels implements module
 	*/
 	static public function give_access( $chan, $nick, $chan_access, $secure = 1 )
 	{
-		if ( $secure && services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !$secure && !services::user_exists( $nick, true, array( 'display', 'identified' ) ) )
 			return false;
 		// return false if secure is set to 1 and $nick isnt identified.
 		
