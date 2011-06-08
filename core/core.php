@@ -29,6 +29,7 @@ class core
 	static public $debug_data = array();
 	static public $debug = false;
 	static public $services_account = false;
+	static public $hide_chans = true;
 	// our main static variables, these are all very important.
 	
 	static public $servers = array();
@@ -472,10 +473,17 @@ class core
 			self::save_logs();
 			// save logs.
 			
-			ircd::shutdown( 'ERROR', true );
+			ircd::shutdown( 'ERROR: m_services_account.so is required, startup halted.', true );
 			// exit
 		}
 		// services account isn't found, quit out letting them know.
+		
+		if ( core::$hide_chans === false )
+		{
+			core::alog( 'WARNING: m_hidechans.so is not loaded, this is NOT recommended. See http://wiki.inspircd.org/Modules/2.0/hidechans' );
+			// alog, don't exit, not needed.
+		}
+		// let the dude know that m_hidechans.so isnt loaded, and it's NOT ADVISED!
 	}
 	
 	/*
@@ -496,7 +504,7 @@ class core
 				
 			self::alog( 'error: '.trim( $message ).' on line '.$line.' in '.$filepath, 'BASIC' );#
 					
-			ircd::shutdown( 'ERROR', true );
+			ircd::shutdown( 'ERROR: '.$message, true );
 			// exit the program	
 		}
 		
