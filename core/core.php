@@ -82,6 +82,7 @@ class core
 		$this->services = new services();
 		$this->commands = new commands();
 		$this->modules = new modules();
+		$this->ircd_handle = new ircd_handle();
 		// setup all the subclasses.
 		
 		database::factory( self::$config->database->driver );
@@ -333,9 +334,7 @@ class core
 		// any core modules? humm
 			
 		foreach ( self::$service_bots as $bot )
-		{
 			$this->$bot->main( $ircdata, $startup );
-		}
 		// we hook to each of our bots
 	}
 	

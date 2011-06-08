@@ -25,7 +25,7 @@ class ircd implements protocol
 	static public $globops = false;
 	static public $chghost = false;
 	static public $chgident = false;
-	static public $sid;
+	static public $sid = '009';
 	static public $uid_count = 'AAAAAA';
 
 	static public $restrict_modes;
@@ -75,13 +75,7 @@ class ircd implements protocol
 	*/
 	static public function handle_on_server( $ircdata )
 	{
-		core::$servers[$ircdata[1]] = array( 'name' => $ircdata[1], 'sid' => $ircdata[4] );
-				
-		if ( !core::$end_burst )
-			self::send( ':'.self::$sid.' BURST '.core::$network_time );
-			
-		core::$pullout = true;
-		// MUST MUST MUST be true, otherwise a whole world of problems occur (trust me!)
+		ircd_handle::handle_on_server( $ircdata[1], $ircdata[4], self::$sid );
 	}
 	
 	/*
@@ -92,18 +86,9 @@ class ircd implements protocol
 	*/
 	static public function handle_on_squit( $ircdata )
 	{
-		$server = str_replace( ':', '', $ircdata[2] );
+		$server = str_replace( ':', '', $server );
 		
-		unset( core::$servers[$server] );
-		
-		if ( in_array( $server, self::$jupes ) )
-		{
-			self::send( ':'.core::$config->server->name.' SQUIT '.$server.' :SQUIT' );
-			unset( self::$jupes[$server] );
-		}
-		// if it's one of our servers we act upon the command! :o
-		// need to revise this, can't remember the protocol stuff for insp 1.2
-		// will have to look into it.
+		ircd_handle::handle_on_squit( $server );
 	}
 	
 	/*
@@ -115,7 +100,7 @@ class ircd implements protocol
 	static public function handle_on_connect( $ircdata, $startup = false )
 	{
 		$nick = $ircdata[4];
-		$server = self::get_server( $ircdata, 0 );
+		$server = ircd_handle::get_server( $ircdata, 0 );
 		$gecos = core::get_data_after( $ircdata, 11 );
 		$gecos = explode( ':', $gecos );
 		$gecos = $gecos[1];
@@ -126,28 +111,7 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
-		core::$nicks[$nick] = array(
-			'nick' => $nick,
-			'uid' => $ircdata[2],
-			'ident' => $ircdata[7],
-			'host' => $ircdata[6],
-			'oldhost' => $ircdata[5],
-			'gecos' => $gecos,
-			'server' => $server,
-			'timestamp' => $ircdata[3],
-			'commands' => null,
-			'floodcmds' => 0,
-			'failed_attempts' => 0,
-			'offences' => 0,
-		);
-		
-		core::$uids[$ircdata[2]] = $nick;
-		// yey for this, saves us massive intensive cpu raeps
-		// on large networks, uses a little more memory but baah!
-		
-		if ( core::$config->settings->logconnections && $startup === false )
-			core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
-		// log
+		ircd_handle::handle_on_connect( $nick, $ircdata[2], $ircdata[7], $ircdata[6], $ircdata[5], $gecos, $server, $ircdata[3], $startup );
 	}
 	
 	/*
@@ -158,43 +122,14 @@ class ircd implements protocol
 	*/
 	static public function handle_nick_change( $ircdata, $startup = false )
 	{
-		$uuid = str_replace( ':', '', $ircdata[0] );
-		$nick = self::get_nick( $ircdata, 0 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$new_nick = $ircdata[2];
 		
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
 		// strip :
-		
-		if ( $new_nick == '' || $nick == $new_nick )
-			return false;
-		// fixing this function being called twice, not sure why thats happening..
-		
-		if ( isset( core::$nicks[$nick] ) )
-		{
-			core::$nicks[$new_nick] = core::$nicks[$nick];
-			unset( core::$nicks[$nick] );
-			// change the nick records
-			
-			core::$nicks[$new_nick]['nick'] = $new_nick;
-			core::$nicks[$new_nick]['onick'] = $nick;
-			core::$uids[$uuid] = $new_nick;
-			
-			foreach ( core::$chans as $chan => $data )
-			{
-				if ( !isset( $data['users'][$nick] ) )
-					continue;
-				// skip to next iteration
-				
-				core::$chans[$chan]['users'][$new_nick] = $data['users'][$nick];
-				unset( core::$chans[$chan]['users'][$nick] );
-			}
-			// check if they are in any channels, change their nick if they are.
-		}
-		
-		if ( core::$config->settings->logconnections && $startup === false )
-			core::alog( 'NICK: '.$nick.' ('.core::$nicks[$new_nick]['ident'].'@'.core::$nicks[$new_nick]['oldhost'].' => '.core::$nicks[$new_nick]['host'].') ('.core::$nicks[$new_nick]['gecos'].') changed nick to '.$new_nick.' ('.core::$nicks[$new_nick]['server'].')' );
-		// log
+	
+		ircd::handle_nick_change( $nick, $new_nick, $startup );
 	}
 	
 		
@@ -206,29 +141,11 @@ class ircd implements protocol
 	*/
 	static public function handle_quit( $ircdata, $startup = false )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
-		// nick
-		
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		// strip :
 		
-		if ( core::$config->settings->logconnections && $startup === false )
-			core::alog( 'QUIT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') left the network ('.core::$nicks[$nick]['server'].')' );
-		// log
-		
-		$uid = str_replace( ':', '', $ircdata[0] );
-		
-		unset( core::$nicks[$nick] );
-		unset( core::$uids[$uid] );
-		// remove a user if they've quit..
-				
-		foreach ( core::$chans as $chan => $data )
-		{
-			if ( isset( core::$chans[$chan]['users'][$nick] ) )
-				unset( core::$chans[$chan]['users'][$nick] );
-			else
-				continue;
-		}
+		ircd::handle_handle_quit( $nick, $startup );
 	}
 	
 	/*
@@ -239,10 +156,8 @@ class ircd implements protocol
 	*/
 	static public function handle_host_change( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
-		
-		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];	
-		core::$nicks[$nick]['host'] = $ircdata[2];
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		ircd_handle::handle_host_change( $nick, $ircdata[2] );
 	}
 	
 	/*
@@ -255,16 +170,16 @@ class ircd implements protocol
 	{
 		if ( $ircdata[1] == 'CHGIDENT' )
 		{
-			$nick = self::get_nick( $ircdata, 2 );
+			$nick = ircd_handle::get_nick( $ircdata, 2 );
 			$ident = substr( $ircdata[3], 1 );
 		}
 		elseif ( $ircdata[1] == 'SETIDENT' )
 		{
-			$nick = self::get_nick( $ircdata, 0 );
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
 			$ident = substr( $ircdata[2], 1 );
 		}
 		
-		core::$nicks[$nick]['ident'] = $ident;
+		ircd_handle::handle_ident_change( $nick, $ident );
 	}
 	
 	/*
@@ -275,10 +190,10 @@ class ircd implements protocol
 	*/
 	static public function handle_gecos_change( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
-		$gecos = core::get_data_after( $ircdata, 2 );
-		
-		core::$nicks[$nick]['gecos'] = substr( $gecos, 1 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$gecos = substr( core::get_data_after( $ircdata, 2 ), 1 );
+	
+		ircd_handle::handle_gecos_change( $nick, $gecos );
 	}
 	
 	/*
@@ -291,12 +206,8 @@ class ircd implements protocol
 	{
 		$chan = core::get_chan( $ircdata, 2 );
 		$mode_queue = core::get_data_after( $ircdata, 4 );
-		
-		$mode_array = mode::sort_modes( $mode_queue );
-		
-		mode::append_modes( $chan, $mode_array );
-		mode::handle_params( $chan, $mode_array );
-		// handle modes
+	
+		ircd_handle::handle_mode( $chan, $mode_queue );
 	}
 	
 	/*
@@ -313,9 +224,8 @@ class ircd implements protocol
 		$chan = core::get_chan( $ircdata, 2 );
 		$topic = trim( substr( core::get_data_after( $ircdata, 5 ), 1 ) );
 		// grab the topic
-			
-		core::$chans[$chan]['topic'] = $topic;
-		core::$chans[$chan]['topic_setter'] = $nick;
+	
+		ircd_handle::handle_ftopic( $chan, $topic, $nick );
 	}
 	
 	/*
@@ -326,13 +236,12 @@ class ircd implements protocol
 	*/
 	static public function handle_topic( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
 		$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
 		// grab the topic
-			
-		core::$chans[$chan]['topic'] = $topic;
-		core::$chans[$chan]['topic_setter'] = $nick;
+	
+		ircd_handle::handle_topic( $chan, $topic, $nick );
 	}
 	
 	/*
@@ -344,36 +253,20 @@ class ircd implements protocol
 	static public function handle_channel_create( $ircdata )
 	{
 		$chans = explode( ',', $ircdata[2] );
+		// parse the chans sending an array, although we shouldn't actually get these in an FJOIN, do it to be safe.
 		
-		foreach ( $chans as $chan )
-		{
-			$nusers_str = implode( ' ', $ircdata );
-			$nusers_str = explode( ':', $nusers_str );
-			// right here we need to find out where the thing is, because
-			// of the way 1.2 handles FJOINs
-			$nusers = self::parse_users( $chan, $nusers_str, 1 );
-			
-			$mode_queue = core::get_data_after( $ircdata, 4 );
-			$mode_queue = explode( ':', $mode_queue );
-			$mode_queue = $mode_queue[0];
-			// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
-			
-			core::$chans[$chan]['timestamp'] = $ircdata[3];
-			core::$chans[$chan]['p_modes'] = array();
-			
-			if ( is_array( core::$chans[$chan]['users'] ) )
-				core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );
-			else
-				core::$chans[$chan]['users'] = $nusers;
-			// basically check if we already have an array, because FJOIN can happen on
-			// existing channels, idk why, maybe on bursts etc?
-			
-			$mode_array = mode::sort_modes( $mode_queue );
-			mode::append_modes( $chan, $mode_array );
-			mode::handle_params( $chan, $mode_array );
-			// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in FJOIN now, upon bursts, and also resent
-			// when users join channels (not sure why here, probably just because they can and it shouldn't break a good parser)
-		}
+		$nusers_str = implode( ' ', $ircdata );
+		$nusers_str = explode( ':', $nusers_str );
+		// right here we need to find out where the thing is, because
+		// of the way 1.2 handles FJOINs
+		$nusers = ircd_handle::parse_users( $chan, $nusers_str, 1 );
+		
+		$mode_queue = core::get_data_after( $ircdata, 4 );
+		$mode_queue = explode( ':', $mode_queue );
+		$mode_queue = $mode_queue[0];
+		// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
+	
+		ircd_handle::handle_channel_create( $chans, $nusers, $ircdata[3], core::get_data_after( $ircdata, 4 ) );
 	}
 	
 	/*
@@ -384,15 +277,10 @@ class ircd implements protocol
 	*/
 	static public function handle_join( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$chans = explode( ',', $ircdata[2] );
-		
-		foreach ( $chans as $chan )
-		{
-			if ( !isset( core::$chans[$chan]['users'][$nick] ) )
-				core::$chans[$chan]['users'][$nick] = '';
-			// maintain the logged users array
-		}
+	
+		ircd_handle::handle_join( $chans, $nick );
 	}
 
 	/*
@@ -403,11 +291,10 @@ class ircd implements protocol
 	*/
 	static public function handle_part( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
-			
-		unset( core::$chans[$chan]['users'][$nick] );
-		// remove the user out of the array
+	
+		ircd_handle::handle_part( $chan, $nick );
 	}
 	
 	/*
@@ -419,10 +306,9 @@ class ircd implements protocol
 	static public function handle_kick( $ircdata )
 	{
 		$chan = core::get_chan( $ircdata, 2 );
-		$who = self::get_nick( $ircdata, 3 );
-			
-		unset( core::$chans[$chan]['users'][$who] );
-		// again, move them out.
+		$who = ircd_handle::get_nick( $ircdata, 3 );
+	
+		ircd_handle::handle_kick( $chan, $who );
 	}
 	
 	/*
@@ -433,9 +319,9 @@ class ircd implements protocol
 	*/
 	static public function handle_oper_up( $ircdata )
 	{
-		$nick = self::get_nick( $ircdata, 0 );
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		
-		core::$nicks[$nick]['ircop'] = true;
+		ircd_handle::handle_oper_up( $nick );
 	}
 
 	/*
@@ -443,6 +329,28 @@ class ircd implements protocol
 	*
 	* our functions like core::kick, grabbed from the ircd protocol class.
 	*/
+	
+	/*
+	* send_burst
+	*
+	* @params
+	* $server
+	*/
+	static public function send_burst( $server )
+	{
+		self::send( ':'.$server.' BURST '.core::$network_time );
+	}
+	
+	/*
+	* send_squit
+	*
+	* @params
+	* $server
+	*/
+	static public function send_squit( $server )
+	{
+		self::send( ':'.core::$config->server->name.' SQUIT '.$server.' :SQUIT' );
+	}
 
 	/*
 	* ping
@@ -454,10 +362,9 @@ class ircd implements protocol
 	{
 		if ( self::on_ping( $ircdata ) )
 		{
-			database::ping();
-			// ping the db
+			ircd_handle::ping( $ircdata[1] );
 			
-			self::send( 'PONG '. $ircdata[2], core::$socket );	
+			self::send( 'PONG '. $ircdata[1], core::$socket );
 			return true;
         }
 		// ping pong.
@@ -476,99 +383,49 @@ class ircd implements protocol
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'MODULES' )
 		{
 			$ircd_modules = explode( ',', $ircdata[2] );
-		
-			if ( !in_array( 'm_services_account.so', $ircd_modules ) )
-				timer::add( array( 'core', 'check_services', array() ), 3, 1 );
-			else
-				core::$services_account = true;
+			$services_account = false;
+			$hidechans = false;
+			$globops = false;
+			$chghost = false;
+			$chgident = false;
+			// setup some vars. (this part is probably the trickest part of coding protocol modules
+			// because unreal etc don't use insp style modules see irc.ircnode.org #acora for assistance.
+			
+			if ( in_array( 'm_services_account.so', $ircd_modules ) )
+				$services_account = true;
 			// we have services_account
 			
-			if ( !in_array( 'm_hidechans.so', $ircd_modules ) )
-			{
-				foreach ( self::$service_modes as $s_type => $s_mode )
-					self::$service_modes[$s_type] = str_replace( 'I', '', $s_mode );
-				// remove +I
-				
-				timer::add( array( 'core', 'check_services', array() ), 3, 1 );
-				core::$hide_chans = false;
-				// hide chans isnt found, call check_services to notify the opers
-			}
-			// we don't have m_hidechans, not a major issue, just remove +I from self::$service_modes
+			if ( in_array( 'm_hidechans.so', $ircd_modules ) )
+				$hidechans = true;
+			// we have hidechans
 			
 			if ( in_array( 'm_globops.so', $ircd_modules ) )
-				self::$globops = true;
+				$globops = true;
 			// we have globops!
 			
 			if ( in_array( 'm_chghost.so', $ircd_modules ) )
-				self::$chghost = true;
+				$chghost = true;
 			// we have chghost
 			
 			if ( in_array( 'm_chgident.so' ) !== false )
-				self::$chgident = true;
+				$chgident = true;
 			// and chgident
+			
+			ircd_handle::parse_ircd_modules( $services_account, $hidechans, $globops, $chghost, $chgident );
 		}
 		// only trigger when our modules info is coming through
 		
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' && $ircdata[1] == 'CAPABILITIES' )
 		{
 			$max_modes = explode( '=', $ircdata[5] );
-			self::$max_params = $max_modes[1];
-			// set $max_params to MAXMODES everything below is mode related
-		
+			$max_modes = $max_modes[1];
 			$pdata = explode( '=', $ircdata[15] );
 			$pdata = $pdata[1];
 			$data = explode( '=', $ircdata[16] );
 			$data = $data[1];
-			$rmodes = '';
-			// set some variables
-			
-			$split_data = explode( ',', $data );
-			self::$restrict_modes = $split_data[0];
-			self::$modes_p_unrequired = $split_data[2];
-			// explode our modes up and assign them
-			
-			if ( strpos( self::$restrict_modes, 'q' ) !== false )
-			{
-				self::$owner = true;
-				self::$status_modes[] .= 'q';
-				self::$restrict_modes = str_replace( 'q', '', self::$restrict_modes );
-				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
-			}
-			// search restrict modes for 'aq' as we want them in status modes
-			
-			if ( strpos( self::$restrict_modes, 'a' ) !== false )
-			{
-				self::$protect = true;
-				self::$status_modes[] .= 'a';
-				self::$restrict_modes = str_replace( 'a', '', self::$restrict_modes );
-				// remove from $restrict_modes and add to $status_modes IN ORDER ;)
-			}
-			// search restrict modes for 'aq' as we want them in status modes
-			
-			if ( strpos( $hdata, 'HALFOP=1' ) !== false )
-				self::$halfop = true;
-			// we check halfop differently
-			
-			self::$status_modes = array_merge( self::$status_modes, str_split( preg_replace( '/[^A-Za-z]/', '', $pdata ) ) );			
-			self::$modes_params = implode( '', self::$status_modes ) . self::$restrict_modes . $split_data[1] . self::$modes_p_unrequired;
-			self::$modes = self::$modes_params . $split_data[3];
-			// causing status modes not to be in ircd::$modes
-			
-			$parsed_pdata = explode( ')', $pdata );
-			$pdata_modes = str_split( str_replace( '(', '', $parsed_pdata[0] ) );
-			$pdata_prefix = str_split( $parsed_pdata[1] );
-			// parse up PREFIX=(ohv) data etc
-			
-			if ( strpos( $parsed_pdata[0], 'q' ) === false )
-				self::$prefix_modes['q'] = $pdata_prefix[0];
-			if ( strpos( $parsed_pdata[0], 'a' ) === false )
-				self::$prefix_modes['a'] = $pdata_prefix[0];
-			// if q and a arn't in $parsed_pdata[0] that means there are no prefixes for them modes set
-			// so standard @ (well, not technically, but in our case, yes.
-			
-			foreach ( $pdata_modes as $i => $ix )
-				self::$prefix_modes[$ix] = $pdata_prefix[$i];
-			// loop em n sort it out
+		
+			ircd_handle::parse_ircd_modes( $max_modes, $pdata, $data );
+			// parse some data out of CAPABILITIES and send it into parse_ircd_modes
 		}
 		// only trigger when the capab capabilities is coming through
 		
@@ -586,11 +443,10 @@ class ircd implements protocol
 	*/
 	static public function init_server( $name, $pass, $desc, $numeric )
 	{
-		self::$sid = $numeric;
 		self::send( 'SERVER '.$name.' '.$pass.' 0 '.self::$sid.' :'.$desc );
 		
-		core::alog( 'init_server(): '.$name.' introduced :'.$desc, 'BASIC' );
-		// log it
+		ircd_handle::init_server( $name, $pass, $desc, $numeric );
+		// call the handler
 	}
 		
 	/*
@@ -621,40 +477,23 @@ class ircd implements protocol
 	{
 		++self::$uid_count;
 		$uid = self::$sid . self::$uid_count;
-		// produce our random UUID.
-		
-		core::$times[$nick] = core::$network_time;
-		// just so if we do need to change anything, we've still got it.
+		// produce our random UUID (internal and TS6 specific).
 		
 		if ( $enforcer )
 		{
-			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$times[$nick].' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['enforcer'].' :'.$gecos );
+			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$network_time.' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['enforcer'].' :'.$gecos );
 			// this just connects a psuedoclient.
 		}
 		else
 		{
-			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$times[$nick].' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['service'].' :'.$gecos );
+			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$network_time.' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['service'].' :'.$gecos );
 			// this just connects a psuedoclient.
 			self::send( ':'.$uid.' OPERTYPE Service' );
 			// set opertype by default	
 		}
 		
-		core::$nicks[$nick] = array(
-			'nick' => $nick,
-			'uid' => $uid,
-			'ident' => $ident,
-			'host' => $hostname,
-			'gecos' => $gecos,
-			'ircop' => ( $enforcer ) ? false : true,
-			'timestamp' => core::$network_time,
-			'server' => core::$config->server->name,
-		);
-		// add it to the array.
-		core::$uids[$uid] = $nick;
-		// add it to the array.
-		
-		core::alog( 'introduce_client(): introduced '.$nick.'!'.$ident.'@'.$hostname, 'BASIC' );
-		// debug
+		ircd_handle::introduce_client( $nick, $uid, $ident, $hostname, $gecos, $enforcer );
+		// handle it
 	}
 	
 	/*
@@ -666,19 +505,14 @@ class ircd implements protocol
 	*/
 	static public function remove_client( $nick, $message )
 	{
-		$uid = self::get_uid( $nick );
+		$uid = ircd_handle::get_uid( $nick );
 		// get the uid.
-		
-		unset( core::$times[$nick] );
-		unset( core::$nicks[$nick] );
-		unset( core::$uids[$uid] );
-		// we unset that, just to save memory
 		
 		self::send( ':'.$uid.' QUIT '.$message );
 		// as simple as.
 		
-		core::alog( 'remove_client(): removed '.$nick, 'BASIC' );
-		// debug
+		ircd_handle::remove_client( $nick, $uid, $message );
+		// handle it
 	}
 	
 	/*
@@ -692,13 +526,12 @@ class ircd implements protocol
 	{
 		if ( self::$globops && core::$config->settings->silent )
 		{
-			$unick = self::get_uid( $nick );
-			// get the uid.
-			
-			core::alog( 'globops(): '.$nick.' sent a globops', 'BASIC' );
-			// debug info
-			
+			$unick = ircd_handle::get_uid( $nick );
 			self::send( ':'.$unick.' GLOBOPS :'.$message );
+			// get the uid and send it.
+			
+			ircd_handle::globops( $nick, $message );
+			// handle it
 		}
 	}
 	
@@ -712,17 +545,7 @@ class ircd implements protocol
 	*/
 	static public function global_notice( $nick, $mask, $message )
 	{
-		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
-		// debug info
-		
-		foreach ( core::$nicks as $user => $data )
-		{
-			$hostname = core::get_full_hostname( $user );
-			// hostname
-			
-			if ( $data['server'] != core::$config->server_name && services::match( $hostname, $mask ) )
-				self::notice( $nick, $user, $message );
-		}
+		ircd_handle::global_notice( $nick, $mask, $message );
 	}
 	
 	/*
@@ -735,8 +558,8 @@ class ircd implements protocol
 	*/
 	static public function notice( $nick, $what, $message )
 	{
-		$nick = self::get_uid( $nick );
-		if ( $what[0] != '#' ) $what = self::get_uid( $what );
+		$nick = ircd_handle::get_uid( $nick );
+		if ( $what[0] != '#' ) $what = ircd_handle::get_uid( $what );
 		// get the uid.
 		
 		self::send( ':'.$nick.' NOTICE '.$what.' :'.$message );
@@ -752,15 +575,15 @@ class ircd implements protocol
 	*/
 	static public function msg( $nick, $what, $message )
 	{
-		$nick = self::get_uid( $nick );
-		if ( $what[0] != '#' ) $what = self::get_uid( $what );
+		$nick = ircd_handle::get_uid( $nick );
+		if ( $what[0] != '#' ) $what = ircd_handle::get_uid( $what );
 		// get the uid.
 		
 		self::send( ':'.$nick.' PRIVMSG '.$what.' :'.$message );
 	}
 	
 	/*
-	* chan
+	* mode
 	*
 	* @params
 	* $nick - who to send it from
@@ -769,7 +592,7 @@ class ircd implements protocol
 	*/
 	static public function mode( $nick, $chan, $mode )
 	{
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
 		if ( $mode[0] != '-' && $mode[0] != '+' ) $mode = '+'.$mode;
@@ -778,21 +601,12 @@ class ircd implements protocol
 		$mode = mode::check_modes( $mode );
 		// we don't want nobody messing about
 		
-		if ( $mode != '' )
-		{
-			if ( !isset( core::$chans[$chan]['timestamp'] ) || core::$chans[$chan]['timestamp'] == '' )
-				core::$chans[$chan]['timestamp'] = core::$network_time;
-			
-			self::send( ':'.$unick.' FMODE '.$chan.' '.core::$chans[$chan]['timestamp'].' '.$mode );
-			
-			$mode_array = mode::sort_modes( $mode );
-			mode::append_modes( $chan, $mode_array );
-			mode::handle_params( $chan, $mode_array );
-		}
-		// we only send it if the mode actually has anything in it.
+		if ( trim( $mode ) == '' )
+			return false;
 		
-		core::alog( 'mode(): '.$nick.' set '.$mode.' on '.$chan, 'BASIC' );
-		// debug info
+		self::send( ':'.$unick.' FMODE '.$chan.' '.core::$chans[$chan]['timestamp'].' '.$mode );
+		ircd_handle::mode( $nick, $chan, $mode );
+		// send the mode then handle it internally
 	}
 	
 	/*
@@ -805,14 +619,13 @@ class ircd implements protocol
 	*/
 	static public function umode( $nick, $user, $mode )
 	{
-		$unick = self::get_uid( $nick );
-		$uuser = self::get_uid( $user );
+		$unick = ircd_handle::get_uid( $nick );
+		$uuser = ircd_handle::get_uid( $user );
 		// get the uid.
 		
-		core::alog( 'umode(): '.$nick.' set '.$mode.' on '.$user, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.$unick.' SVSMODE '.$uuser.' '.$mode );
+		ircd_handle::umode( $nick, $user, $mode );
+		// send the mode then handle it internally
 	}
 	
 	/*
@@ -824,16 +637,12 @@ class ircd implements protocol
 	*/
 	static public function join_chan( $nick, $chan )
 	{
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		core::$chans[$chan]['users'][$nick] = '';
-		// add us to the channel array
-		
-		core::alog( 'join_chan(): '.$nick.' joined '.$chan, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.$unick.' JOIN '.$chan.' '.core::$network_time );
+		ircd_handle::join_chan( $nick, $chan );
+		// send the join then handle it internally
 	}
 	
 	/*
@@ -845,16 +654,12 @@ class ircd implements protocol
 	*/
 	static public function part_chan( $nick, $chan )
 	{
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		unset( core::$chans[$chan]['users'][$nick] );
-		// remove us from the channel
-		
-		core::alog( 'part_chan(): '.$nick.' left '.$chan, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.$unick.' PART '.$chan );
+		ircd_handle::part_chan( $nick, $chan );
+		// send the part then handle it internally
 	}
 	
 	/*
@@ -867,13 +672,12 @@ class ircd implements protocol
 	*/
 	static public function topic( $nick, $chan, $topic )
 	{
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		core::alog( 'topic(): '.$nick.' set a topic for '.$chan, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.$unick.' TOPIC '.$chan.' :'.$topic );
+		ircd_handle::topic( $nick, $chan, $topic );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -891,14 +695,13 @@ class ircd implements protocol
 		
 		if ( $urow['server'] != core::$config->server->name )
 		{
-			$unick = self::get_uid( $nick );
-			$uuser = self::get_uid( $user );
+			$unick = ircd_handle::get_uid( $nick );
+			$uuser = ircd_handle::get_uid( $user );
 			// get the uid.
 			
-			core::alog( 'kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
-			// debug info
-			
 			self::send( ':'.$unick.' KICK '.$chan.' '.$uuser.' :'.$reason );
+			ircd_handle::kick( $nick, $user, $chan, $reason );
+			// send the cmd then handle it internally
 		}
 	}
 		
@@ -914,17 +717,13 @@ class ircd implements protocol
 	{
 		if ( self::$chghost )
 		{
-			$ufrom = self::get_uid( $from );
-			$unick = self::get_uid( $nick );
+			$ufrom = ircd_handle::get_uid( $from );
+			$unick = ircd_handle::get_uid( $nick );
 			// get the uid.
 			
-			core::alog( 'sethost(): '.$from.' set '.$nick.'\'s host', 'BASIC' );
-			// debug info
-			
-			core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];
-			core::$nicks[$nick]['host'] = $host;
-			
 			self::send( ':'.$ufrom.' CHGHOST '.$unick.' '.$host );
+			ircd_handle::sethost( $from, $nick, $host );
+			// send the cmd then handle it internally
 		}
 	}
 	
@@ -940,16 +739,13 @@ class ircd implements protocol
 	{
 		if ( self::$chgident )
 		{
-			$ufrom = self::get_uid( $from );
-			$unick = self::get_uid( $nick );
+			$ufrom = ircd_handle::get_uid( $from );
+			$unick = ircd_handle::get_uid( $nick );
 			// get the uid.
-			
-			core::alog( 'setident(): '.$from.' set '.$nick.'\'s ident', 'BASIC' );
-			// debug info
-			
-			core::$nicks[$nick]['ident'] = $ident;
 		
 			self::send( ':'.$ufrom.' CHGIDENT '.$unick.' '.$ident );
+			ircd_handle::setident( $from, $nick, $host );
+			// send the cmd then handle it internally
 		}
 	}
 	
@@ -963,14 +759,13 @@ class ircd implements protocol
 	*/
 	static public function svsnick( $old_nick, $new_nick, $timestamp )
 	{
-		$uold_nick = self::get_uid( $old_nick );
-		$unew_nick = self::get_uid( $new_nick );
+		$uold_nick = ircd_handle::get_uid( $old_nick );
+		$unew_nick = ircd_handle::get_uid( $new_nick );
 		// get the uid.
 		
-		core::alog( 'svsnick(): '.$old_nick.' changed to '.$new_nick, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.self::$sid.' SVSNICK '.$uold_nick.' '.$unew_nick.' '.$timestamp );
+		ircd_handle::svsnick( $old_nick, $new_nick, $timestamp );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -983,14 +778,13 @@ class ircd implements protocol
 	*/
 	static public function kill( $nick, $user, $message )
 	{
-		$unick = self::get_uid( $nick );
-		$uuser = self::get_uid( $user );
+		$unick = ircd_handle::get_uid( $nick );
+		$uuser = ircd_handle::get_uid( $user );
 		// get the uid.
 		
-		core::alog( 'kill(): '.$nick.' killed '.$user, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.$unick.' KILL '.$uuser.' :Killed ('.$nick.' ('.$message.')))' );
+		ircd_handle::svsnick( $nick, $user, $timestamp );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -1004,10 +798,9 @@ class ircd implements protocol
 	*/
 	static public function gline( $nick, $mask, $duration, $message )
 	{
-		core::alog( 'gline(): '.$nick.' glined '.$mask, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask.' '.$nick.' '.core::$network_time.' '.$duration.' :'.$message );
+		ircd_handle::gline( $nick, $mask, $duration, $message );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -1019,13 +812,9 @@ class ircd implements protocol
 	*/
 	static public function shutdown( $message, $terminate = false )
 	{
-		core::alog( 'shutdown(): '.$message, 'BASIC' );
-		// debug info
-		
 		self::send( ':'.core::$config->server->name.' SQUIT '.core::$config->server->name.' :'.$message );
-		
-		if ( $terminate ) exit;
-		// if true, exit;
+		ircd_handle::shutdown( $message, $terminate );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -1039,16 +828,16 @@ class ircd implements protocol
 	*/
 	static public function push( $from, $numeric, $nick, $message )
 	{
-		$unick = self::get_uid( $nick );
-		$ufrom = self::get_uid( $from );
+		$unick = ircd_handle::get_uid( $nick );
+		$ufrom = ircd_handle::get_uid( $from );
 		// get the uid.
 		
-		core::alog( 'push(): '.$from.' pushed text to '.$nick.' on numeric '.$numeric, 'BASIC' );
-		// debug info
 		$message = implode( ' ', $message );
 		// implode the message
 		
 		self::send( ':'.$ufrom.' PUSH '.$unick.' ::'.$ufrom.' '.$numeric.' '.$unick.' '.$message );
+		ircd_handle::shutdown( $from, $numeric, $nick, $message );
+		// send the cmd then handle it internally
 	}
 	
 	/*
@@ -1070,17 +859,7 @@ class ircd implements protocol
 	*/
 	static public function send( $command )
 	{
-		fputs( core::$socket, $command."\r\n", strlen( $command."\r\n" ) );
-		// fairly simple, hopefully.
-		
-		core::$outgoing = core::$outgoing + strlen( $command."\r\n" );
-		// add to the outgoing counter.
-		
-		core::alog( 'send(): '.$command, 'SERVER' );
-		// log SERVER
-		
-		core::$lines_sent++;
-		// ++ lines sent
+		ircd_handle::send( $command );
 	}
 	
     /*
@@ -1097,7 +876,7 @@ class ircd implements protocol
 	*/
 	static public function on_user_login( $nick )
 	{
-		$uid = self::get_uid( $nick );
+		$uid = ircd_handle::get_uid( $nick );
 		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :'.$nick );
 	}
 	
@@ -1109,7 +888,7 @@ class ircd implements protocol
 	*/
 	static public function on_user_logout( $nick )
 	{
-		$uid = self::get_uid( $nick );
+		$uid = ircd_handle::get_uid( $nick );
 		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :' );	
 	}
 
@@ -1151,8 +930,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TIMESET' )
 		{
-			core::alog( 'on_timeset(): force timechange to '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
+			ircd_handle::on_timeset( $ircdata[2] );
 			
 			return true;
 		}
@@ -1240,9 +1018,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'UID' )
 		{
-			core::alog( 'on_connect(): '.$ircdata[4].' connected to '.self::get_server( $ircdata, 0 ), 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_connect( $ircdata[4], ircd_handle::get_server( $ircdata, 0 ) );
 			return true;
 		}
 		// return true when the $ircdata finds a (remote)connect.
@@ -1260,9 +1036,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
 		{
-			core::alog( 'on_quit(): '.self::get_nick( $ircdata, 0 ).' quit', 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_connect( ircd_handle::get_nick( $ircdata, 0 ) );
 			return true;
 		}
 		// return true when the $ircdata finds a quit.
@@ -1280,9 +1054,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FHOST' )
 		{
-			core::alog( 'on_fhost(): '.self::get_nick( $ircdata, 0 ).'\'s host changed to '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_fhost( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
 			return true;
 		}
 		// return true when the $ircdata finds a host change
@@ -1299,12 +1071,7 @@ class ircd implements protocol
 	static public function on_chan_create( $ircdata )
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FJOIN' )
-		{
-			core::alog( 'on_chan_create(): '.$ircdata[2].' created', 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
 			return true;
-		}
 		// return true when any channel is created, because $chan isnt set.
 		
 		return false;
@@ -1320,9 +1087,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'JOIN' )
 		{
-			core::alog( 'on_join(): '.self::get_nick( $ircdata, 0 ).' joined '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_join( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
 			return true;
 		}
 		// return true when any channel is joined, because $chan isnt set.
@@ -1340,9 +1105,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'PART' )
 		{
-			core::alog( 'on_part(): '.self::get_nick( $ircdata, 0 ).' left '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_part( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
 			return true;
 		}
 		// return true when any channel is parted, because $chan isnt set.
@@ -1360,9 +1123,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FMODE' )
 		{
-			core::alog( 'on_mode(): '.self::get_nick( $ircdata, 0 ).' set '.core::get_data_after( $ircdata, 4 ).' on '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_mode( ircd_handle::get_nick( $ircdata, 0 ), core::get_data_after( $ircdata, 4 ), $ircdata[2] );
 			return true;
 		}
 		// return true when any channel has a mode change, because $chan isnt set.
@@ -1380,9 +1141,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'KICK' )
 		{
-			core::alog( 'on_kick(): '.self::get_nick( $ircdata, 0 ).' kicked '.self::get_nick( $ircdata, 3 ).' from '.$ircdata[2], 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_kick( ircd_handle::get_nick( $ircdata, 0 ), core::get_data_after( $ircdata, 3 ), $ircdata[2] );
 			return true;
 		}
 		// return true when anyone is kicked from any channel, because $chan isnt set.
@@ -1400,9 +1159,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TOPIC' )
 		{
-			core::alog( 'on_ftopic(): topic for '.$ircdata[2].' changed', 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_topic( $ircdata[2] );
 			return true;
 		}
 		// return true when any channel's topic is changed, because $chan isnt set.
@@ -1420,9 +1177,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FTOPIC' )
 		{
-			core::alog( 'on_ftopic(): topic for '.$ircdata[2].' changed', 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_ftopic( $ircdata[2] );
 			return true;
 		}
 		// return true when any channel's topic is changed, because $chan isnt set.
@@ -1440,9 +1195,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'OPERTYPE' )
 		{
-			core::alog( 'on_oper_up(): '.self::get_nick( $ircdata, 0 ).' opered up to '.str_replace( '_', ' ', $ircdata[2] ), 'BASIC' );
-			// i added this to make debbuing a bit more useful.
-			
+			ircd_handle::on_oper_up( ircd_handle::get_nick( $ircdata, 0 ), str_replace( '_', ' ', $ircdata[2] ) );
 			return true;
 		}
 		// return true when a oper up is matched, and not an oper warning x]
@@ -1461,7 +1214,7 @@ class ircd implements protocol
 	{
 		if ( $where != '' )
 		{
-			if ( $where[0] != '#' ) $where = self::get_uid( $where );
+			if ( $where[0] != '#' ) $where = ircd_handle::get_uid( $where );
 			
 			if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'PRIVMSG' && $ircdata[2] == $where ) )
 				return true;
@@ -1489,7 +1242,7 @@ class ircd implements protocol
 	{
 		if ( $where != '' )
 		{
-			if ( $where[0] != '#' ) $where = self::get_uid( $where );
+			if ( $where[0] != '#' ) $where = ircd_handle::get_uid( $where );
 			
 			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' && $ircdata[2] == $where )
 				return true;
@@ -1516,9 +1269,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 4 )
 		{
-			core::alog( 'on_nick_change(): '.self::get_nick( $ircdata, 0 ).' changed nick to '.$ircdata[2], 'BASIC' );
-			// debug info
-			
+			ircd_handle::on_nick_change( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
 			return true;
 		}
 		// return true on any nick change.
@@ -1536,18 +1287,14 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGIDENT' )
 		{
-			core::alog( 'on_ident_change(): '.self::get_nick( $ircdata, 2 ).' changed ident to '.substr( $ircdata[3], 1 ), 'BASIC' );
-			// debug info
-			
+			ircd_handle::on_ident_change( ircd_handle::get_nick( $ircdata, 0 ), substr( $ircdata[3], 1 ) );
 			return true;
 		}
 		// return true on chgident.
 		
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETIDENT' )
 		{
-			core::alog( 'on_ident_change(): '.self::get_nick( $ircdata, 0 ).' changed ident to '.substr( $ircdata[2], 1 ), 'BASIC' );
-			// debug info
-			
+			ircd_handle::on_ident_change( ircd_handle::get_nick( $ircdata, 0 ), substr( $ircdata[2], 1 ) );
 			return true;
 		}
 		// return true on setident.
@@ -1565,9 +1312,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FNAME' )
 		{
-			core::alog( 'on_gecos_change(): '.self::get_nick( $ircdata, 0 ).' changed gecos to '.substr( $ircdata[2], 1 ), 'BASIC' );
-			// debug info
-			
+			ircd_handle::on_gecos_change( ircd_handle::get_nick( $ircdata, 0 ), substr( $ircdata[2], 1 ) );
 			return true;
 		}
 		// return true on fname.
@@ -1584,14 +1329,7 @@ class ircd implements protocol
 	*/
 	static public function get_server( $ircdata, $number )
 	{
-		$sid = str_replace( ':', '', $ircdata[$number] );
-		
-		foreach ( core::$servers as $server => $info )
-		{
-			if ( $info['sid'] == $sid )
-				return $server;
-			// had to make a function for this.
-		}
+		return ircd_handle::get_server( $ircdata, $number );
 	}
 	
 	/*
@@ -1603,12 +1341,7 @@ class ircd implements protocol
 	*/
 	static public function get_nick( $ircdata, $number )
 	{
-		$uuid = str_replace( ':', '', $ircdata[$number] );
-		
-		return core::$uids[$uuid];
-		// we always display the uid nick here, ALWAYS
-		// therefore when we need the uid, we'll change the
-		// nick to a uid.	
+		return ircd_handle::get_nick( $ircdata, $number );	
 	}
 	
 	/*
@@ -1619,9 +1352,7 @@ class ircd implements protocol
 	*/
 	static public function get_uid( $nick )
 	{
-		$uuid = core::$nicks[$nick]['uid'];
-		
-		return $uuid;
+		return ircd_handle::get_uid( $nick );
 	}
 	
 	/*
@@ -1632,21 +1363,7 @@ class ircd implements protocol
 	*/
 	static public function parse_users( $chan, $ircdata, $number )
 	{
-		$users = core::get_data_after( $ircdata, $number );
-		$users = explode( ' ', $users );
-		
-		foreach ( $users as $user )
-		{
-			if ( $user != null || $user != ' ' )
-			{
-				$prenick = explode( ',', $user );
-				$nick = trim( self::get_nick( $prenick, 1 ) );
-				
-				if ( $nick != null ) $nusers[$nick] = $prenick[0];
-			}
-		}
-		
-		return $nusers;
+		return ircd_handle::parse_users( $chan, $ircdata, $number );
 	}
 }
 // EOF;
