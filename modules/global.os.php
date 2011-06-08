@@ -74,9 +74,7 @@ class os_global implements module
 	public function modunload()
 	{
 		if ( isset( core::$config->global->nick ) || core::$config->global->nick != null )
-		{
 			ircd::remove_client( core::$config->global->nick, 'module unloaded' );
-		}
 		// remove our global client.
 	}
 	

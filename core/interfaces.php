@@ -38,6 +38,8 @@ interface protocol
 	static public function handle_oper_up( $ircdata );
 	// handle events
 	
+	static public function send_burst( $server );
+	static public function send_squit( $server );
 	static public function ping( $ircdata );
 	static public function get_information( $ircdata );
 	static public function init_server( $name, $pass, $desc, $numeric );
@@ -87,8 +89,8 @@ interface protocol
 	static public function on_msg( $ircdata, $where = '' );
 	static public function on_notice( $ircdata, $where = '' );
 	static public function on_nick_change( $ircdata );
-	static public function get_nick( $ircdata, $number );
-	static public function parse_users( $chan, $ircdata, $number );
+	static public function on_ident_change( $ircdata );
+	static public function on_gecos_change( $ircdata );
 	// core events
 }
 
