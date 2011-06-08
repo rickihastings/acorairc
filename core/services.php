@@ -4,8 +4,8 @@
 * Acora IRC Services
 * core/services.php: Collection of functions for basic usage
 * 
-* Copyright (c) 2009 Acora (http://gamergrid.net/acorairc)
-* Coded by N0valyfe and Henry of GamerGrid: irc.gamergrid.net #acora
+* Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
+* Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
 *
 * This project is licensed under the GNU Public License
 *
