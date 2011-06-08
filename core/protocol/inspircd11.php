@@ -647,7 +647,7 @@ class ircd implements protocol
 			// hostname
 			
 			if ( $data['server'] != core::$config->server->name && services::match( $hostname, $mask ) )
-				services::communicate( $nick, $user, $message );
+				self::notice( $nick, $user, $message );
 		}
 	}
 	
