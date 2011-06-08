@@ -225,7 +225,7 @@ class services
 				return false;
 			// invalid character
 			
-			if ( !ereg( "^[a-zA-Z]*$", $char ) && !ereg( "^[a-zA-Z]*$", $split_host[$index + 1] ) )
+			if ( !preg_match( "/^[a-z0-9]*$/i", $char ) && !preg_match( "/^[a-z0-9]*$/i", $split_host[$index + 1] ) )
 				return false;
 			// invalid format, eg something..fake.vhost
 		}
