@@ -23,11 +23,7 @@ class ircd_handle
 	* @params
 	* void
 	*/
-	public function __construct()
-	{
-		//modules::init_module( 'inspircd12', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
-		// these are standard in module constructors
-	}
+	public function __construct() { }
 	
 	/*
 	* handle_on_server
@@ -509,8 +505,6 @@ class ircd_handle
 	{
 		core::alog( 'globops(): '.$nick.' sent a globops', 'BASIC' );
 		// debug info
-			
-		self::send( ':'.$unick.' GLOBOPS :'.$message );
 	}
 	
 	/*

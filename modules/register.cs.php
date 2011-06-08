@@ -17,7 +17,7 @@
 class cs_register implements module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
