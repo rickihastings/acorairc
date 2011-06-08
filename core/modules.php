@@ -54,12 +54,19 @@ class modules
 	*/
 	static public function load_module( $module_name, $module_file )
 	{
-		if ( !require( BASEPATH.'/modules/'.$module_file ) )
+		if ( !@file_exists( BASEPATH.'/modules/'.$module_file ) )
 		{
 			core::alog( 'load_module(): unable to load: '.$module_name.' (not found)', 'BASIC' );
 			return false;
 		}
-		// module doesn't exist, log it
+		// check if the module actually exists
+	
+		if ( !@require( BASEPATH.'/modules/'.$module_file ) )
+		{
+			core::alog( 'load_module(): unable to load: '.$module_name.' (error loading)', 'BASIC' );
+			return false;
+		}
+		// module (exists?) but can't be loaded
 		
 		if ( !self::$list[$module_name]['class'] = new $module_name() )
 		{
