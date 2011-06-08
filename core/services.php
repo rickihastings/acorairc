@@ -36,7 +36,7 @@ class services
 
 		if ( database::num_rows( $user_q ) == 0 )
 			return false;
-		// chan isnt even registered.
+		// user isnt registered || isnt identified
 		
 		$row = database::fetch( $user_q );
 		

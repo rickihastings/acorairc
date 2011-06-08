@@ -17,7 +17,7 @@
 class cs_flags implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	

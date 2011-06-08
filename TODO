@@ -14,4 +14,5 @@
 * Report an error and boot when module isn't found, instead of crashing
 * Fix bug with /os global
 * Fix bug with /cs levels #channel displayed wrong message for unidenfied users (DONE)
-* Fix bug with levels being given out if you arn't identified
+* Fixed more bugs with levels not setting certain modes on folk, like +v *@* (DONE)
+* Fix bug with levels being given out if you arn't identified (DONE)
