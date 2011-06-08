@@ -19,3 +19,6 @@
 * Fix bug with levels being given out if you arn't identified (DONE)
 * Add the option to turn chanserv's guard off via config file (silly git, this is already possible so, DONE)
 * Do some work on /cs flags #channel, as it could show alot more info, like /cs info
+* Add +r to channels upon register, can't believe we don't actually do this? (DONE, but it can be unset by operserv, i'm going to leave it like this.
+  incase someone wants to "pretend" a channel isnt registered, for whatever reason)
+* Vigiriously test all commands!
