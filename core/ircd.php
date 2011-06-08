@@ -447,8 +447,6 @@ class ircd_handle
 	*/
 	static public function init_server( $name, $pass, $desc, $numeric )
 	{
-		ircd::$sid = $numeric;
-		
 		core::alog( 'init_server(): '.$name.' introduced :'.$desc, 'BASIC' );
 		// log it
 	}

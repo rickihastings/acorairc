@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.6s';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -25,7 +25,7 @@ class ircd implements protocol
 	static public $globops = false;
 	static public $chghost = false;
 	static public $chgident = false;
-	static public $sid = '009';
+	static public $sid;
 	static public $uid_count = 'AAAAAA';
 
 	static public $restrict_modes;
@@ -64,6 +64,7 @@ class ircd implements protocol
 	public function __construct()
 	{
 		modules::init_module( 'inspircd12', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
+		self::$sid = core::$config->server->numeric;
 		// these are standard in module constructors
 	}
 	
