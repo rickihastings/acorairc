@@ -154,7 +154,7 @@ class ns_identify implements module
 									cs_levels::give_access( $chan, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
 									// give them access
 									
-									continue;
+									continue 2;
 									// continue to next loop cause we've found a match
 								}
 								elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )

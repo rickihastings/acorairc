@@ -733,7 +733,7 @@ class cs_levels implements module
 						self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
 						// give them access
 						
-						break;
+						continue;
 						// break cause we've found a match
 					}
 					elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'o' ) !== false )
@@ -811,7 +811,7 @@ class cs_levels implements module
 					self::give_access( $channel->channel, $nick, $access, false );
 					// give them access, false is always set here otherwise we end up giving unidentified nicks access, which nobody wants
 					
-					continue;
+					continue 2;
 					// continue to next loop cause we've found a match
 				}
 				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
@@ -914,7 +914,7 @@ class cs_levels implements module
 	*/
 	static public function give_access( $chan, $nick, $chan_access, $secure = 1 )
 	{
-		if ( !$secure && !services::user_exists( $nick, true, array( 'display', 'identified' ) ) )
+		if ( ( $secure == 1 ) && !services::user_exists( $nick, true, array( 'display', 'identified' ) ) )
 			return false;
 		// return false if secure is set to 1 and $nick isnt identified.
 		
