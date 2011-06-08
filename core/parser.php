@@ -294,9 +294,7 @@ class parser
 	function array_to_object( $array )
 	{
 		foreach ( $array as $key => $value )
-		{
 			if ( is_array( $value ) ) $array[$key] = self::array_to_object( $value );
-		}
 		
 		return (object) $array;
 	}

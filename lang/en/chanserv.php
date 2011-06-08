@@ -546,6 +546,7 @@ $help = (object) array(
 	// levels
 	'CS_FLAGS_NEEDS_PARAM'	=>	'{flag} requires a parameter to be set',
 	'CS_FLAGS_ALREADY_SET'	=>	'{flag} is already set on {chan}',
+	'CS_FLAGS_LIST'			=>	'The currentl flags set on {chan} are {flags}.',
 	'CS_FLAGS_NOT_SET'		=>	'{flag} is not set on {chan}',
 	'CS_FLAGS_SET'			=>	'{flag} set on {chan}',
 	'CS_FLAGS_INVALID_T'	=>	'The value for {flag} must contain a wildcard (*)',
