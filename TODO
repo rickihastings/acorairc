@@ -22,3 +22,5 @@
 * Add +r to channels upon register, can't believe we don't actually do this? (DONE, but it can be unset by operserv, i'm going to leave it like this.
   incase someone wants to "pretend" a channel isnt registered, for whatever reason)
 * Vigiriously test all commands!
+* Fix that bug where recv(): .. blank is sent, no idea whats causing it
+* Add charybdis33 support
