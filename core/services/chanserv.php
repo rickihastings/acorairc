@@ -330,7 +330,7 @@ class chanserv implements service
 		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $channel->channel ) );
 		// lets update the last used timestamp
 		
-		ircd::mode( core::$config->chanserv->nick, $channel->channel, '+r' );
+		ircd::set_registered_mode( core::$config->chanserv->nick, $channel->channel );
 		// just set that for the crack.
 	
 		if ( self::check_flags( $channel->channel, array( 'G' ) ) && $channel->suspended == 0 && isset( modules::$list['cs_fantasy'] ) && !isset( core::$chans[$channel->channel]['users'][core::$config->chanserv->nick] ) )

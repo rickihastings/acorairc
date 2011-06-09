@@ -63,8 +63,9 @@ interface protocol
 	static public function gline( $nick, $mask, $duration, $message );
 	static public function shutdown( $message, $terminate = false );
 	static public function push( $from, $numeric, $nick, $message );
-	static public function end_burst();
+	static public function end_burst( $ircdata );
 	static public function send( $command );
+	static public function set_registered_mode( $nick, $channel );
 	// ircd functions
 	
 	static public function on_capab_start( $ircdata );
@@ -92,6 +93,12 @@ interface protocol
 	static public function on_ident_change( $ircdata );
 	static public function on_gecos_change( $ircdata );
 	// core events
+	
+	static public function get_server( $ircdata, $number );
+	static public function get_nick( $ircdata, $number );
+	static public function get_uid( $nick );
+	static public function parse_users( $chan, $ircdata, $number );
+	// additional functions
 }
 
 /*

@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.6s';
+	const MOD_VERSION = '0.0.6';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -425,8 +425,14 @@ class ircd implements protocol
 			$pdata = $pdata[1];
 			$data = explode( '=', $ircdata[16] );
 			$data = $data[1];
+			
+			if ( strpos( implode( ' ', $ircdata ), 'HALFOP=1' ) !== false )
+				$has_halfop = true;
+			else
+				$has_halfop = false;
+			// do we have halfop?
 		
-			ircd_handle::parse_ircd_modes( $max_modes, $pdata, $data );
+			ircd_handle::parse_ircd_modes( $max_modes, $pdata, $data, $has_halfop );
 			// parse some data out of CAPABILITIES and send it into parse_ircd_modes
 		}
 		// only trigger when the capab capabilities is coming through
@@ -845,9 +851,9 @@ class ircd implements protocol
 	* end_burst
 	*
 	* @params
-	* void
+	* $ircdata
 	*/
-	static public function end_burst()
+	static public function end_burst( $ircdata )
 	{
 		self::send( ':'.self::$sid.' ENDBURST' );
 	}
@@ -861,6 +867,17 @@ class ircd implements protocol
 	static public function send( $command )
 	{
 		ircd_handle::send( $command );
+	}
+	
+	/*
+	* set_registered_mode
+	*
+	* @params
+	* $nick, $channel
+	*/
+	static public function set_registered_mode( $nick, $channel )
+	{
+		ircd::mode( $nick, $channel, '+r' );
 	}
 	
     /*
