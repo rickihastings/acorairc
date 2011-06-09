@@ -967,6 +967,8 @@ class ircd_handle
 				{
 					$n_user = explode( ',', $user );
 					$nick = self::get_nick( $n_user, 1 );
+					// split it via ,
+					
 					$nusers[$nick] = $n_user[0];
 				}
 				else
