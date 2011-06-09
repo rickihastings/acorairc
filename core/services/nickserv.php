@@ -94,7 +94,8 @@ class nickserv implements service
 		}
 		// here we deal with giving umode +h to ops :D
 		
-		if ( ircd::on_chan_create( $ircdata ) && core::$config->server->help_chan )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false && core::$config->server->help_chan )
 		{
 			$chans = explode( ',', $ircdata[2] );
 			// chans
@@ -103,13 +104,7 @@ class nickserv implements service
 			{
 				if ( $chan == strtolower( core::$config->server->help_chan ) )
 				{
-					// the chan
-					$nusers_str = implode( ' ', $ircdata );
-					$nusers_str = explode( ':', $nusers_str );
-					// right here we need to find out where the thing is
-					$nusers = ircd::parse_users( $chan, $nusers_str, 1 );
-					
-					foreach ( $nusers as $nick => $modes )
+					foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 					{
 						if ( strstr( $modes, 'o' ) )
 							ircd::umode( core::$config->nickserv->nick, $nick, '+h' );

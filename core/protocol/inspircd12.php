@@ -1106,7 +1106,7 @@ class ircd implements protocol
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'JOIN' )
 		{
 			ircd_handle::on_join( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
-			return true;
+			return $ircdata[2];
 		}
 		// return true when any channel is joined, because $chan isnt set.
 		

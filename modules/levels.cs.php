@@ -666,26 +666,22 @@ class cs_levels implements module
 			
 			foreach ( $chans as $chan )
 			{
-				$nusers_str = implode( ' ', $ircdata );
-				$nusers_str = explode( ':', $nusers_str );
-				// right here we need to find out where the thing is
-				$nusers = ircd::parse_users( $chan, $nusers_str, 1 );
-				
 				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 					return false;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
 				
-				self::on_create( $nusers, $channel );
+				self::on_create( core::$chans[$chan]['users'], $channel );
 				// on_create event
 			}
 		}
 		// we give out the nessicary access when a channel is created :)
 		
-		if ( ircd::on_join( $ircdata ) )
+		$populated_chan = ircd::on_join( $ircdata );
+		if ( $populated_chan !== false )
 		{
 			$nick = core::get_nick( $ircdata, 0 );
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// get the channel & nick
 			
 			foreach ( $chans as $chan )

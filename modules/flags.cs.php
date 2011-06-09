@@ -675,10 +675,11 @@ class cs_flags implements module
 		}
 		// on part we check for
 		
-		if ( ircd::on_join( $ircdata ) )
+		$populated_chan = ircd::on_join( $ircdata );
+		if ( $populated_chan !== false )
 		{
 			$nick = core::get_nick( $ircdata, 0 );
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// find the nick & chan
 			
 			foreach ( $chans as $chan )
@@ -728,10 +729,7 @@ class cs_flags implements module
 			
 			foreach ( $chans as $chan )
 			{
-				$nusers_str = implode( ' ', $ircdata );
-				$nusers_str = explode( ':', $nusers_str );
-				// right here we need to find out where the thing is
-				$nusers = ircd::parse_users( $chan, $nusers_str, 1 );
+				$nusers = core::$chans[$chan]['users'];
 				
 				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 					return false;	

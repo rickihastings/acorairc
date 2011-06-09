@@ -972,7 +972,8 @@ class ircd_handle
 				else
 				{
 					$modes = preg_replace( '/[a-zA-Z0-9\s]/', '', $user );
-					$nick = preg_replace( '/[^a-zA-Z0-9\s]/', '', $user );
+					$nick = array( preg_replace( '/[^a-zA-Z0-9\s]/', '', $user ) );
+					$nick = self::get_nick( $nick, 0 );
 					
 					$modes = str_replace( '@', 'o', $modes );
 					$modes = str_replace( '%', 'h', $modes );

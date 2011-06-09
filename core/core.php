@@ -392,7 +392,7 @@ class core
 			ircd::handle_channel_create( $ircdata );
 		// on channel create
 		
-		if ( ircd::on_join( $ircdata ) )
+		if ( ircd::on_join( $ircdata ) !== false )
 			ircd::handle_join( $ircdata );
 		// on join
 		
