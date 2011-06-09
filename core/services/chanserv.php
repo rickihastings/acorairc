@@ -111,7 +111,8 @@ class chanserv implements service
 	*/
 	static public function on_chan_create( $ircdata )
 	{
-		if ( $populated_chan = ircd::on_chan_create( $ircdata ) )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false )
 		{
 			$chans = explode( ',', $populated_chan );
 			// chans
@@ -160,9 +161,10 @@ class chanserv implements service
 	*/
 	static public function on_join( $ircdata )
 	{
-		if ( ircd::on_join( $ircdata ) )
+		$populated_chan = ircd::on_join( $ircdata );
+		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// find the chans.
 			
 			foreach ( $chans as $chan )

@@ -51,8 +51,27 @@ class mode
 			$first_part[0] = '+'.$first_part[0];
 		// if it isn't empty and the first character isnt +/-, add a +o to it.
 		
-		$modes = implode( ' ', $first_part );
+		$first_parts = str_split( $first_part[0] );
+		$fpi = 0;
+		foreach ( $first_parts as $fp1 => $fp2 )
+		{
+			if ( $fp2 == '+' || $fp2 == '-' )
+				continue;
+			if ( strpos( ircd::$modes_params, $fp2 ) !== false )
+				$fpi++;
+			// skip +/-
+			
+			if ( strpos( ircd::$restrict_modes, $fp2 ) !== false )
+			{
+				if ( strpos( $first_part[$fpi], '@' ) === false )
+					$first_part[$fpi] = '*@' . $first_part[$fpi];
+				// check the hostmask, we don't have a @ ?
+			}
+			// it is a +beI typically. so.. let's make sure its a valid hostmask
+		}
+		// loop through the first parts
 		
+		$modes = implode( ' ', $first_part );	
 		return trim( $modes );
 	}
 	
