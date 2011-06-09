@@ -229,10 +229,10 @@ class chanserv implements service
 			if ( ( strpos( $mode_queue, core::$config->chanserv->nick ) || strpos( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
 			{
 				if ( ircd::$protect )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick );
+					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
 					// +ao its self.
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick );
+					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
 					// +o its self.
 			}
 			// we're being deopped! WHAT THE FUCK! :D
@@ -261,10 +261,10 @@ class chanserv implements service
 				// add chanserv to the users array, housekeeping it :D
 				
 				if ( ircd::$protect )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick );
+					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
 					// +ao its self.
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick );
+					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
 					// +o its self.
 			}
 			// what the fuck is this tool doing.. kicking us!!?! we SHOULD kick their ass
@@ -341,10 +341,10 @@ class chanserv implements service
 			// join the chan.
 			
 			if ( ircd::$protect )
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick );
+				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
 				// +ao its self.
 			else
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+o '.core::$config->chanserv->nick );
+				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+o '.core::$config->chanserv->nick, true );
 				// +o its self.
 		}
 		// check if guard is on

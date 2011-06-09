@@ -595,8 +595,9 @@ class ircd implements protocol
 	* $nick - who to send it from
 	* $chan - the channel to use
 	* $mode - mode to set
+	* $boolean - if set to true sid will be sent instead of nick
 	*/
-	static public function mode( $nick, $chan, $mode )
+	static public function mode( $nick, $chan, $mode, $boolean = false )
 	{
 		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
@@ -610,7 +611,10 @@ class ircd implements protocol
 		if ( trim( $mode ) == '' )
 			return false;
 		
-		self::send( ':'.$unick.' FMODE '.$chan.' '.core::$chans[$chan]['timestamp'].' '.$mode );
+		$from = ( $boolean ) ? self::$sid : $unick;
+		// check what we send
+		
+		self::send( ':'.$from.' FMODE '.$chan.' '.core::$chans[$chan]['timestamp'].' '.$mode );
 		ircd_handle::mode( $nick, $chan, $mode );
 		// send the mode then handle it internally
 	}
