@@ -181,9 +181,10 @@ class ns_suspend implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_connect( $ircdata ) )
+		$connect_data = ircd::on_connect( $ircdata );
+		if ( $connect_data !== false )
 		{
-			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
+			$nick = $connect_data['nick'];
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'suspended' ) ) )
 			{

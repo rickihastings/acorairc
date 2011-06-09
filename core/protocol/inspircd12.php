@@ -130,7 +130,7 @@ class ircd implements protocol
 		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
 		// strip :
 	
-		ircd::handle_nick_change( $nick, $new_nick, $startup );
+		ircd_handle::handle_nick_change( $nick, $new_nick, $startup );
 	}
 	
 		
@@ -146,7 +146,7 @@ class ircd implements protocol
 		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		// strip :
 		
-		ircd::handle_handle_quit( $nick, $startup );
+		ircd_handle::handle_quit( $nick, $startup );
 	}
 	
 	/*
@@ -254,6 +254,7 @@ class ircd implements protocol
 	static public function handle_channel_create( $ircdata )
 	{
 		$chans = explode( ',', $ircdata[2] );
+		$chan = $chans[0];
 		// parse the chans sending an array, although we shouldn't actually get these in an FJOIN, do it to be safe.
 		
 		$nusers_str = implode( ' ', $ircdata );
@@ -264,10 +265,10 @@ class ircd implements protocol
 		
 		$mode_queue = core::get_data_after( $ircdata, 4 );
 		$mode_queue = explode( ':', $mode_queue );
-		$mode_queue = $mode_queue[0];
+		$mode_queue = trim( $mode_queue[0] );
 		// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
 	
-		ircd_handle::handle_channel_create( $chans, $nusers, $ircdata[3], core::get_data_after( $ircdata, 4 ) );
+		ircd_handle::handle_channel_create( $chans, $nusers, $ircdata[3], $mode_queue );
 	}
 	
 	/*
@@ -481,17 +482,16 @@ class ircd implements protocol
 		// produce our random UUID (internal and TS6 specific).
 		
 		if ( $enforcer )
-		{
-			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$network_time.' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['enforcer'].' :'.$gecos );
-			// this just connects a psuedoclient.
-		}
+			$service_mode = self::$service_modes['enforcer'];
 		else
-		{
-			self::send( ':'.self::$sid.' UID '.$uid.' '.core::$network_time.' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.self::$service_modes['service'].' :'.$gecos );
-			// this just connects a psuedoclient.
+			$service_mode = self::$service_modes['service'];
+		// what do we use?
+			
+		self::send( ':'.self::$sid.' UID '.$uid.' '.core::$network_time.' '.$nick.' '.$hostname.' '.$hostname.' '.$ident.' '.core::$config->conn->vhost.' '.core::$network_time.' '.$service_mode.' :'.$gecos );
+		
+		if ( !$enforcer )
 			self::send( ':'.$uid.' OPERTYPE Service' );
-			// set opertype by default	
-		}
+		// send the opertype
 		
 		ircd_handle::introduce_client( $nick, $uid, $ident, $hostname, $gecos, $enforcer );
 		// handle it
@@ -1020,7 +1020,7 @@ class ircd implements protocol
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'UID' )
 		{
 			ircd_handle::on_connect( $ircdata[4], ircd_handle::get_server( $ircdata, 0 ) );
-			return true;
+			return core::$nicks[$ircdata[4]];
 		}
 		// return true when the $ircdata finds a (remote)connect.
 		
@@ -1072,7 +1072,7 @@ class ircd implements protocol
 	static public function on_chan_create( $ircdata )
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FJOIN' )
-			return true;
+			return $ircdata[2];
 		// return true when any channel is created, because $chan isnt set.
 		
 		return false;

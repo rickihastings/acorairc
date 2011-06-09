@@ -354,7 +354,7 @@ class core
 			ircd::handle_on_squit( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_connect( $ircdata ) )
+		if ( ircd::on_connect( $ircdata ) !== false )
 			ircd::handle_on_connect( $ircdata, $startup );
 		// log shit on connect, basically the users host etc.
 		
@@ -390,7 +390,7 @@ class core
 			ircd::handle_topic( $ircdata );	
 		// on topic
 		
-		if ( ircd::on_chan_create( $ircdata ) )
+		if ( ircd::on_chan_create( $ircdata ) !== false )
 			ircd::handle_channel_create( $ircdata );
 		// on channel create
 		
@@ -519,7 +519,7 @@ class core
 	*/
 	static public function max_users( $ircdata )
 	{
-		if ( ircd::on_connect( $ircdata ) )
+		if ( ircd::on_connect( $ircdata ) !== false )
 		{
 			if ( count( self::$nicks ) > self::$max_users )
 			{

@@ -109,9 +109,10 @@ class os_logonnews implements module
 		// we're booting, fuck sending messages to everyone, they don't want to see
 		// it if it's just a restart, and we don't want to waste the resources on it.
 		
-		if ( ircd::on_connect( $ircdata ) )
+		$connect_data = ircd::on_connect( $ircdata );
+		if ( $connect_data !== false )
 		{
-			$nick = core::get_nick( $ircdata, ( strstr(core::$config->server->ircd, 'inspircd') ) ? 4 : 3 );
+			$nick = $connect_data['nick'];
 			
 			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ), array( 0 => 3 ) );
 			// get our news

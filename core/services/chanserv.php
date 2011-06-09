@@ -111,9 +111,9 @@ class chanserv implements service
 	*/
 	static public function on_chan_create( $ircdata )
 	{
-		if ( ircd::on_chan_create( $ircdata ) )
+		if ( $populated_chan = ircd::on_chan_create( $ircdata ) )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// chans
 			
 			foreach ( $chans as $chan )

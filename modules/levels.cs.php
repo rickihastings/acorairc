@@ -658,9 +658,10 @@ class cs_levels implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_chan_create( $ircdata ) )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// the chans
 			
 			foreach ( $chans as $chan )

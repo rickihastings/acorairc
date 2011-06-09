@@ -33,9 +33,7 @@ class os_global implements module
 	public function modload()
 	{
 		if ( isset( core::$config->global ) )
-		{
 			ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
-		}
 		// i decided to change global from a core feature into a module based feature
 		// seen as though global won't do anything really without this module it's going here
 		
@@ -128,19 +126,20 @@ class os_global implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && ircd::on_connect( $ircdata ) )
+		$connect_data = ircd::on_connect( $ircdata );
+		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && $connect_data !== false )
 		{
-			$part = strstr( core::$config->server->ircd, 'inspircd11' ) ? 3 : 2;
-			$nick = core::get_nick( $ircdata, $part );
+			$nick = $connect_data['nick'];
 			// get nick
 			
 			ircd::notice( core::$config->global->nick, $nick, 'Services are currently running in debug mode, please be careful when sending passwords.' );
 			// give them a quick notice that people can see their passwords.
 		}
 		
-		if ( ircd::on_chan_create( $ircdata ) )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// chan
 			
 			foreach ( $chans as $chan )

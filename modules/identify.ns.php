@@ -227,9 +227,10 @@ class ns_identify implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_connect( $ircdata ) )
+		$connect_data = ircd::on_connect( $ircdata );
+		if ( $connect_data !== false )
 		{
-			$nick = core::get_nick( $ircdata, ( core::$config->server->ircd == 'inspircd12' ) ? 4 : 3 );
+			$nick = $connect_data['nick'];
 			// get nick
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
@@ -250,7 +251,7 @@ class ns_identify implements module
 					ircd::on_user_login( $nick );
 					
 					if ( !$startup )
-						core::alog( core::$config->nickserv->nick.': '.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['host'].' automatically identified for '.$nick );
+						core::alog( core::$config->nickserv->nick.': '.$connect_data['ident'].'@'.$connect_data['host'].' automatically identified for '.$nick );
 				}
 				else
 				{
@@ -264,7 +265,7 @@ class ns_identify implements module
 		
 		if ( ircd::on_nick_change( $ircdata ) )
 		{
-			$nick = $ircdata[2];
+			$nick = core::get_nick( $ircdata, 2 );
 			$old_nick = core::$nicks[$nick]['onick'];
 			// get the nicknames
 			
