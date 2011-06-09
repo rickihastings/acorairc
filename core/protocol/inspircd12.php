@@ -257,11 +257,12 @@ class ircd implements protocol
 		$chan = $chans[0];
 		// parse the chans sending an array, although we shouldn't actually get these in an FJOIN, do it to be safe.
 		
-		$nusers_str = implode( ' ', $ircdata );
-		$nusers_str = explode( ':', $nusers_str );
+		$nusers_str = core::get_data_after( $ircdata, 5 );
+		$nusers_str = str_replace( ':', '', $nusers_str );
+		$nusers = explode( ' ', $nusers_str );
 		// right here we need to find out where the thing is, because
 		// of the way 1.2 handles FJOINs
-		$nusers = ircd_handle::parse_users( $chan, $nusers_str, 1 );
+		$nusers = ircd_handle::parse_users( $chan, $nusers );
 		
 		$mode_queue = core::get_data_after( $ircdata, 4 );
 		$mode_queue = explode( ':', $mode_queue );
