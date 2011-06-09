@@ -842,7 +842,7 @@ class ircd implements protocol
 		// implode the message
 		
 		self::send( ':'.$ufrom.' PUSH '.$unick.' ::'.$ufrom.' '.$numeric.' '.$unick.' '.$message );
-		ircd_handle::shutdown( $from, $numeric, $nick, $message );
+		ircd_handle::push( $from, $numeric, $nick, $message );
 		// send the cmd then handle it internally
 	}
 	

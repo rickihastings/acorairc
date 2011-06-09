@@ -738,12 +738,11 @@ class ircd implements protocol
 	*/
 	static public function svsnick( $old_nick, $new_nick, $timestamp )
 	{
-		// TODO
 		$uold_nick = ircd_handle::get_uid( $old_nick );
 		$unew_nick = ircd_handle::get_uid( $new_nick );
 		// get the uid.
 		
-		self::send( ':'.self::$sid.' SVSNICK '.$uold_nick.' '.$unew_nick.' '.$timestamp );
+		self::send( ':'.$uold_nick.' NICK '.$unew_nick.' '.$timestamp );
 		ircd_handle::svsnick( $old_nick, $new_nick, $timestamp );
 		// send the cmd then handle it internally
 	}
@@ -811,16 +810,14 @@ class ircd implements protocol
 	*/
 	static public function push( $from, $numeric, $nick, $message )
 	{
-		// TODO
 		$unick = ircd_handle::get_uid( $nick );
-		$ufrom = ircd_handle::get_uid( $from );
 		// get the uid.
 		
 		$message = implode( ' ', $message );
 		// implode the message
 		
-		self::send( ':'.$ufrom.' PUSH '.$unick.' ::'.$ufrom.' '.$numeric.' '.$unick.' '.$message );
-		ircd_handle::shutdown( $from, $numeric, $nick, $message );
+		self::send( ':'.self::$sid.' '.$numeric.' '.$unick.' :'.$message );
+		ircd_handle::push( $from, $numeric, $nick, $message );
 		// send the cmd then handle it internally
 	}
 	
@@ -923,11 +920,9 @@ class ircd implements protocol
 	*/
 	static public function on_timeset( $ircdata )
 	{
-		// TODO
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TIMESET' )
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TIME' )
 		{
 			ircd_handle::on_timeset( $ircdata[2] );
-			
 			return true;
 		}
 		
