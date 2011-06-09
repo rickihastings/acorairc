@@ -462,13 +462,11 @@ class ircd implements protocol
 	* send_version
 	*
 	* @params
-	* $version - version
-	* $name - server name
-	* $ircd - ircd
+	* void
 	*/
-	static public function send_version( $version, $name, $ircd )
+	static public function send_version( $ircdata )
 	{
-		self::send( ':'.self::$sid.' VERSION :acora-'.core::$version.' '.core::$config->server_name.' '.core::$config->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+		self::send( ':'.self::$sid.' VERSION :acora-'.core::$version.' '.core::$config->server->name.' '.core::$config->server->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
 		// ooh, version?
 	}
 	

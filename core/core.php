@@ -434,7 +434,8 @@ class core
 	*/
 	public function post_boot_server()
 	{
-		ircd::send_version( self::$version, self::$config->server_name, self::$config->ircd );
+		if ( self::$capab_start && !self::$end_burst )
+			ircd::send_version( array() );
 	
 		foreach ( self::$service_bots as $bot )
 		{
