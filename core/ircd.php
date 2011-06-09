@@ -378,7 +378,7 @@ class ircd_handle
 	* @params
 	* $max_modes, $pdata, $data
 	*/
-	static public function parse_ircd_modes( $max_modes, $pdata, $data )
+	static public function parse_ircd_modes( $max_modes, $pdata, $data, $hdata )
 	{
 		ircd::$max_params = $max_modes;
 		// set $max_params to MAXMODES everything below is mode related
@@ -406,7 +406,7 @@ class ircd_handle
 		}
 		// search restrict modes for 'aq' as we want them in status modes
 		
-		if ( strpos( $hdata, 'HALFOP=1' ) !== false )
+		if ( $hdata )
 			ircd::$halfop = true;
 		// we check halfop differently
 		

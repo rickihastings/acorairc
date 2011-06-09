@@ -242,9 +242,8 @@ class core
 					// i don't know why.. maybe on clock shifts..
 					// how long did the burst take?
 					
+					ircd::end_burst( $ircdata );
 					self::$end_burst = true;
-					
-					ircd::end_burst();
 				}
 				// here we check if we're recieving an endburst
 				
@@ -264,7 +263,7 @@ class core
 				foreach( self::$debug_data as $line => $message )
 				{
 					if ( trim( $message ) != '' || trim( $message ) != null )
-						print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+						print "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
 					// only print if we have something to print
 						
 					unset( self::$debug_data[$line] );
@@ -293,6 +292,10 @@ class core
 	*/
 	public function process( $ircdata, $startup = false )
 	{
+		if ( self::$end_burst )
+			ircd::ping( $ircdata );
+		// pingpong my name is tingtong
+	
 		self::log_changes( $ircdata, $startup );
 		// log peoples hostnames, used for bans etc.
 		
@@ -303,9 +306,6 @@ class core
 		// this just does some checking, this is quite
 		// important as it deals with the main anti-flood support
 		
-		ircd::ping( $ircdata );
-		// pingpong my name is tingtong
-		
 		if ( commands::ctcp( $ircdata ) ) return true;
 		// ctcp stuff :D
 		
@@ -313,9 +313,7 @@ class core
 		// motd
 		
 		if ( ircd::on_timeset( $ircdata ) && $ircdata[3] == 'FORCE' )
-		{
 			self::$network_time = $ircdata[2];
-		}
 		// we're getting a new time, update it
 		
 		if ( $ircdata[0] == 'ERROR' )
@@ -558,7 +556,7 @@ class core
 		{
 			foreach( self::$log_data as $line => $message )
 			{
-				$filemsg = "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+				$filemsg = "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
 					
 				if ( !$fp = fopen( $filepath, 'a' ) )
 					return false;
@@ -834,7 +832,7 @@ class core
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
 				if ( !is_resource( self::$socket ) && self::$debug )
-					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\r\n";
+					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
 				elseif ( !in_array( $message, self::$debug_data ) )
 					self::$debug_data[] = $message;
 				// if we're not connected, and in debug mode
