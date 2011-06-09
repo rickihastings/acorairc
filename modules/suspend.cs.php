@@ -213,9 +213,10 @@ class cs_suspend implements module
 		}
 		// on_join trigger for forbidden channels
 		
-		if ( ircd::on_chan_create( $ircdata ) )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// chans
 			
 			foreach ( $chans as $chan )

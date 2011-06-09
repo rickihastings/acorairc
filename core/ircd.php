@@ -515,7 +515,7 @@ class ircd_handle
 	*/
 	static public function global_notice( $nick, $mask, $message )
 	{
-		/*core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
+		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
 		// debug info
 		
 		foreach ( core::$nicks as $user => $data )
@@ -525,7 +525,7 @@ class ircd_handle
 			
 			if ( $data['server'] != core::$config->server_name && services::match( $hostname, $mask ) )
 				ircd::notice( $nick, $user, $message );
-		}*/
+		}
 	}
 	
 	/*
@@ -944,19 +944,44 @@ class ircd_handle
 	* @params
 	* $ircdata - ..
 	*/
-	static public function parse_users( $chan, $ircdata, $number )
+	static public function parse_users( $chan, $users )
 	{
-		$users = core::get_data_after( $ircdata, $number );
-		$users = explode( ' ', $users );
-		
-		foreach ( $users as $user )
+		if ( trim( $users[0] ) == '' )
+			return array();
+			
+		foreach ( $users as $i => $user )
 		{
-			if ( $user != null || $user != ' ' )
+			if ( $user == null || $user == ' ' )
+				continue;
+			$user = trim( $user );
+			
+			if ( !preg_match( '/[^a-zA-Z0-9\s]/', $user ) )
 			{
-				$prenick = explode( ',', $user );
-				$nick = trim( self::get_nick( $prenick, 1 ) );
-				
-				if ( $nick != null ) $nusers[$nick] = $prenick[0];
+				$nick = self::get_nick( $users, $i );
+				$nusers[$nick] = '';
+				// just a normal unprivilaged user
+			}
+			else
+			{
+				if ( strpos( $user, ',' ) !== false )
+				{
+					$n_user = explode( ',', $user );
+					$nick = self::get_nick( $n_user, 1 );
+					$nusers[$nick] = $n_user[0];
+				}
+				else
+				{
+					$modes = preg_replace( '/[a-zA-Z0-9\s]/', '', $user );
+					$nick = preg_replace( '/[^a-zA-Z0-9\s]/', '', $user );
+					
+					$modes = str_replace( '@', 'o', $modes );
+					$modes = str_replace( '%', 'h', $modes );
+					$modes = str_replace( '+', 'v', $modes );
+					// replace @ to o, % to h, + to v etc.
+					
+					$nusers[$nick] = $modes;
+				}
+				// if it has a , parse it.
 			}
 		}
 		

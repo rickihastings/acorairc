@@ -720,9 +720,10 @@ class cs_flags implements module
 		// on_join entry msg
 		// this is just a basic JOIN trigger
 		
-		if ( ircd::on_chan_create( $ircdata ) )
+		$populated_chan = ircd::on_chan_create( $ircdata );
+		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $ircdata[2] );
+			$chans = explode( ',', $populated_chan );
 			// chan
 			
 			foreach ( $chans as $chan )
