@@ -17,7 +17,7 @@
 class mysql implements driver
 {
 
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -140,7 +140,11 @@ class mysql implements driver
 		
 		while ( $row = database::fetch( $tablesResult ) )
 		{
-			mysql_query( "OPTIMIZE TABLE `".$row->$tname."`" );
+			$query = "OPTIMIZE TABLE `".$row->$tname."`";
+		
+			mysql_query( $query );
+			core::alog( $query, 'DATABASE' );
+			// log query
 		}
 		// loop through our tables
 		
@@ -237,6 +241,9 @@ class mysql implements driver
 		}
 		// order by
 		
+		core::alog( $query, 'DATABASE' );
+		// log query
+		
 		return mysql_query( $query );
 	}
 	
@@ -293,6 +300,9 @@ class mysql implements driver
 		}
 		// and the where part: `id` = '1'
 		
+		core::alog( $query, 'DATABASE' );
+		// log query
+		
 		return mysql_query( $query );
 	}
 	
@@ -333,6 +343,9 @@ class mysql implements driver
 			else $query .= "'".self::quote( $value )."', ";
 		}
 		// what are we inserting?
+		
+		core::alog( $query, 'DATABASE' );
+		// log query
 		
 		return mysql_query( $query );
 	}
@@ -379,6 +392,9 @@ class mysql implements driver
 			}
 		}
 		// and the where part: `id` = '1'
+		
+		core::alog( $query, 'DATABASE' );
+		// log query
 		
 		return mysql_query( $query );
 	}

@@ -792,7 +792,7 @@ class core
 	*
 	* @params
 	* $message - message to log
-	* $type - this should be either BASIC, SERVER or CHAN
+	* $type - this should be either BASIC, SERVER, DATABASE or CHAN
 	*/
 	static public function alog( $message, $type = 'CHAN' )
 	{
