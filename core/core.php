@@ -276,10 +276,11 @@ class core
 			}
 			// here we output debug data, if there is any.
 			
-			usleep( 45000 );
-			// 40000 is the highest i'm willing to go, as 50000
-			// breaks the /hop and /cycle, 40000 gives us some time
-			// to reprocess and stuff. Still keeping CPU low.
+			usleep( 40000 );
+			// 50000 breaks /hop and /cycle
+			// 40000 is quite slow when handling alot of data
+			// 15/20/25 000 has high cpu usage for 10 mins or so, i'm settling at 15000
+			// as after about 5 mins the usage drops dramatically, eventually to 0.0, and performance is increased
 		}
 	}
 	
@@ -360,7 +361,7 @@ class core
 			ircd::handle_nick_change( $ircdata, $startup );
 		// on nick change, make sure the variable changes too.
 		
-		if ( ircd::on_quit( $ircdata ) )
+		if ( ircd::on_quit( $ircdata ) !== false )
 			ircd::handle_quit( $ircdata, $startup );
 		// on quit.
 		
@@ -892,7 +893,7 @@ class core
 	*/
 	static public function get_nick( $ircdata, $number )
 	{
-		return ircd::get_nick( $ircdata, $number );
+		return ircd_handle::get_nick( $ircdata, $number );
 		// moved this into the protocol module
 	}
 	

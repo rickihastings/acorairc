@@ -380,10 +380,8 @@ class commands
 	{
 		// this works better than i imagined
 		
-		if ( services::check_mask_ignore( $nick ) === true )
-		{
-			return false;
-		}
+		//if ( services::check_mask_ignore( $nick ) === true )
+		//	return false;
 		// this is basically to check if we have
 		// an ignored user, via their hostmask, or their nickname.
 		
@@ -399,9 +397,7 @@ class commands
 		// some vars..
 		
 		if ( strtolower( $commands[0] ) == 'help' || $command == '' || substr( $commands[0], 0, 1 ) == '' )
-		{
 			return false;
-		}
 		// its a command we don't need to deal with, ignore it
 		
 		for ( $i = $num_cmds; $i > -1; $i-- )
@@ -412,9 +408,7 @@ class commands
 			// i really cba explaining this..
 			
 			if ( isset( self::$commands[$hook][$new] ) )
-			{
 				break;
-			}
 		}
 		// just a loop to.. err can't remember what this does..
 		// something interesting though
