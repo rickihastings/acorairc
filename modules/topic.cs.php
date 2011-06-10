@@ -122,9 +122,15 @@ class cs_topic implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_topic( $ircdata ) || ircd::on_ftopic( $ircdata ) )
+		$return = ircd::on_topic( $ircdata );
+		if ( $return !== false )
+			$chan = $return;
+		$b_return = ircd::on_ftopic( $ircdata );
+		if ( $b_return !== false )
+			$chan = $b_return;
+		
+		if ( $return !== false || $b_return !== false )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
 			$topic = core::$chans[$chan]['topic'];
 			$setter = core::$chans[$chan]['topic_setter'];
 			// i forgot this was done by the protocol modules

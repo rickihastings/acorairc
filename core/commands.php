@@ -35,28 +35,30 @@ class commands
 	*/
 	static public function ctcp( $ircdata )
 	{
-		if ( ircd::on_msg( $ircdata ) )
+		$return = ircd::on_msg( $ircdata );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$who = ircd::get_nick( $ircdata, 2 );
+			$nick = $return['nick'];
+			$who = $return['target'];
+			$msg = $return['msg'];
 			
-			if ( substr( $ircdata[3], 1 ) == 'VERSION' )
+			if ( substr( $msg, 1 ) == 'VERSION' )
 			{
 				ircd::notice( $who, $nick, 'VERSION acora-'.core::$version.' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
 				ircd::notice( $who, $nick, 'VERSION (C) GamerGrid #acora @ irc.gamergrid.net' );
 			}
 			// only reply on version.
-			elseif ( substr( $ircdata[3], 1 ) == 'TIME' )
+			elseif ( substr( $msg, 1 ) == 'TIME' )
 			{
 				ircd::notice( $who, $nick, 'TIME '.date( 'D M j G:i:s Y', core::$network_time ).'' );
 			}
 			// only reply on time.
-			elseif ( substr( $ircdata[3], 1 ) == 'PING' )
+			elseif ( substr( $msg, 1 ) == 'PING' )
 			{
 				ircd::notice( $who, $nick, 'PING 0secs' );
 			}
 			// only reply on ping.
-			elseif ( substr( $ircdata[3], 1 ) == 'FINGER' )
+			elseif ( substr( $msg, 1 ) == 'FINGER' )
 			{
 				ircd::notice( $who, $nick, 'FINGER Get your finger out of my socket!' );
 			}
@@ -118,22 +120,20 @@ class commands
 	* on_fantasy_cmd
 	*
 	* @params
-	* $ircdata - ..
+	* $return - a valid array from ircd::on_msg()
 	* $command - The command to listen for, !op, !deop
 	* $nick - The bot which listens for the command.
 	*/
-	static public function on_fantasy_cmd( $ircdata, $command, $nick )
+	static public function on_fantasy_cmd( $return, $command, $nick )
 	{
-		$prefix = ':'.core::$config->chanserv->fantasy_prefix;
-		$chan = core::get_chan( $ircdata, 2 );
+		$prefix = core::$config->chanserv->fantasy_prefix;
+		$chan = $return['target'];
 		$command = strtolower( $command );
-		$realdata = strtolower( $ircdata[3] );
-		$from = core::get_nick( $ircdata, 0 );
+		$realdata = strtolower( $return['msg'] );
+		$from = $return['nick'];
 		
 		if ( services::check_mask_ignore( $nick ) === true )
-		{
 			return false;
-		}
 		// this is basically to check if we have
 		// an ignored user, via their hostmask, or their nickname.
 		

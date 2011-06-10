@@ -201,8 +201,10 @@ class ns_suspend implements module
 		}
 		// trigger on connect
 		
-		if ( ircd::on_nick_change( $ircdata ) )
+		$return = ircd::on_nick_change( $ircdata );
+		if ( $return !== false )
 		{
+			$nick = $return['new_nick'];
 			$nick = core::get_nick( $ircdata, 2 );
 			// get the nicknames
 			

@@ -78,10 +78,11 @@ class chanserv implements service
 				modules::$list[$module]['class']->main( $ircdata, $startup );
 				// loop through the modules for chanserv.
 
-		if ( ircd::on_msg( $ircdata, core::$config->chanserv->nick ) )
+		$return = ircd::on_msg( $ircdata, core::$config->chanserv->nick );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
+			$nick = $return['nick'];
+			$command = substr( $return['msg'], 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			self::get_command( $nick, $command );
@@ -138,9 +139,10 @@ class chanserv implements service
 	*/
 	static public function on_part( $ircdata )
 	{
-		if ( ircd::on_part( $ircdata ) )
+		$return = ircd::on_part( $ircdata );
+		if ( $return !== false )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
+			$chan = $return['chan'];
 			// get the channel
 			
 			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
@@ -213,11 +215,12 @@ class chanserv implements service
 	*/
 	static public function on_mode( $ircdata )
 	{
-		if ( ircd::on_mode( $ircdata ) )
+		$return = ircd::on_mode( $ircdata );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$chan = core::get_chan( $ircdata, 2 );
-			$mode_queue = core::get_data_after( $ircdata, 4 );
+			$nick = $return['nick'];
+			$chan = $return['chan'];
+			$mode_queue = $return['modes'];
 			
 			$a_mode = strpos( $mode_queue, 'a' );
 			$o_mode = strpos( $mode_queue, 'o' );
@@ -245,11 +248,12 @@ class chanserv implements service
 	*/
 	static public function on_kick( $ircdata )
 	{
-		if ( ircd::on_kick( $ircdata ) )
+		$return = ircd::on_kick( $ircdata );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$chan = core::get_chan( $ircdata, 2 );
-			$who = core::get_nick( $ircdata, 3 );
+			$nick = $return['nick'];
+			$chan = $return['chan'];
+			$who = $return['who'];
 			
 			if ( $who == core::$config->chanserv->nick || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
 			{

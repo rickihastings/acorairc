@@ -136,10 +136,11 @@ class operserv implements service
 			}
 		}
 		
-		if ( ircd::on_msg( $ircdata, core::$config->operserv->nick ) )
+		$return = ircd::on_msg( $ircdata, core::$config->operserv->nick );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
+			$nick = $return['nick'];
+			$command = substr( $return['msg'], 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			core::alog( core::$config->operserv->nick.': '.$nick.': '.$command );

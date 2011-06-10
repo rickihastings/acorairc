@@ -47,10 +47,11 @@ class ns_help implements module
 	*/
     public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_msg( $ircdata, core::$config->nickserv->nick ) )
+		$return = ircd::on_msg( $ircdata, core::$config->nickserv->nick );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$query = substr( core::get_data_after( $ircdata, 3 ), 1 );
+			$nick = $return['nick'];
+			$query = substr( $return['msg'], 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			$query = strtolower( $query );
 			

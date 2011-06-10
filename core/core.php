@@ -345,11 +345,11 @@ class core
 	*/
 	static public function log_changes( $ircdata, $startup = false )
 	{
-		if ( ircd::on_server( $ircdata ) )
+		if ( ircd::on_server( $ircdata ) !== false )
 			ircd::handle_on_server( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_squit( $ircdata ) )
+		if ( ircd::on_squit( $ircdata ) !== false )
 			ircd::handle_on_squit( $ircdata );
 		// let's us keep track of the linked servers
 		
@@ -357,7 +357,7 @@ class core
 			ircd::handle_on_connect( $ircdata, $startup );
 		// log shit on connect, basically the users host etc.
 		
-		if ( ircd::on_nick_change( $ircdata ) )
+		if ( ircd::on_nick_change( $ircdata ) !== false )
 			ircd::handle_nick_change( $ircdata, $startup );
 		// on nick change, make sure the variable changes too.
 		
@@ -365,27 +365,27 @@ class core
 			ircd::handle_quit( $ircdata, $startup );
 		// on quit.
 		
-		if ( ircd::on_fhost( $ircdata ) )
+		if ( ircd::on_fhost( $ircdata ) !== false )
 			ircd::handle_host_change( $ircdata );
 		// on hostname change.
 		
-		if ( ircd::on_ident_change( $ircdata ) )
+		if ( ircd::on_ident_change( $ircdata ) !== false )
 			ircd::handle_ident_change( $ircdata );
 		// on ident change
 		
-		if ( ircd::on_gecos_change( $ircdata ) )
+		if ( ircd::on_gecos_change( $ircdata ) !== false )
 			ircd::handle_gecos_change( $ircdata );
 		// on realname (gecos) change
 		
-		if ( ircd::on_mode( $ircdata ) )
+		if ( ircd::on_mode( $ircdata ) !== false )
 			ircd::handle_mode( $ircdata );	
 		// on mode
 		
-		if ( ircd::on_ftopic( $ircdata ) )
+		if ( ircd::on_ftopic( $ircdata ) !== false )
 			ircd::handle_ftopic( $ircdata );
 		// on ftopic
 		
-		if ( ircd::on_topic( $ircdata ) )
+		if ( ircd::on_topic( $ircdata ) !== false )
 			ircd::handle_topic( $ircdata );	
 		// on topic
 		
@@ -397,15 +397,15 @@ class core
 			ircd::handle_join( $ircdata );
 		// on join
 		
-		if ( ircd::on_part( $ircdata ) )
+		if ( ircd::on_part( $ircdata ) !== false )
 			ircd::handle_part( $ircdata );
 		// and on part.
 		
-		if ( ircd::on_kick( $ircdata ) )
+		if ( ircd::on_kick( $ircdata ) !== false )
 			ircd::handle_kick( $ircdata );
 		// and on kick.
 		
-		if ( ircd::on_oper_up( $ircdata ) )
+		if ( ircd::on_oper_up( $ircdata ) !== false )
 			ircd::handle_oper_up( $ircdata );
 		// on oper ups
 	}
@@ -640,31 +640,24 @@ class core
 	static public function flood_check( $ircdata )
 	{
 		if ( trim( $ircdata[0] ) == '' )
-		{
 			return true;
-		}
 		// the data is empty, omgwtf..
 		
-		if ( ircd::on_msg( $ircdata ) && $ircdata[2][0] == '#' && $ircdata[3][1] != self::$config->chanserv->fantasy_prefix )
-		{
+		$return = ircd::on_msg( $ircdata );
+		if ( $return !== false && $return['target'][0] == '#' && $return['msg'][1] != self::$config->chanserv->fantasy_prefix )
 			return true;
-		}
 		// this is just here to instantly ignore any normal channel messages 
 		// otherwise we get lagged up on flood attempts
 		
-		if ( ircd::on_notice( $ircdata ) )
-		{
+		if ( ircd::on_notice( $ircdata ) !== false )
 			return true;
-		}
 		// and ignore notices, since we shouldnt respond to any 
 		// notices what so ever, just saves wasting cpu cycles when we get a notice
 		
-		if ( ircd::on_msg( $ircdata ) && $ircdata[2][0] != '#' )
+		if ( $return !== false && $return['target'][0] == '#' )
 		{
 			if ( self::$config->settings->flood_msgs == 0 || self::$config->settings->flood_time == 0 )
-			{
 				return false;	
-			}
 			// check if it's disabled.
 			
 			$nick = self::get_nick( $ircdata, 0 );
@@ -673,30 +666,22 @@ class core
 			$from = self::get_nick( $ircdata, 2 );
 			
 			if ( self::$nicks[$nick]['ircop'] )
-			{
 				return false;
-			}
 			// ignore ircops
 			
 			$inc = 0;
 			foreach ( self::$nicks[$nick]['commands'] as $index => $timestamp )
-			{
 				if ( $timestamp > $time_limit ) $inc = 1;
-			}
 
 			if ( $inc == 1 )
-			{
 				self::$nicks[$nick]['floodcmds']++;
-			}
 			// we've ++'d the floodcmds, if this goes higher than self::flood_trigger
 			// they're flooding, floodcmds is cleared every 100 seconds.
  
 			if ( self::$nicks[$nick]['floodcmds'] > self::$config->settings->flood_msgs )
 			{
 				if ( services::check_mask_ignore( $nick ) === true )
-				{
 					return false;
-				}
 				
 				if ( self::$nicks[$nick]['offences'] == 0 || self::$nicks[$nick]['offences'] == 1 )
 				{

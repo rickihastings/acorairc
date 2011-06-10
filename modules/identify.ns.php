@@ -263,10 +263,11 @@ class ns_identify implements module
 		// on connect let them know that they're using
 		// an identified nickname
 		
-		if ( ircd::on_nick_change( $ircdata ) )
+		$return = ircd::on_nick_change( $ircdata );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 2 );
-			$old_nick = core::$nicks[$nick]['onick'];
+			$nick = $return['new_nick'];
+			$old_nick = $return['nick'];
 			// get the nicknames
 			
 			timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
