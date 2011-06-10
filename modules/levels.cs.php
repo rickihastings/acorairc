@@ -919,35 +919,49 @@ class cs_levels implements module
 		$mode_params = '';
 		foreach ( $chan_access as $level )
 		{
-			if ( $level == '5' && ircd::$owner )
+			$has_owner = $has_protect = $has_op = $has_halfop = $has_voice = false;
+		
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'q' ) !== false )
+				$has_owner = true;
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'a' ) !== false )
+				$has_protect = true;
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
+				$has_op = true;
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'h' ) !== false )
+				$has_halfop = true;
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) !== false )
+				$has_voice = true;
+			// check what we already have.
+			
+			if ( !$has_owner && $level == '5' && ircd::$owner )
 			{
 				$mode_string .= 'q';
 				$mode_params .= $nick.' ';
 			}
 			// we've found a +q!
 			
-			if ( $level == '4' && ircd::$protect )
+			if ( !$has_protect && $level == '4' && ircd::$protect )
 			{
 				$mode_string .= 'a';
 				$mode_params .= $nick.' ';
 			}
 			// we've found a +a!
 			
-			if ( $level == '3' )
+			if ( !$has_op && $level == '3' )
 			{
 				$mode_string .= 'o';
 				$mode_params .= $nick.' ';
 			}
 			// we've found a +o!
 			
-			if ( $level == '2' && ircd::$halfop )
+			if ( !$has_halfop && $level == '2' && ircd::$halfop )
 			{
 				$mode_string .= 'h';
 				$mode_params .= $nick.' ';
 			}
 			// we've found a +h!
 			
-			if ( $level == '1' )
+			if ( !$has_voice && $level == '1' )
 			{
 				$mode_string .= 'v';
 				$mode_params .= $nick.' ';
