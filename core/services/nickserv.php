@@ -62,10 +62,11 @@ class nickserv implements service
 			}
 		}
 		
-		if ( ircd::on_msg( $ircdata, core::$config->nickserv->nick ) )
+		$return = ircd::on_msg( $ircdata, core::$config->nickserv->nick );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$command = substr( core::get_data_after( $ircdata, 3 ), 1 );
+			$nick = $return['nick'];
+			$command = substr( $return['msg'], 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
 			self::get_command( $nick, $command );
@@ -73,9 +74,10 @@ class nickserv implements service
 		// this is what we use to handle command listens
 		// should be quite epic.
 		
-		if ( ircd::on_mode( $ircdata ) && core::$config->server->help_chan )
+		$return = ircd::on_mode( $ircdata );
+		if ( $return !== false && core::$config->server->help_chan )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
+			$chan = $return['chan'];
 			
 			if ( $chan == strtolower( core::$config->server->help_chan ) )
 			{

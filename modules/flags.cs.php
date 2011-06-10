@@ -605,11 +605,12 @@ class cs_flags implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( ircd::on_mode( $ircdata ) )
+		$return = ircd::on_mode( $ircdata );
+		if ( $return !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			$chan = core::get_chan( $ircdata, 2 );
-			$mode_queue = core::get_data_after( $ircdata, 4 );
+			$nick = $return['nick'];
+			$chan = $return['chan'];
+			$mode_queue = $return['modes'];
 			
 			if ( strpos( $nick, '.' ) !== false && strstr(core::$config->server->ircd, 'inspircd') )
 				$server = $nick;
@@ -647,9 +648,10 @@ class cs_flags implements module
 		}
 		// we need to check for any modechanges here, for modelocking
 		
-		if ( ircd::on_part( $ircdata ) )
+		$return = ircd::on_part( $ircdata );
+		if ( $return !== false )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
+			$chan = $return['chan'];
 			// get the channel
 			
 			if ( chanserv::check_flags( $chan, array( 'L' ) ) )
