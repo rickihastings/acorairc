@@ -1278,14 +1278,16 @@ class ircd implements protocol
 	{
 		$return = array(
 			'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-			'target' => $where,
 			'msg' => core::get_data_after( $ircdata, 3 ),
 		);
+		
+		if ( $ircdata[2][0] != '#' )
+			$return['target'] = ircd_handle::get_nick( $ircdata, 2 );
+		else
+			$return['target'] = core::get_chan( $ircdata, 2 );
 	
 		if ( $where != '' )
 		{
-			if ( $where[0] != '#' ) $where = ircd_handle::get_uid( $where );
-			
 			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' && $ircdata[2] == $where )
 				return $return;
 			// return true providing $where matches where it was sent, crafty.
