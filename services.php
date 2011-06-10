@@ -21,15 +21,11 @@ define( 'CONFPATH', BASEPATH.'/conf/' );
 
 // Check to see if the version of PHP meets the minimum requirement
 if ( version_compare( '5.0.0', PHP_VERSION, '>' ) )
-{
     exit( 'Fatal Error: PHP 5.0.0+ is required, current version: '.PHP_VERSION );
-}
 
 // make sure we have access to PHP CLI
 if ( ( substr( php_sapi_name(), 0, 3 ) != 'cli' ) )
-{
     exit( 'Fatal Error: PHP CLI is required to run.' );
-}
 
 // set time limit to 0
 // also set ignore user abort

@@ -189,10 +189,8 @@ class chanserv implements service
 	*/
 	static public function on_quit( $ircdata )
 	{
-		if ( ircd::on_quit( $ircdata ) )
+		if ( ircd::on_quit( $ircdata ) !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			
 			foreach ( core::$chans as $chan => $data )
 			{
 				if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
@@ -543,7 +541,6 @@ class chanserv implements service
 		// get our flags records
 		
 		return $chan_flags->$param_field;
-		print ' WILL FIND U';
 	}
 	
 	/*

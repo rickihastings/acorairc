@@ -661,7 +661,7 @@ class cs_flags implements module
 		}
 		// on part we check for
 		
-		if ( ircd::on_quit( $ircdata ) )
+		if ( ircd::on_quit( $ircdata ) !== false )
 		{
 			foreach ( core::$chans as $chan => $data )
 			{

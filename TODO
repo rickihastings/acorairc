@@ -24,3 +24,5 @@
 * Vigiriously test all commands!
 * Fix that bug where recv(): .. blank is sent, no idea whats causing it
 * Add charybdis33 support
+* Redesign how services::check_mask_ignore() works, at currently it doesnt work so is commented out.
+* Redesign all handlers, so they send information rather than $ircdata, cause its inprecitable what state it's going to come in

@@ -116,7 +116,6 @@ class ircd implements protocol
 		$gecos = $gecos[1];
 		// get nick, server, gecos
 		
-		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		if ( $gecos[0] == ':' ) $gecos = substr( $gecos, 1 );
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
@@ -135,7 +134,6 @@ class ircd implements protocol
 		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$new_nick = $ircdata[2];
 		
-		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
 		// strip :
 	
@@ -152,10 +150,10 @@ class ircd implements protocol
 	static public function handle_quit( $ircdata, $startup = false )
 	{
 		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		if ( $nick[0] == ':' ) $nick = substr( $nick, 1 );
 		// strip :
 		
 		ircd_handle::handle_quit( $nick, $startup );
+		//print_r( core::$chans );
 	}
 	
 	/*
@@ -1035,8 +1033,9 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
 		{
-			ircd_handle::on_connect( ircd_handle::get_nick( $ircdata, 0 ) );
-			return true;
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
+			ircd_handle::on_connect( $nick );
+			return $nick;
 		}
 		// return true when the $ircdata finds a quit.
 		
@@ -1216,7 +1215,9 @@ class ircd implements protocol
 			if ( $where[0] != '#' ) $where = ircd_handle::get_uid( $where );
 			
 			if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'PRIVMSG' && $ircdata[2] == $where ) )
+			{
 				return true;
+			}
 			// return true providing $where matches where it was sent, crafty.
 			// clearly doesn't make much sence imo. lol
 		}

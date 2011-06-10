@@ -1057,8 +1057,9 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
 		{
-			ircd_handle::on_connect( ircd_handle::get_nick( $ircdata, 0 ) );
-			return true;
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
+			ircd_handle::on_connect( $nick );
+			return $nick;
 		}
 		// return true when the $ircdata finds a quit.
 		

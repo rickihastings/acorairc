@@ -19,7 +19,7 @@ version="0.4.5beta+Cymric"
 
 if [ "$1" = "" ]
 then
-    	echo -e "Invalid use (start|stop|restart|debug|status|version)"
+    	echo "Invalid use (start|stop|restart|debug|status|version)"
 	exit
 fi
 
@@ -27,7 +27,7 @@ if [ "$1" = "start" ]
 then
     	if [ "$run" ]
     		then
-        	echo -e "Acora IRC Services are already running."
+        	echo "Acora IRC Services are already running."
 		exit
     	else
        		php -q extra/start.php	
@@ -38,10 +38,10 @@ then
     	if [ "$run" ]
     	then
         	kill -9 $run
-        	echo -e "Acora IRC Services shutting down."
+        	echo "Acora IRC Services shutting down."
        		exit
 		else
-        	echo -e "Acora IRC Services are not running."
+        	echo "Acora IRC Services are not running."
         	exit
 		fi
 elif [ "$1" = "restart" ]
@@ -52,17 +52,17 @@ then
         	php -q extra/start.php
 			exit
     	else
-    		echo -e "Acora IRC Services are not running."
+    		echo "Acora IRC Services are not running."
 		exit
     	fi
 elif [ "$1" = "debug" ]
 then
     	if [ "$run" ]
     	then
-        	echo -e "Acora IRC Services are already running."
+        	echo "Acora IRC Services are already running."
 			exit
     	else
-		echo -e "Running in debug mode."
+		echo "Running in debug mode."
        		php services.php debug	
 		exit
 	fi
@@ -70,17 +70,17 @@ elif [ "$1" = "status" ]
 then
 	if [ "$run" ]
     	then
-        	echo -e "Acora IRC Services are running."
+        	echo "Acora IRC Services are running."
 			exit
     	else
-        	echo -e "Acora IRC Services are not running."
+        	echo "Acora IRC Services are not running."
 		exit
     	fi
 elif [ "$1" = "version" ]
 then
-    	echo -e "Acora IRC Services version $version\033[m"
+    	echo "Acora IRC Services version $version\033[m"
 	exit
 else
-    	echo -e "Invalid use (start|stop|restart|debug|status|version)"
+    	echo "Invalid use (start|stop|restart|debug|status|version)"
 	exit
 fi

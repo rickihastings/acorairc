@@ -300,10 +300,9 @@ class ns_identify implements module
 			// is the new nick registered? let them know
 		}
 		
-		if ( ircd::on_quit( $ircdata ) )
+		$quit_nick = ircd::on_quit( $ircdata );
+		if ( $quit_nick !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
-			
 			timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 			// remove the secured timer. if there is one
 			
