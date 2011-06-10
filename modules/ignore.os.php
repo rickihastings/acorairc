@@ -135,7 +135,7 @@ class os_ignore implements module
 				$who = '*!'.$who;
 			// we need to check if it's a hostmask thats been written properly.
 			
-			database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time ) );
+			database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time, 'temp' => '0' ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
 			core::alog( core::$config->operserv->nick.': '.$nick.' added '.$who.' to services ignore list' );
 			// as simple, as.

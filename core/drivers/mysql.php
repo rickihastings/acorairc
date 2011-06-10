@@ -55,9 +55,7 @@ class mysql implements driver
 		// log the sucessful connection
 		
 		if ( core::$config->database->optimize )
-		{
 			timer::add( array( 'database', 'optimize', array() ), 86399, 0 );
-		}
 		// add a timer to optimize the db every day.
 	}
 	

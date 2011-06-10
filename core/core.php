@@ -446,12 +446,14 @@ class core
 		// start our bots up.
 		
 		foreach ( self::$config->core_modules as $id => $module )
-		{
 			modules::load_module( 'core_'.$module, $module.'.core.php' );
-		}
 		// we load core modules before the bots, incase there
 		// is a module that changes an existing function w/e
-			
+		
+		database::delete( 'ignored_users', array( 'temp', '=', '1' ) );
+		// remove all temp ignore bans, services may have shutdown before the timer removed their ban
+		// leaving them permanently banned.
+		
 		timer::init();
 		// setup the timer, socket_blocking to 0 is required.
 	}
@@ -686,7 +688,7 @@ class core
 				if ( self::$nicks[$nick]['offences'] == 0 || self::$nicks[$nick]['offences'] == 1 )
 				{
 					self::$nicks[$nick]['offences']++;
-					database::insert( 'ignored_users', array( 'who' => '*!*@'.self::$nicks[$nick]['host'], 'time' => core::$network_time ) );
+					database::insert( 'ignored_users', array( 'who' => '*!*@'.self::$nicks[$nick]['host'], 'time' => core::$network_time, 'temp' => '1' ) );
 					timer::add( array( 'core', 'remove_ignore', array( '*!*@'.self::$nicks[$nick]['host'] ) ), 120, 1 );
 					// add them to the ignore list.
 					// also, add a timer to unset it in 2 minutes.

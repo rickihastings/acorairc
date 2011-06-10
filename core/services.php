@@ -185,7 +185,7 @@ class services
 	*/
 	static function check_mask_ignore( $nick )
 	{
-		/*$ignored_user = database::select( 'ignored_users', array( 'who' ) );
+		$ignored_user = database::select( 'ignored_users', array( 'who' ) );
 		
 		$hostname = core::get_full_hostname( $nick );
 		// we generate the hostname
@@ -206,7 +206,7 @@ class services
 		{
 			return false;
 		}
-		// there are records*/
+		// there are records
 	}
 	
 	/* 
