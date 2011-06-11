@@ -276,7 +276,7 @@ class core
 			}
 			// here we output debug data, if there is any.
 			
-			usleep( 40000 );
+			usleep( 20000 );
 			// 50000 breaks /hop and /cycle
 			// 40000 is quite slow when handling alot of data
 			// 15/20/25 000 has high cpu usage for 10 mins or so, i'm settling at 15000
@@ -468,13 +468,13 @@ class core
 	{
 		if ( core::$services_account === false )
 		{
-			self::alog( 'ERROR: m_services_account.so is required, startup halted.', 'BASIC' );
+			self::alog( 'ERROR: service accounts is required, startup halted.', 'BASIC' );
 			// log it
 			
 			self::save_logs();
 			// save logs.
 			
-			ircd::shutdown( 'ERROR: m_services_account.so is required, startup halted.', true );
+			ircd::shutdown( 'ERROR: service accounts is required, startup halted.', true );
 			// exit
 		}
 		// services account isn't found, quit out letting them know.
