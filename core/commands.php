@@ -40,25 +40,26 @@ class commands
 		{
 			$nick = $return['nick'];
 			$who = $return['target'];
-			$msg = $return['msg'];
+			$msg = explode( ' ', substr( $return['msg'], 1 ) );
+			$part_one = preg_replace( '/[^a-zA-Z0-9\s]/', '', $msg[0] );
 			
-			if ( substr( $msg, 1 ) == 'VERSION' )
+			if ( $part_one == 'VERSION' )
 			{
 				ircd::notice( $who, $nick, 'VERSION acora-'.core::$version.' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
-				ircd::notice( $who, $nick, 'VERSION (C) GamerGrid #acora @ irc.gamergrid.net' );
+				ircd::notice( $who, $nick, 'VERSION (C) 2009 GamerGrid #acora @ irc.ircnode.org' );
 			}
 			// only reply on version.
-			elseif ( substr( $msg, 1 ) == 'TIME' )
+			elseif ( $part_one == 'TIME' )
 			{
 				ircd::notice( $who, $nick, 'TIME '.date( 'D M j G:i:s Y', core::$network_time ).'' );
 			}
 			// only reply on time.
-			elseif ( substr( $msg, 1 ) == 'PING' )
+			elseif ( $part_one == 'PING' )
 			{
 				ircd::notice( $who, $nick, 'PING 0secs' );
 			}
 			// only reply on ping.
-			elseif ( substr( $msg, 1 ) == 'FINGER' )
+			elseif ( $part_one == 'FINGER' )
 			{
 				ircd::notice( $who, $nick, 'FINGER Get your finger out of my socket!' );
 			}
