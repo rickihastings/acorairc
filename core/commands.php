@@ -177,7 +177,7 @@ class commands
 			foreach ( $help as $index => $line )
 			{
 				$meta_data = array(
-					'info' => $line,
+					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
 				);
 			
@@ -192,7 +192,7 @@ class commands
 		else
 		{
 			$meta_data = array(
-				'info' => $help,
+				'info' => ( $line == ' ' ) ? '' : $help,
 				'module' => $module,
 			);
 		
@@ -235,7 +235,7 @@ class commands
 			foreach ( $help as $line )
 			{
 				$meta_data = array(
-					'info' => $line,
+					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
 					'oper_help' => $oper_help,
 				);
@@ -246,7 +246,7 @@ class commands
 		else
 		{
 			$meta_data = array(
-				'info' => $help,
+				'info' => ( $line == ' ' ) ? '' : $help,
 				'module' => $module,
 				'oper_help' => $oper_help,
 			);
@@ -299,7 +299,6 @@ class commands
 			foreach ( self::$prefix[$hook][$command] as $line => $meta_data )
 			{
 				$meta = unserialize( $meta_data );
-				
 				services::communicate( $bot, $nick, $meta['info'] );
 			}
 		}
