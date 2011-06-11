@@ -716,10 +716,10 @@ class ircd_handle
 	static public function send( $command )
 	{
 		$command = trim( $command );
-		fputs( core::$socket, $command."\n", strlen( $command."\n" ) );
+		fputs( core::$socket, $command."\r\n" );
 		// fairly simple, hopefully.
 		
-		core::$outgoing = core::$outgoing + strlen( $command."\n" );
+		core::$outgoing = core::$outgoing + strlen( $command."\r\n" );
 		// add to the outgoing counter.
 		
 		core::alog( 'send(): '.$command, 'SERVER' );

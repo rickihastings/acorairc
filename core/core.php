@@ -183,7 +183,7 @@ class core
 			}
 			// this is for normal data, eg. post burst.
 				
-			if ( $raw = stream_get_line( self::$socket, 4092, "\n" ) )
+			if ( $raw = stream_get_line( self::$socket, 4092, "\r\n" ) )
 			{
 				$raw = trim( $raw );
 				$ircdata = explode( ' ', $raw );
@@ -263,7 +263,7 @@ class core
 				foreach( self::$debug_data as $line => $message )
 				{
 					if ( trim( $message ) != '' || trim( $message ) != null )
-						print "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
+						print "[".date( 'H:i:s', time() )."] ".self::$network_time.": ".$message."\r\n";
 					// only print if we have something to print
 						
 					unset( self::$debug_data[$line] );
@@ -560,7 +560,7 @@ class core
 		{
 			foreach( self::$log_data as $line => $message )
 			{
-				$filemsg = "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
+				$filemsg = "[".date( 'H:i:s', time() )."] ".$message."\r\n";
 					
 				if ( !$fp = fopen( $filepath, 'a' ) )
 					return false;
@@ -821,7 +821,7 @@ class core
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
 				if ( !is_resource( self::$socket ) && self::$debug )
-					print "[".date( 'H:i:s', self::$network_time )."] ".$message."\n";
+					print "[".date( 'H:i:s', time() )."] ".self::$network_time.": ".$message."\r\n";
 				elseif ( !in_array( $message, self::$debug_data ) )
 					self::$debug_data[] = $message;
 				// if we're not connected, and in debug mode

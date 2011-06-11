@@ -5,7 +5,6 @@
 
 * core::check_unused_chans() broken, commented out for the time being. This is quite a critical function in freeing unused data, so priority. (DONE)
 * Parse modes from capab replacing $modes_p_unrequired, $modes_params and $restrict_modes, as these CAN change, and shouldn't really be defined in the ircd protocol (DONE INSPIRCD12)
-* Do the same above for other protocol modes (gonna be a pain!)
 * Fix an issue with global.os module, on_connect looks like (DONE)
 * Fix an issue with empty data being put in recv(): log (DONE)
 * Also parse prefix's from capab and putting them into $prefix_modes as they can change with newer inspircd modules ! etc (DONE)
@@ -21,7 +20,7 @@
 * Do some work on /cs flags #channel, as it could show alot more info, like /cs info
 * Add +r to channels upon register, can't believe we don't actually do this? (DONE, but it can be unset by operserv, i'm going to leave it like this.
   incase someone wants to "pretend" a channel isnt registered, for whatever reason)
-* Vigiriously test all commands!
+* Vigiriously test all features!
 * Fix that bug where recv(): .. blank is sent, no idea whats causing it
 * Add charybdis33 support
 * Redesign how services::check_mask_ignore() works, at currently it doesnt work so is commented out. (DONE)
