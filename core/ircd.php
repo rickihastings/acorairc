@@ -68,9 +68,9 @@ class ircd_handle
 	* handle_on_connect
 	*
 	* @params
-	* $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $startup );
+	* $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $modes, $startup
 	*/
-	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $startup = false )
+	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $modes, $startup = false )
 	{
 		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
@@ -86,6 +86,8 @@ class ircd_handle
 			'gecos' => $gecos,
 			'server' => $server,
 			'timestamp' => $timestamp,
+			'identified' => false,
+			'ircop' => ( strpos( $modes, 'o' ) === false ) ? false : true,
 			'commands' => null,
 			'floodcmds' => 0,
 			'failed_attempts' => 0,
@@ -347,7 +349,7 @@ class ircd_handle
 	* @params (all booleans)
 	* $services_account
 	*/
-	static public function parse_ircd_modules( $services_account, $hidechans, $globops, $chghost, $chgident )
+	static public function parse_ircd_modules( $services_account, $hidechans, $chghost, $chgident )
 	{
 		if ( !$services_account )
 			timer::add( array( 'core', 'check_services', array() ), 3, 1 );
@@ -366,7 +368,6 @@ class ircd_handle
 		
 		core::$services_account = $services_account;
 		core::$hide_chans = $hidechans;
-		ircd::$globops = $globops;
 		ircd::$chghost = $chghost;
 		ircd::$chgident = $chgident;
 		// pass variables over.
@@ -496,14 +497,14 @@ class ircd_handle
 	}
 	
 	/*
-	* globops
+	* wallops
 	*
 	* @params
 	* $nick, $message
 	*/
-	static public function globops( $nick, $message )
+	static public function wallops( $nick, $message )
 	{
-		core::alog( 'globops(): '.$nick.' sent a globops', 'BASIC' );
+		core::alog( 'wallops(): '.$nick.' sent a wallops', 'BASIC' );
 		// debug info
 	}
 	
@@ -523,7 +524,7 @@ class ircd_handle
 			$hostname = core::get_full_hostname( $user );
 			// hostname
 			
-			if ( $data['server'] != core::$config->server_name && services::match( $hostname, $mask ) )
+			if ( $data['server'] != core::$config->server->name && services::match( $hostname, $mask ) )
 				ircd::notice( $nick, $user, $message );
 		}
 	}

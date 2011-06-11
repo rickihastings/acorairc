@@ -72,7 +72,7 @@ class ns_ghost implements module
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
 			{
 				ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
 				core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by '.core::get_full_hostname( $nick ) );

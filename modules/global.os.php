@@ -114,7 +114,7 @@ class os_global implements module
 			ircd::global_notice( core::$config->global->nick, $mask, $message );
 		// send the message!!
 		
-		ircd::globops( core::$config->operserv->nick, $nick.' just used GLOBAL command.' );
+		ircd::wallops( core::$config->operserv->nick, $nick.' just used GLOBAL command.' );
 		// we globop the command being used.
 	}
 	

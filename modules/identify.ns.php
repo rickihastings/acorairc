@@ -85,6 +85,7 @@ class ns_identify implements module
 					// remove the secured timer. if there is one
 					
 					ircd::on_user_login( $nick );
+					core::$nicks[$nick]['identified'] = true;
 					// registered mode
 					
 					database::update( 'users', array( 'identified' => 1, 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $nick ) );
@@ -236,6 +237,7 @@ class ns_identify implements module
 				if ( $user->validated == 0 && $user->suspended == 0 )
 				{
 					ircd::on_user_logout( $nick );
+					core::$nicks[$nick]['identified'] = false;
 					// they shouldn't really have registered mode
 					
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
@@ -247,6 +249,7 @@ class ns_identify implements module
 				elseif ( $user->identified == 1 && $user->last_hostmask == core::get_full_hostname( $nick ) )
 				{
 					ircd::on_user_login( $nick );
+					core::$nicks[$nick]['identified'] = true;
 					
 					if ( !$startup )
 						core::alog( core::$config->nickserv->nick.': '.$connect_data['ident'].'@'.$connect_data['host'].' automatically identified for '.$nick );
@@ -278,6 +281,7 @@ class ns_identify implements module
 				if ( $user->validated == 0 && $user->suspended == 0 )
 				{
 					ircd::on_user_logout( $nick );
+					core::$nicks[$nick]['identified'] = false;
 					// they shouldn't really have registered mode
 					
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
@@ -289,6 +293,8 @@ class ns_identify implements module
 				elseif ( $user->identified == 1 && $user->last_hostmask == core::get_full_hostname( $nick ) )
 				{
 					ircd::on_user_login( $nick );
+					core::$nicks[$nick]['identified'] = true;
+					
 					core::alog( core::$config->nickserv->nick.': '.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['host'].' automatically identified for '.$nick );
 				}
 				else
@@ -336,6 +342,7 @@ class ns_identify implements module
 		// set them to identified 0, this might fix that long term bug.
 		
 		ircd::on_user_logout( $nick );
+		core::$nicks[$nick]['identified'] = false;
 		// they shouldn't really have registered mode
 		
 		if ( is_array( nickserv::$help->NS_REGISTERED_NICK ) )

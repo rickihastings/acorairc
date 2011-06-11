@@ -22,7 +22,6 @@ class ircd implements protocol
 	// module info.
 
 	static public $ircd = 'Charybdis 3.3';
-	static public $globops = false;
 	static public $chghost = false;
 	static public $chgident = false;
 	static public $sid;
@@ -120,7 +119,7 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
-		ircd_handle::handle_on_connect( $nick, $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $server, $ircdata[4], $startup );
+		ircd_handle::handle_on_connect( $nick, $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $server, $ircdata[4], $ircdata[5], $startup );
 	}
 	
 	/*
@@ -176,18 +175,7 @@ class ircd implements protocol
 	*/
 	static public function handle_ident_change( $ircdata )
 	{
-		if ( $ircdata[1] == 'CHGIDENT' )
-		{
-			$nick = ircd_handle::get_nick( $ircdata, 2 );
-			$ident = substr( $ircdata[3], 1 );
-		}
-		elseif ( $ircdata[1] == 'SETIDENT' )
-		{
-			$nick = ircd_handle::get_nick( $ircdata, 0 );
-			$ident = substr( $ircdata[2], 1 );
-		}
-		
-		ircd_handle::handle_ident_change( $nick, $ident );
+		// n/a for charybdis
 	}
 	
 	/*
@@ -393,7 +381,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' )
 		{
-			ircd_handle::parse_ircd_modules( true, true, true, true, true );
+			ircd_handle::parse_ircd_modules( true, true, true, true, false );
 			ircd_handle::parse_ircd_modes( self::$max_params, self::$prefix_data, self::$mode_data, false );
 			// we just immediately send true into all the module parses because charybdis doesnt have options to disable CHGHOST etc.
 			// parse some data out of CAPABILITIES and send it into parse_ircd_modes
@@ -491,22 +479,21 @@ class ircd implements protocol
 	}
 	
 	/*
-	* globops
+	* wallops
 	*
 	* @params
 	* $nick - who to send it from
 	* $message - message to send
 	*/
-	static public function globops( $nick, $message )
+	static public function wallops( $nick, $message )
 	{
-		// TODO
-		if ( self::$globops && core::$config->settings->silent )
+		if ( core::$config->settings->silent )
 		{
 			$unick = ircd_handle::get_uid( $nick );
-			self::send( ':'.$unick.' GLOBOPS :'.$message );
+			self::send( ':'.$unick.' WALLOPS :'.$message );
 			// get the uid and send it.
 			
-			ircd_handle::globops( $nick, $message );
+			ircd_handle::wallops( $nick, $message );
 			// handle it
 		}
 	}
@@ -684,7 +671,7 @@ class ircd implements protocol
 			// send the cmd then handle it internally
 		}
 	}
-		
+	
 	/*
 	* sethost
 	*
@@ -717,19 +704,7 @@ class ircd implements protocol
 	*/
 	static public function setident( $from, $nick, $ident )
 	{
-		// TODO
-		if ( self::$chgident )
-		{
-			$unick = ircd_handle::get_uid( $nick );
-			$hostname = core::$nicks[$nick]['hostname'];
-			$timestamp = core::$nicks[$nick]['timestamp'];
-			//$account_name = core::$nicks[$nick][''];
-			// get the uid.
-		
-			self::send( ':'.$unick.' SIGNON '.$unick.' '.$ident.' '.$hostname.' '.$hostname.' '.$timestamp.' :' );
-			ircd_handle::setident( $from, $nick, $host );
-			// send the cmd then handle it internally
-		}
+		// we can't even force the change of an ident in charybdis..
 	}
 	
 	/*
@@ -1157,7 +1132,6 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'KICK' )
 		{
-			// TODO (check on_kick) handle.
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
 				'chan' => core::get_chan( $ircdata, 2 ),
@@ -1220,6 +1194,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MODE' && ( substr( $ircdata[3], 1, 1 ) == '+' && strpos( $ircdata[3], 'o' ) !== false ) )
 		{
+			print 'banter eh';
+			
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
 				'type' => 'Server Administrator',
@@ -1336,24 +1312,11 @@ class ircd implements protocol
 	*/
 	static public function on_ident_change( $ircdata )
 	{
-		// TODO
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGIDENT' )
+		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
 		{
 			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[3], 1 ),
-			);
-		
-			ircd_handle::on_ident_change( $return['nick'], $return['ident'] );
-			return $return;
-		}
-		// return true on chgident.
-		
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETIDENT' )
-		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[2], 1 ),
+				'nick' => ( count( $ircdata ) == 7 ) ? ircd_handle::get_nick( $ircdata, 0 ) : ircd_handle::get_nick( $ircdata, 4 ),
+				'ident' => ( count( $ircdata ) == 7 ) ? $ircdata[3] : $ircdata[5],
 			);
 		
 			ircd_handle::on_ident_change( $return['nick'], $return['ident'] );
@@ -1372,15 +1335,14 @@ class ircd implements protocol
 	*/
 	static public function on_gecos_change( $ircdata )
 	{
-		// TODO
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FNAME' )
+		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
 		{
 			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[2], 1 ),
+				'nick' => ( count( $ircdata ) == 7 ) ? ircd_handle::get_nick( $ircdata, 0 ) : ircd_handle::get_nick( $ircdata, 4 ),
+				'gecos' => ( count( $ircdata ) == 7 ) ? substr( core::get_data_after( $ircdata, 7 ), 1 ) : substr( core::get_data_after( $ircdata, 9 ), 1 ),
 			);
 			
-			ircd_handle::on_gecos_change(  $return['nick'], $return['ident'] );
+			ircd_handle::on_gecos_change(  $return['nick'], $return['gecos'] );
 			return $return;
 		}
 		// return true on fname.

@@ -109,7 +109,7 @@ class os_vhost implements module
 			{
 				if ( substr_count( $realhost, '@' ) == 1 )
 				{
-					ircd::setident( core::$config->operserv->nick, $unick, $ident );
+					ircd::setident( core::$config->operserv->nick, $user->display, $ident );
 					ircd::sethost( core::$config->operserv->nick, $unick, $host );
 				}
 				else

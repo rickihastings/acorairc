@@ -22,7 +22,6 @@ class ircd implements protocol
 	// module info.
 
 	static public $ircd = 'InspIRCd 1.2';
-	static public $globops = false;
 	static public $chghost = false;
 	static public $chgident = false;
 	static public $sid;
@@ -112,7 +111,7 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
-		ircd_handle::handle_on_connect( $nick, $ircdata[2], $ircdata[7], $ircdata[6], $ircdata[5], $gecos, $server, $ircdata[3], $startup );
+		ircd_handle::handle_on_connect( $nick, $ircdata[2], $ircdata[7], $ircdata[6], $ircdata[5], $gecos, $server, $ircdata[3], $ircdata[11], $startup );
 	}
 	
 	/*
@@ -388,7 +387,6 @@ class ircd implements protocol
 			$ircd_modules = explode( ',', $ircdata[2] );
 			$services_account = false;
 			$hidechans = false;
-			$globops = false;
 			$chghost = false;
 			$chgident = false;
 			// setup some vars. (this part is probably the trickest part of coding protocol modules
@@ -402,10 +400,6 @@ class ircd implements protocol
 				$hidechans = true;
 			// we have hidechans
 			
-			if ( in_array( 'm_globops.so', $ircd_modules ) )
-				$globops = true;
-			// we have globops!
-			
 			if ( in_array( 'm_chghost.so', $ircd_modules ) )
 				$chghost = true;
 			// we have chghost
@@ -414,7 +408,7 @@ class ircd implements protocol
 				$chgident = true;
 			// and chgident
 			
-			ircd_handle::parse_ircd_modules( $services_account, $hidechans, $globops, $chghost, $chgident );
+			ircd_handle::parse_ircd_modules( $services_account, $hidechans, $chghost, $chgident );
 		}
 		// only trigger when our modules info is coming through
 		
@@ -522,21 +516,21 @@ class ircd implements protocol
 	}
 	
 	/*
-	* globops
+	* wallops
 	*
 	* @params
 	* $nick - who to send it from
 	* $message - message to send
 	*/
-	static public function globops( $nick, $message )
+	static public function wallops( $nick, $message )
 	{
-		if ( self::$globops && core::$config->settings->silent )
+		if ( core::$config->settings->silent )
 		{
 			$unick = ircd_handle::get_uid( $nick );
-			self::send( ':'.$unick.' GLOBOPS :'.$message );
+			self::send( ':'.$unick.' WALLOPS :'.$message );
 			// get the uid and send it.
 			
-			ircd_handle::globops( $nick, $message );
+			ircd_handle::wallops( $nick, $message );
 			// handle it
 		}
 	}
@@ -1397,10 +1391,10 @@ class ircd implements protocol
 		{
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[2], 1 ),
+				'gecos' => substr( core::get_data_after( $ircdata, 2 ), 1 ),
 			);
 			
-			ircd_handle::on_gecos_change(  $return['nick'], $return['ident'] );
+			ircd_handle::on_gecos_change(  $return['nick'], $return['gecos'] );
 			return $return;
 		}
 		// return true on fname.

@@ -181,14 +181,10 @@ class commands
 				);
 			
 				if ( $what == 'prefix' )
-				{
 					self::$prefix[$hook][$command][] = serialize( $meta_data );
-				}
 				// add a prefix
 				if ( $what == 'suffix' )
-				{
 					self::$suffix[$hook][$command][] = serialize( $meta_data );
-				}
 				// add a suffix
 			}
 		}
@@ -200,14 +196,10 @@ class commands
 			);
 		
 			if ( $what == 'prefix' )
-			{
 				self::$prefix[$hook][$command][] = serialize( $meta_data );
-			}
 			// add a prefix
 			if ( $what == 'suffix' )
-			{
 				self::$suffix[$hook][$command][] = serialize( $meta_data );
-			}
 			// add a suffix
 		}
 		// basically what this does is adds those prefixes
@@ -278,9 +270,7 @@ class commands
 		// straight to the client?
 		
 		if ( services::check_mask_ignore( $nick ) === true )
-		{
 			return false;
-		}
 		// this is basically to check if we have
 		// an ignored user, via their hostmask, or their nickname.
 		
@@ -291,9 +281,7 @@ class commands
 		
 		$commands = explode( ' ', $command );
 		if ( strtolower( $commands[0] ) != 'help' || trim( $command ) == '' )
-		{
 			return false;
-		}
 		// is it actually a help command? >.<
 		
 		$count = ( ( isset( self::$prefix[$hook][$command] ) ) ? count( self::$prefix[$hook][$command] ) : 0 ) + ( ( isset( self::$helpv[$hook][$command] ) ) ? count ( self::$helpv[$hook][$command] ) : 0 ) + ( ( isset( self::$suffix[$hook][$command] ) ) ? count( self::$suffix[$hook][$command] ) : 0 );
@@ -320,7 +308,7 @@ class commands
 		{
 			$meta = unserialize( $meta_data );
 			
-			if ( $meta['oper_help'] && ( services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$nicks[$nick]['ircop'] ) )
+			if ( $meta['oper_help'] && core::$nicks[$nick]['identified'] && core::$nicks[$nick]['ircop'] )
 				services::communicate( $bot, $nick, $meta['info'] );
 			elseif ( !$meta['oper_help'] )
 				services::communicate( $bot, $nick, $meta['info'] );

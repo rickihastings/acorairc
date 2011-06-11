@@ -87,7 +87,7 @@ class ns_info implements module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_4, array( 'host' => $hostmask ) );
 			// standard messages
 			
-			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false || $unick == $nick && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false )
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] || $unick == $nick && core::$nicks[$nick]['identified'] )
 			{
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_5, array( 'email' => nickserv::get_flags( $nick, 'e' ) ) );
 			}
@@ -114,7 +114,7 @@ class ns_info implements module
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_7, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 			
-			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->nickserv->expire != 0 )
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] && core::$config->nickserv->expire != 0 )
 			{
 				$expiry_time = core::$config->nickserv->expire * 86400;
 				

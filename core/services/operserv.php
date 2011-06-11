@@ -85,7 +85,7 @@ class operserv implements service
 				
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_ON );
 				core::alog( 'override_command(): '.$nick.' is now using override mode.', 'BASIC' );
-				ircd::globops( core::$config->operserv->nick, $nick.' is now using override mode.' );
+				ircd::wallops( core::$config->operserv->nick, $nick.' is now using override mode.' );
 				// log and stuff
 				
 				core::$nicks[$nick]['override'] = true;
@@ -104,7 +104,7 @@ class operserv implements service
 				
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_OFF );
 				core::alog( 'override_command(): '.$nick.' has turned override mode off.', 'BASIC' );
-				ircd::globops( core::$config->operserv->nick, $nick.' has turned override mode off.' );
+				ircd::wallops( core::$config->operserv->nick, $nick.' has turned override mode off.' );
 				// log and stuff
 				
 				core::$nicks[$nick]['override'] = false;
@@ -146,7 +146,7 @@ class operserv implements service
 			core::alog( core::$config->operserv->nick.': '.$nick.': '.$command );
 			// logchan it
 			
-			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) !== false ) )
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
 				self::get_command( $nick, $command );
 			else
 				services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );

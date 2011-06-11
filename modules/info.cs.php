@@ -143,7 +143,7 @@ class cs_info implements module
 				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
 			// if our list doesn't equal '', eg. empty show the info.
 				
-			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false && core::$config->chanserv->expire != 0 )
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] && core::$config->chanserv->expire != 0 )
 			{
 				$expiry_time = core::$config->chanserv->expire * 86400;
 				

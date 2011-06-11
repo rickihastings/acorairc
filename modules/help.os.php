@@ -55,7 +55,7 @@ class os_help implements module
 			// convert to lower case because all the tingy wags are in lowercase
 			$query = strtolower( $query );
 			
-			if ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) !== false )  )
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
 				operserv::get_help( $nick, $query );
 		}
 		// only hook to the privmsg towards OperServ

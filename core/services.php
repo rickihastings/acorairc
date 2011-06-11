@@ -123,15 +123,13 @@ class services
 		if ( $data != '' && is_array( $data ) )
 		{
 			foreach ( $data as $var => $value )
-			{
 				$ntemplate = str_replace( '{'.$var.'}', $value, $ntemplate );
-			}
 			// loop through the array replacing each variable.
 		}
 		// IF there is a $data defined, we do some replacing
 		// otherwise leave it alone
 		
-		if ( nickserv::check_flags( $to, array( 'P' ) ) )
+		if ( core::$nicks[$nick]['identified'] && nickserv::check_flags( $to, array( 'P' ) ) )
 			ircd::msg( $from, $to, $ntemplate );
 		else
 			ircd::notice( $from, $to, $ntemplate );

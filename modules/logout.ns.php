@@ -59,6 +59,8 @@ class ns_logout implements module
 			if ( $user->identified == 1 )
 			{
 				ircd::on_user_logout( $nick );
+				core::$nicks[$nick]['identified'] = false;
+					
 				// here we set unregistered mode
 				database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
 				// unidentify them

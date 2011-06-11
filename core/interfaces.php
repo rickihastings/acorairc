@@ -46,7 +46,7 @@ interface protocol
 	static public function send_version( $ircdata );
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false );
 	static public function remove_client( $nick, $message );
-	static public function globops( $nick, $message );
+	static public function wallops( $nick, $message );
 	static public function global_notice( $nick, $mask, $message );
 	static public function notice( $nick, $what, $message );
 	static public function msg( $nick, $what, $message );

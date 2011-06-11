@@ -135,7 +135,7 @@ class os_module implements module
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module ) );
 			core::alog( core::$config->operserv->nick.': loaded module '.$module );
-			ircd::globops( core::$config->operserv->nick, $nick.' loaded module '.$module );
+			ircd::wallops( core::$config->operserv->nick, $nick.' loaded module '.$module );
 			// let everyone know
 		}
 		else
@@ -205,7 +205,7 @@ class os_module implements module
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module ) );
 			core::alog( core::$config->operserv->nick.': unloaded module '.$module );
-			ircd::globops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
+			ircd::wallops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
 			// let everyone know :D	
 		}
 		else
