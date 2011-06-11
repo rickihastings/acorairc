@@ -720,11 +720,13 @@ class ircd implements protocol
 		// TODO
 		if ( self::$chgident )
 		{
-			$ufrom = ircd_handle::get_uid( $from );
 			$unick = ircd_handle::get_uid( $nick );
+			$hostname = core::$nicks[$nick]['hostname'];
+			$timestamp = core::$nicks[$nick]['timestamp'];
+			//$account_name = core::$nicks[$nick][''];
 			// get the uid.
 		
-			self::send( ':'.$ufrom.' CHGIDENT '.$unick.' '.$ident );
+			self::send( ':'.$unick.' SIGNON '.$unick.' '.$ident.' '.$hostname.' '.$hostname.' '.$timestamp.' :' );
 			ircd_handle::setident( $from, $nick, $host );
 			// send the cmd then handle it internally
 		}

@@ -201,9 +201,7 @@ class ns_identify implements module
 					// ooh, we have something to log :)
 					
 					if ( core::$nicks[$nick]['failed_attempts'] == 5 )
-					{
 						ircd::kill( core::$config->nickserv->nick, $nick, 'Maxmium FAILED login attempts reached.' );
-					}
 					// have they reached the failed attempts limit? we gonna fucking KILL mwhaha
 				}
 				// invalid password? HAX!!
