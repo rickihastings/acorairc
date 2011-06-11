@@ -28,3 +28,5 @@
 * Add chanserv invite
 * Add an identified parameter to core::$nicks, will save using queries in some instances. Mainly to fix a bug in charybdis though (DONE)
 * Port logout.ns into identify.ns, because having logout with no identify is pointless? (DONE)
+* Fix OS JUPE, as its current method wont work with charybdis.
+* Make sure OS SHUTDOWN, and unknown commands responses are in the language files
