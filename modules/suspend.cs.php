@@ -60,7 +60,7 @@ class cs_suspend implements module
 		$chan_info = array();
 		// get the channel.
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -111,7 +111,7 @@ class cs_suspend implements module
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
 		core::alog( core::$config->chanserv->nick.': '.$nick.' SUSPENDED '.$chan.' with the reason: '.$reason );
-		ircd::globops( core::$config->chanserv->nick, $nick.' SUSPENDED '.$chan );
+		ircd::wallops( core::$config->chanserv->nick, $nick.' SUSPENDED '.$chan );
 		
 		if ( !empty( core::$chans[$chan]['users'] ) )
 		{
@@ -136,7 +136,7 @@ class cs_suspend implements module
 		$chan = core::get_chan( $ircdata, 0 );
 		// get the channel.
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -177,7 +177,7 @@ class cs_suspend implements module
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
 		core::alog( core::$config->chanserv->nick.': '.$nick.' UNSUSPENDED '.$chan );
-		ircd::globops( core::$config->chanserv->nick, $nick.' UNSUSPENDED '.$chan );
+		ircd::wallops( core::$config->chanserv->nick, $nick.' UNSUSPENDED '.$chan );
 		// oh well, was fun while it lasted eh?
 		// unsuspend it :P
 	}

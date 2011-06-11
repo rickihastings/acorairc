@@ -133,9 +133,9 @@ class cs_drop implements module
 		{
 			return true;
 		}
-		elseif ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) )
+		elseif ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
 		{
-			ircd::globops( core::$config->chanserv->nick, $nick.' used DROP on '.$chan );
+			ircd::wallops( core::$config->chanserv->nick, $nick.' used DROP on '.$chan );
 			return true;
 		}
 		

@@ -911,7 +911,7 @@ class cs_levels implements module
 	*/
 	static public function give_access( $chan, $nick, $chan_access, $secure = 1 )
 	{
-		if ( ( $secure == 1 ) && !services::user_exists( $nick, true, array( 'display', 'identified' ) ) )
+		if ( ( $secure == 1 ) && !core::$nicks[$nick]['identified'] )
 			return false;
 		// return false if secure is set to 1 and $nick isnt identified.
 		

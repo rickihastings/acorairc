@@ -84,7 +84,7 @@ class os_rehash implements module
 				// destory relevant data to the module
 				
 				core::alog( core::$config->operserv->nick.': unloaded module '.$name );
-				ircd::globops( core::$config->operserv->nick, 'unloaded module '.$name );
+				ircd::wallops( core::$config->operserv->nick, 'unloaded module '.$name );
 				// unset the module
 				
 				core::alog( 'rehash_command(): '.$name.' unloaded from rehash', 'BASIC' );
@@ -113,7 +113,7 @@ class os_rehash implements module
 				}
 				
 				core::alog( core::$config->operserv->nick.': loaded module '.$name );
-				ircd::globops( core::$config->operserv->nick, 'loaded module '.$name );
+				ircd::wallops( core::$config->operserv->nick, 'loaded module '.$name );
 				// load it up
 					
 				core::alog( 'rehash_command(): '.$name.' loaded from rehash', 'BASIC' );
@@ -127,7 +127,7 @@ class os_rehash implements module
 		// load the ones that are new.
 		
 		core::alog( core::$config->operserv->nick.': Successfully reloaded configuration.' );
-		ircd::globops( core::$config->operserv->nick, $nick.' performed a REHASH' );
+		ircd::wallops( core::$config->operserv->nick, $nick.' performed a REHASH' );
 		
 		core::alog( 'rehash_command(): sucessful rehash', 'BASIC' );
 		// log what we need to log.

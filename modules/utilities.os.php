@@ -87,7 +87,7 @@ class os_utilities implements module
 			
 			ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick, $numeric );
 			core::alog( core::$config->operserv->nick.': WARNING '.$nick.' juped '.$server );
-			ircd::globops( core::$config->operserv->nick, $nick.' juped '.$server );
+			ircd::wallops( core::$config->operserv->nick, $nick.' juped '.$server );
 			
 			core::alog( 'jupe_command(): '.$server.' juped', 'BASIC' );
 			// log what we need to log.
@@ -123,7 +123,7 @@ class os_utilities implements module
 		// does the channel exist?
 		
 		ircd::mode( core::$config->operserv->nick, $channel, $modes );
-		ircd::globops( core::$config->operserv->nick, $nick.' used MODE '.$modes.' on '.$channel );
+		ircd::wallops( core::$config->operserv->nick, $nick.' used MODE '.$modes.' on '.$channel );
 		// set the mode, globops it.
 	}
 	

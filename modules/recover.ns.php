@@ -17,7 +17,7 @@
 class ns_recover implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -82,7 +82,7 @@ class ns_recover implements module
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
 			{
 				$random_nick = 'Unknown'.rand( 10000, 99999 );
 				// generate a random nick
@@ -135,7 +135,7 @@ class ns_recover implements module
 
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'display', 'identified' ) ) !== false ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
 			{
 				if ( !isset( self::$held_nicks[$unick] ) )
 				{

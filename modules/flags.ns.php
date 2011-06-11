@@ -252,7 +252,7 @@ class ns_flags implements module
 		}
 		// is a non-root trying to change a root's password?
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;

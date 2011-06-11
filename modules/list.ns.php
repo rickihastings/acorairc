@@ -56,7 +56,7 @@ class ns_list implements module
 		$limit = $ircdata[1];
 		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;

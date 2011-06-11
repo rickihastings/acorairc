@@ -60,7 +60,7 @@ class ns_suspend implements module
 		$user_info = array();
 		// get the nick etc.
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
@@ -110,7 +110,7 @@ class ns_suspend implements module
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
 		core::alog( core::$config->nickserv->nick.': '.$nick.' SUSPENDED '.$unick.' with the reason: '.$reason );
-		ircd::globops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
+		ircd::wallops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
 		
 		if ( isset( core::$nicks[$unick] ) )
 		{
@@ -135,7 +135,7 @@ class ns_suspend implements module
 		$unick = core::get_nick( $ircdata, 0 );
 		// get the nick etc.
 		
-		if ( !core::$nicks[$nick]['ircop'] || services::user_exists( $nick, true, array( 'display', 'identified' ) ) === false )
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
@@ -168,7 +168,7 @@ class ns_suspend implements module
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
 		core::alog( core::$config->nickserv->nick.': '.$nick.' UNSUSPENDED '.$unick );
-		ircd::globops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
+		ircd::wallops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
 		// oh well, was fun while it lasted eh?
 		// unsuspend it :P
 	}
