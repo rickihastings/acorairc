@@ -90,43 +90,35 @@ $help = (object) array(
 	'CS_HELP_FANTASY_ALL1' 	=> array(
 		'=---- ChanServ Help ----=',
 		'Fantasy Commands Help',
-		' ',
+		'',
+	),
+	// FANTASY HELP !help
+	
+	'CS_HELP_FANTASY_ALL_OWNER' 	=> array(
 		'    {p}owner     - Gives a user +q in the channel',
 		'    {p}deowner   - Takes +q from a user in the channel',
+	),
+	// FANTASY HELP OWNER
+	
+	'CS_HELP_FANTASY_ALL_PROTECT' 	=> array(
 		'    {p}protect   - Gives a user +a in the channel',
 		'    {p}deprotect - Takes +a from a user in the channel',
+	),
+	// FANTASY HELP PROTECT
+	
+	'CS_HELP_FANTASY_ALL_OP' 	=> array(
 		'    {p}op        - Gives a user +o in the channel',
 		'    {p}deop      - Takes +o from a user in the channel',
+	),
+	// FANTASY HELP OP
+	
+	'CS_HELP_FANTASY_ALL_HALFOP' 	=> array(
 		'    {p}halfop    - Gives a user +h in the channel',
 		'    {p}dehalfop  - Takes +h from a user in the channel',
-		'    {p}voice     - Gives a user +v in the channel',
-		'    {p}devoice   - Takes +v from a user in the channel',
-		'    {p}topic     - Changes the topic, using a TOPICMASK if there is one set',
-		'    {p}mode      - Sets a channel mode',
-		'    {p}m         - An alias for {p}mode',
-		'    {p}kick      - Kicks a user from the channel',
-		'    {p}kickban   - Kickbans a user from the channel',
-		'    {p}ban       - Bans a user or a host from the channel',
-		'    {p}unban     - Unbans a user or a host from the channel',
-		'    {p}flags     - Lets you set channel flags via a fantasy command',
-		'    {p}levels    - Lets you set channel levels via a fantasy command',
-		'    {p}sync      - Synchronizes the channel access list',
-		' ',
-		'Note owner/deowner and protect/deprotect commands will only work if your',
-		'server has them enabled.',
-		'=---- End of ChanServ Help ----=',
 	),
-	// FANTASY HELP !help W/ HALFOP
+	// FANTASY HELP HALFOP
 	
 	'CS_HELP_FANTASY_ALL2' 	=> array(
-		'=---- ChanServ Help ----=',
-		' ',
-		'    {p}owner     - Gives a user +q in the channel',
-		'    {p}deowner   - Takes +q from a user in the channel',
-		'    {p}protect   - Gives a user +a in the channel',
-		'    {p}deprotect - Takes +a from a user in the channel',
-		'    {p}op        - Gives a user +o in the channel',
-		'    {p}deop      - Takes +o from a user in the channel',
 		'    {p}voice     - Gives a user +v in the channel',
 		'    {p}devoice   - Takes +v from a user in the channel',
 		'    {p}topic     - Changes the topic, using a TOPICMASK if there is one set',
@@ -139,12 +131,10 @@ $help = (object) array(
 		'    {p}flags     - Lets you set channel flags via a fantasy command',
 		'    {p}levels    - Lets you set channel levels via a fantasy command',
 		'    {p}sync      - Synchronizes the channel access list',
-		' ',
-		'Note owner/deowner and protect/deprotect commands will only work if your',
-		'server has them enabled.',
+		'',
 		'=---- End of ChanServ Help ----=',
 	),
-	// FANTASY HELP !help W/O HALFOP
+	// FANTASY HELP !help
 	
 	'CS_HELP_REGISTER_ALL' 	=> array(
 		'=---- ChanServ Help ----=',

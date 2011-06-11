@@ -59,10 +59,20 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'help', core::$config->chanserv->nick ) )
 			{
+				$help = chanserv::$help->CS_HELP_FANTASY_ALL1;
+			
+				if ( ircd::$owner )
+					$help = array_merge( $help, chanserv::$help->CS_HELP_FANTASY_ALL_OWNER );
+				if ( ircd::$protect )
+					$help = array_merge( $help, chanserv::$help->CS_HELP_FANTASY_ALL_PROTECT );
+					
+				$help = array_merge( $help, chanserv::$help->CS_HELP_FANTASY_ALL_OP );
+					
 				if ( ircd::$halfop )
-					$help = chanserv::$help->CS_HELP_FANTASY_ALL1;
-				else
-					$help = chanserv::$help->CS_HELP_FANTASY_ALL2;
+					$help = array_merge( $help, chanserv::$help->CS_HELP_FANTASY_ALL_HALFOP );
+					
+				$help = array_merge( $help, chanserv::$help->CS_HELP_FANTASY_ALL2 );
+				// compile a help array
 				
 				foreach ( $help as $line )
 					services::communicate( core::$config->chanserv->nick, $nick, $line, array( 'p' => core::$config->chanserv->fantasy_prefix ) );	
