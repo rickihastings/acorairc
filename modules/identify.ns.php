@@ -17,7 +17,7 @@
 class ns_identify implements module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -37,9 +37,12 @@ class ns_identify implements module
 		
 		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1 );
 		nickserv::add_help( 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
+		nickserv::add_help( 'ns_logout', 'help', nickserv::$help->NS_HELP_LOGOUT_1 );
+		nickserv::add_help( 'ns_logout', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
 		// add the help
 		
 		nickserv::add_command( 'identify', 'ns_identify', 'identify_command' );
+		nickserv::add_command( 'logout', 'ns_logout', 'logout_command' );
 		// add the command
 		
 		nickserv::add_help( 'ns_identify', 'help id', nickserv::$help->NS_HELP_IDENTIFY_ALL );
@@ -216,6 +219,45 @@ class ns_identify implements module
 			// doesn't even exist..
 		}
 		// right now we need to check if the user exists, and password matches
+	}
+	
+	/*
+	* logout_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function logout_command( $nick, $ircdata = array() )
+	{
+		// no parameter commands ftw.
+		
+		if ( $user = services::user_exists( $nick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
+		{
+			if ( $user->identified == 1 )
+			{
+				ircd::on_user_logout( $nick );
+				core::$nicks[$nick]['identified'] = false;
+					
+				// here we set unregistered mode
+				database::update( 'users', array( 'identified' => 0, 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
+				// unidentify them
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
+				// let them know
+				core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' logged out of '.core::$nicks[$nick]['nick'] );
+				// and log it.
+			}
+			else
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
+				// not even identified
+			}
+		}
+		else
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
+			// unregistered nick name
+		}
 	}
 	
 	/*
