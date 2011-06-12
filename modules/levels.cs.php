@@ -671,7 +671,7 @@ class cs_levels implements module
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
 				
-				self::on_create( core::$chans[$chan]['users'], $channel );
+				self::on_create( core::$chans[$chan]['users'], $channel, true );
 				// on_create event
 			}
 		}
@@ -706,64 +706,8 @@ class cs_levels implements module
 				}
 				// check for bans before access
 				
-				$access_array = self::get_access( $channel->channel );
-				// get the access array
-				
-				foreach ( $access_array as $target => $access )
-				{
-					if ( $target == $nick )
-					{
-						$remove_access = false;
-						// don't remove access
-						
-						self::give_access( $channel->channel, $nick, $access, false );
-						// give them access, false is always set here otherwise we end up giving unidentified nicks access, which nobody wants
-						
-						break;
-						// break cause we've found a match
-					}
-					elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
-					{
-						$remove_access = false;
-						// don't remove access
-						
-						self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
-						// give them access
-						
-						continue;
-						// break cause we've found a match
-					}
-					elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'o' ) !== false )
-					{
-						$remove_access = true;
-						// set remove access to true
-						
-						continue;
-						// continue to next loop to check other access records
-					}
-					elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
-					{
-						$remove_access = true;
-						// set remove access to true
-						
-						continue;
-						// continue to next loop to check other access records
-					}
-					else
-					{
-						continue;
-						// continue to next loop to check other access records
-					}
-					// we check if the user has access, if they do break;
-					// we also check if they dont have access and have op, if they do remove it.
-				}
-				// loop through the access records
-				
-				if ( $remove_access )
-					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
-				// easy fix to stop stuff like this below happening.
-				// [20:27:19] * ChanServ sets mode: -o N0valyfe
-				// [20:27:19] * ChanServ sets mode: +o N0valyfe	
+				self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, false );
+				// on_create event
 			}
 		}
 		// and the same when someone joins
@@ -775,10 +719,11 @@ class cs_levels implements module
 	* @params
 	* $nusers - array from ircd::parse_users()
 	* $channel - valid channel array
+	* $create - true for create, false for join.
 	*/
-	static public function on_create( $nusers, $channel )
+	static public function on_create( $nusers, $channel, $create = true )
 	{
-		$access_array = self::get_access( $channel->channel );
+		$access_array = array_reverse( self::get_access( $channel->channel ) );
 		// get the access array
 		
 		foreach ( $nusers as $nick => $modes )
@@ -798,61 +743,49 @@ class cs_levels implements module
 			}
 			// check for bans before access
 			
-			foreach ( $access_array as $target => $access )
+			foreach ( $access_array as $target => $level )
 			{
 				if ( $target == $nick )
 				{
 					$remove_access = false;
 					// don't remove access
 					
-					self::give_access( $channel->channel, $nick, $access, false );
-					// give them access, false is always set here otherwise we end up giving unidentified nicks access, which nobody wants
-					
+					self::give_access( $channel->channel, $nick, $target, $access_array, true );
+					// give them access
 					continue 2;
-					// continue to next loop cause we've found a match
 				}
+				// straight match, give access
 				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
 				{
 					$remove_access = false;
 					// don't remove access
 					
-					self::give_access( $channel->channel, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
+					self::give_access( $channel->channel, $nick, $target, $access_array, chanserv::check_flags( $channel->channel, array( 'S' ) ) );
 					// give them access
-					
-					continue;
-					// continue to next loop cause we've found a match
+					continue 2;
 				}
-				elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'o' ) !== false )
+				// hostname match, give access
+				elseif ( strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
 				{
 					$remove_access = true;
-					// set remove access to true
-					
 					continue;
-					// continue to next loop to check other access records
 				}
-				elseif ( strpos( core::$chans[$channel->channel]['users'][$nick], 'h' ) !== false )
+				// they don't have access, but they have +o, remove it
+				elseif ( ircd::$halfop && strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
 				{
 					$remove_access = true;
-					// set remove access to true
-						
 					continue;
-					// continue to next loop to check other access records
 				}
-				else
-				{
-					continue;
-					// continue to next loop to check other access records
-				}
-				// we check if the user has access, if they do break;
-				// we also check if they dont have access and have op, if they do remove it.
+				
+				if ( $remove_access && ircd::$halfop )
+					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
+				elseif ( $remove_access && !ircd::$halfop )
+					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-o '.$nick );
+				// easy fix to stop stuff like this below happening.
+				// [20:27:19] * ChanServ sets mode: -o N0valyfe
+				// [20:27:19] * ChanServ sets mode: +o N0valyfe
 			}
-			// loop through the access records
-			
-			if ( $remove_access )
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
-			// easy fix to stop stuff like this below happening.
-			// [20:27:19] * ChanServ sets mode: -o N0valyfe
-			// [20:27:19] * ChanServ sets mode: +o N0valyfe	
+			// foreach the access array
 		}
 		// loop through the users
 	}
@@ -906,67 +839,74 @@ class cs_levels implements module
 	* @params
 	* $chan - The channel to give the user access in
 	* $user - The user to recieve access
+	* $target - target, either a nick or *@*
 	* $access - a valid resource from an access query.
 	* $secure - check if secure is enabled
 	*/
-	static public function give_access( $chan, $nick, $chan_access, $secure = 1 )
+	static public function give_access( $chan, $nick, $target, $chan_access, $secure = true )
 	{
-		if ( ( $secure == 1 ) && !core::$nicks[$nick]['identified'] )
+		if ( $secure && !core::$nicks[$nick]['identified'] )
 			return false;
 		// return false if secure is set to 1 and $nick isnt identified.
 		
 		$mode_string = '';
 		$mode_params = '';
-		foreach ( $chan_access as $level )
+		foreach ( $chan_access as $record => $levels )
 		{
-			$has_owner = $has_protect = $has_op = $has_halfop = $has_voice = false;
-		
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'q' ) !== false )
-				$has_owner = true;
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'a' ) !== false )
-				$has_protect = true;
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
-				$has_op = true;
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'h' ) !== false )
-				$has_halfop = true;
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) !== false )
-				$has_voice = true;
-			// check what we already have.
-			
-			if ( !$has_owner && $level == '5' && ircd::$owner )
+			if ( $record != $target )
+				continue;
+				
+			foreach ( $levels as $ix => $level )
 			{
-				$mode_string .= 'q';
-				$mode_params .= $nick.' ';
-			}
-			// we've found a +q!
+				$has_owner = $has_protect = $has_op = $has_halfop = $has_voice = false;
 			
-			if ( !$has_protect && $level == '4' && ircd::$protect )
-			{
-				$mode_string .= 'a';
-				$mode_params .= $nick.' ';
+				if ( strpos( core::$chans[$chan]['users'][$nick], 'q' ) !== false )
+					$has_owner = true;
+				if ( strpos( core::$chans[$chan]['users'][$nick], 'a' ) !== false )
+					$has_protect = true;
+				if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
+					$has_op = true;
+				if ( strpos( core::$chans[$chan]['users'][$nick], 'h' ) !== false )
+					$has_halfop = true;
+				if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) !== false )
+					$has_voice = true;
+				// check what we already have.
+				
+				if ( !$has_owner && $level == '5' && ircd::$owner )
+				{
+					$mode_string .= 'q';
+					$mode_params .= $nick.' ';
+				}
+				// we've found a +q!
+				
+				if ( !$has_protect && $level == '4' && ircd::$protect )
+				{
+					$mode_string .= 'a';
+					$mode_params .= $nick.' ';
+				}
+				// we've found a +a!
+				
+				if ( !$has_op && $level == '3' )
+				{
+					$mode_string .= 'o';
+					$mode_params .= $nick.' ';
+				}
+				// we've found a +o!
+				
+				if ( !$has_halfop && $level == '2' && ircd::$halfop )
+				{
+					$mode_string .= 'h';
+					$mode_params .= $nick.' ';
+				}
+				// we've found a +h!
+				
+				if ( !$has_voice && $level == '1' )
+				{
+					$mode_string .= 'v';
+					$mode_params .= $nick.' ';
+				}
+				// we've found a +v!
 			}
-			// we've found a +a!
-			
-			if ( !$has_op && $level == '3' )
-			{
-				$mode_string .= 'o';
-				$mode_params .= $nick.' ';
-			}
-			// we've found a +o!
-			
-			if ( !$has_halfop && $level == '2' && ircd::$halfop )
-			{
-				$mode_string .= 'h';
-				$mode_params .= $nick.' ';
-			}
-			// we've found a +h!
-			
-			if ( !$has_voice && $level == '1' )
-			{
-				$mode_string .= 'v';
-				$mode_params .= $nick.' ';
-			}
-			// we've found a +v!
 		}
 		// loop through access records
 		// levels are as follows;

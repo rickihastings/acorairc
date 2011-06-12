@@ -37,12 +37,12 @@ class ns_identify implements module
 		
 		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1 );
 		nickserv::add_help( 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
-		nickserv::add_help( 'ns_logout', 'help', nickserv::$help->NS_HELP_LOGOUT_1 );
-		nickserv::add_help( 'ns_logout', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
+		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_LOGOUT_1 );
+		nickserv::add_help( 'ns_identify', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
 		// add the help
 		
 		nickserv::add_command( 'identify', 'ns_identify', 'identify_command' );
-		nickserv::add_command( 'logout', 'ns_logout', 'logout_command' );
+		nickserv::add_command( 'logout', 'ns_identify', 'logout_command' );
 		// add the command
 		
 		nickserv::add_help( 'ns_identify', 'help id', nickserv::$help->NS_HELP_IDENTIFY_ALL );
@@ -138,9 +138,11 @@ class ns_identify implements module
 					{
 						foreach ( core::$chans as $chan => $cdata )
 						{
-							$access_array = cs_levels::get_access( $chan );
-							// get the access array
-							
+							if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+								return false;
+							// if the channel doesn't exist we return false, to save us the hassle of wasting
+							// resources on this stuff below.
+						
 							if ( $nick == core::$config->chanserv->nick )
 								continue;
 							// skip us :D
@@ -148,47 +150,8 @@ class ns_identify implements module
 							$hostname = core::get_full_hostname( $nick );
 							// get the hostname ready.
 							
-							foreach ( $access_array as $target => $access )
-							{
-								if ( $target == $nick )
-								{
-									$remove_access = false;
-									// don't remove access
-									
-									cs_levels::give_access( $chan, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
-									// give them access
-									
-									continue 2;
-									// continue to next loop cause we've found a match
-								}
-								elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
-								{
-									$remove_access = false;
-									// don't remove access
-									
-									cs_levels::give_access( $chan, $nick, $access, chanserv::check_flags( $chan, array( 'S' ) ) );
-									// give them access
-									
-									continue;
-									// continue to next loop cause we've found a match
-								}
-								elseif ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
-								{
-									$remove_access = true;
-									// set remove access to true
-									
-									continue;
-									// continue to next loop to check other access records
-								}
-								else
-								{
-									continue;
-									// continue to next loop to check other access records
-								}
-								// we check if the user has access, if they do break;
-								// we also check if they dont have access and have op, if they do remove it.
-							}
-							// loop through the access records
+							cs_levels::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, true );
+							// on_create event
 						}
 						// loop through channels, check if they are in any
 					}
