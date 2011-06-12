@@ -86,6 +86,7 @@ class cs_flags implements module
 			// get the flag records
 			
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_LIST, array( 'chan' => $chan, 'flags' => $flags_q->flags ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_LIST2, array( 'chan' => $chan ) );
 			return false;
 		}
 		else if ( $target == '' && $flags == '' && !$levels_result )
