@@ -43,7 +43,6 @@ class cs_fantasy implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		// TODO
 		$return = ircd::on_msg( $ircdata );
 		if ( $return !== false )
 		{
@@ -56,12 +55,13 @@ class cs_fantasy implements module
 				return false;
 			// channel isnt registered, halt immediatly.. 
 			// either something has cocked up or someone
-			// has forced us into a channel :S
+			// has forced us into a channel :S the cunts!
 			
 			if ( chanserv::check_flags( $channel->channel, array( 'F' ) ) === false )
 				return false;
+			// is +F enabled on $chan?
 			
-			if ( commands::on_fantasy_cmd( $return, 'help', core::$config->chanserv->nick ) )
+			if ( !isset( $msgs[1] ) && commands::on_fantasy_cmd( $return, 'help', core::$config->chanserv->nick ) )
 			{
 				$help = chanserv::$help->CS_HELP_FANTASY_ALL1;
 			
@@ -81,7 +81,19 @@ class cs_fantasy implements module
 				foreach ( $help as $line )
 					services::communicate( core::$config->chanserv->nick, $nick, $line, array( 'p' => core::$config->chanserv->fantasy_prefix ) );	
 			}
-			// !help command
+			// !help command (without queries)
+			
+			if ( isset( $msgs[1] ) && commands::on_fantasy_cmd( $return, 'help', core::$config->chanserv->nick ) )
+			{
+				$query = implode( ' ', $msgs );
+				$query = substr( $query, 1 );
+				$query = strtolower( $query );
+				// convert to lower case because all the tingy wags are in lowercase
+				
+				chanserv::get_help( $nick, $query );
+				// send help eh.
+			}
+			// !help command (with queries)
 			
 			if ( ircd::$owner && commands::on_fantasy_cmd( $return, 'owner', core::$config->chanserv->nick ) )
 			{

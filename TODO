@@ -28,3 +28,4 @@
 * Add chanserv invite
 * Add an identified parameter to core::$nicks, will save using queries in some instances. Mainly to fix a bug in charybdis though (DONE)
 * Port logout.ns into identify.ns, because having logout with no identify is pointless? (DONE)
+* Convert !help op to /cs help op, and so fourth (DONE)
