@@ -239,7 +239,11 @@ class ns_identify implements module
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
 			{
-				if ( $user->validated == 0 && $user->suspended == 0 )
+				if ( $user->suspended == 1 )
+				{
+					return false;
+				}
+				elseif ( $user->validated == 0 && $user->suspended == 0 )
 				{
 					ircd::on_user_logout( $nick );
 					core::$nicks[$nick]['identified'] = false;
@@ -283,7 +287,11 @@ class ns_identify implements module
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
 			{
-				if ( $user->validated == 0 && $user->suspended == 0 )
+				if ( $user->suspended == 1 )
+				{
+					return false;
+				}
+				elseif ( $user->validated == 0 && $user->suspended == 0 )
 				{
 					ircd::on_user_logout( $nick );
 					core::$nicks[$nick]['identified'] = false;
@@ -330,7 +338,7 @@ class ns_identify implements module
 	public function secured_callback( $nick )
 	{
 		$random_nick = 'Unknown'.rand( 10000, 99999 );
-		ircd::svsnick( $nick, $random_nick, core::$network_time );
+		ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
 		// ready to change a secured nick >:D
 	}	
 	

@@ -87,7 +87,7 @@ class ns_recover implements module
 				$random_nick = 'Unknown'.rand( 10000, 99999 );
 				// generate a random nick
 				
-				ircd::svsnick( $unick, $random_nick, core::$network_time );
+				ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
 				// force the nick change, ONLY, we set a timer to introduce the
 				// enforcer client, in the next iteration of the main loop
 				// to make sure the ircd class can preserve all information

@@ -735,10 +735,9 @@ class ircd implements protocol
 	static public function svsnick( $old_nick, $new_nick, $timestamp )
 	{
 		$uold_nick = ircd_handle::get_uid( $old_nick );
-		$unew_nick = ircd_handle::get_uid( $new_nick );
 		// get the uid.
 		
-		self::send( ':'.$uold_nick.' NICK '.$unew_nick.' '.$timestamp );
+		self::send( ':'.self::$sid.' ENCAP * RSFNC '.$uold_nick.' '.$new_nick.' '.$timestamp.' '.$timestamp );
 		ircd_handle::svsnick( $old_nick, $new_nick, $timestamp );
 		// send the cmd then handle it internally
 	}
@@ -1323,7 +1322,7 @@ class ircd implements protocol
 	*/
 	static public function on_nick_change( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 3 )
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 4 )
 		{
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),

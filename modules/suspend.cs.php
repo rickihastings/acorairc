@@ -199,17 +199,17 @@ class cs_suspend implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( $channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) ) )
-				{
-					if ( $channel->suspended == 1 )
-					{
-						if ( !core::$nicks[$nick]['ircop'] )
-							ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
-							// boot
-					}
-					// it's also suspended
-				}
-				// channel is registered
+				$channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) );
+			
+				if ( $channel === false )
+					continue;
+				if ( $channel->suspended == 0 )
+					continue;
+				// channel isnt registered or suspended
+					
+				if ( !core::$nicks[$nick]['ircop'] )
+					ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
+				// boot
 			}
 		}
 		// on_join trigger for forbidden channels
@@ -223,21 +223,20 @@ class cs_suspend implements module
 			foreach ( $chans as $chan )
 			{
 				$nusers = core::$chans[$chan]['users'];
+				$channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) );
 				
-				if ( $channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) ) )
+				if ( $channel === false )
+					continue;
+				if ( $channel->suspended == 0 )
+					continue;
+				// channel isnt registered or suspended!
+				
+				foreach ( $nusers as $nick => $modes )
 				{
-					if ( $channel->suspended == 1 )
-					{
-						foreach ( $nusers as $nick => $modes )
-						{
-							if ( !core::$nicks[$nick]['ircop'] )
-								ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
-						}
-						// boot
-					}
-					// it's also suspended
+					if ( !core::$nicks[$nick]['ircop'] )
+						ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
 				}
-				// channel is registered
+				// boot
 			}
 		}
 		// and same with channels being created

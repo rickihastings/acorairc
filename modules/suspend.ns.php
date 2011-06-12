@@ -55,10 +55,17 @@ class ns_suspend implements module
 	*/
 	static public function suspend_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( $ircdata, 0 );
+		$unick = $ircdata[0];
 		$reason = core::get_data_after( $ircdata, 1 );
 		$user_info = array();
 		// get the nick etc.
+		
+		if ( $unick == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
+			return false;
+		}
+		// make sure unick isnt empty!
 		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
@@ -118,7 +125,7 @@ class ns_suspend implements module
 			
 			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
 			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
-			ircd::svsnick( $unick, $random_nick, core::$network_time );
+			ircd::svsnick( $unick, $random_nick, core::$nicks[$nick]['timestamp'] );
 		}
 		// is the nick in use? we need to force change it.
 	}
@@ -132,8 +139,15 @@ class ns_suspend implements module
 	*/
 	static public function unsuspend_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( $ircdata, 0 );
+		$unick = $ircdata[0];
 		// get the nick etc.
+		
+		if ( $unick == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
+			return false;
+		}
+		// make sure unick isnt empty!
 		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
@@ -154,9 +168,7 @@ class ns_suspend implements module
 			database::update( 'users', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'display', '=', $unick ) );
 			
 			if ( $user->real_user == 0 )
-			{
 				database::delete( 'users', array( 'display', '=', $unick ) );
-			}
 			// nick wasen't registered by a real person, drop it
 		}
 		else
@@ -185,18 +197,18 @@ class ns_suspend implements module
 		if ( $connect_data !== false )
 		{
 			$nick = $connect_data['nick'];
+			$user = services::user_exists( $nick, false, array( 'display', 'suspended' ) );
 			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'suspended' ) ) )
-			{
-				if ( $user->suspended == 1 )
-				{
-					$random_nick = 'Unknown'.rand( 10000, 99999 );
-					
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
-					ircd::svsnick( $nick, $random_nick, core::$network_time );
-				}
-			}
+			if ( $user === false )
+				return false;
+			if ( $user->suspended == 0 )
+				return false;
+				
+			$random_nick = 'Unknown'.rand( 10000, 99999 );
+			
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+			ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
 			// check if the nick is suspended etc.
 		}
 		// trigger on connect
@@ -205,21 +217,22 @@ class ns_suspend implements module
 		if ( $return !== false )
 		{
 			$nick = $return['new_nick'];
-			$nick = core::get_nick( $ircdata, 2 );
 			// get the nicknames
 			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'suspended' ) ) )
-			{
-				if ( $user->suspended == 1 )
-				{
-					$random_nick = 'Unknown'.rand( 10000, 99999 );
-					
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
-					ircd::svsnick( $nick, $random_nick, core::$network_time );
-				}
-			}
-			// check if the nick is suspended etc.
+			$user = services::user_exists( $nick, false, array( 'display', 'suspended' ) );
+			
+			if ( $user === false )
+				return false;
+			if ( $user->suspended == 0 )
+				return false;
+			// not registered or suspended.
+			
+			$random_nick = 'Unknown'.rand( 10000, 99999 );
+			
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+			ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
+			// change nick
 		}
 		// trigger on nick change
 	}
