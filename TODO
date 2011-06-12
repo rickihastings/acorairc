@@ -20,8 +20,6 @@
 * Do some work on /cs flags #channel, as it could show alot more info, like /cs info (DONE)
 * Add +r to channels upon register, can't believe we don't actually do this? (DONE, but it can be unset by operserv, i'm going to leave it like this.
   incase someone wants to "pretend" a channel isnt registered, for whatever reason)
-* Vigiriously test all features!
-* Fix that bug where recv(): .. blank is sent, no idea whats causing it
 * Add charybdis33 support (DONE)
 * Redesign how services::check_mask_ignore() works, at currently it doesnt work so is commented out. (DONE)
 * Redesign all handlers, so they send information rather than $ircdata, cause its inprecitable what state it's going to come in (DONE)
@@ -29,3 +27,6 @@
 * Add an identified parameter to core::$nicks, will save using queries in some instances. Mainly to fix a bug in charybdis though (DONE)
 * Port logout.ns into identify.ns, because having logout with no identify is pointless? (DONE)
 * Convert !help op to /cs help op, and so fourth (DONE)
+* Add a confirm code protection to DROP to ensure it's not accidently used
+* Look into bans being set upon burst, we currently can't see this happening, charybdis uses BMASK, not sure what insp uses. fix! (DONE)
+* Add mass mode command, convert mode::type_mask to use this and also levels, this allows setting a tonne of modes together compressed

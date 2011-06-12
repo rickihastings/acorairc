@@ -200,8 +200,25 @@ class ircd implements protocol
 	*/
 	static public function handle_mode( $ircdata )
 	{
-		$chan = core::get_chan( $ircdata, 2 );
-		$mode_queue = core::get_data_after( $ircdata, 4 );
+		$chan = core::get_chan( $ircdata, 3 );
+		// get the channel!
+	
+		if ( $ircdata[1] == 'BMASK' )
+		{
+			$params = ( count( $ircdata ) - 5 );
+	
+			$mode_queue = '+';
+			for ( $i = 0; $i < $params; $i++ )
+				$mode_queue .= $ircdata[4];
+			
+			$mode_queue .= ' '.substr( core::get_data_after( $ircdata, 5 ), 1 );
+			// setup a string eh!
+		}
+		else
+		{
+			$mode_queue = core::get_data_after( $ircdata, 4 );
+		}
+		// handle BMASK else just handle the mode.
 	
 		ircd_handle::handle_mode( $chan, $mode_queue );
 	}
@@ -1106,12 +1123,29 @@ class ircd implements protocol
 	*/
 	static public function on_mode( $ircdata )
 	{
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'BMASK' )
+		{
+			$return = array(
+				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
+				'chan' => core::get_chan( $ircdata, 3 ),
+				'modes' => core::get_data_after( $ircdata, 4 ),
+				'mode' => $ircdata[4],
+				'params' => substr( core::get_data_after( $ircdata, 5 ), 1 ),
+				'bmask' => true,
+			);
+		
+			ircd_handle::on_mode( $return['nick'], '+'.$return['mode'].' '.$return['params'], $return['chan'] );
+			return $return;
+		}
+		// listen for BMASK. handle_mode decides what we want to parse!
+	
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TMODE' )
 		{
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
 				'chan' => core::get_chan( $ircdata, 3 ),
 				'modes' => core::get_data_after( $ircdata, 4 ),
+				'bmask' => false,
 			);
 		
 			ircd_handle::on_mode( $return['nick'], $return['modes'], $return['chan'] );

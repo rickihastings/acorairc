@@ -171,41 +171,12 @@ class cs_xcommands implements module
 		
 		ircd::mode( core::$config->chanserv->nick, $chan, '-'.core::$chans[$chan]['modes'] );
 		// remove standard modes
-		foreach ( core::$chans[$chan]['users'] as $user => $modes )
-		{
-			if ( $modes == '' )
-				continue;
-			// if modes is empty skip
-			if ( $user == core::$config->chanserv->nick || $user == core::$config->global->nick )
-				continue;
-			// if its chanserv or global, skip
-			
-			$c_modes = count( str_split( $modes ) );
-			$mode_string = '-'.$modes;
-			
-			for ( $i = 0; $i < $c_modes; $i++ )
-				$mode_string .= ' '.$user;
-			// generate a mode string.
-			
-			ircd::mode( core::$config->chanserv->nick, $chan, $mode_string );
-			// send the mode string
-		}
-		// status modes
-		foreach ( core::$chans[$chan]['p_modes'] as $mask => $modes )
-		{
-			$c_modes = count( str_split( $modes ) );
-			$mode_string = '-'.$modes;
-			
-			for ( $i = 0; $i < $c_modes; $i++ )
-				$mode_string .= ' '.$mask;
-			// generate a mode string.
-			
-			ircd::mode( core::$config->chanserv->nick, $chan, $mode_string );
-			// send the mode string
-		}
+
+		mode::mass_mode( $chan, '-', core::$chans[$chan]['users'], core::$config->chanserv->nick );
+		mode::mass_mode( $chan, '-', core::$chans[$chan]['p_modes'], core::$config->chanserv->nick );
 		// bans etc.
 		
-		$modelock = self::get_flags( $chan, 'm' );
+		$modelock = chanserv::get_flags( $chan, 'm' );
 		// store some flag values in variables.
 		
 		if ( $modelock != null )

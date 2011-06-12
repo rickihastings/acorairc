@@ -605,6 +605,50 @@ class mode
 
 		unset ( $nicks );
 	}
+	
+	/*
+	* de_mode (private)
+	* 
+	* @params
+	* $chan - the channel to deal with.
+	* $type - either + or -
+	* $params - a list of params, with the modes they have set, usually an $nusers array or $pmodes
+	* $cnick - and who is to set these modes.
+	*/
+	static public function de_mode( $chan, $type, $params, $cnick )
+	{
+		if ( $type != '-' && $type != '+' )
+			return false;
+	
+		$mode_string = array();
+		$nick_string = array();
+		// set some vars
+		
+		$i = 0;
+		$x = 0;
+		foreach ( $params as $param => $mode )
+		{
+			if ( $param == core::$config->chanserv->nick || $mode == '' )
+				continue;
+		
+			$i++;
+			
+			if ( $i == ircd::$max_params )
+			{
+				$i = 0;
+				$x++;
+			}
+			// do a bit of mathz :D
+			
+			$mode_string[$x] .= $mode;
+			$nick_string[$x] .= $param.' ';
+		}
+		// compile a string
+		
+		foreach ( $mode_string as $q => $string )
+			ircd::mode( $cnick, $chan, $type.$mode_string[$q].' '.trim( $nick_string[$q] ) );
+		// set string
+	}
 }
 
 // EOF;
