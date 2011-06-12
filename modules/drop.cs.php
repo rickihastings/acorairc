@@ -17,7 +17,7 @@
 class cs_drop implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -53,6 +53,7 @@ class cs_drop implements module
 	static public function drop_command( $nick, $ircdata = array() )
 	{
 		$chan = core::get_chan( $ircdata, 0 );
+		$code = $ircdata[1];
 		// get the channel.
 		
 		if ( self::_drop_check( $nick, $chan ) === false )
@@ -69,6 +70,27 @@ class cs_drop implements module
 		}
 		// is the channel suspended?
 		
+		if ( trim( $code ) == '' )
+		{
+			$characters = '0123456789abcdefghijklmnopqrstuvwxyz';
+			$drop_code = '';    
+			for ( $p = 0; $p < 10; $p++ )
+				$drop_code .= $characters[mt_rand( 0, strlen( $characters ) )];
+			// generate random code
+				
+			core::$chans[$chan]['drop_code'] = $drop_code;
+			
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROP_CODE, array( 'chan' => $chan, 'code' => $drop_code ) );
+			return false;
+		}
+		else if ( $code != core::$chans[$chan]['drop_code'] )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_INVALID_CODE );
+			return false;
+		}
+		// set a confirmation code and send it back if none is specified
+		// is a code is specified, AND it's correct, continue.
+		
 		database::delete( 'chans', array( 'channel', '=', $chan ) );
 		database::delete( 'chans_levels', array( 'channel', '=', $chan ) );
 		// delete all associated records
@@ -76,7 +98,7 @@ class cs_drop implements module
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROPPED, array( 'chan' => $chan ) );
 		// let the user know
 		
-		if ( isset( core::$chans[$chan] ) )
+		if ( isset( core::$chans[$chan] ) && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
 		{
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
 			// now lets leave the channel if we're in it
