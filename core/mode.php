@@ -484,46 +484,46 @@ class mode
 			if ( $part[1] == '0' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					if ( strpos( $modes, 'o' ) === false && strpos( $modes, 'h' ) === false && strpos( $modes, 'v' ) === false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'o' ) === false && strpos( $modes, 'h' ) === false && strpos( $modes, 'v' ) === false ) $nicks[$nick] .= $mode[1];
 				// loop through, finding users that are level 0, or more
 				// commonly, don't have any status modes.
 			}
 			elseif ( $part[1] == 'v' || $part[1] == ircd::$prefix_modes['v'] )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					if ( strpos( $modes, 'v' ) !== false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'v' ) !== false ) $nicks[$nick] .= $mode[1];
 				// again we loop, finding users that have voice.	
 			}
 			elseif ( ( $part[1] == 'h' || $part[1] == ircd::$prefix_modes['h'] ) && ircd::$halfop  )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					if ( strpos( $modes, 'h' ) !== false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'h' ) !== false ) $nicks[$nick] .= $mode[1];
 				// again we loop, finding users that have halfop.	
 			}
 			elseif ( $part[1] == 'o' || $part[1] == ircd::$prefix_modes['o'] )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					if ( strpos( $modes, 'o' ) !== false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'o' ) !== false ) $nicks[$nick] .= $mode[1];
 				// again we loop, finding users that have operator.	
 			}
 			elseif ( ( $part[1] == 'a' || $part[1] == ircd::$prefix_modes['a'] ) && ircd::$protect )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
 				{
-					if ( strpos( $modes, 'a' ) !== false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'a' ) !== false ) $nicks[$nick] .= $mode[1];
 				}
 				// again we loop, finding users that have admin.	
 			}
 			elseif ( ( $part[1] == 'q' || $part[1] == ircd::$prefix_modes['q'] ) && ircd::$owner )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					if ( strpos( $modes, 'q' ) !== false ) $nicks[] .= $nick;
+					if ( strpos( $modes, 'q' ) !== false ) $nicks[$nick] .= $mode[1];
 				// again we loop, finding users that have owner.	
 			}
 			elseif ( $part[1] == '*' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					$nicks[] .= $nick;
+					$nicks[$nick] .= $mode[1];
 				// and last but not least, all :)
 				// note we don't need to do any checks here.
 			}
@@ -546,7 +546,7 @@ class mode
 			{
 				$hostname = core::get_full_hostname( $nick );
 				
-				if ( services::match( $hostname, $part[1] ) ) $nicks[] .= $nick; 
+				if ( services::match( $hostname, $part[1] ) ) $nicks[$nick] .= $mode[1];
 				// this needs tested, although i'm purty confident i'll work.
 			}
 			// loop through our users, and find a matching mask >:D
@@ -562,52 +562,14 @@ class mode
 			return false;
 		// empty array :(
 		
-		foreach ( $nicks as $id => $nick )
-			if ( $nick == $cnick ) unset( $nicks[$id] );
-		// we don't want chanserv in our list, eww.
+		self::mass_mode( $chan, $mode[0], $nicks, $cnick );
+		// better than duplicating code, this can be used else where aswell :D
 		
-		$i = 0;
-		$x = count( $nicks );
-		$mode_string = $mode[0];
-		$nick_string = ' ';
-		foreach ( $nicks as $id => $nick )
-		{
-			$i++;
-			// plus plus
-	
-			$mode_string .= $mode[1];
-			$nick_string .= $nick.' ';
-			// add stuff to the strings.
-			
-			if ( $i == ircd::$max_params || $i == $x ) 
-			{
-				ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
-				// send the modes
-				
-				$i = 0;
-				$mode_string = $mode[0];
-				$nick_string = ' ';
-				// reset all our strings :D
-			}
-			else
-			{
-				unset( $nicks[$id] );
-			}
-			// bit of maths, well, not much, lol.
-		}
-		// ok, so we've got our list, instead of sending the modes one by one, here's
-		// what we're gonna do, we're gonna compress it into a mode string, setting
-		// 6 at a time, sound good? indeed it does.
-		
-		if ( count( $nicks ) > 0 )
-			ircd::mode( $cnick, $chan, trim( $mode_string.$nick_string ) );
-		// send the remaining modes
-
 		unset ( $nicks );
 	}
 	
 	/*
-	* de_mode (private)
+	* mass_mode (private)
 	* 
 	* @params
 	* $chan - the channel to deal with.
@@ -615,7 +577,7 @@ class mode
 	* $params - a list of params, with the modes they have set, usually an $nusers array or $pmodes
 	* $cnick - and who is to set these modes.
 	*/
-	static public function de_mode( $chan, $type, $params, $cnick )
+	static public function mass_mode( $chan, $type, $params, $cnick )
 	{
 		if ( $type != '-' && $type != '+' )
 			return false;
