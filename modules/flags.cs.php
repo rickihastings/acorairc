@@ -17,7 +17,7 @@
 class cs_flags implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -71,6 +71,14 @@ class cs_flags implements module
 		$rparams = explode( '||', $param );
 		$levels_result = chanserv::check_levels( $nick, $chan, array( 's', 'F' ) );
 		// get the channel.
+		
+		if ( $chan == '' || $chan[0] != '#' )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
+			return false;
+			// wrong syntax
+		}
+		// make sure they've entered a channel
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
 		{
@@ -276,10 +284,10 @@ class cs_flags implements module
 					// join the chan.
 					
 					if ( ircd::$protect )
-						ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick );
+						ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
 						// +ao its self.
 					else
-						ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick );
+						ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
 						// +o its self.
 				}
 				// only join if channel has above 0 users in it.
@@ -578,7 +586,6 @@ class cs_flags implements module
 		if ( isset( self::$set[$chan] ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
-			// who do we notice?
 			unset( self::$set[$chan] );
 		}
 		// send back the target stuff..
@@ -870,8 +877,8 @@ class cs_flags implements module
 			
 			if ( $mode == '-' )
 			{
-				if ( strpos( self::$set[$target], '+' ) === false )
-					self::$set[$target] .= '+';
+				if ( strpos( self::$set[$chan], '-' ) === false )
+					self::$set[$chan] .= '-';
 				// ok, no + ?
 				
 				$chan_flag = database::fetch( $chan_flag_q );
@@ -904,8 +911,8 @@ class cs_flags implements module
 					return false;
 				}
 				
-				if ( strpos( self::$set[$target], '+' ) === false )
-					self::$set[$target] .= '+';
+				if ( strpos( self::$set[$chan], '+' ) === false )
+					self::$set[$chan] .= '+';
 				// ok, no + ?
 				
 				$chan_flag = database::fetch( $chan_flag_q );
@@ -927,8 +934,8 @@ class cs_flags implements module
 			
 			if ( $mode == '+' )
 			{
-				if ( strpos( self::$set[$target], '+' ) === false )
-					self::$set[$target] .= '+';
+				if ( strpos( self::$set[$chan], '+' ) === false )
+					self::$set[$chan] .= '+';
 				// ok, no + ?
 				
 				$chan_flag = database::fetch( $chan_flag_q );
@@ -956,7 +963,7 @@ class cs_flags implements module
 				}
 			}
 			// the flag ISNT set, so now we check whether they are trying to -, or + it
-			// if they are trying to + it, go ahead, error if they are trying to _ it.
+			// if they are trying to + it, go ahead, error if they are trying to - it.
 			
 			if ( $mode == '-' )
 			{

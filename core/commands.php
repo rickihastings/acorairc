@@ -130,7 +130,8 @@ class commands
 		$prefix = core::$config->chanserv->fantasy_prefix;
 		$chan = $return['target'];
 		$command = strtolower( $command );
-		$realdata = strtolower( $return['msg'] );
+		$commands = explode( ' ', $return['msg'] );
+		$realdata = strtolower( $commands[0] );
 		$from = $return['nick'];
 		
 		if ( services::check_mask_ignore( $nick ) === true )
