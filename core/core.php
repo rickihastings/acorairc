@@ -36,6 +36,7 @@ class core
 	static public $chans = array();
 	static public $nicks = array();
 	static public $uids = array();
+	static public $help;
 	// we set $uids anyway, although its only used on networks
 	// that use TS6 - UUID/SID style protocol, it's here anyway.
 	
@@ -76,6 +77,10 @@ class core
 		if ( isset( self::$config->chanserv ) ) self::$service_bots[] = 'chanserv';
 		if ( isset( self::$config->operserv ) ) self::$service_bots[] = 'operserv';
 		// setup our $config->service_bots dir
+		
+		require( BASEPATH.'/lang/'.core::$config->server->lang.'/core.php' );
+		self::$help = $help;
+		// load the help file
 		
 		$this->timer = new timer();
 		$this->mode = new mode();
@@ -481,10 +486,10 @@ class core
 		
 		if ( core::$hide_chans === false )
 		{
-			core::alog( 'WARNING: m_hidechans.so is not loaded, this is NOT recommended. See http://wiki.inspircd.org/Modules/2.0/hidechans' );
+			core::alog( 'WARNING: +I is either not loaded or not available, this is NOT advised.' );
 			// alog, don't exit, not needed.
 		}
-		// let the dude know that m_hidechans.so isnt loaded, and it's NOT ADVISED!
+		// let the dude know that we don't have a module that hides chans +I
 	}
 	
 	/*

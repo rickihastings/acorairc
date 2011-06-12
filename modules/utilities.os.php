@@ -17,7 +17,7 @@
 class os_utilities implements module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -74,7 +74,6 @@ class os_utilities implements module
 		if ( $server == core::$config->server->name || isset( core::$servers[$server] ) )
 		{
 			core::alog( core::$config->operserv->nick.': WARNING '.$nick.' tried to jupe '.$server );
-			
 			core::alog( 'jupe_command(): WARNING '.$nick.' tried to jupe '.$server, 'BASIC' );
 			// log what we need to log.
 		}

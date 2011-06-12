@@ -289,7 +289,7 @@ class commands
 		
 		if ( !isset( self::$helpv[$hook][$command] ) || $count == 0 )
 		{
-			services::communicate( $bot, $nick, 'No help available for '.$command.'.' );
+			services::communicate( $bot, $nick, core::$help->CORE_UNKNOWN_HELP, array( 'command' => $command ) );
 			return false;
 		}
 		// does the array even exist?
@@ -411,7 +411,7 @@ class commands
 		if ( !isset( self::$commands[$hook][$new] ) )
 		{
 			self::$unknown_cmds++;
-			services::communicate( $bot, $nick, 'Unknown command '.$commands_r[0].'.' );
+			services::communicate( $bot, $nick, core::$help->CORE_UNKNOWN_COMMAND, array( 'command' => $commands_r[0] ) );
 			return false;
 		}
 		// command don't exist, at all..

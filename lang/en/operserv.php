@@ -219,7 +219,7 @@ $help = (object) array(
 	
 	'OS_HELP_JUPE_ALL'		=> array(
 		'=---- OperServ Help ----=',
-		'Syntax: JUPE server numeric',
+		'Syntax: JUPE server numeric',
 		' ',
 		'Creates a "fake" server linked under the services',
 		'server. Useful for disallowing servers to relink.',
