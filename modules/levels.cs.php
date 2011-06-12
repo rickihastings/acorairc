@@ -723,7 +723,9 @@ class cs_levels implements module
 	*/
 	static public function on_create( $nusers, $channel, $create = true )
 	{
+		$new_nusers_give = $new_nusers_take = array();
 		$access_array = array_reverse( self::get_access( $channel->channel ) );
+		$strict = ( chanserv::check_flags( $channel->channel, array( 'S' ) ) ) ? 'strict:' : ':';
 		// get the access array
 		
 		foreach ( $nusers as $nick => $modes )
@@ -747,47 +749,50 @@ class cs_levels implements module
 			{
 				if ( $target == $nick )
 				{
-					$remove_access = false;
-					// don't remove access
-					
-					self::give_access( $channel->channel, $nick, $target, $access_array, true );
+					$new_nusers_give[$nick] .= 'strict:'.implode( '', $level );
 					// give them access
 					continue 2;
 				}
 				// straight match, give access
 				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
 				{
-					$remove_access = false;
-					// don't remove access
-					
-					self::give_access( $channel->channel, $nick, $target, $access_array, chanserv::check_flags( $channel->channel, array( 'S' ) ) );
+					$new_nusers_give[$nick] .= $strict.implode( '', $level );
 					// give them access
 					continue 2;
 				}
 				// hostname match, give access
+				elseif ( ircd::$owner && strpos( core::$chans[$chan]['nicks'][$nick], 'q' ) !== false )
+				{
+					$new_nusers_take[$nick] .= 'q';
+					continue;
+				}
+				// they don't have access, but they have +a, remove it
+				elseif ( ircd::$protect && strpos( core::$chans[$chan]['nicks'][$nick], 'a' ) !== false )
+				{
+					$new_nusers_take[$nick] .= 'a';
+					continue;
+				}
+				// they don't have access, but they have +a, remove it
 				elseif ( strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
 				{
-					$remove_access = true;
+					$new_nusers_take[$nick] .= 'o';
 					continue;
 				}
 				// they don't have access, but they have +o, remove it
 				elseif ( ircd::$halfop && strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
 				{
-					$remove_access = true;
+					$new_nusers_take[$nick] .= 'h';
 					continue;
 				}
-				
-				if ( $remove_access && ircd::$halfop )
-					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-oh '.$nick.' '.$nick );
-				elseif ( $remove_access && !ircd::$halfop )
-					ircd::mode( core::$config->chanserv->nick, $channel->channel, '-o '.$nick );
-				// easy fix to stop stuff like this below happening.
-				// [20:27:19] * ChanServ sets mode: -o N0valyfe
-				// [20:27:19] * ChanServ sets mode: +o N0valyfe
 			}
 			// foreach the access array
 		}
 		// loop through the users
+		
+		mode::mass_mode( $channel->channel, '-', $new_nusers_take, core::$config->chanserv->nick );
+		// take access from people who shouldn't have it
+		self::give_access( $channel->channel, $new_nusers_give, $access_array );
+		// give access to people who should have it
 	}
 	
 	/*
@@ -805,16 +810,16 @@ class cs_levels implements module
 		$temp_array = array();
 		while ( $flags = database::fetch( $user_flags_q ) )
 		{
-			if ( strpos( $flags->flags, 'q' ) !== false )
+			if ( ircd::$owner && strpos( $flags->flags, 'q' ) !== false )
 				$temp_array[] = '5';
 			
-			if ( strpos( $flags->flags, 'a' ) !== false )
+			if ( ircd::$protect && strpos( $flags->flags, 'a' ) !== false )
 				$temp_array[] = '4';
 			
 			if ( strpos( $flags->flags, 'o' ) !== false )
 				$temp_array[] = '3';
 			
-			if ( strpos( $flags->flags, 'h' ) !== false )
+			if ( ircd::$halfop && strpos( $flags->flags, 'h' ) !== false )
 				$temp_array[] = '2';
 			
 			if ( strpos( $flags->flags, 'v' ) !== false )
@@ -838,90 +843,44 @@ class cs_levels implements module
 	* 
 	* @params
 	* $chan - The channel to give the user access in
-	* $user - The user to recieve access
-	* $target - target, either a nick or *@*
+	* $nusers - The users to recieve access
 	* $access - a valid resource from an access query.
-	* $secure - check if secure is enabled
 	*/
-	static public function give_access( $chan, $nick, $target, $chan_access, $secure = true )
+	static public function give_access( $chan, $nusers, $chan_access )
 	{
-		if ( $secure && !core::$nicks[$nick]['identified'] )
-			return false;
-		// return false if secure is set to 1 and $nick isnt identified.
+		$new_nusers = array();
+		// preset a new array
 		
-		$mode_string = '';
-		$mode_params = '';
-		foreach ( $chan_access as $record => $levels )
+		foreach ( $nusers as $nick => $data )
 		{
-			if ( $record != $target )
-				continue;
-				
-			foreach ( $levels as $ix => $level )
-			{
-				$has_owner = $has_protect = $has_op = $has_halfop = $has_voice = false;
+			$parts = explode( ':', $data );
+			$level = $parts[1];
+			$strict = ( $parts[0] == 'strict' ) ? true : false;
+			// determine whether we check strictly or not (secure +S)
 			
-				if ( strpos( core::$chans[$chan]['users'][$nick], 'q' ) !== false )
-					$has_owner = true;
-				if ( strpos( core::$chans[$chan]['users'][$nick], 'a' ) !== false )
-					$has_protect = true;
-				if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) !== false )
-					$has_op = true;
-				if ( strpos( core::$chans[$chan]['users'][$nick], 'h' ) !== false )
-					$has_halfop = true;
-				if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) !== false )
-					$has_voice = true;
-				// check what we already have.
-				
-				if ( !$has_owner && $level == '5' && ircd::$owner )
-				{
-					$mode_string .= 'q';
-					$mode_params .= $nick.' ';
-				}
-				// we've found a +q!
-				
-				if ( !$has_protect && $level == '4' && ircd::$protect )
-				{
-					$mode_string .= 'a';
-					$mode_params .= $nick.' ';
-				}
-				// we've found a +a!
-				
-				if ( !$has_op && $level == '3' )
-				{
-					$mode_string .= 'o';
-					$mode_params .= $nick.' ';
-				}
-				// we've found a +o!
-				
-				if ( !$has_halfop && $level == '2' && ircd::$halfop )
-				{
-					$mode_string .= 'h';
-					$mode_params .= $nick.' ';
-				}
-				// we've found a +h!
-				
-				if ( !$has_voice && $level == '1' )
-				{
-					$mode_string .= 'v';
-					$mode_params .= $nick.' ';
-				}
-				// we've found a +v!
-			}
+			if ( $strict && !core::$nicks[$nick]['identified'] )
+				continue;
+			// else we move on
+			
+			if ( ircd::$owner && strpos( core::$chans[$chan]['users'][$nick], 'q' ) === false && strpos( $level, '5' ) !== false )
+				$level = str_replace( '5', 'q', $level );
+			if ( ircd::$protect && strpos( core::$chans[$chan]['users'][$nick], 'a' ) === false && strpos( $level, '4' ) !== false )
+				$level = str_replace( '4', 'a', $level );
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) === false && strpos( $level, '3' ) !== false )
+				$level = str_replace( '3', 'o', $level );
+			if ( ircd::$halfop && strpos( core::$chans[$chan]['users'][$nick], 'h' ) === false && strpos( $level, '2' ) !== false )
+				$level = str_replace( '2', 'h', $level );
+			if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) === false && strpos( $level, '1' ) !== false )
+				$level = str_replace( '1', 'v', $level );
+			// replace '5' with 'q' etc, where applicable
+			
+			$new_nusers[$nick] = $level;
 		}
-		// loop through access records
-		// levels are as follows;
-		// 5 - q
-		// 4 - a
-		// 3 - o
-		// 2 - h
-		// 1 - v
 		
-		if ( $mode_string != '' )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+'.$mode_string.' '.trim( $mode_params ) );
-		// finally, we set the mode string on the nick
-		// providing it isnt empty
+		mode::mass_mode( $chan, '+', $new_nusers, core::$config->chanserv->nick );
+		// new method, saves resources and code! YEAH!!!
 		
-		unset( $mode_string );
+		unset( $nusers );
 	}
 	
 	/*
