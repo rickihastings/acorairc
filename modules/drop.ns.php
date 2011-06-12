@@ -17,7 +17,7 @@
 class ns_drop implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	

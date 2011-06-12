@@ -151,7 +151,6 @@ class ircd implements protocol
 		// strip :
 		
 		ircd_handle::handle_quit( $nick, $startup );
-		//print_r( core::$chans );
 	}
 	
 	/*
@@ -1226,8 +1225,6 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MODE' && ( substr( $ircdata[3], 1, 1 ) == '+' && strpos( $ircdata[3], 'o' ) !== false ) )
 		{
-			print 'banter eh';
-			
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
 				'type' => 'Server Administrator',
