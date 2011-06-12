@@ -67,7 +67,7 @@ class cs_suspend implements module
 		}
 		// they've gotta be identified and opered..
 		
-		if ( $chan == '' || $chan[0] != '#' )
+		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
 			return false;
@@ -143,7 +143,7 @@ class cs_suspend implements module
 		}
 		// they've gotta be identified.
 		
-		if ( $chan == '' || $chan[0] != '#' )
+		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
 			return false;

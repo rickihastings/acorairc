@@ -319,6 +319,8 @@ $help = (object) array(
 	'NS_ISNT_REGISTERED'	=>	'{nick} isn\'t registered',
 	'NS_NICK_DROPPED'		=>	'{nick} has been dropped',
 	'NS_NOT_IN_USE'			=>	'{nick} isn\'t in use',
+	'NS_CANT_GHOST_SELF'	=>	'You can\'t ghost yourself',
+	'NS_CANT_RECOVER_SELF'	=>	'You can\'t recover yourself',
 	'NS_NO_HOLD'			=>	'Services doesn\'t have a hold on {nick}',
 	'NS_ALREADY_IDENTIFIED'	=>	'You are already identified',
 	'NS_ALREADY_REGISTERED'	=>	'This nickname is already registered',	
@@ -336,6 +338,7 @@ $help = (object) array(
 	'NS_NICK_REQUESTED'		=>	'A confirmation code has been sent to {email}',
 	'NS_NICK_REGISTERED'	=>	'Your nickname has been sucessfully registered, you may now identify',
 	'NS_NICK_RELEASED'		=>	'Services hold on {nick} has been released',
+	'NS_NICK_RECOVERED'		=>	'{nick} has been recovered',
 	'NS_NICK_CHANGE'		=>	'Your nickname is now being changed to {nick}',
 	// standard messages
 	'NS_SUSPEND_1'			=>	'{nick} is currently suspended',

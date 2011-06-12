@@ -17,7 +17,7 @@
 class ns_ghost implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -72,6 +72,13 @@ class ns_ghost implements module
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
+			if ( $nick == $unick )
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_GHOST_SELF );
+				return false;
+			}
+			// you can't ghost yourself.. waste of time, and clearly useless.
+			
 			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
 			{
 				ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );

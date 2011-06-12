@@ -60,19 +60,19 @@ class ns_suspend implements module
 		$user_info = array();
 		// get the nick etc.
 		
-		if ( $unick == '' )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
-			return false;
-		}
-		// make sure unick isnt empty!
-		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
+		
+		if ( trim( $unick ) == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
+			return false;
+		}
+		// make sure unick isnt empty!
 		
 		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
 		{
@@ -142,19 +142,19 @@ class ns_suspend implements module
 		$unick = $ircdata[0];
 		// get the nick etc.
 		
-		if ( $unick == '' )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
-			return false;
-		}
-		// make sure unick isnt empty!
-		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
+		
+		if ( trim( $unick ) == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
+			return false;
+		}
+		// make sure unick isnt empty!
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'suspended', 'real_user' ) ) )
 		{

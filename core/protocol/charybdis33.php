@@ -132,11 +132,10 @@ class ircd implements protocol
 	{
 		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$new_nick = $ircdata[2];
-		
-		if ( $new_nick[0] == ':' ) $new_nick = substr( $new_nick, 1 );
+		$timestamp = substr( $ircdata[3], 1 );
 		// strip :
 	
-		ircd_handle::handle_nick_change( $nick, $new_nick, $startup );
+		ircd_handle::handle_nick_change( $nick, $new_nick, $timestamp, $startup );
 	}
 	
 		

@@ -104,9 +104,9 @@ class ircd_handle
 	* handle_nick_change
 	*
 	* @params
-	* $nick, $new_nick, $startup
+	* $nick, $new_nick, $timestamp, $startup
 	*/
-	static public function handle_nick_change( $nick, $new_nick, $startup = false )
+	static public function handle_nick_change( $nick, $new_nick, $timestamp, $startup = false )
 	{
 		$uuid = self::get_uid( $nick );
 		
@@ -122,6 +122,7 @@ class ircd_handle
 			
 			core::$nicks[$new_nick]['nick'] = $new_nick;
 			core::$nicks[$new_nick]['onick'] = $nick;
+			core::$nicks[$new_nick]['timestamp'] = $timestamp;
 			core::$uids[$uuid] = $new_nick;
 			
 			foreach ( core::$chans as $chan => $data )

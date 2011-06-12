@@ -82,6 +82,13 @@ class ns_recover implements module
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
+			if ( $nick == $unick )
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_RECOVER_SELF );
+				return false;
+			}
+			// you can't ghost yourself.. waste of time, and clearly useless.
+		
 			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
 			{
 				$random_nick = 'Unknown'.rand( 10000, 99999 );
@@ -94,6 +101,7 @@ class ns_recover implements module
 				// about the target, and not have it overwritten with introduce_client()
 				
 				core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by '.core::get_full_hostname( $nick ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
 				// introduce a client, logchan everything etc.
 				
 				timer::add( array( 'ns_recover', 'introduce_callback', array( $unick ) ), 1, 1 );
