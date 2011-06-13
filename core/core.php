@@ -962,17 +962,17 @@ class core
 
 		$days = floor( $seconds / 86400 );
 		$remaining = $seconds - ( $days * 86400 );
-		$return .= $days.'d ';
+		if ( $days > 0 ) $return .= $days.'d ';
 		// days
 		
 		$hours = floor( $remaining / 3600 );
 		$remaining = $remaining - ( $hours * 3600 );
-		$return .= $hours.'h ';
+		if ( $hours > 0 ) $return .= $hours.'h ';
 		// hours
 		
 		$mins = floor( $remaining / 60 );
 		$remaining = $remaining - ( $mins * 60 );
-		$return .= $mins.'m ';
+		if ( $mins > 0 ) $return .= $mins.'m ';
 		// minutes
 		
 		$return .= $remaining.'s';
