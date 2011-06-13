@@ -68,9 +68,8 @@ class modules
 		}
 		// module (exists?) but can't be loaded
 		
-		try {
-			self::$list[$module_name]['class'] = new $module_name();
-		} catch( Exception $e ) {
+		if ( !self::$list[$module_name]['class'] = new $module_name() )
+		{
 			core::alog( 'load_module(): unable to start: '.$module_name.' (boot error)', 'BASIC' );
 			return false;
 		}
