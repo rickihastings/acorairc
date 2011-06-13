@@ -881,7 +881,7 @@ class ircd implements protocol
 	{
 		// TODO
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.$uid.' SIGNON '.$nick.' '.core::$nicks[$nick]['ident'].' '.core::$nicks[$nick]['host'].' '.core::$nicks[$nick]['timestamp'].' '.$nick );
+		self::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$nick );
 	}
 	
 	/*
@@ -893,7 +893,7 @@ class ircd implements protocol
 	static public function on_user_logout( $nick )
 	{
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.self::$sid.' SU '.$uid );	
+		self::send( ':'.self::$sid.' ENCAP * SU '.$uid. ' :' );	
 	}
 
 	/*
