@@ -602,6 +602,9 @@ class mode
 			}
 			// do a bit of mathz :D
 			
+			$mode_num = strlen( $mode );
+			// more mathos!
+			
 			$array = ( strpos( $param, '@' ) === false ) ? core::$chans[$chan]['users'][$param] : core::$chans[$chan]['p_modes'][$param];
 			// check if it's a mask or user
 			
@@ -614,7 +617,9 @@ class mode
 			// with inspircd etc this stuff has a fall back because the ircd doesnt allow it, but older ircds do..
 			
 			$mode_string[$x] .= $mode;
-			$nick_string[$x] .= $param.' ';
+			
+			for ( $y = 0; $y < $mode_num; $y++ )
+				$nick_string[$x] .= $param.' ';
 		}
 		// compile a string
 		
