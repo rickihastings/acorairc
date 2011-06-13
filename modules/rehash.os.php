@@ -17,7 +17,7 @@
 class os_rehash implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -43,7 +43,7 @@ class os_rehash implements module
 		// add the commands
 	}
 	
-		/*
+	/*
 	* rehash_command (command)
 	* 
 	* @params
@@ -63,9 +63,7 @@ class os_rehash implements module
 			$category_name = $full.'_modules';
 			
 			foreach ( core::$config->$category_name as $id => $module )
-			{
 				$total_modules[$short.'_'.$module] = array( 'type' => $short, 'file' => $module.'.'.$short.'.php' );
-			}
 		}
 		// merge all the arrays to check that the loaded and excluded modules are all correct
 		
@@ -74,9 +72,7 @@ class os_rehash implements module
 			if ( !isset( $total_modules[$name] ) && $details['extra'] != 'static' )
 			{
 				if ( is_callable( array( $name, 'modunload' ), true ) && method_exists( $name, 'modunload' ) )
-				{
 					modules::$list[$name]['class']->modunload();
-				}
 				// if the module has an unload method, call it now before we destroy the class.
 				
 				unset( modules::$list[$name] );
@@ -125,6 +121,8 @@ class os_rehash implements module
 		}
 		// go through every module
 		// load the ones that are new.
+		
+		modules::on_rehash();
 		
 		core::alog( core::$config->operserv->nick.': Successfully reloaded configuration.' );
 		ircd::wallops( core::$config->operserv->nick, $nick.' performed a REHASH' );

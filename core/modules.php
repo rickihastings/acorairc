@@ -77,7 +77,32 @@ class modules
 		
 		self::$list[$module_name]['class']->modload();
 		// onload handler.
-	}	
+	}
+	
+	/*
+	* on_rehash (public)
+	* 
+	* @params
+	* (void)
+	*/
+	public function on_rehash()
+	{
+		foreach ( core::$service_bots as $bot )
+		{
+			if ( method_exists( $bot, 'on_rehash' ) )
+				call_user_func_array( array( $bot, 'on_rehash' ) );
+			// call the method.
+		}
+		// do bots
+	
+		foreach ( self::$list as $name => $details )
+		{
+			if ( method_exists( self::$list[$name]['class'], 'on_rehash' ) )
+				self::$list[$name]['class']->on_rehash();
+			// call the method.
+		}
+		// do modules
+	}
 		
 	/*
 	* _unset_docs (private)
