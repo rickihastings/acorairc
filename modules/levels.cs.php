@@ -63,7 +63,7 @@ class cs_levels implements module
 		chanserv::add_command( 'levels', 'cs_levels', 'levels_command' );
 		// add the command
 		
-		self::$flags = '+-kvhoaqsrftRSFb';
+		self::$flags = '+-kvhoaqsrftiRSFb';
 		// string of valid flags
 		
 		if ( !ircd::$halfop )
@@ -376,6 +376,21 @@ class cs_levels implements module
 				// +t the target in question
 			}
 			// ----------- +t ----------- //
+			
+			// ----------- +i ----------- //
+			elseif ( $flag == 'i' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '+i' );
+				// +i the target in question
+			}
+			// ----------- +i ----------- //
 
 			// ----------- +R ----------- //
 			elseif ( $flag == 'R' )
@@ -647,6 +662,21 @@ class cs_levels implements module
 				// -t the target in question
 			}
 			// ----------- -t ----------- //
+			
+			// ----------- -i ----------- //
+			elseif ( $flag == 'i' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '-i' );
+				// -i the target in question
+			}
+			// ----------- -i ----------- //
 
 			// ----------- -R ----------- //
 			elseif ( $flag == 'R' )

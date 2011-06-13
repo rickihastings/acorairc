@@ -120,6 +120,11 @@ class services
 	{
 		$ntemplate = $template;
 		
+		$ntemplate = str_replace( '{chanserv}', core::$config->chanserv->nick, $ntemplate );
+		$ntemplate = str_replace( '{nickserv}', core::$config->nickserv->nick, $ntemplate );
+		$ntemplate = str_replace( '{operserv}', core::$config->operserv->nick, $ntemplate );
+		// replace *Serv with it's actual name
+		
 		if ( $data != '' && is_array( $data ) )
 		{
 			foreach ( $data as $var => $value )

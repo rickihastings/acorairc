@@ -16,17 +16,17 @@
 
 $help = (object) array(
 	'CS_HELP_PREFIX' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		' ',
-		'ChanServ is a service that lets you register',
+		'{chanserv} is a service that lets you register',
 		'channels under your nickname only giving you access',
 		'to manage that channel.',
 		' ',
-		'If your channel is registered with ChanServ your',
+		'If your channel is registered with {chanserv} your',
 		'channel is totally protected from unauthorized use',
 		'making channel takeovers almost impossible. For more',
-		'information on how to use ChanServ type:',
-		'/msg ChanServ HELP command.',
+		'information on how to use {chanserv} type:',
+		'/msg {chanserv} HELP command.',
 		' ',
 	),
 	// HELP PREFIX
@@ -39,6 +39,7 @@ $help = (object) array(
 	'CS_HELP_DROP_1' 		=> '     DROP      - Cancel the registration of a channel',
 	'CS_HELP_SET_1' 		=> '     SET       - Set channel options and information',
 	'CS_HELP_TOPIC_1' 		=> '     TOPIC     - Set a topic respecting the TOPICMASK',
+	'CS_HELP_INVITE_1' 		=> '     INVITE    - Invite a user into a channel',
 	'CS_HELP_LIST_1' 		=> '     LIST      - Allows you to search for registered channels',
 	'CS_HELP_SUSPEND_1' 	=> '     SUSPEND   - Prevent a registered channel from being used',
 	'CS_HELP_UNSUSPEND_1' 	=> '     UNSUSPEND - Reverses the effect of SUSPEND',
@@ -47,16 +48,16 @@ $help = (object) array(
 	
 	'CS_HELP_SUFFIX' 		=> array(
 		' ',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// HELP SUFFIX
 	
 	'CS_XCOMMANDS_PREFIX' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		' ',
 		'A list of channel management commands, these commands',
 		'should be executed like any other command:',
-		'/msg ChanServ command and NOT with the "COMMANDS"',
+		'/msg {chanserv} command and NOT with the "COMMANDS"',
 		'prefix.',
 		' ',
 	),
@@ -64,7 +65,7 @@ $help = (object) array(
 	
 	'CS_XCOMMANDS_SUFFIX' 	=> array(
 		' ',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// COMMANDS SUFFIX
 	
@@ -88,7 +89,7 @@ $help = (object) array(
 	// COMMANDS
 	
 	'CS_HELP_FANTASY_ALL1' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Fantasy Commands Help',
 		'',
 	),
@@ -132,32 +133,32 @@ $help = (object) array(
 		'    {p}levels    - Lets you set channel levels via a fantasy command',
 		'    {p}sync      - Synchronizes the channel access list',
 		'',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// FANTASY HELP !help
 	
 	'CS_HELP_REGISTER_ALL' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: REGISTER channel description',
 		' ',
-		'Registers a channel in the ChanServ database.',
+		'Registers a channel in the {chanserv} database.',
 		'The last parameter, which must be included, is a',
 		'general description of the channel\'s purpose.',
 		' ',
 		'When you register a channel, you are recorded as the',
-		'"founder" of the channel. ChanServ will also',
+		'"founder" of the channel. {chanserv} will also',
 		'automatically give the founder channel-operator',
 		'privileges when s/he enters the channel.',
 		' ',
 		'NOTICE: In order to register a channel, you must have',
 		'first registered your nickname. If you haven\'t,',
-		'/msg NickServ HELP for information on how to do so.',
-		'=---- End of ChanServ Help ----=',
+		'/msg {nickserv} HELP for information on how to do so.',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// REGISTER
 	
 	'CS_HELP_FLAGS_ALL'		=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: FLAGS channel flags [params]',
 		' ',
 		'The FLAGS command allows for setting channel specific settings.',
@@ -184,7 +185,7 @@ $help = (object) array(
 		'         things like +v *!*@* will stop working with this on.',
 		'    +F - Enables channel fantasy commands, which allows use of in-channel',
 		'         commands such as !op/!deop.',
-		'    +G - If enabled ChanServ will occupy your channel, +F won\'t work',
+		'    +G - If enabled {chanserv} will occupy your channel, +F won\'t work',
 		'         without this enabled.',
 		'    +T - Prevents channel ops from changing the topic. This can be',
 		'         overriden with TOPIC or !topic.',
@@ -197,12 +198,12 @@ $help = (object) array(
 		' ',
 		'More than one flag can be set at once, for example "-ros+v". With multiple',
 		'parameters.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// CS FLAGS
 	
 	'CS_HELP_LEVELS_ALL' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: LEVELS channel flags { nickname | hostmask }',
 		'        LEVELS channel flags { nickname | hostmask } expiry reason',
 		'        LEVELS channel',
@@ -212,9 +213,9 @@ $help = (object) array(
 		'supports both nicknames and hostmasks as targets.',
 		' ',
 		'When setting +b flag an expiry time must be specified in the format of',
-		'1d1h1m, chanserv will also accept just simply 40m, or 1h, etc. For permanent',
+		'1d1h1m, {chanserv} will also accept just simply 40m, or 1h, etc. For permanent',
 		'bans you can simply enter 0. The reason parameter is optional. If no paramters',
-		'Are found chanserv will set a permanent ban with no reason.',
+		'Are found {chanserv} will set a permanent ban with no reason.',
 		' ',
 		'When only the channel argument is given a list of the current',
 		'channel flags will be displayed.',
@@ -250,6 +251,7 @@ $help = (object) array(
 		'    +r - Enables use of the kick, kickban, ban and unban commands.',
 		'    +f - Enables modification of channel access lists.',
 		'    +t - Enables use of the topic command.',
+		'    +i - Enables use of the invite command.',
 		'    +R - Enables use of the clear command.',
 		'    +S - Marks user as a sucessor.',
 		'    +F - Grants full founder access.',
@@ -257,12 +259,12 @@ $help = (object) array(
 		' ',
 		'More than one flag can be set at once, for example "-ros+v".',
 		'Only one target can be specified for this command.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// LEVELS END
 	
 	'CS_HELP_LIST_ALL' 		=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: LIST pattern limit [SUSEPENDED]',
 		' ',
 		'Searches for all channels matching the given pattern',
@@ -277,48 +279,60 @@ $help = (object) array(
 		'to search through suspended channels.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// LIST
 	
 	'CS_HELP_DROP_ALL' 		=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: DROP channel',
 		' ',
 		'Unregisters the given channel providing you have +F channel',
 		'level. Once a channel is dropped all data associated with the',
 		'channel is removed and cannot be restored. IRC Operators can',
 		'drop any channel without needing +F channel level.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// DROP
 	
 	'CS_HELP_INFO_ALL' 		=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: INFO channel',
 		' ',
 		'Lists information about the named registered channel,',
 		'including its founder, time of registration, last time',
 		'description, entry message, and mode lock, if any.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// INFO
 	
+	'CS_HELP_INVITE_ALL' 		=> array(
+		'=---- {chanserv} Help ----=',
+		'Syntax: INVITE channel',
+		'        INVITE channel nickname',
+		' ',
+		'Invite requests services to send a user an invite to',
+		'the specified channel, this is useful if you use +i.',
+		'If no nickname is entered yours is used.',
+		'=---- End of {chanserv} Help ----=',
+	),
+	// INVITE
+	
 	'CS_HELP_TOPIC_ALL' 	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: TOPIC channel [topic]',
 		' ',
-		'Causes ChanServ to set the channel topic to the one',
+		'Causes {chanserv} to set the channel topic to the one',
 		'specified.',
 		'This command is most useful in conjunction with',
-		'SET TOPICMASK. See /msg ChanServ HELP SET TOPICMASK',
+		'SET TOPICMASK. See /msg {chanserv} HELP SET TOPICMASK',
 		'for more information.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// TOPIC
 	
 	'CS_HELP_SUSPEND_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: SUSPEND channel reason',
 		' ',
 		'Disallows anyone from using the given channel, can',
@@ -326,35 +340,35 @@ $help = (object) array(
 		'all previous settings and data.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// SUSPEND
 	
 	'CS_HELP_UNSUSPEND_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: UNSUSPEND channel',
 		' ',
 		'Releases a suspended channel. All data and settings',
 		'are preserved from before the suspension.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// UNSUSPEND
 	
 	'CS_HELP_CLEAR_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: CLEAR channel',
 		' ',
 		'Clears ALL modes in a channel including all modes with parameters',
 		'such as channel keys, bans, status modes are all dropped. The',
 		'default channel modes are re-set onto the channel.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// CLEAR
 	
 	'CS_HELP_MODE_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: MODE channel [modes]',
 		' ',
 		'Changes a channel mode, if no parameter is given',
@@ -362,24 +376,24 @@ $help = (object) array(
 		'are re-set onto the channel',
 		' ',
 		'Channel bans/keys/status/limit modes etc are not dropped.', 
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// MODE
 	
 	'CS_HELP_SYNC_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: SYNC channel',
 		' ',
 		'Changes the channel access list, anyone who isnt on the list',
 		'and has channel access will be removed, this only applies to',
 		'operators and half operators. People on the access list but',
 		'without access will be given access.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// SYNC
 	
 	'CS_HELP_TYPEMASK_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: COMMAND TYPE:TARGET',
 		' ',
 		'Type mask or Type target is used to "mass" mode people',
@@ -402,12 +416,12 @@ $help = (object) array(
 		'work. A wildcard can be specified for everyone, and a 0',
 		'can also be used for statusless users. Typemask can also',
 		'be used on fantasy commands, such as !voice level:0.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// TYPEMASK
 
 	'CS_HELP_XCOMMANDS_OWNER'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: OWNER channel { nickname | type:target }',
 		'        DEOWNER channel { nickname | type:target }',
 		' ',
@@ -416,12 +430,12 @@ $help = (object) array(
 		' ',
 		'If the second parameter is not given the requested action',
 		'will be performed on the person issuing the command',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// XCOMMANDS OWNER
 	
 	'CS_HELP_XCOMMANDS_PROTECT'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: PROTECT channel { nickname | type:target }',
 		'        DEPROTECT channel { nickname | type:target }',
 		' ',
@@ -430,12 +444,12 @@ $help = (object) array(
 		' ',
 		'If the second parameter is not given the requested action',
 		'will be performed on the person issuing the command',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// XCOMMANDS PROTECT
 	
 	'CS_HELP_XCOMMANDS_OP'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: OP channel { nickname | type:target }',
 		'        DEOP channel { nickname | type:target }',
 		' ',
@@ -444,12 +458,12 @@ $help = (object) array(
 		' ',
 		'If the second parameter is not given the requested action',
 		'will be performed on the person issuing the command',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// XCOMMANDS OP
 	
 	'CS_HELP_XCOMMANDS_HALFOP'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: HALFOP channel { nickname | type:target }',
 		'        DEHALFOP channel { nickname | type:target }',
 		' ',
@@ -458,12 +472,12 @@ $help = (object) array(
 		' ',
 		'If the second parameter is not given the requested action',
 		'will be performed on the person issuing the command',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// XCOMMANDS PROTECT
 	
 	'CS_HELP_XCOMMANDS_VOICE'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: VOICE channel { nickname | type:target }',
 		'        DEVOICE channel { nickname | type:target }',
 		' ',
@@ -472,38 +486,38 @@ $help = (object) array(
 		' ',
 		'If the second parameter is not given the requested action',
 		'will be performed on the person issuing the command',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// PROTECT/DEPROTECT/OWNER/DEOP.. UGH BLAH..
 	
 	'CS_HELP_BAN_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: BAN channel { nickname | hostmask }',
 		'        UNBAN channel { nickname | hostmask }',
 		' ',
-		'These commands allow you to tell ChanServ to ban or unban',
+		'These commands allow you to tell {chanserv} to ban or unban',
 		'the requested nickname or hostmask.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// BAN/UNBAN
 	
 	'CS_HELP_KICK_ALL'	=> array(
-		'=---- ChanServ Help ----=',
+		'=---- {chanserv} Help ----=',
 		'Syntax: KICK channel nickname [reason]',
 		'        KICKBAN channel nickname [reason]',
 		' ',
 		'These commands allow you to remove a user from a channel',
 		'with the requested reason, if the KICK command is used',
 		'the user will be able to immediatly rejoin, if the BAN',
-		'command is used ChanServ will set a channel ban for that',
+		'command is used {chanserv} will set a channel ban for that',
 		'users hostmask and then remove them from the channel, ',
 		'preventing them from rejoining.',
-		'=---- End of ChanServ Help ----=',
+		'=---- End of {chanserv} Help ----=',
 	),
 	// KICK/KICKBAN
 	
-	'CS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg ChanServ HELP for more information',
-	'CS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg ChanServ HELP {help} for more information',
+	'CS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {chanserv} HELP for more information',
+	'CS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {chanserv} HELP {help} for more information',
 	
 	'CS_ACCESS_DENIED'		=> 	'Access Denied',
 	'CS_UNREGISTERED'		=>	'You need to be registered and identified to register a channel',
@@ -512,9 +526,11 @@ $help = (object) array(
 	'CS_CHAN_REGISTERED'	=>	'{chan} has been registered under your nickname',
 	'CS_MAX_CHANS_REG'		=>	'You cannot register more than {num} channel(s)',
 	'CS_NEED_CHAN_OP'		=>	'You need to be an op in {chan} to register it',	
-	'CS_CHAN_DROP_CODE'		=>	'To avoid this command being accidently used, this command has to be confirmed. Please confirm it by using /msg Chanserv DROP {chan} {code}',
+	'CS_CHAN_DROP_CODE'		=>	'To avoid this command being accidently used, this command has to be confirmed. Please confirm it by using /msg {chanserv} DROP {chan} {code}',
 	'CS_CHAN_INVALID_CODE'	=>	'The confirmation code you have entered is incorrect',
 	'CS_CHAN_DROPPED'		=>	'{chan} has been dropped',
+	'CS_CHAN_INVITE'		=>	'{nick} has been invited to {chan}',
+	'CS_CHAN_NOEXIST'		=>	'{chan} doesn\'t exist',
 	'CS_UNREGISTERED_CHAN'	=>	'{chan} isn\'t a registered channel',
 	'CS_UNREGISTERED_NICK'	=>	'{nick} isn\'t a registered nickname',
 	// standard messages

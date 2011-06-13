@@ -177,6 +177,11 @@ class commands
 		{
 			foreach ( $help as $index => $line )
 			{
+				$line = str_replace( '{chanserv}', core::$config->chanserv->nick, $line );
+				$line = str_replace( '{nickserv}', core::$config->nickserv->nick, $line );
+				$line = str_replace( '{operserv}', core::$config->operserv->nick, $line );
+				// replace *Serv with it's actual name
+				
 				$meta_data = array(
 					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
@@ -192,8 +197,13 @@ class commands
 		}
 		else
 		{
+			$help = str_replace( '{chanserv}', core::$config->chanserv->nick, $help );
+			$help = str_replace( '{nickserv}', core::$config->nickserv->nick, $help );
+			$help = str_replace( '{operserv}', core::$config->operserv->nick, $help );
+			// replace *Serv with it's actual name
+		
 			$meta_data = array(
-				'info' => ( $line == ' ' ) ? '' : $help,
+				'info' => ( $help == ' ' ) ? '' : $help,
 				'module' => $module,
 			);
 		
@@ -235,6 +245,11 @@ class commands
 		{
 			foreach ( $help as $line )
 			{
+				$line = str_replace( '{chanserv}', core::$config->chanserv->nick, $line );
+				$line = str_replace( '{nickserv}', core::$config->nickserv->nick, $line );
+				$line = str_replace( '{operserv}', core::$config->operserv->nick, $line );
+				// replace *Serv with it's actual name
+			
 				$meta_data = array(
 					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
@@ -246,8 +261,13 @@ class commands
 		}
 		else
 		{
+			$help = str_replace( '{chanserv]', core::$config->chanserv->nick, $help );
+			$help = str_replace( '{nickserv}', core::$config->nickserv->nick, $help );
+			$help = str_replace( '{operserv}', core::$config->operserv->nick, $help );
+			// replace *Serv with it's actual name
+		
 			$meta_data = array(
-				'info' => ( $line == ' ' ) ? '' : $help,
+				'info' => ( $help == ' ' ) ? '' : $help,
 				'module' => $module,
 				'oper_help' => $oper_help,
 			);

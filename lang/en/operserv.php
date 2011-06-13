@@ -16,10 +16,10 @@
 
 $help = (object) array(
 	'OS_HELP_PREFIX' 	=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		' ',
-		'OperServ is designed to give IRCops more control',
-		'over the network, OperServ offers a range of commands',
+		'{operserv} is designed to give IRCops more control',
+		'over the network, {operserv} offers a range of commands',
 		'to help you and your opers manage your network.',
 		' ',
 	),
@@ -27,9 +27,9 @@ $help = (object) array(
 	
 	'OS_HELP_SUFFIX' 	=> array(
 		' ',
-		'Notice: All commands sent to OperServ are logged!',
+		'Notice: All commands sent to {operserv} are logged!',
 		' ',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// HELP SUFFIX
 	
@@ -52,7 +52,7 @@ $help = (object) array(
 	// STANDARD HELP MESSAGES
 	
 	'OS_HELP_GLOBAL_ALL' 		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: GLOBAL hostmask message',
 		' ',
 		'Allows IRCops to send messages to all users matching the',
@@ -61,12 +61,12 @@ $help = (object) array(
 		'nick!user@host',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// GLOBAL
 	
 	'OS_HELP_OVERRIDE_ALL' 		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: OVERRIDE [ON|OFF]',
 		' ',
 		'Gives services roots the ability to override all channel access checks.',
@@ -76,34 +76,34 @@ $help = (object) array(
 		'be constructed as a "power trip".',
 		' ',
 		'Command limited to Services Roots.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// SHUTDOWN
 	
 	'OS_HELP_SHUTDOWN_ALL' 		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: SHUTDOWN',
 		' ',
 		'Causes the services program to shutdown.',
 		' ',
 		'Command limited to Services Roots.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// SHUTDOWN
 	
 	'OS_HELP_RESTART_ALL' 		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: RESTART',
 		' ',
 		'Causes the services program to reboot.',
 		' ',
 		'Command limited to Services Roots.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// RESTART
 	
 	'OS_HELP_STATS_ALL' 		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: STATS [UPTIME|NETWORK|OPERS]',
 		' ',
 		'Shows network and program statistics based on the second',
@@ -114,35 +114,35 @@ $help = (object) array(
 		'their full hostmask.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// STATS
 	
 	'OS_HELP_MODLIST_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: MODLIST',
 		' ',
 		'Lists all currently loaded modules.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
 	
 	'OS_HELP_MODLOAD_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: MODLOAD module',
 		' ',
 		'This command loads and initiates the requested',
 		'module from the modules directory.',
 		' ',
 		'Command limited to Services Roots.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
 	
 	'OS_HELP_MODUNLOAD_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: MODUNLOAD module',
 		' ',
 		'This command unloads and destructs the requested',
@@ -150,12 +150,12 @@ $help = (object) array(
 		'MODLOAD command.',
 		' ',
 		'Command limited to Services Roots.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
 	
 	'OS_HELP_IGNORE_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: IGNORE ADD { nickname | hostmask }',
 		'        IGNORE DEL { nickname | hostmask }',
 		'        IGNORE LIST',
@@ -168,12 +168,12 @@ $help = (object) array(
 		'it should be in the format (nick!user@host).',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// IGNORE
 	
 	'OS_HELP_LOGONNEWS_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: LOGONNEWS ADD title message',
 		'        LOGONNEWS DEL title',
 		'        LOGONNEWS LIST',
@@ -184,12 +184,12 @@ $help = (object) array(
 		'the three most recent will be sent to avoid flooding the user.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// LOGONNEWS
 	
 	'OS_HELP_CHANCLEAR_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: CHANCLEAR [KICK|KILL|GLINE] channel reason',
 		' ',
 		'CHANCLEAR allows admins to clear a channel in one of',
@@ -202,23 +202,23 @@ $help = (object) array(
 		'to be opered up for this command to ignore them.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// CHANCLEAR
 	
 	'OS_HELP_REHASH_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: REHASH',
 		' ',
 		'Reloads the services configuration file.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// REHASH
 	
 	'OS_HELP_JUPE_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: JUPE server numeric',
 		' ',
 		'Creates a "fake" server linked under the services',
@@ -228,12 +228,12 @@ $help = (object) array(
 		'into account so a dummy value can be entered.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// JUPE
 	
 	'OS_HELP_KICK_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: KICK channel user reason',
 		' ',
 		'Allows staff to kick a user from any channel.',
@@ -242,12 +242,12 @@ $help = (object) array(
 		'IRCop sending the KICK command prepended.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// KICK
 	
 	'OS_HELP_MODE_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: MODE channel modes',
 		' ',
 		'Allows staff to set channel modes for any channel.',
@@ -255,19 +255,19 @@ $help = (object) array(
 		'command.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// MODE
 	
 	'OS_HELP_VHOST_ALL'		=> array(
-		'=---- OperServ Help ----=',
+		'=---- {operserv} Help ----=',
 		'Syntax: VHOST SET nickname hostname',
 		'        VHOST DEL nickname',
 		'        VHOST LIST limit',
 		' ',
 		'Sets the vhost for the given nickname to that of the given',
 		'hostname. The hostname can only contain A-Za-z0-9 dashes',
-		'and dots. These can only be set by people with OperServ',
+		'and dots. These can only be set by people with {operserv}',
 		'access. When a user with a vhost identifies the vhost',
 		'will automatically be assigned for them.',
 		' ',
@@ -282,14 +282,14 @@ $help = (object) array(
 		'offset-max.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of OperServ Help ----=',
+		'=---- End of {operserv} Help ----=',
 	),
 	// VHOST
 	
-	'OS_INVALID_SYNTAX' 	=> 'Invalid syntax: /msg OperServ HELP for more information',
-	'OS_INVALID_SYNTAX_RE'	=> 'Invalid syntax: /msg OperServ HELP {help} for more information',
+	'OS_INVALID_SYNTAX' 	=> 'Invalid syntax: /msg {operserv} HELP for more information',
+	'OS_INVALID_SYNTAX_RE'	=> 'Invalid syntax: /msg {operserv} HELP {help} for more information',
 	
-	'OS_DENIED_ACCESS' 		=> 'OperServ is not available to you',
+	'OS_DENIED_ACCESS' 		=> '{operserv} is not available to you',
 	'OS_ACCESS_DENIED' 		=> 'Access denied',
 	'OS_CHAN_INVALID'		=> '{chan} doesn\'t exist',	
 	'OS_UNREGISTERED_NICK'	=>	'{nick} isn\'t a registered nickname',

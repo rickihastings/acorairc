@@ -56,6 +56,7 @@ interface protocol
 	static public function part_chan( $nick, $chan );
 	static public function topic( $nick, $chan, $topic );
 	static public function kick( $nick, $user, $chan, $reason = '' );
+	static public function invite( $nick, $user, $chan );
 	static public function sethost( $from, $nick, $host );
 	static public function setident( $from, $nick, $ident );
 	static public function svsnick( $old_nick, $new_nick, $timestamp );

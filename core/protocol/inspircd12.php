@@ -706,6 +706,25 @@ class ircd implements protocol
 			// send the cmd then handle it internally
 		}
 	}
+	
+	/*
+	* invite
+	*
+	* @params
+	* $nick - who to send it from
+	* $user - who to invite
+	* $chan - chan to use
+	*/
+	static public function invite( $nick, $user, $chan )
+	{
+		$unick = ircd_handle::get_uid( $nick );
+		$uuser = ircd_handle::get_uid( $user );
+		// get the uid.
+			
+		self::send( ':'.$unick.' INVITE '.$uuser.' '.$chan );
+		// send the cmd
+	}
+	
 		
 	/*
 	* sethost

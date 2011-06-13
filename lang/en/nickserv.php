@@ -16,18 +16,18 @@
 
 $help = (object) array(
 	'NS_HELP_PREFIX' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		' ',
-		'NickServ is a nickname registration system,',
-		'access to ChanServ requires a registered NickServ account.',
+		'{nickserv} is a nickname registration system,',
+		'access to {chanserv} requires a registered {nickserv} account.',
 		'For more information on a specific command, type',
-		'/msg NickServ HELP command.',
+		'/msg {nickserv} HELP command.',
 		' ',
 	),
 	// PREFIX
 
 	'NS_HELP_REGISTER_1' 	=> '     REGISTER  - Register a nickname',
-	'NS_HELP_CONFIRM_1'		=> '     CONFIRM   - Confirm a NickServ passcode',
+	'NS_HELP_CONFIRM_1'		=> '     CONFIRM   - Confirm a {nickserv} passcode',
 	'NS_HELP_IDENTIFY_1' 	=> '     IDENTIFY  - Identify yourself with your password',
 	'NS_HELP_LOGOUT_1' 		=> '     LOGOUT    - Reverses the effect of the IDENTIFY command',
 	'NS_HELP_GHOST_1' 		=> '     GHOST     - Disconnects a "ghost" IRC session using your nickname',
@@ -49,16 +49,16 @@ $help = (object) array(
 		'NOTICE: This service is intended to provide a way for',
 		'IRC users to ensure their identity is not compromised.',
 		'It is NOT intended to facilitate "stealing" of',
-		'nicknames or other malicious actions. Abuse of NickServ',
+		'nicknames or other malicious actions. Abuse of {nickserv}',
 		'will result in, at minimum, loss of the abused',
 		'nickname(s).',
 		' ',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// SUFFIX
 	
 	'NS_HELP_FLAGS_ALL'		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: FLAGS flags [params]',
 		' ',
 		'The FLAGS command allows for setting nickname specific settings.',
@@ -80,12 +80,12 @@ $help = (object) array(
 		' ',
 		'More than one flag can be set at once, for example "-P+S". With multiple',
 		'parameters.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// NS FLAGS
 	
 	'NS_HELP_SAFLAGS_ALL'		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: SAFLAGS nickname flags [params]',
 		' ',
 		'The FLAGS command allows for setting nickname specific settings on another',
@@ -109,85 +109,85 @@ $help = (object) array(
 		'parameters.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// NS SAFLAGS
 	
 	'NS_HELP_PASSWORD_ALL'		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: PASSWORD new-password confirm-password',
 		' ',
 		'Changes the password used to identify you as the nickname\'s',
 		'owner.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// PASSWORD
 	
 	'NS_HELP_SAPASS_ALL'		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: SAPASS nickname new-password confirm-password',
 		' ',
 		'Changes the password of the specified user used to identify',
 		'them as the nickname\'s owner.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// SAPASS
 	
 	'NS_HELP_REGISTER_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: REGISTER password email',
 		' ',
-		'Registers your nickname in the NickServ database, once your',
+		'Registers your nickname in the {nickserv} database, once your',
 		'nickname is registered, you can identify with the IDENTIFY',
 		'command and configure your nickname\'s settings as you like them.',
 		'',
 		'The email is required and will be used to send a passcode to',
 		'confirm your account if the network admins have enabled it',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// REGISTER
 	
 	'NS_HELP_CONFIRM_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: CONFIRM passcode',
 		' ',
 		'This is the second step of nickname registration process.',
 		'You must perform this command in order to get your nickname',
-		'registered with NickServ. The passcode is sent to your e-mail',
+		'registered with {nickserv}. The passcode is sent to your e-mail',
 		'address in the first step of the registration process.',
 		'For more information about the first stage of the registration',
-		'process, type: /msg NickServ HELP REGISTER',
-		'=---- End of NickServ Help ----=',
+		'process, type: /msg {nickserv} HELP REGISTER',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// CONFIRM
 	
 	'NS_HELP_IDENTIFY_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: IDENTIFY password',
 		' ',
 		'Identifies you as the real owner of the nickname.',
 		'Many commands require you to authenticate yourself',
 		'with this command before you use them.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// IDENTIFY
 	
 	'NS_HELP_LOGOUT_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: LOGOUT',
 		' ',
 		'Reverses the effect of the IDENTIFY',
 		'command, i.e. make you not recognized as the real owner of the nickname',
 		'anymore. Note, however, that you won\'t be asked to reidentify',
 		'yourself.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// LOGOUT
 	
 	'NS_HELP_GHOST_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: GHOST nickname password',
 		' ',
 		'Terminates a "ghost" IRC session using your nickname. A',
@@ -196,58 +196,58 @@ $help = (object) array(
 		'reason or another. Typically, this happens if your',
 		'computer crashes or your internet or modem connection',
 		'goes down while you\'re on IRC.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// GHOST
 	
 	'NS_HELP_RECOVER_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: RECOVER nickname password',
 		' ',
 		'Allows you to recover your nickname if someone else has',
 		'taken it.',
 		' ',
-		'When you give this command, NickServ will bring a fake',
+		'When you give this command, {nickserv} will bring a fake',
 		'user online with the same nickname as the user you\'re',
 		'trying to recover your nickname from. This fake user will',
 		'remain online for 1 minute to ensure that the other',
 		'user does not immediately reconnect; after that time,',
 		'you can reclaim your nickname. Alternatively, use the RELEASE',
-		'command (/msg NickServ HELP RELEASE) to get the nickname',
+		'command (/msg {nickserv} HELP RELEASE) to get the nickname',
 		'back sooner.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// RECOVER
 	
 	'NS_HELP_RELEASE_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: RELEASE nickname password',
 		' ',
-		'Instructs NickServ to remove any hold on your nickname',
+		'Instructs {nickserv} to remove any hold on your nickname',
 		'caused by automatic kill protection or use of the RECOVER',
 		'command. This holds lasts for 1 minute; this command gets',
 		'rid of them sooner.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// RELEASE
 	
 	'NS_HELP_DROP_ALL' 	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: DROP nickname password',
 		' ',
-		'Using this command makes NickServ drop the nickname, a',
+		'Using this command makes {nickserv} drop the nickname, a',
 		'password is required even if you are identified to that',
 		'nickname. Once a nickname has been dropped it is free',
 		'to re register by anyone.',
 		' ',
 		'You will also lose any channels registered and all',
 		'channel access under that nickname.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// DROP
 	
 	'NS_HELP_SUSPEND_ALL'	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: SUSPEND nickname reason',
 		' ',
 		'Disallows anyone from using the given nickname, can',
@@ -255,24 +255,24 @@ $help = (object) array(
 		'all previous settings and data.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// SUSPEND
 	
 	'NS_HELP_UNSUSPEND_ALL'	=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: UNSUSPEND nickname',
 		' ',
 		'Releases a suspended nickname. All data and settings',
 		'are preserved from before the suspension.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// UNSUSPEND
 	
 	'NS_HELP_LIST_ALL' 		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: LIST pattern limit [SUSEPENDED]',
 		' ',
 		'Searches for all nicknames matching the given pattern',
@@ -288,12 +288,12 @@ $help = (object) array(
 		'to search through suspended channels.',
 		' ',
 		'Command limited to IRC Operators.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// LIST
 	
 	'NS_HELP_INFO_ALL' 		=> array(
-		'=---- NickServ Help ----=',
+		'=---- {nickserv} Help ----=',
 		'Syntax: INFO nickname',
 		' ',
 		'Displays information about the given nickname, such as',
@@ -302,17 +302,17 @@ $help = (object) array(
 		' ',
 		'Services staff are shown all information including',
 		'hidden information.',
-		'=---- End of NickServ Help ----=',
+		'=---- End of {nickserv} Help ----=',
 	),
 	// INFO
 	
 	'NS_REGISTERED_NICK'	 => 	array(
 		'This nickname is registered. Please choose a different nickname,',
-		'or identify via /msg NickServ identify password',
+		'or identify via /msg {nickserv} identify password',
 	),
 	
-	'NS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg NickServ HELP for more information',
-	'NS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg NickServ HELP {help} for more information',
+	'NS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {nickserv} HELP for more information',
+	'NS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {nickserv} HELP {help} for more information',
 	
 	'NS_ACCESS_DENIED'		=> 	'Access Denied',
 	'NS_UNREGISTERED'		=> 	'Your nickname isn\'t registered',
