@@ -98,7 +98,7 @@ class cs_levels implements module
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
 			// start of flag list
 			
-			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
+			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp', 'expire' ), array( 'channel', '=', $chan ) );
 			// get the flag records
 			
 			$x = 0;
@@ -118,11 +118,18 @@ class cs_levels implements module
 				// +v   tool
 				
 				if ( $flags->reason != '' )
+				{
+					$expire = ( $flags->expire == 0 ) ? 'Never' : ( ( $flags->timestamp + $flags->expire ) - core::$network_time ).' seconds';
 					$extra = '('.$flags->reason.')';
+					$expired =  ' (Expires in: '.$expire.')';
+				}
 				else
+				{
 					$extra = '';
+					$expired = '';
+				}
 				
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'reason' => $extra ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'reason' => $extra, 'expired' => $expired ) );
 				// show the flag
 			}
 			// loop through them
@@ -383,9 +390,25 @@ class cs_levels implements module
 			// ----------- +b ----------- //
 			elseif ( $flag == 'b' )
 			{
-				$reason = core::get_data_after( $ircdata, 3 );
+				$expire = $ircdata[3];
+				
+				if ( isset( $expire ) && !is_numeric( $expire ) )
+				{
+					$expire = 0;
+					$reason = core::get_data_after( $ircdata, 3 );
+				}
+				elseif ( isset( $expire ) && is_numeric( $expire ) )
+				{
+					$reason = core::get_data_after( $ircdata, 4 );
+				}
+				else
+				{
+					$expire = 0;
+					$reason = core::get_data_after( $ircdata, 3 );
+				}
+				
 				$reason = ( $reason == '' ) ? 'No reason' : $reason;
-				// grab the reason
+				// grab the reason etc
 				
 				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
 				{
@@ -394,7 +417,7 @@ class cs_levels implements module
 				}
 				// do they have access to alter this?
 				
-				if ( self::set_flag( $nick, $chan, $target, '+b', $reason ) !== false )
+				if ( self::set_flag( $nick, $chan, $target, '+b', $reason, $expire ) !== false )
 				{
 					foreach ( core::$chans[$chan]['users'] as $user => $modes )
 					{
@@ -414,6 +437,10 @@ class cs_levels implements module
 					}
 					// loop through the users in this channel, finding
 					// matches to the +b flag thats just been set
+					
+					if ( $expire != 0 )
+						timer::add( array( 'cs_levels', 'set_flag', array( $nick, $chan, $target, '-b' ) ), $expire, 1 );
+					// if expire != 0, set up a timer
 				}
 				// +b the target in question
 			}
@@ -667,7 +694,7 @@ class cs_levels implements module
 			foreach ( $chans as $chan )
 			{
 				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
-					return false;
+					continue;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
 				
@@ -687,7 +714,7 @@ class cs_levels implements module
 			foreach ( $chans as $chan )
 			{
 				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
-					return false;
+					continue;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
 				
@@ -697,14 +724,6 @@ class cs_levels implements module
 				
 				$hostname = core::get_full_hostname( $nick );
 				// generate a hostname
-				
-				if ( $reason = chanserv::check_levels( $nick, $chan, array( 'b' ), true, false, true ) )
-				{
-					ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
-					ircd::kick( core::$config->chanserv->nick, $nick, $chan, $reason );
-					return false;
-				}
-				// check for bans before access
 				
 				self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, false );
 				// on_create event
@@ -736,6 +755,17 @@ class cs_levels implements module
 			
 			$hostname = core::get_full_hostname( $nick );
 			// get the hostname ready.
+			
+			$bans_q = database::select( 'chans_levels', array( 'id', 'expire', 'timestamp' ), array( 'expire', '!=', '0', 'AND', 'channel', '=', $channel->channel ) );
+			while ( $bans = database::fetch( $bans_q ) )
+			{
+				if ( ( ( $bans->timestamp + $bans->expire ) - core::$network_time ) <= 0 )
+				{
+					database::delete( 'chans_levels', array( 'id', '=', $bans->id ) );
+					continue;
+				}
+			}
+			// is there any expired bans?
 			
 			if ( $reason = chanserv::check_levels( $nick, $channel->channel, array( 'b' ), true, false, true ) )
 			{
@@ -892,8 +922,9 @@ class cs_levels implements module
 	* $target - target in question
 	* $flag - +v, +V, -V etc.
 	* $param - optional
+	* $timestamp - optional
 	*/
-	static public function set_flag( $nick, $chan, $target, $flag, $param = '' )
+	static public function set_flag( $nick, $chan, $target, $flag, $param = '', $timestamp = 0 )
 	{	
 		$mode = $flag[0];
 		$r_flag = $flag[1];
@@ -924,7 +955,7 @@ class cs_levels implements module
 				if ( $new_user_flags == '' )
 					database::delete( 'chans_levels', array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 				else
-					database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );	
+					database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'timestamp' => core::$network_time ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );	
 				// check if it's empty, if it is just delete the row
 				
 				self::$set[$target] .= $r_flag;
@@ -956,10 +987,10 @@ class cs_levels implements module
 					$new_user_flags = $user_flag->flags.$r_flag;
 					
 					if ( $r_flag == 'b' && $mode == '+' )
-						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'reason' => $param ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
+						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'reason' => $param, 'expire' => $timestamp, 'timestamp' => core::$network_time ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
 					else
-						database::update( 'chans_levels', array( 'flags' => $new_user_flags ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
+						database::update( 'chans_levels', array( 'flags' => $new_user_flags, 'timestamp' => core::$network_time ), array( 'channel', '=', $chan, 'AND', 'target', '=', $target ) );
 						// update.
 					
 					self::$set[$target] .= $r_flag;
@@ -969,10 +1000,10 @@ class cs_levels implements module
 				else
 				{
 					if ( $r_flag == 'b' && $mode == '+' )
-						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag, 'reason' => $param ) );
+						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag, 'reason' => $param, 'expire' => $timestamp, 'timestamp' => core::$network_time ) );
 						// insert.
 					else
-						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag ) );
+						database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $target, 'flags' => $r_flag, 'timestamp' => core::$network_time ) );
 						// insert.
 					
 					self::$set[$target] .= $r_flag;

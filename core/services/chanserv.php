@@ -453,7 +453,7 @@ class chanserv implements service
 			return false;
 		// they aint even identified..
 		
-		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason' ), array( 'channel', '=', $chan ) );
+		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp', 'expire' ), array( 'channel', '=', $chan ) );
 		// get our flags records
 		
 		$hostname = core::get_full_hostname( $nick );

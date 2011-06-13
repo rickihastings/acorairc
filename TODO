@@ -31,5 +31,5 @@
 * Add mass mode command, convert mode::type_mask to use this and also levels, this allows setting a tonne of modes together compressed (DONE)
 * Add a session limting/clone detection module
 * Add AKILL system
-* Add timers to +b flags
+* Add timers to +b flags (DONE)
 * Add chanserv invite

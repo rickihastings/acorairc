@@ -532,7 +532,7 @@ $help = (object) array(
 	'CS_LEVELS_NOT_SET'		=>	'{target} does not have {flag} set on {chan}',
 	'CS_LEVELS_SET'			=>	'{flag} set on {target} on {chan}',
 	'CS_LEVELS_LIST_TOP'	=>	'    Flags         Nickname/Hostmask',
-	'CS_LEVELS_LIST'		=>	'    {flags} {target} {reason}',
+	'CS_LEVELS_LIST'		=>	'    {flags} {target} {reason}{expired}',
 	'CS_LEVELS_BAD_FLAG'	=>	'You cannot set {flag} on yourself',
 	'CS_LEVELS_UNKNOWN'		=>	'{flag} isn\'t a valid level flag',
 	// levels
