@@ -1171,7 +1171,6 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'KICK' )
 		{
-			// TODO (check on_kick) handle.
 			$return = array(
 				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
 				'chan' => core::get_chan( $ircdata, 2 ),

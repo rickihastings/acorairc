@@ -32,7 +32,8 @@
 * Add a session limting/clone detection module
 * Add AKILL system
 * Add timers to +b flags (DONE)
-* Add chanserv invite
+* Add chanserv invite/add +i flag to enable use of it
+* Add +R flag to enable use of CLEAR
 * Change timers to hours/minutes (DONE)
 * Add ACCESS module, to simplify adding to access lists, it's quite complicated atm, levels are going to stay, this is going to be a short cut
 * Add BANS module, to simplify bans through levels system, also to view bans seperate from access

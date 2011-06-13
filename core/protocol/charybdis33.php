@@ -861,6 +861,7 @@ class ircd implements protocol
 	*/
 	static public function on_user_login( $nick )
 	{
+		// TODO
 		$uid = ircd_handle::get_uid( $nick );
 		self::send( ':'.$uid.' SIGNON '.$nick.' '.core::$nicks[$nick]['ident'].' '.core::$nicks[$nick]['host'].' '.core::$nicks[$nick]['timestamp'].' '.$nick );
 	}

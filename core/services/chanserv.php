@@ -369,7 +369,7 @@ class chanserv implements service
 				{
 					if ( count( core::$chans[$channel->channel]['users'] ) == 2 && isset( core::$chans[$channel->channel]['users'][core::$config->chanserv->nick] ) )
 					{
-						if ( self::check_levels( $nick, $channel->channel, array( 'k', 'v', 'h', 'o', 'a', 'q', 'F' ), true, false ) === false )
+						if ( self::check_levels( $nick, $channel->channel, array( 'k', 'v', 'h', 'o', 'a', 'q', 'S', 'F' ), true, false ) === false )
 						{
 							if ( strstr( $mode_array['plus'], 'i' ) && $nick != core::$config->chanserv->nick )
 							{

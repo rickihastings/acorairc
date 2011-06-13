@@ -97,7 +97,7 @@ class cs_fantasy implements module
 			
 			if ( ircd::$owner && commands::on_fantasy_cmd( $return, 'owner', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '+q', core::$config->chanserv->nick );
@@ -111,7 +111,7 @@ class cs_fantasy implements module
 			
 			if ( ircd::$owner && commands::on_fantasy_cmd( $return, 'deowner', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '-q', core::$config->chanserv->nick );
@@ -125,7 +125,7 @@ class cs_fantasy implements module
 						
 			if ( ircd::$protect && commands::on_fantasy_cmd( $return, 'protect', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '+a', core::$config->chanserv->nick );
@@ -139,7 +139,7 @@ class cs_fantasy implements module
 			
 			if ( ircd::$protect && commands::on_fantasy_cmd( $return, 'deprotect', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
@@ -154,7 +154,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'op', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '+o', core::$config->chanserv->nick );
@@ -168,7 +168,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'deop', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
@@ -183,7 +183,7 @@ class cs_fantasy implements module
 			
 			if ( ircd::$halfop && commands::on_fantasy_cmd( $return, 'halfop', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '+h', core::$config->chanserv->nick );
@@ -197,7 +197,7 @@ class cs_fantasy implements module
 			
 			if ( ircd::$halfop && commands::on_fantasy_cmd( $return, 'dehalfop', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
@@ -212,7 +212,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'voice', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '+v', core::$config->chanserv->nick );
@@ -226,7 +226,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'devoice', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'v', 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
 				
 				if ( strpos( $msgs[1], ':' ) !== false )
 					mode::type_check( $chan, $msgs[1], '-v', core::$config->chanserv->nick );
@@ -240,7 +240,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'topic', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'S', 'F' ) ) === false ) return false;
 				
 				if ( isset( $msgs[1] ) )
 				{
@@ -272,7 +272,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'mode', core::$config->chanserv->nick ) || commands::on_fantasy_cmd( $return, 'm', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'S', 'F' ) ) === false ) return false;
 				
 				if ( isset( $msgs[1] ) )
 				{
@@ -292,14 +292,14 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'kick', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'S', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
 				
 				if ( isset( $msgs[1] ) )
 				{
-					if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) === false )
+					if ( chanserv::check_levels( $msgs[1], $channel->channel, array( 'S', 'F' ) ) )
 						return false;
-					// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.
+					// you can't k/b anyone with either +S or +F, others can be k/bed though.
 					
 					if ( isset( $msgs[2] ) )
 					{
@@ -320,14 +320,14 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'kickban', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'S', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
 				
 				if ( isset( $msgs[1] ) )
 				{
-					if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) === false )
+					if ( chanserv::check_levels( $msgs[1], $channel->channel, array( 'S', 'F' ) ) )
 						return false;
-					// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.
+					// you can't k/b anyone with either +S or +F, others can be k/bed though.
 					
 					if ( $user = core::search_nick( $msgs[1] ) )
 					{
@@ -358,14 +358,14 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'ban', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'S', 'F' ) ) === false ) return false;
 				// ignore if the nick doesn't have access to perform this
 				
 				if ( isset( $msgs[1] ) )
 				{
-					if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) === false )
+					if ( chanserv::check_levels( $msgs[1], $channel->channel, array( 'S', 'F' ) ) )
 						return false;
-					// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.
+					// you can't k/b anyone with either +S or +F, others can be k/bed though.
 					
 					if ( strpos( $msgs[1], '@' ) === false && $user = core::search_nick( $msgs[1] ) )
 						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );
@@ -378,7 +378,7 @@ class cs_fantasy implements module
 			
 			if ( commands::on_fantasy_cmd( $return, 'unban', core::$config->chanserv->nick ) )
 			{
-				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'F' ) ) === false ) return false;
+				if ( chanserv::check_levels( $nick, $channel->channel, array( 'r', 'S', 'F' ) ) === false ) return false;
 				
 				if ( isset( $msgs[1] ) )
 				{

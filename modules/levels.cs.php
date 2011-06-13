@@ -63,7 +63,7 @@ class cs_levels implements module
 		chanserv::add_command( 'levels', 'cs_levels', 'levels_command' );
 		// add the command
 		
-		self::$flags = '+-kvhoaqsrftFb';
+		self::$flags = '+-kvhoaqsrftRSFb';
 		// string of valid flags
 		
 		if ( !ircd::$halfop )
@@ -92,7 +92,7 @@ class cs_levels implements module
 		$chan = core::get_chan( $ircdata, 0 );
 		$target = $ircdata[2];
 		$flags = $ircdata[1];
-		$levels_result = chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'F' ) );
+		$levels_result = chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'S', 'F' ) );
 		// get the channel.
 		
 		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
@@ -123,10 +123,10 @@ class cs_levels implements module
 				for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
 					$x_s .= ' ';
 				
-				if ( !isset( $flags->flags[13] ) )
+				if ( !isset( $flags->flags[15] ) )
 				{
 					$y = strlen( $flags->flags );
-					for ( $i = $y; $i <= 12; $i++ )
+					for ( $i = $y; $i <= 14; $i++ )
 						$false_flag .= ' ';
 				}
 				// this is just a bit of fancy fancy, so everything displays neat, like so:
@@ -230,7 +230,7 @@ class cs_levels implements module
 			// ----------- +k ----------- //
 			if ( $flag == 'k' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -245,7 +245,7 @@ class cs_levels implements module
 			// ----------- +v ----------- //
 			elseif ( $flag == 'v' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -260,7 +260,7 @@ class cs_levels implements module
 			// ----------- +h ----------- //
 			elseif ( $flag == 'h' && ircd::$halfop )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -275,7 +275,7 @@ class cs_levels implements module
 			// ----------- +o ----------- //
 			elseif ( $flag == 'o' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -290,7 +290,7 @@ class cs_levels implements module
 			// ----------- +a ----------- //
 			elseif ( $flag == 'a' && ircd::$protect )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -305,7 +305,7 @@ class cs_levels implements module
 			// ----------- +q ----------- //
 			elseif ( $flag == 'q' && ircd::$owner )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -320,7 +320,7 @@ class cs_levels implements module
 			// ----------- +s ----------- //
 			elseif ( $flag == 's' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -335,22 +335,7 @@ class cs_levels implements module
 			// ----------- +r ----------- //
 			elseif ( $flag == 'r' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, $target, '+r' );
-				// +r the target in question
-			}
-			// ----------- +r ----------- //
-			
-			// ----------- +r ----------- //
-			elseif ( $flag == 'r' )
-			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -365,7 +350,7 @@ class cs_levels implements module
 			// ----------- +f ----------- //
 			elseif ( $flag == 'f' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -380,7 +365,7 @@ class cs_levels implements module
 			// ----------- +t ----------- //
 			elseif ( $flag == 't' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -391,6 +376,36 @@ class cs_levels implements module
 				// +t the target in question
 			}
 			// ----------- +t ----------- //
+
+			// ----------- +R ----------- //
+			elseif ( $flag == 'R' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '+R' );
+				// +R the target in question
+			}
+			// ----------- +R ----------- //
+
+			// ----------- +S ----------- //
+			elseif ( $flag == 'S' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '+S' );
+				// +S the target in question
+			}
+			// ----------- +S ----------- //
 			
 			// ----------- +F ----------- //
 			elseif ( $flag == 'F' )
@@ -443,7 +458,7 @@ class cs_levels implements module
 				}
 				// loop through calculating it into seconds
 				
-				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -486,7 +501,7 @@ class cs_levels implements module
 			// ----------- -k ----------- //
 			if ( $flag == 'k' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -501,7 +516,7 @@ class cs_levels implements module
 			// ----------- -v ----------- //
 			elseif ( $flag == 'v' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -516,7 +531,7 @@ class cs_levels implements module
 			// ----------- -h ----------- //
 			elseif ( $flag == 'h' && ircd::$halfop )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -531,7 +546,7 @@ class cs_levels implements module
 			// ----------- -o ----------- //
 			elseif ( $flag == 'o' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -546,7 +561,7 @@ class cs_levels implements module
 			// ----------- -a ----------- //
 			elseif ( $flag == 'a' && ircd::$protect )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -561,7 +576,7 @@ class cs_levels implements module
 			// ----------- -q ----------- //
 			elseif ( $flag == 'q' && ircd::$owner )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'f', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -576,7 +591,7 @@ class cs_levels implements module
 			// ----------- -s ----------- //
 			elseif ( $flag == 's' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -591,22 +606,7 @@ class cs_levels implements module
 			// ----------- -r ----------- //
 			elseif ( $flag == 'r' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, $target, '-r' );
-				// -r the target in question
-			}
-			// ----------- -r ----------- //
-			
-			// ----------- -r ----------- //
-			elseif ( $flag == 'r' )
-			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -621,7 +621,7 @@ class cs_levels implements module
 			// ----------- -f ----------- //
 			elseif ( $flag == 'f' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -636,7 +636,7 @@ class cs_levels implements module
 			// ----------- -t ----------- //
 			elseif ( $flag == 't' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -647,6 +647,36 @@ class cs_levels implements module
 				// -t the target in question
 			}
 			// ----------- -t ----------- //
+
+			// ----------- -R ----------- //
+			elseif ( $flag == 'R' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '-R' );
+				// -R the target in question
+			}
+			// ----------- -R ----------- //
+			
+			// ----------- -S ----------- //
+			elseif ( $flag == 'S' )
+			{
+				if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+				{
+					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+					return false;
+				}
+				// do they have access to alter this?
+				
+				self::set_flag( $nick, $chan, $target, '-S' );
+				// -S the target in question
+			}
+			// ----------- -S ----------- //
 			
 			// ----------- -F ----------- //
 			elseif ( $flag == 'F' )
@@ -666,7 +696,7 @@ class cs_levels implements module
 			// ----------- -b ----------- //
 			elseif ( $flag == 'b' )
 			{
-				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 					return false;
@@ -776,7 +806,9 @@ class cs_levels implements module
 	static public function on_create( $nusers, $channel, $create = true )
 	{
 		$new_nusers_give = $new_nusers_take = array();
-		$access_array = array_reverse( self::get_access( $channel->channel ) );
+		$access_array = self::get_access( $channel->channel );
+		ksort( $access_array );
+		$access_array = array_reverse( $access_array );
 		$strict = ( chanserv::check_flags( $channel->channel, array( 'S' ) ) ) ? 'strict:' : ':';
 		// get the access array
 		
@@ -817,7 +849,7 @@ class cs_levels implements module
 			
 			foreach ( $access_array as $target => $level )
 			{
-				if ( $target == $nick )
+				if ( $target == $nick && core::$nicks[$nick]['identified'] )
 				{
 					$new_nusers_give[$nick] .= 'strict:'.implode( '', $level );
 					// give them access

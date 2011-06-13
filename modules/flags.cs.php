@@ -69,7 +69,7 @@ class cs_flags implements module
 		$flags = $ircdata[1];
 		$param = core::get_data_after( $ircdata, 2 );
 		$rparams = explode( '||', $param );
-		$levels_result = chanserv::check_levels( $nick, $chan, array( 's', 'F' ) );
+		$levels_result = chanserv::check_levels( $nick, $chan, array( 's', 'S', 'F' ) );
 		// get the channel.
 		
 		if ( $chan == '' || $chan[0] != '#' )
@@ -358,7 +358,7 @@ class cs_flags implements module
 				{
 					foreach ( core::$chans[$chan]['users'] as $unick => $mode )
 					{
-						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'F' ), true, false ) === false )
+						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
 						{
 							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
 							ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel.' );
@@ -700,7 +700,7 @@ class cs_flags implements module
 				
 				if ( chanserv::check_flags( $chan, array( 'I' ) ) )
 				{
-					if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'F' ), true, false ) === false )
+					if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
 					{
 						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
 						ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel.' );
@@ -749,7 +749,7 @@ class cs_flags implements module
 				{
 					foreach ( $nusers as $nick => $mode )
 					{
-						if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'F' ), true, false ) === false )
+						if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
 						{
 							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
 							ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel.' );

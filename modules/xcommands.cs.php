@@ -162,7 +162,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'R', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -203,7 +203,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -231,7 +231,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -273,7 +273,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -304,7 +304,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -337,7 +337,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -368,7 +368,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -401,7 +401,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -432,7 +432,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -465,7 +465,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -527,7 +527,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -558,7 +558,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -590,16 +590,16 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
 		
-		if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $channel->channel, array( 'o', 'F' ) ) === false )
+		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 			return false;
-		// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.		
+		// you can't k/b anyone with either +S or +F, others can be k/bed though.	
 		
 		$reason = core::get_data_after( $ircdata, 2 );
 					
@@ -624,16 +624,16 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $chan, array( 'o', 'F' ) ) === false )
+		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 			return false;
-		// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.		
+		// you can't k/b anyone with either +S or +F, others can be k/bed though.	
 		
 		$reason = core::get_data_after( $ircdata, 2 );
 		
@@ -667,16 +667,16 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
 		// do they have access?
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'o', 'F' ) ) && chanserv::check_levels( $nick, $chan, array( 'o', 'F' ) ) === false )
+		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 			return false;
-		// check if the user kicking, has the access to kick them. that doesn't make sense, but yeah.		
+		// you can't k/b anyone with either +S or +F, others can be k/bed though.
 		
 		if ( strpos( $ircdata[1], '@' ) === false && $user = core::search_nick( $ircdata[1] ) )
 			ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
@@ -702,7 +702,7 @@ class cs_xcommands implements module
 			return false;
 		// check if the channel exists and stuff
 		
-		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;

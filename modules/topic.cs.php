@@ -71,7 +71,7 @@ class cs_topic implements module
 		}
 		// make sure the channel exists.
 		
-		if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
