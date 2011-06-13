@@ -232,7 +232,7 @@ class ns_flags implements module
 	*/
 	static public function saflags_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( $ircdata, 0 );
+		$unick = $ircdata[0];
 		$flags = $ircdata[1];
 		$param = core::get_data_after( $ircdata, 2 );
 		$rparams = explode( '||', $param );

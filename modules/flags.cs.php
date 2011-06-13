@@ -688,7 +688,7 @@ class cs_flags implements module
 		$populated_chan = ircd::on_join( $ircdata );
 		if ( $populated_chan !== false )
 		{
-			$nick = core::get_nick( $ircdata, 0 );
+			$nick = $ircdata[0];
 			$chans = explode( ',', $populated_chan );
 			// find the nick & chan
 			

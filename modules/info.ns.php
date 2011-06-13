@@ -52,10 +52,10 @@ class ns_info implements module
 	*/
 	static public function info_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( $ircdata, 0 );
+		$unick = $ircdata[0];
 		// get the nickname.
 		
-		if ( $unick == '' )
+		if ( trim( $unick ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
 			// wrong syntax

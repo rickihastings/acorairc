@@ -105,7 +105,7 @@ class ns_password implements module
 	*/
 	static public function sapass_command( $nick, $ircdata = array() )
 	{
-		$unick = core::get_nick( $ircdata, 0 );
+		$unick = $ircdata[0];
 		$new_pass = $ircdata[1];
 		$conf_pass = $ircdata[2];
 		// new password.
