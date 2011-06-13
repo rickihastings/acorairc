@@ -60,7 +60,7 @@ class cs_register implements module
 		{
 			if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' || stristr( $channel, ' ' ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 				// wrong syntax
 				return false;
 			}

@@ -65,7 +65,7 @@ class cs_list implements module
 		
 		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
 		}
 		// invalid syntax
