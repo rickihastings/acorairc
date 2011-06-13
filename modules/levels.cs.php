@@ -44,12 +44,21 @@ class cs_levels implements module
 		
 		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1 );
 		// add the help
+			
+		chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL );
 		
 		if ( ircd::$halfop ) 
-			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL );
-		else 
-			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL2 );
-		// if we have halfop enabled the help we add is different.
+			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_HOP );
+			
+		chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_OP );
+			
+		if ( ircd::$protect ) 
+			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_PRO );
+		if ( ircd::$owner ) 
+			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_OWN );
+		
+		chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL2 );
+		// the help we add is setup in parts.
 		
 		chanserv::add_command( 'levels', 'cs_levels', 'levels_command' );
 		// add the command

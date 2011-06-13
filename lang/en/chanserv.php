@@ -204,11 +204,15 @@ $help = (object) array(
 	'CS_HELP_LEVELS_ALL' 	=> array(
 		'=---- ChanServ Help ----=',
 		'Syntax: LEVELS channel flags { nickname | hostmask }',
+		'        LEVELS channel flags { nickname | hostmask } expiry reason ',
 		'        LEVELS channel',
 		' ',
 		'The LEVELS command allows for the granting/removal of channel',
 		'privileges on a more specific, non-generalized level. It',
 		'supports both nicknames and hostmasks as targets.',
+		' ',
+		'Optional expiry time and reason, both parameters are optional for +b flag',
+		'note that both parameters are ignored on flags other than +b.',
 		' ',
 		'When only the channel argument is given a list of the current',
 		'channel flags will be displayed.',
@@ -216,45 +220,30 @@ $help = (object) array(
 		'Access flags:',
 		'    +k - Grants known-user access.',
 		'    +v - Enables automatic voice.',
-		'    +h - Enables automatic halfop.',
-		'    +o - Enables automatic op.',
-		'    +a - Enables automatic protect.',
-		'    +q - Enables automatic owner.',
-		'    +s - Enables use of the flags command.',
-		'    +r - Enables use of the kick, kickban, ban and unban commands.',
-		'    +f - Enables modification of channel access lists.',
-		'    +t - Enables use of the topic and topicappend commands.',
-		'    +F - Grants full founder access.',
-		'    +b - Enables automatic kickban.',
-		' ',
-		'More than one flag can be set at once, for example "-ros+v".',
-		'Only one target can be specified for this command.',
-		' ',
-		'Note that +a and +q will only work if your server has +qa modes',
-		'enabled.',
-		'=---- End of ChanServ Help ----=',
 	),
-	// LEVELS W/HOP
+	// LEVELS START
+	
+	'CS_HELP_LEVELS_ALL_HOP' 	=> array(
+		'    +h - Enables automatic halfop.',
+	),
+	// LEVELS ALL_HOP
+	
+	'CS_HELP_LEVELS_ALL_OP' 	=> array(
+		'    +o - Enables automatic op.',
+	),
+	// LEVELS ALL_OP
+	
+	'CS_HELP_LEVELS_ALL_PRO' 	=> array(
+		'    +a - Enables automatic protect.',
+	),
+	// LEVELS ALL_PRO
+	
+	'CS_HELP_LEVELS_ALL_OWN' 	=> array(
+		'    +q - Enables automatic owner.',
+	),
+	// LEVELS ALL_OWN
 	
 	'CS_HELP_LEVELS_ALL2' 	=> array(
-		'=---- ChanServ Help ----=',
-		'Syntax: LEVELS channel flags { nickname | hostmask }',
-		'        LEVELS channel',
-		' ',
-		'The LEVELS command allows for the granting/removal of channel',
-		'privileges on a more specific, non-generalized level. It',
-		'supports both nicknames and hostmasks as targets.',
-		' ',
-		'When only the channel argument is given a list of the current',
-		'channel flags will be displayed.',
-		' ',
-		'Access flags:',
-		'    +k - Grants known-user access.',
-		'    +v - Enables automatic voice.',
-		'    +h - Enables automatic halfop.',
-		'    +o - Enables automatic op.',
-		'    +a - Enables automatic protect.',
-		'    +q - Enables automatic owner.',
 		'    +s - Enables use of the flags command.',
 		'    +r - Enables use of the kick, kickban, ban and unban commands.',
 		'    +f - Enables modification of channel access lists.',
@@ -264,12 +253,9 @@ $help = (object) array(
 		' ',
 		'More than one flag can be set at once, for example "-ros+v".',
 		'Only one target can be specified for this command.',
-		' ',
-		'Note that +a and +q will only work if your server has +qa modes',
-		'enabled.',
 		'=---- End of ChanServ Help ----=',
 	),
-	// LEVELS WO/HOP
+	// LEVELS END
 	
 	'CS_HELP_LIST_ALL' 		=> array(
 		'=---- ChanServ Help ----=',
