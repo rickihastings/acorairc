@@ -61,15 +61,16 @@ class modules
 		}
 		// check if the module actually exists
 	
-		if ( !@require( BASEPATH.'/modules/'.$module_file ) )
+		if ( !require( BASEPATH.'/modules/'.$module_file ) )
 		{
 			core::alog( 'load_module(): unable to load: '.$module_name.' (error loading)', 'BASIC' );
 			return false;
 		}
 		// module (exists?) but can't be loaded
 		
-		if ( !self::$list[$module_name]['class'] = new $module_name() )
-		{
+		try {
+			self::$list[$module_name]['class'] = new $module_name();
+		} catch( Exception $e ) {
 			core::alog( 'load_module(): unable to start: '.$module_name.' (boot error)', 'BASIC' );
 			return false;
 		}

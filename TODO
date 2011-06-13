@@ -23,7 +23,6 @@
 * Add charybdis33 support (DONE)
 * Redesign how services::check_mask_ignore() works, at currently it doesnt work so is commented out. (DONE)
 * Redesign all handlers, so they send information rather than $ircdata, cause its inprecitable what state it's going to come in (DONE)
-* Add chanserv invite
 * Add an identified parameter to core::$nicks, will save using queries in some instances. Mainly to fix a bug in charybdis though (DONE)
 * Port logout.ns into identify.ns, because having logout with no identify is pointless? (DONE)
 * Convert !help op to /cs help op, and so fourth (DONE)
@@ -33,3 +32,4 @@
 * Add a session limting/clone detection module
 * Add AKILL system
 * Add timers to +b flags
+* Add chanserv invite
