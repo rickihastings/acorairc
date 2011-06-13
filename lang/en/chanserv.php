@@ -519,8 +519,10 @@ $help = (object) array(
 	'CS_LEVELS_ALREADY_SET'	=>	'{target} already has {flag} set on {chan}',
 	'CS_LEVELS_NOT_SET'		=>	'{target} does not have {flag} set on {chan}',
 	'CS_LEVELS_SET'			=>	'{flag} set on {target} on {chan}',
-	'CS_LEVELS_LIST_TOP'	=>	'    Flags         Nickname/Hostmask',
-	'CS_LEVELS_LIST'		=>	'    {flags} {target} {reason}{expired}',
+	'CS_LEVELS_LIST_TOP'	=>	'Entry  Flags         Nickname/Hostmask',
+	'CS_LEVELS_LIST_DLM'	=>	'-----  ------------  -----------------',
+	'CS_LEVELS_LIST'		=>	'{num} {flags} {target} [modified {modified} ago]',
+	'CS_LEVELS_LIST_BTM'	=>	'End of LEVELS listing for {chan}',
 	'CS_LEVELS_BAD_FLAG'	=>	'You cannot set {flag} on yourself',
 	'CS_LEVELS_UNKNOWN'		=>	'{flag} isn\'t a valid level flag',
 	// levels
@@ -556,9 +558,9 @@ $help = (object) array(
 	'CS_SUSPEND_4'			=>	'{chan} isn\'t suspended',
 	'CS_SUSPEND_5'			=>	'{chan} unsuspended',	
 	// suspend
-	'CS_LIST_TOP'			=>	'Listing all registered channels',
-	'CS_LIST_TOP2'			=>	'    Channel           Description',
-	'CS_LIST_ROW'			=>	'    {chan} ({info})',
+	'CS_LIST_TOP'			=>	'Entry  Channel           Description',
+	'CS_LIST_DLM'			=>	'-----  ----------------  -----------',
+	'CS_LIST_ROW'			=>	'{num}  {chan}{info}',
 	'CS_LIST_BOTTOM'		=>	'End of list - {num}/{total} channel(s) shown',
 	// list
 );

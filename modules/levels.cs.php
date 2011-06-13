@@ -105,9 +105,10 @@ class cs_levels implements module
 		if ( $target == '' && $flags == '' && $levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
 			// start of flag list
 			
-			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp', 'expire' ), array( 'channel', '=', $chan ) );
+			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp' ), array( 'channel', '=', $chan ) );
 			// get the flag records
 			
 			$x = 0;
@@ -115,6 +116,12 @@ class cs_levels implements module
 			{
 				$x++;
 				$false_flag = $flags->flags;
+				$modified = core::format_time( core::$network_time - $flags->timestamp );
+				$x_s = $x;
+				
+				$y_s = strlen( $x );
+				for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
+					$x_s .= ' ';
 				
 				if ( !isset( $flags->flags[13] ) )
 				{
@@ -126,7 +133,7 @@ class cs_levels implements module
 				// +ao  N0valyfe
 				// +v   tool
 				
-				if ( $flags->reason != '' )
+				/*if ( $flags->reason != '' )
 				{
 					$expire = ( $flags->expire == 0 ) ? 'Never' : ( ( $flags->timestamp + $flags->expire ) - core::$network_time ).' seconds';
 					$extra = '('.$flags->reason.')';
@@ -136,12 +143,16 @@ class cs_levels implements module
 				{
 					$extra = '';
 					$expired = '';
-				}
+				}*/
 				
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'reason' => $extra, 'expired' => $expired ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
 				// show the flag
 			}
 			// loop through them
+			
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_BTM, array( 'chan' => $chan ) );
+			// show other help data
 			
 			return false;
 		}

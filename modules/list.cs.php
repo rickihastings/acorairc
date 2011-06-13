@@ -17,7 +17,7 @@
 class cs_list implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -90,12 +90,19 @@ class cs_list implements module
 		// no channels?
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_TOP );
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_TOP2 );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_DLM );
 		// top of the list
 		
+		$x = 0;
 		while ( $channel = database::fetch( $chans ) )
 		{
+			$x++;
 			$false_chan = $channel->channel;
+			$x_s = $x;
+			
+			$y_s = strlen( $x_s );
+			for ( $i_s = $y_s; $i_s < 5; $i_s++ )
+				$x_s .= ' ';
 			
 			if ( !isset( $channel->channel[18] ) )
 			{
@@ -106,15 +113,16 @@ class cs_list implements module
 			// this is just a bit of fancy fancy, so everything displays neat
 			
 			if ( $channel->suspended == 0 )
-				$info = chanserv::get_flags( $channel->channel, 'd' );
+				$info = '['.chanserv::get_flags( $channel->channel, 'd' ).']';
 			else
-				$info = $channel->suspend_reason;
+				$info = '['.$channel->suspend_reason.']';
 			// suspend reason, or description?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_ROW, array( 'chan' => $false_chan, 'info' => $info ) );
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_ROW, array( 'num' => $x_s, 'chan' => $false_chan, 'info' => $info ) );
 		}
 		// loop through the channels
 		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_DLM );
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $chans ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
 	}
 
