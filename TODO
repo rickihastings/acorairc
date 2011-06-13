@@ -33,3 +33,6 @@
 * Add AKILL system
 * Add timers to +b flags (DONE)
 * Add chanserv invite
+* Add seperate commands like ACCESS and BANS, in flags.cs.php
+* Change timers to hours/minutes
+
