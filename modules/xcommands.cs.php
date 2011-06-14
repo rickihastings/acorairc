@@ -184,6 +184,8 @@ class cs_xcommands implements module
 		else
 			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
+		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CLEAR_CHAN, array( 'chan' => $chan ) );
 	}
 	
 	/*
@@ -213,6 +215,8 @@ class cs_xcommands implements module
 		cs_levels::on_create( core::$chans[$chan]['users'], $channel );
 		// execute on_create, cause we just treat it as that
 		// this is kinda a shortcut, but well worth it.
+		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SYNC_CHAN, array( 'chan' => $chan ) );
 	}
 	
 	/*

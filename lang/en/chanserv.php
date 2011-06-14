@@ -533,6 +533,8 @@ $help = (object) array(
 	'CS_CHAN_NOEXIST'		=>	'{chan} doesn\'t exist',
 	'CS_UNREGISTERED_CHAN'	=>	'{chan} isn\'t a registered channel',
 	'CS_UNREGISTERED_NICK'	=>	'{nick} isn\'t a registered nickname',
+	'CS_CLEAR_CHAN'			=>	'All modes on {chan} have been unset',
+	'CS_SYNC_CHAN'			=>	'Access list for {chan} has been synchronised',
 	// standard messages
 	'CS_LEVELS_ALREADY_SET'	=>	'{target} already has {flag} set on {chan}',
 	'CS_LEVELS_NOT_SET'		=>	'{target} does not have {flag} set on {chan}',

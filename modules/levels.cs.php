@@ -879,43 +879,34 @@ class cs_levels implements module
 			
 			foreach ( $access_array as $target => $level )
 			{
-				if ( $target == $nick && core::$nicks[$nick]['identified'] )
+				if ( $target == $nick && core::$nicks[$nick]['identified'] && !isset( $new_nusers_give[$nick] ) )
 				{
 					$new_nusers_give[$nick] .= 'strict:'.implode( '', $level );
-					// give them access
-					continue 2;
 				}
-				// straight match, give access
-				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) )
+				elseif ( strpos( $target, '@' ) !== false && services::match( $hostname, $target ) && !isset( $new_nusers_give[$nick] ) )
 				{
-					$new_nusers_give[$nick] .= $strict.implode( '', $level );
-					// give them access
-					continue 2;
+					if ( in_array( 1, $level ) )
+						$new_nusers_give[$nick] .= ':'.implode( '', $level );
+					else
+						$new_nusers_give[$nick] .= $strict.implode( '', $level );
 				}
-				// hostname match, give access
-				elseif ( ircd::$owner && strpos( core::$chans[$chan]['nicks'][$nick], 'q' ) !== false )
-				{
+				// give them access
+				
+				if ( isset( $new_nusers_give[$nick] ) || $strict == ':' )
+					continue;
+				// if they need access just skip
+				
+				if ( ircd::$owner && strpos( $modes, 'q' ) !== false )
 					$new_nusers_take[$nick] .= 'q';
-					continue;
-				}
 				// they don't have access, but they have +a, remove it
-				elseif ( ircd::$protect && strpos( core::$chans[$chan]['nicks'][$nick], 'a' ) !== false )
-				{
+				if ( ircd::$protect && strpos( $modes, 'a' ) !== false )
 					$new_nusers_take[$nick] .= 'a';
-					continue;
-				}
 				// they don't have access, but they have +a, remove it
-				elseif ( strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
-				{
+				if ( strpos( $modes, 'o' ) !== false )
 					$new_nusers_take[$nick] .= 'o';
-					continue;
-				}
 				// they don't have access, but they have +o, remove it
-				elseif ( ircd::$halfop && strpos( core::$chans[$chan]['nicks'][$nick], 'o' ) !== false )
-				{
+				if ( ircd::$halfop && strpos( $modes, 'h' ) !== false )
 					$new_nusers_take[$nick] .= 'h';
-					continue;
-				}
 			}
 			// foreach the access array
 		}
