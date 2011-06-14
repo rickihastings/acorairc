@@ -428,7 +428,7 @@ class chanserv implements service
 		// we're asuming that check has already been done (Y)
 		// we just grab it.
 		
-		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || ( core::$nicks[$nick]['ircop'] && services::user_exists( $nick, true, array( 'id', 'display' ) ) !== false ) )
+		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identifed'] ) )
 			return true;
 		else
 			return false;

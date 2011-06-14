@@ -98,6 +98,9 @@ class ns_drop implements module
 					ircd::on_user_logout( $nick->display );
 				// if the nick is being used unregister it, even though it shouldn't be?
 				
+				core::$nicks[$user->display]['identified'] = false;
+				// set identified to false
+				
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );
 				// let the nick know the account has been dropped.
 			}

@@ -869,7 +869,7 @@ class cs_levels implements module
 			}
 			// is there any expired bans?
 			
-			if ( $reason = chanserv::check_levels( $nick, $channel->channel, array( 'b' ), true, false, true ) )
+			if ( $reason = chanserv::check_levels( $nick, $channel->channel, array( 'b' ), true, false, true, false ) )
 			{
 				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+b *@'.core::$nicks[$nick]['host'] );
 				ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $reason );

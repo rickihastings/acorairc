@@ -84,8 +84,9 @@ class operserv implements service
 				// override is already on..
 				
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_ON );
-				core::alog( 'override_command(): '.$nick.' is now using override mode.', 'BASIC' );
-				ircd::wallops( core::$config->operserv->nick, $nick.' is now using override mode.' );
+				core::alog( 'override_command(): WARNING: '.$nick.' is now using override mode.', 'BASIC' );
+				core::alog( 'WARNING: '.$nick.' has turned OVERRIDE mode ON' );
+				ircd::wallops( core::$config->operserv->nick, 'WARNING: '.core::$config->operserv->nick, $nick.' has turned OVERRIDE mode ON' );
 				// log and stuff
 				
 				core::$nicks[$nick]['override'] = true;
@@ -104,7 +105,8 @@ class operserv implements service
 				
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_OVERRIDE_OFF );
 				core::alog( 'override_command(): '.$nick.' has turned override mode off.', 'BASIC' );
-				ircd::wallops( core::$config->operserv->nick, $nick.' has turned override mode off.' );
+				core::alog( $nick.' has turned OVERRIDE mode OFF' );
+				ircd::wallops( core::$config->operserv->nick, $nick.' has turned OVERRIDE mode OFF' );
 				// log and stuff
 				
 				core::$nicks[$nick]['override'] = false;
