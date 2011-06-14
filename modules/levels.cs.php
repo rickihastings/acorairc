@@ -123,10 +123,10 @@ class cs_levels implements module
 				for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
 					$x_s .= ' ';
 				
-				if ( !isset( $flags->flags[15] ) )
+				if ( !isset( $flags->flags[14] ) )
 				{
 					$y = strlen( $flags->flags );
-					for ( $i = $y; $i <= 14; $i++ )
+					for ( $i = $y; $i <= 13; $i++ )
 						$false_flag .= ' ';
 				}
 				// this is just a bit of fancy fancy, so everything displays neat, like so:

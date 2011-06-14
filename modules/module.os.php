@@ -83,6 +83,7 @@ class os_module implements module
 		// loop through the currently loaded modules.
 		
 		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_DLM );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_BTM, array( 'num' => count( modules::$list ) ) );
 	}
 	
 	/*

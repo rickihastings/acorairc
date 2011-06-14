@@ -192,12 +192,19 @@ class os_vhost implements module
 			// no vhosts
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_T2 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_D );
 			// list top.
 			
+			$x = 0;
 			while ( $users = database::fetch( $users_q ) )
 			{
+				$x++;
 				$false_nick = $users->display;
+				
+				$num = $x;
+				$y_i = strlen( $num );
+					for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
+						$num .= ' ';
 				
 				if ( !isset( $users->display[18] ) )
 				{
@@ -207,10 +214,11 @@ class os_vhost implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_R, array( 'nick' => $false_nick, 'info' => $users->vhost ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_R, array( 'num' => $num, 'nick' => $false_nick, 'info' => $users->vhost ) );
 			}
 			// loop through em, show the vhosts
 			
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_D );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_B, array( 'num' => ( database::num_rows( $users_q ) == 0 ) ? 0 : database::num_rows( $users_q ), 'total' => $total ) );
 			// end of list.
 		}

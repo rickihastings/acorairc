@@ -37,5 +37,5 @@
 * Change timers to hours/minutes (DONE)
 * Add ACCESS module, to simplify adding to access lists, it's quite complicated atm, levels are going to stay, this is going to be a short cut
 * Add BANS module, to simplify bans through levels system, also to view bans seperate from access
-* Change listing modules to new style lists*, and listing ignore, stats opers and logonnews also vhosts
+* Change listing modules to new style lists*, and listing ignore*, stats opers* and also vhosts* (DONE)
 * Notify user when channel is CLEAR, SYNC (DONE)

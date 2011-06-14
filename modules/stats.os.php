@@ -78,26 +78,38 @@ class os_stats implements module
 		}
 		elseif ( strtolower( $type ) == 'opers' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_1 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_T );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_D );
 			
+			$x = 0;
 			foreach ( core::$nicks as $user => $info )
 			{
 				if ( !$info['ircop'] || $info['server'] == core::$config->server->name ) continue;
 				// skip if they aint an ircop
 				
+				$x++;
 				$false_host = core::get_full_hostname( $user );
+				// some vars.
 				
-				if ( !isset( $false_host[45] ) )
-				{
+				$num = $x;
+				$y_i = strlen( $num );
+					for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
+						$num .= ' ';
+				
+				if ( !isset( $false_host[50] ) )
+				{	
 					$y = strlen( $false_host );
-					for ( $i = $y; $i <= 44; $i++ )
+					for ( $i = $y; $i <= 49; $i++ )
 						$false_host .= ' ';
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_2, array( 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_L, array( 'num' => $num, 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
 			}
 			// opers info.
+			
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_D );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_B, array( 'num' => $x ) );
 		}
 		else
 		{

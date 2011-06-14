@@ -103,9 +103,7 @@ class os_logonnews implements module
 	public function main( $ircdata, $startup = false )
 	{
 		if ( $startup )
-		{
 			return false;
-		}
 		// we're booting, fuck sending messages to everyone, they don't want to see
 		// it if it's just a restart, and we don't want to waste the resources on it.
 		
@@ -114,7 +112,7 @@ class os_logonnews implements module
 		{
 			$nick = $connect_data['nick'];
 			
-			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ), array( 0 => 3 ) );
+			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ), array( 0 => 3 ) );
 			// get our news
 			
 			if ( database::num_rows( $get_news ) > 0 )
@@ -196,7 +194,7 @@ class os_logonnews implements module
 	*/
 	static public function _list_news( $nick )
 	{
-		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time', 'DESC' ) );
+		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ) );
 		// get our news
 			
 		if ( database::num_rows( $get_news ) > 0 )

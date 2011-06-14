@@ -189,24 +189,34 @@ class os_ignore implements module
 		if ( database::num_rows( $check_nick_q ) > 0 )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_T2 );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_D );
 			// t-o-l
 			
+			$x = 0;
 			while ( $ignored = database::fetch( $check_nick_q ) )
 			{
+				$x++;
 				$false_nick = $ignored->who;
 				
-				if ( !isset( $ignored->who[18] ) )
+				$num = $x;
+				$y_i = strlen( $num );
+					for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
+						$num .= ' ';
+				
+				if ( !isset( $ignored->who[50] ) )
 				{
 					$y = strlen( $ignored->who );
-					for ( $i = $y; $i <= 17; $i++ )
+					for ( $i = $y; $i <= 49; $i++ )
 						$false_nick .= ' ';
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST, array( 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST, array( 'num' => $num, 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
 			}
 			// loop through the records
+			
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_D );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_B, array( 'num' => $x ) );
 		}
 		else
 		{
