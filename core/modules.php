@@ -54,7 +54,7 @@ class modules
 	*/
 	static public function load_module( $module_name, $module_file )
 	{
-		if ( !@file_exists( BASEPATH.'/modules/'.$module_file ) )
+		if ( !file_exists( BASEPATH.'/modules/'.$module_file ) )
 		{
 			core::alog( 'load_module(): unable to load: '.$module_name.' (not found)', 'BASIC' );
 			return false;

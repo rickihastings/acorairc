@@ -61,8 +61,8 @@ class os_module implements module
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
 		
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_1 );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_2 );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_TOP );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_DLM );
 		
 		$x = 0;
 		foreach ( modules::$list as $module => $data )
@@ -70,10 +70,10 @@ class os_module implements module
 			$x++;
 			$false_name = $data['name'];
 				
-			if ( !isset( $data['name'][15] ) )
+			if ( !isset( $data['name'][17] ) )
 			{
 				$y = strlen( $data['name'] );
-				for ( $i = $y; $i <= 14; $i++ )
+				for ( $i = $y; $i <= 16; $i++ )
 					$false_name .= ' ';
 			}
 			// this is just a bit of fancy fancy, so everything displays neat
@@ -81,6 +81,8 @@ class os_module implements module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_3, array( 'name' => $false_name, 'version' => $data['version'], 'author' => $data['author'], 'type' => $data['type'], 'extra' => $data['extra'] ) );
 		}
 		// loop through the currently loaded modules.
+		
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_DLM );
 	}
 	
 	/*
@@ -93,6 +95,8 @@ class os_module implements module
 	public function modload_command( $nick, $ircdata = array() )
 	{
 		$module = $ircdata[0];
+		$file = explode( '_', $module );
+		$file = $file[1].'.'.$file[0].'.php';
 		// get the module thats been requested.
 		
 		if ( services::is_root( $nick ) )
@@ -109,10 +113,17 @@ class os_module implements module
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_3, array( 'name' => $module ) );
 				return false;
 			}
+			// module exists
 		
 			if ( !class_exists( $module ) )
 			{
-				modules::load_module( $name, $details['file'] );
+				if ( !file_exists( BASEPATH.'/modules/'.$file ) )
+				{
+					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
+					return false;
+				}
+			
+				modules::load_module( $name, $file, true );
 				// load the module 
 			}
 			else
@@ -120,7 +131,6 @@ class os_module implements module
 				if ( !modules::$list[$module]['class'] = new $module() )
 				{
 					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
-					core::alog( core::$config->operserv->nick.': unable to load module '.$module );
 					core::alog( 'modload_command(): unable to load module '.$module.' (boot error)', 'BASIC' );
 					// log what we need to log.
 					
@@ -133,8 +143,8 @@ class os_module implements module
 			modules::$list[$module]['class']->modload();
 			// onload handler.
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module ) );
-			core::alog( core::$config->operserv->nick.': loaded module '.$module );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module, 'version' => modules::$list[$module]['version'], 'extra' => modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'] ) );
+			core::alog( $nick.' loaded module '.$module.' ['.modules::$list[$module]['version'].'] ['.modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'].']' );
 			ircd::wallops( core::$config->operserv->nick, $nick.' loaded module '.$module );
 			// let everyone know
 		}
@@ -174,7 +184,6 @@ class os_module implements module
 			if ( modules::$list[$module]['extra'] == 'static' )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
-				core::alog( core::$config->operserv->nick.': unable to unload static module '.$module );
 				core::alog( 'modunload_command(): unable to unload static module '.$module.' (cannot be unloaded)', 'BASIC' );
 				// log what we need to log.
 				
@@ -184,7 +193,6 @@ class os_module implements module
 			if ( !class_exists( $module ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
-				core::alog( core::$config->operserv->nick.': unable to unload module '.$module );
 				core::alog( 'modunload_command(): unable to unload module '.$module.' (not booted)', 'BASIC' );
 				// log what we need to log.
 				
@@ -197,14 +205,15 @@ class os_module implements module
 			}
 			// if the module has an unload method, call it now before we destroy the class.
 			
+			$data = modules::$list[$module];
 			unset( modules::$list[$module] );
 			// unset the module
 			
 			modules::_unset_docs( $module );
 			// unset the modules help docs etc.
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module ) );
-			core::alog( core::$config->operserv->nick.': unloaded module '.$module );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module, 'version' => $data['version'], 'extra' => $data['author'].'/'.$data['type'].'/'.$data['extra'] ) );
+			core::alog( $nick.' unloaded module '.$module.' ['.$data['version'].'] ['.$data['author'].'/'.$data['type'].'/'.$data['extra'].']' );
 			ircd::wallops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
 			// let everyone know :D	
 		}
