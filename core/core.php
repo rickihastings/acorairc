@@ -594,6 +594,8 @@ class core
 	{
 		foreach ( self::$chans as $chan => $data )
 		{
+			self::$chans[$chan]['joins'] = 0;
+		
 			if ( count( self::$chans[$chan]['users'] ) == 0 )
 			{
 				if ( strstr( core::$config->server->ircd, 'inspircd' ) && strstr( self::$chans[$chan]['modes'], 'P' ) )
@@ -649,6 +651,15 @@ class core
 		if ( trim( $ircdata[0] ) == '' )
 			return true;
 		// the data is empty, omgwtf..
+		
+		$chan = ircd::on_join( $ircdata );
+		if ( $chan !== false && ( core::$chans[$chan]['joins'] >= 10 ) )
+		{
+			ircd::mode( ircd::$sid, $chan, '+i' );
+			core::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
+			return true;
+		}
+		// check for join floods.
 		
 		$return = ircd::on_msg( $ircdata );
 		if ( $return !== false && $return['target'][0] == '#' && $return['msg'][1] != self::$config->chanserv->fantasy_prefix )

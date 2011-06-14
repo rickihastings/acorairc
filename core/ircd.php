@@ -260,6 +260,11 @@ class ircd_handle
 		{
 			core::$chans[$chan]['timestamp'] = $timestamp;
 			core::$chans[$chan]['p_modes'] = array();
+			core::$chans[$chan]['joins'] = 0;
+			// we don't count bursts as joins as this is only here for flood protection
+			// and flood protection would be activated on bursts which is what we DON'T want
+			// for instance if a server splits loses 30 users on a channel, when it reconnects
+			// 30 users join in a second causing chanserv to trigger flood.
 			
 			if ( is_array( core::$chans[$chan]['users'] ) )
 				core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );
@@ -286,6 +291,9 @@ class ircd_handle
 	{
 		foreach ( $chans as $chan )
 		{
+			core::$chans[$chan]['joins']++;
+			// ++ joins
+		
 			if ( !isset( core::$chans[$chan]['users'][$nick] ) )
 				core::$chans[$chan]['users'][$nick] = '';
 			// maintain the logged users array
