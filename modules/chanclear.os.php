@@ -57,7 +57,7 @@ class os_chanclear implements module
 		$mode = strtoupper( $ircdata[0] );
 		// get the data.
 			
-		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'GLINE' ) ) )
+		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'BAN' ) ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
 			return false;
@@ -92,9 +92,9 @@ class os_chanclear implements module
 					{
 						ircd::kill( core::$config->operserv->nick, $user, 'CHANKILL by '.$nick.' ('.$reason.')' );
 					}
-					elseif ( $mode == 'GLINE' )
+					elseif ( $mode == 'BAN' )
 					{
-						ircd::gline( core::$config->operserv->nick, '*@'.core::$nicks[$user]['oldhost'], 604800, 'CHANKILL by '.$nick.' ('.$reason.')' );
+						ircd::global_ban( core::$config->operserv->nick, core::$nicks[$user], 10800, 'CHANKILL by '.$nick.' ('.$reason.')' );
 					}
 					// remove all other users.
 				}

@@ -190,13 +190,13 @@ $help = (object) array(
 	
 	'OS_HELP_CHANCLEAR_ALL'		=> array(
 		'=---- {operserv} Help ----=',
-		'Syntax: CHANCLEAR [KICK|KILL|GLINE] channel reason',
+		'Syntax: CHANCLEAR [KICK|KILL|BAN] channel reason',
 		' ',
 		'CHANCLEAR allows admins to clear a channel in one of',
 		'three ways, KICK which kicks the user and sets a +b on',
 		'their hostmask, KILL which issues a server KILL to the',
-		'users, or GLINE which sets a one week network ban against',
-		'all the users in that channel.',
+		'users, or BAN which sets a one week ban against all the',
+		'users in that channel.',
 		' ',
 		'All IRCops are ignored from this, services staff have',
 		'to be opered up for this command to ignore them.',

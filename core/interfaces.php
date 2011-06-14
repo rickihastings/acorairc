@@ -61,7 +61,7 @@ interface protocol
 	static public function setident( $from, $nick, $ident );
 	static public function svsnick( $old_nick, $new_nick, $timestamp );
 	static public function kill( $nick, $user, $message );
-	static public function gline( $nick, $mask, $duration, $message );
+	static public function global_ban( $nick, $user, $duration, $message );
 	static public function shutdown( $message, $terminate = false );
 	static public function push( $from, $numeric, $nick, $message );
 	static public function end_burst( $ircdata );

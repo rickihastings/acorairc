@@ -713,8 +713,8 @@ class core
 					self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being glined for 10 minutes' );
 					self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
 					
-					ircd::gline( self::$config->operserv->nick, '*@'.self::$nicks[$nick]['oldhost'], 600, 'Flooding services, 10 minute ban.' );
-					// third offence, wtf? add a 10 minute gline.
+					ircd::global_ban( self::$config->operserv->nick, self::$nicks[$nick], 10, 'Flooding services, 10 minute ban.' );
+					// third offence, wtf? add a 10 minute ban.
 					
 					return true;
 				}

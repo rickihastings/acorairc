@@ -111,6 +111,7 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
+		// todo
 		ircd_handle::handle_on_connect( $nick, $ircdata[2], $ircdata[7], $ircdata[6], $ircdata[5], $gecos, $server, $ircdata[3], $ircdata[11], $startup );
 	}
 	
@@ -809,18 +810,26 @@ class ircd implements protocol
 	}
 	
 	/*
-	* gline
+	* global_ban
 	*
 	* @params
 	* $nick - who to send it from
-	* $mask - the mask of the gline
+	* $user - user record from core::$nicks
 	* $duration - the duration
 	* $message - message to use
 	*/
-	static public function gline( $nick, $mask, $duration, $message )
+	static public function global_ban( $nick, $user, $duration, $message )
 	{
-		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask.' '.$nick.' '.core::$network_time.' '.$duration.' :'.$message );
-		ircd_handle::gline( $nick, $mask, $duration, $message );
+		if ( $user['ircop'] )
+			return false;
+		// if ircop ignore
+	
+		$rduration = ( $duration * 60 );
+		$mask = '*@'.$user['ip_address']
+		// set some vars
+	
+		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask.' '.$nick.' '.core::$network_time.' '.$rduration.' :'.$message );
+		ircd_handle::global_ban( $nick, $mask, $duration, $message );
 		// send the cmd then handle it internally
 	}
 	

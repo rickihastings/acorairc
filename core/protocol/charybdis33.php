@@ -119,7 +119,7 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
-		ircd_handle::handle_on_connect( $nick, $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $server, $ircdata[4], $ircdata[5], $startup );
+		ircd_handle::handle_on_connect( $nick, $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $ircdata[8], $server, $ircdata[4], $ircdata[5], $startup );
 	}
 	
 	/*
@@ -424,7 +424,7 @@ class ircd implements protocol
 	static public function init_server( $name, $pass, $desc, $numeric )
 	{
 		self::send( 'PASS '.$pass.' TS 6 '.self::$sid );
-		self::send( 'CAPAB :QS EX CHW IE KLN KNOCK TB UNKLN CLUSTER ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN MLOCK' );
+		self::send( 'CAPAB :QS EX CHW IE KLN GLN KNOCK TB UNKLN CLUSTER ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN MLOCK' );
 		self::send( ':'.self::$sid.' SERVER '.$name.' 0 :'.$desc );
 		// handle server, bit of trickery for ON CAPAB START etc does on here ;)
 		
@@ -778,22 +778,28 @@ class ircd implements protocol
 	}
 	
 	/*
-	* gline
+	* global_ban
 	*
 	* @params
 	* $nick - who to send it from
-	* $mask - the mask of the gline
+	* $user - user record from core::$nicks
 	* $duration - the duration
 	* $message - message to use
 	*/
-	static public function gline( $nick, $mask, $duration, $message )
+	static public function global_ban( $nick, $user, $duration, $message )
 	{
-		$unick = ircd_handle::get_uid( $nick );
+		if ( $user['ircop'] )
+			return false;
+		// if ircop ignore
 	
-		// TODO
-		self::send( ':'.$unick.' GLINE '.$mask.' '.$mask.' :'.$message );
-		ircd_handle::gline( $nick, $mask, $duration, $message );
+		$unick = ircd_handle::get_uid( $nick );
+		$mask = $user['oldhost'];
+		// set some vars
+		
+		self::send( ':'.$unick.' ENCAP * KLINE '.$duration.' * '.$mask.' :'.$message );
+		ircd_handle::global_ban( $nick, $mask, $duration, $message );
 		// send the cmd then handle it internally
+		// note we only send a kline
 	}
 	
 	/*

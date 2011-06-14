@@ -68,9 +68,9 @@ class ircd_handle
 	* handle_on_connect
 	*
 	* @params
-	* $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $modes, $startup
+	* $nick, $uid, $ident, $host, $oldhost, $gecos, $ip_addr, $server, $timestamp, $modes, $startup
 	*/
-	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $server, $timestamp, $modes, $startup = false )
+	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $ip_addr, $server, $timestamp, $modes, $startup = false )
 	{
 		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
@@ -84,6 +84,7 @@ class ircd_handle
 			'host' => $host,
 			'oldhost' => $oldhost,
 			'gecos' => $gecos,
+			'ip_address' => $ip_addr,
 			'server' => $server,
 			'timestamp' => $timestamp,
 			'identified' => false,
@@ -671,14 +672,14 @@ class ircd_handle
 	}
 	
 	/*
-	* gline
+	* global_ban
 	*
 	* @params
-	* $nick, $mask, $duration, $message
+	* $nick, $user, $duration, $message
 	*/
-	static public function gline( $nick, $mask, $duration, $message )
+	static public function global_ban( $nick, $user, $duration, $message )
 	{
-		core::alog( 'gline(): '.$nick.' glined '.$mask, 'BASIC' );
+		core::alog( 'global_ban(): '.$nick.' set a global ban on '.$mask.' for '.$duration.' minutes', 'BASIC' );
 		// debug info
 	}
 	
