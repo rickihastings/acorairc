@@ -17,7 +17,7 @@
 class cs_suspend implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -161,13 +161,17 @@ class cs_suspend implements module
 			// channel isn't even suspended
 			
 			$check_row = database::select( 'chans_levels', array( 'channel' ), array( 'channel', '=', $chan ) );
-			
 			if ( database::num_rows( $check_row ) == 0 )
 			{
 				database::delete( 'chans', array( 'channel', '=', $chan ) );
 				database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
+				// the channel has no access records, drop it. this means it was a suspend on a non-registered channel
 			}
-			// the channel has no access records, drop it.
+			else
+			{
+				database::update( 'chans', array( 'suspended' => 0 ), array( 'channel', '=', $chan ) );
+				// channel has access rows which means it was pre-registered, just update it don't drop it
+			}
 		}
 		else
 		{
