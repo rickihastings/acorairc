@@ -800,8 +800,8 @@ class cs_levels implements module
 		$populated_chan = ircd::on_join( $ircdata );
 		if ( $populated_chan !== false )
 		{
-			$nick = $ircdata[0];
-			$chans = explode( ',', $populated_chan );
+			$nick = $populated_chan['nick'];
+			$chans = explode( ',', $populated_chan['chan'] );
 			// get the channel & nick
 			
 			foreach ( $chans as $chan )

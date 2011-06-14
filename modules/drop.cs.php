@@ -92,6 +92,7 @@ class cs_drop implements module
 		// is a code is specified, AND it's correct, continue.
 		
 		database::delete( 'chans', array( 'channel', '=', $chan ) );
+		database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
 		database::delete( 'chans_levels', array( 'channel', '=', $chan ) );
 		// delete all associated records
 		

@@ -165,7 +165,7 @@ class chanserv implements service
 		$populated_chan = ircd::on_join( $ircdata );
 		if ( $populated_chan !== false )
 		{
-			$chans = explode( ',', $populated_chan );
+			$chans = explode( ',', $populated_chan['chan'] );
 			// find the chans.
 			
 			foreach ( $chans as $chan )
@@ -254,7 +254,7 @@ class chanserv implements service
 			$chan = $return['chan'];
 			$who = $return['who'];
 			
-			if ( $who == core::$config->chanserv->nick || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
+			if ( $who == core::$config->server->name || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
 			{
 				ircd::join_chan( core::$config->chanserv->nick, $chan );
 				// join the chan.

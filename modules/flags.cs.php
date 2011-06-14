@@ -358,10 +358,13 @@ class cs_flags implements module
 				{
 					foreach ( core::$chans[$chan]['users'] as $unick => $mode )
 					{
-						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
+						if ( core::$nicks[$unick]['server'] == core::$config->server->name )
+							continue;
+					
+						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 						{
 							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
-							ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel.' );
+							ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
 						}
 						// they don't have +k, KICKEM
 					}
@@ -620,15 +623,13 @@ class cs_flags implements module
 			$chan = $return['chan'];
 			$mode_queue = $return['modes'];
 			
-			if ( strpos( $nick, '.' ) !== false && strstr(core::$config->server->ircd, 'inspircd') )
+			if ( strpos( $nick, '.' ) !== false )
 				$server = $nick;
-			elseif ( strlen( $nick ) == 3 && strstr(core::$config->server->ircd, 'inspircd') )
+			elseif ( strlen( $nick ) == 3 )
 				$server = core::$servers[$nick]['sid'];
-				// UNTESTED
 			else
 				$server = '';
-			// we've found a.in nick, which means it's a server? And it's NOT insp1.2
-			// OR we've noticed $nick is 3 chars long, which is a SID and it's insp1.2
+			// we've found a.in nick, which means it's a server?
 			
 			if ( $server == core::$config->ulined_servers || ( is_array( core::$config->ulined_servers ) && in_array( $server, core::$config->ulined_servers ) ) )
 				return false;
@@ -688,8 +689,8 @@ class cs_flags implements module
 		$populated_chan = ircd::on_join( $ircdata );
 		if ( $populated_chan !== false )
 		{
-			$nick = $ircdata[0];
-			$chans = explode( ',', $populated_chan );
+			$nick = $populated_chan['nick'];
+			$chans = explode( ',', $populated_chan['chan'] );
 			// find the nick & chan
 			
 			foreach ( $chans as $chan )
@@ -700,10 +701,10 @@ class cs_flags implements module
 				
 				if ( chanserv::check_flags( $chan, array( 'I' ) ) )
 				{
-					if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
+					if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 					{
 						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
-						ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel.' );
+						ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
 						return false;
 					}
 					// they don't have +k, KICKEM
@@ -749,10 +750,13 @@ class cs_flags implements module
 				{
 					foreach ( $nusers as $nick => $mode )
 					{
-						if ( chanserv::check_levels( $nick, $chan, array( 'k', 'q', 'a', 'o', 'h', 'v', 'S', 'F' ), true, false ) === false )
+						if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 						{
+							if ( core::$nicks[$nick]['server'] == core::$config->server->name )
+								continue;
+						
 							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
-							ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel.' );
+							ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
 						}
 						// they don't have +k, KICKEM
 					}

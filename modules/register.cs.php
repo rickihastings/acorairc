@@ -21,6 +21,8 @@ class cs_register implements module
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
+	static public $flags = 'FSRiktfrsqao';
+	
 	public function __construct() {}
 	// __construct, makes everyone happy.
 	
@@ -99,7 +101,7 @@ class cs_register implements module
 			// ignore parameter flags
 			
 			database::insert( 'chans', $chan_info );
-			database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $user->display, 'flags' => 'FSRitfrsqao', 'setby' => $user->display, 'timestamp' => core::$network_time ) );
+			database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $user->display, 'flags' => self::$flags, 'setby' => $user->display, 'timestamp' => core::$network_time ) );
 			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
 			// create the channel! WOOOH
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );

@@ -652,12 +652,18 @@ class core
 			return true;
 		// the data is empty, omgwtf..
 		
-		$chan = ircd::on_join( $ircdata );
-		if ( $chan !== false && ( core::$chans[$chan]['joins'] >= 10 ) )
+		$return = ircd::on_join( $ircdata );
+		if ( $return !== false && ( core::$chans[$chan]['joins'] >= 10 ) )
 		{
-			ircd::mode( ircd::$sid, $chan, '+i' );
-			core::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
-			return true;
+			$chans = explode( ',', $return['chan'] );
+			// find the chans.
+			
+			foreach ( $chans as $chan )
+			{
+				ircd::mode( ircd::$sid, $chan, '+i' );
+				core::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
+				return true;
+			}
 		}
 		// check for join floods.
 		
