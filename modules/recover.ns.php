@@ -73,12 +73,14 @@ class ns_recover implements module
 		}
 		// invalid syntax
 		
-		if ( !isset( core::$nicks[$unick] ) )
+		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
+		if ( !isset( $unicks[strtolower( $unick )] ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
 			return false;
 			// nickname isn't in use
 		}
+		$unick = $unicks[$unick]['nick'];
 		
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{

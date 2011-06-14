@@ -105,8 +105,10 @@ class os_vhost implements module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
 			// update it and log it
 			
-			if ( isset( core::$nicks[$unick] ) && $user->identified == 1 )
+			$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
+			if ( isset( $unicks[strtolower( $unick )] ) && $user->identified == 1 )
 			{
+				$unick = $unicks[$unick]['nick'];
 				if ( substr_count( $realhost, '@' ) == 1 )
 				{
 					ircd::setident( core::$config->operserv->nick, $user->display, $ident );

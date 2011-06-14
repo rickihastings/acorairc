@@ -152,8 +152,10 @@ class os_utilities implements module
 		if ( trim( $reason ) == '' ) $reason = 'Kick command issued by '.$nick;
 		// if they haven't suplied a reason let's fill it in.
 		
-		if ( isset( core::$nicks[$unick] ) && isset( core::$chans[$channel] ) && isset( core::$chans[$channel]['users'][$unick] ) )
+		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
+		if ( isset( $unicks[strtolower( $unick )] ) && isset( core::$chans[$channel] ) && isset( core::$chans[$channel]['users'][$unick] ) )
 		{
+			$unick = $unicks[$unick]['nick'];
 			ircd::kick( core::$config->operserv->nick, $unick, $channel, $reason );
 			core::alog( core::$config->operserv->nick.': '.$nick.' used KICK to remove '.$unick.' from '.$chan );
 		}

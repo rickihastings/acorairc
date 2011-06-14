@@ -119,8 +119,10 @@ class ns_suspend implements module
 		core::alog( core::$config->nickserv->nick.': '.$nick.' SUSPENDED '.$unick.' with the reason: '.$reason );
 		ircd::wallops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
 		
-		if ( isset( core::$nicks[$unick] ) )
+		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
+		if ( isset( $unicks[strtolower( $unick )] ) )
 		{
+			$unick = $unicks[$unick]['nick'];
 			$random_nick = 'Unknown'.rand( 10000, 99999 );
 			
 			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
