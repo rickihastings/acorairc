@@ -369,8 +369,6 @@ $help = (object) array(
 	'OS_IGNORE_LIST_B'	=> 'End of list - {num} records',
 	'OS_IGNORE_EXISTS'	=> '{nick} is already on the services ignore list',	
 	// ignore
-	'OS_LOGON_START'	=> '=---- Message(s) of the Day ----=',
-	'OS_LOGON_END'		=> '=---- End of Message(s) of the Day ----=',
 	'OS_LOGON_NEWS_1'	=> '[{title}] Notice from {user}, posted {date}:',
 	'OS_LOGON_NEWS_2'	=> '{message}',
 	'OS_LOGONNEWS_ADD'	=> 'Added new logon news item',

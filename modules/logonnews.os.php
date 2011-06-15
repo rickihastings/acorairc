@@ -117,18 +117,12 @@ class os_logonnews implements module
 			
 			if ( database::num_rows( $get_news ) > 0 )
 			{
-				if ( isset( operserv::$help->OS_LOGON_START ) )
-					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_START );
-				
 				while ( $news = database::fetch( $get_news ) )
 				{
 					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
 					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
 				}
 				// loop through the news
-				
-				if ( isset( operserv::$help->OS_LOGON_END ) )
-					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_END );
 			}
 			// there is news! epic
 		}
