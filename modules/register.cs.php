@@ -111,9 +111,11 @@ class cs_register implements module
 			core::alog( 'register_command(): '.$chan.' registered by '.core::get_full_hostname( $nick ), 'BASIC' );
 			// log what we need to log.
 			
-			if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic', 'suspended' ) ) )
+			chanserv::$chan_q[$chan] = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp',  'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+				
+			if ( !chanserv::$chan_q[$chan] )
 			{
-				chanserv::_join_channel( $channel );
+				chanserv::_join_channel( chanserv::$chan_q[$chan] );
 				// join the channel
 			}
 			// does the channel exist?

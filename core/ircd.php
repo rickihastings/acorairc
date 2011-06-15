@@ -77,6 +77,12 @@ class ircd_handle
 		// yey for this, saves us massive intensive cpu raeps
 		// on large networks, uses a little more memory but baah!
 		
+		if ( !isset( core::$ips[$ip_addr] ) )
+			core::$ips[$ip_addr] = 1;
+		else
+			core::$ips[$ip_addr]++;
+		// add an ip_address array
+		
 		core::$nicks[$nick] = array(
 			'nick' => $nick,
 			'uid' => $uid,
@@ -156,7 +162,14 @@ class ircd_handle
 			core::alog( 'QUIT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') left the network ('.core::$nicks[$nick]['server'].')' );
 		// log
 		
+		$ip_addr = core::$nicks[$nick]['ip_address'];
 		$uid = self::get_uid( $nick );
+		
+		if ( core::$ips[$ip_addr] == 1 )
+			unset( core::$ips[$ip_addr] );
+		else
+			core::$ips[$ip_addr]--;
+		// check if ip record is set
 		
 		unset( core::$nicks[$nick] );
 		unset( core::$uids[$uid] );

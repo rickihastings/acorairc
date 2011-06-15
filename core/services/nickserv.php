@@ -20,6 +20,11 @@ class nickserv implements service
 	static public $help;
 	// help
 
+	static public $nick_q = array();
+	// store the last queries in an internal array, cause i've
+	// noticed the same query is being called like 5 times cause the data
+	// is used in 5 different places.
+	
 	/*
 	* __construct
 	* 
@@ -52,15 +57,15 @@ class nickserv implements service
 	* $ircdata - ..
 	*/
 	public function main( $ircdata, $startup = false )
-	{			
-		foreach ( modules::$list as $module => $data )
+	{	
+		$return = ircd::on_connect( $ircdata );
+		if ( $return !== false )
 		{
-			if ( $data['type'] == 'nickserv' )
-			{
-				modules::$list[$module]['class']->main( $ircdata, $startup );
-				// loop through the modules for nickserv.
-			}
+			$nick = $return['nick'];
+			$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
+			self::$nick_q[strtolower( $nick )] = $user;
 		}
+		// on connect
 		
 		$return = ircd::on_msg( $ircdata, core::$config->nickserv->nick );
 		if ( $return !== false )
@@ -117,6 +122,15 @@ class nickserv implements service
 			}
 		}
 		// and on_chan_create
+		
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( $data['type'] == 'nickserv' )
+			{
+				modules::$list[$module]['class']->main( $ircdata, $startup );
+				// loop through the modules for nickserv.
+			}
+		}
 	}
 	
 	/*

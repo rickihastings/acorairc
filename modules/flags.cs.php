@@ -695,7 +695,7 @@ class cs_flags implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+				if ( chanserv::$chan_q[$chan] === false )
 					return false;	
 				// channel isnt registered
 				
@@ -742,7 +742,7 @@ class cs_flags implements module
 			{
 				$nusers = core::$chans[$chan]['users'];
 				
-				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+				if ( !chanserv::$chan_q[$chan] === false )
 					return false;	
 				// channel isnt registered
 				

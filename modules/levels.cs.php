@@ -786,12 +786,12 @@ class cs_levels implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+				if ( !chanserv::$chan_q[$chan] === false )
 					continue;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
 				
-				self::on_create( core::$chans[$chan]['users'], $channel, true );
+				self::on_create( core::$chans[$chan]['users'], chanserv::$chan_q[$chan], true );
 				// on_create event
 			}
 		}
@@ -806,7 +806,7 @@ class cs_levels implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+				if ( chanserv::$chan_q[$chan] === false )
 					continue;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
@@ -818,7 +818,7 @@ class cs_levels implements module
 				$hostname = core::get_full_hostname( $nick );
 				// generate a hostname
 				
-				self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, false );
+				self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), chanserv::$chan_q[$chan], false );
 				// on_create event
 			}
 		}

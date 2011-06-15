@@ -90,7 +90,7 @@ class os_global implements module
 		
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array ( 'help' => 'GLOBAL' ) );
 			return false;
 		}
 		// are they sending a message?

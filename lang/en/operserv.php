@@ -37,6 +37,7 @@ $help = (object) array(
 	'OS_HELP_SHUTDOWN_1'	=> '     SHUTDOWN  - Terminate the Services program',
 	'OS_HELP_RESTART_1'		=> '     RESTART   - Restart the Services program',
 	'OS_HELP_STATS_1'		=> '     STATS     - Show status of Services and network',
+	'OS_HELP_SESSION_1'		=> '     SESSION   - Manage session limits',
 	'OS_HELP_MODULES_1'		=> '     MODLIST   - List loaded modules',
 	'OS_HELP_MODLOAD_1'		=> '     MODLOAD   - Load a module',
 	'OS_HELP_MODUNLOAD_1'	=> '     MODUNLOAD - Unload a module',
@@ -117,6 +118,27 @@ $help = (object) array(
 		'=---- End of {operserv} Help ----=',
 	),
 	// STATS
+	
+	'OS_HELP_SESSION_ALL' 		=> array(
+		'=---- {operserv} Help ----=',
+		'Syntax: SESSION ADD ip address limit description',
+		'        SESSION DEL ip address',
+		'        SESSION LIST',
+		' ',
+		'Allows management of session limits, if the ircd does not',
+		'support propagating IP addresses at all, this module is',
+		'essentially useless. Default limit can be set in services.conf',
+		'and limits can be raised by using SESSION ADD. Limit cannot',
+		'be 0.',
+		' ',
+		'Warnings are displayed for IP Addresses with multiple clients',
+		'in the log channel. When the limit is reached any new clients',
+		'are killed.',
+		' ',
+		'Command limited to Services Roots.',
+		'=---- End of {operserv} Help ----=',
+	),
+	// SESSION
 	
 	'OS_HELP_MODLIST_ALL'		=> array(
 		'=---- {operserv} Help ----=',
@@ -364,6 +386,19 @@ $help = (object) array(
 	'OS_OVERRIDE_IS_ON'	=> 'You already have override mode enabled',
 	'OS_OVERRIDE_IS_OFF'=> 'You don\'t have override mode enabled',
 	// override
+	'OS_EXCP_NOLIMIT'	=> 'You cannot set a 0 limit on an ip address',
+	'OS_EXCP_ADD'		=> 'Session limit for {ip_addr} set to {limit}',
+	'OS_EXCP_EXISTS'	=> 'Session limit for {ip_addr} already exists',
+	'OS_EXCP_DEL'		=> 'Session limit for {ip_addr} removed',
+	'OS_EXCP_NOEXISTS'	=> 'No session limit exists for {ip_addr}',
+	'OS_EXCP_LIST_T'	=> 'Entry  IP Address       Limit  Details',
+	'OS_EXCP_LIST_D'	=> '-----  ---------------  -----  -------',
+	'OS_EXCP_LIST1'		=> '1      *                {limit} [Added by: services.conf]',
+	'OS_EXCP_LIST'		=> '{num} {ip_addr}  {limit} [Added by: {nick}] [Reason: {desc}]',
+	'OS_EXCP_LIST_B'	=> 'End of list - {num} exception(s)',
+	// session
+	
+	// akill
 );
 
 // EOF;

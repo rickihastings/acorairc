@@ -235,40 +235,40 @@ class ns_identify implements module
 		if ( $connect_data !== false )
 		{
 			$nick = $connect_data['nick'];
+			$user = nickserv::$nick_q[strtolower( $nick )];
 			// get nick
 			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
+			if ( !isset( $user ) || $user === false )
+				return false;
+				
+			if ( $user->suspended == 1 )
 			{
-				if ( $user->suspended == 1 )
-				{
-					return false;
-				}
-				elseif ( $user->validated == 0 && $user->suspended == 0 )
-				{
-					ircd::on_user_logout( $nick );
-					core::$nicks[$nick]['identified'] = false;
-					// they shouldn't really have registered mode
-					
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
-				}
-				elseif ( $user->identified == 0 && $user->suspended == 0 )
-				{
-					self::_registered_nick( $nick, $user );
-				}
-				elseif ( $user->identified == 1 && $user->last_hostmask == core::get_full_hostname( $nick ) )
-				{
-					ircd::on_user_login( $nick );
-					core::$nicks[$nick]['identified'] = true;
-					
-					if ( !$startup )
-						core::alog( core::$config->nickserv->nick.': '.$connect_data['ident'].'@'.$connect_data['host'].' automatically identified for '.$nick );
-				}
-				else
-				{
-					self::_registered_nick( $nick, $user );
-				}
+				return false;
 			}
-			// is the user existing?
+			elseif ( $user->validated == 0 && $user->suspended == 0 )
+			{
+				ircd::on_user_logout( $nick );
+				core::$nicks[$nick]['identified'] = false;
+				// they shouldn't really have registered mode
+				
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
+			}
+			elseif ( $user->identified == 0 && $user->suspended == 0 )
+			{
+				self::_registered_nick( $nick, $user );
+			}
+			elseif ( $user->identified == 1 && $user->last_hostmask == core::get_full_hostname( $nick ) )
+			{
+				ircd::on_user_login( $nick );
+				core::$nicks[$nick]['identified'] = true;
+				
+				if ( !$startup )
+					core::alog( core::$config->nickserv->nick.': '.$connect_data['ident'].'@'.$connect_data['host'].' automatically identified for '.$nick );
+			}
+			else
+			{
+				self::_registered_nick( $nick, $user );
+			}
 		}
 		// on connect let them know that they're using
 		// an identified nickname

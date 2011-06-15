@@ -58,7 +58,7 @@ class os_ignore implements module
 		
 			if ( trim( $who ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
 				return false;
 			}
 			// wrong syntax
@@ -72,7 +72,7 @@ class os_ignore implements module
 		
 			if ( trim( $who ) == '' )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
 				return false;
 			}
 			// wrong syntax
@@ -92,7 +92,7 @@ class os_ignore implements module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
 			// wrong syntax
 			return false;
 		}
@@ -124,7 +124,7 @@ class os_ignore implements module
 		
 		if ( services::is_root( $who ) && !services::is_root( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, operserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to drop a root?

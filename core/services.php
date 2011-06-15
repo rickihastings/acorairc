@@ -29,7 +29,7 @@ class services
 	*/
 	static public function user_exists( $nick, $identified = true, $array )
 	{
-		if ( $identified )
+		if ( $identified === true )
 			$user_q = database::select( 'users', $array, array( 'display', '=', $nick, 'AND', 'identified', '=', '1' ) );
 		else
 			$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );

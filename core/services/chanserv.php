@@ -19,6 +19,11 @@ class chanserv implements service
 	
 	static public $help;
 	// help
+	
+	static public $chan_q = array();
+	// store the last queries in an internal array, cause i've
+	// noticed the same query is being called like 5 times cause the data
+	// is used in 5 different places.
 
 	/*
 	* __construct
@@ -119,12 +124,11 @@ class chanserv implements service
 			
 			foreach ( $chans as $chan )
 			{
-				if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic', 'suspended' ) ) )
-				{
-					self::_join_channel( $channel );
-					// join the channel
-				}
-				// does the channel exist?
+				self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+				
+				if ( self::$chan_q[$chan] )
+					self::_join_channel( self::$chan_q[$chan] );
+				// join the channel
 			}
 		}
 		// hook to the event when a channel is created.
@@ -170,7 +174,9 @@ class chanserv implements service
 			
 			foreach ( $chans as $chan )
 			{
-				if ( services::chan_exists( $chan, array( 'channel', 'topic' ) ) !== false )
+				self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+			
+				if ( self::$chan_q[$chan] !== false )
 				{
 					database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $chan ) );
 					// lets update the last used timestamp
@@ -329,7 +335,7 @@ class chanserv implements service
 	* $chan - The channel chanserv is to join
 	*/
 	static public function _join_channel( $channel )
-	{	
+	{
 		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $channel->channel ) );
 		// lets update the last used timestamp
 		

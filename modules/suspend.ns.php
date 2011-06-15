@@ -199,9 +199,9 @@ class ns_suspend implements module
 		if ( $connect_data !== false )
 		{
 			$nick = $connect_data['nick'];
-			$user = services::user_exists( $nick, false, array( 'display', 'suspended' ) );
+			$user = nickserv::$nick_q[$nick];;
 			
-			if ( $user === false )
+			if ( !isset( $user ) || $user === false )
 				return false;
 			if ( $user->suspended == 0 )
 				return false;

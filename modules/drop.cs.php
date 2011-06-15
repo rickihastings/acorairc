@@ -113,6 +113,10 @@ class cs_drop implements module
 		
 		core::alog( 'drop_command(): '.$chan.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
 		// log what we need to log.
+		
+		unset( chanserv::$chan_q[$chan] );
+		unset( chanserv::$chan_flags_q[$chan] );
+		// remove chanserv::$chan_q[$chan] just incase
 	}
 	
 	/*

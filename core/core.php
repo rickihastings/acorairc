@@ -30,12 +30,14 @@ class core
 	static public $debug = false;
 	static public $services_account = false;
 	static public $hide_chans = true;
+	static public $session_rows;
 	// our main static variables, these are all very important.
 	
 	static public $servers = array();
 	static public $chans = array();
 	static public $nicks = array();
 	static public $uids = array();
+	static public $ips = array();
 	static public $help;
 	// we set $uids anyway, although its only used on networks
 	// that use TS6 - UUID/SID style protocol, it's here anyway.
@@ -336,7 +338,7 @@ class core
 				modules::$list[$module]['class']->main( $ircdata, $startup );
 		}	
 		// any core modules? humm
-			
+		
 		foreach ( self::$service_bots as $bot )
 			$this->$bot->main( $ircdata, $startup );
 		// we hook to each of our bots
@@ -359,7 +361,12 @@ class core
 		// let's us keep track of the linked servers
 		
 		if ( ircd::on_connect( $ircdata ) !== false )
+		{
 			ircd::handle_on_connect( $ircdata, $startup );
+			// handle connect
+			core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'akill' ) );
+			// check for session rows here so both modules (session/akill) can access it.
+		}
 		// log shit on connect, basically the users host etc.
 		
 		if ( ircd::on_nick_change( $ircdata ) !== false )

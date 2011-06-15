@@ -203,7 +203,7 @@ class cs_suspend implements module
 			
 			foreach ( $chans as $chan )
 			{
-				$channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) );
+				$channel = chanserv::$chan_q[$chan];
 			
 				if ( $channel === false )
 					continue;
@@ -227,7 +227,7 @@ class cs_suspend implements module
 			foreach ( $chans as $chan )
 			{
 				$nusers = core::$chans[$chan]['users'];
-				$channel = services::chan_exists( $chan, array( 'channel', 'suspended', 'suspend_reason' ) );
+				$channel = chanserv::$chan_q[$chan];
 				
 				if ( $channel === false )
 					continue;
