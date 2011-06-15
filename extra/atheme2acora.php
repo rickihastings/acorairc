@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* extra/anope2acora.php: Anope to Acora database convert.
+* extra/atheme2acora.php: Atheme to Acora database convert.
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
