@@ -75,9 +75,9 @@ class core
 		self::$debug = ( $argv[1] == 'debug' ) ? true : false;
 		// is debug mode running? y/n
 		
+		if ( isset( self::$config->operserv ) ) self::$service_bots[] = 'operserv';
 		if ( isset( self::$config->nickserv ) ) self::$service_bots[] = 'nickserv';
 		if ( isset( self::$config->chanserv ) ) self::$service_bots[] = 'chanserv';
-		if ( isset( self::$config->operserv ) ) self::$service_bots[] = 'operserv';
 		// setup our $config->service_bots dir
 		
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/core.php' );

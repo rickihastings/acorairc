@@ -29,7 +29,7 @@
 * Add a confirm code protection to DROP to ensure it's not accidently used (DONE)
 * Look into bans being set upon burst, we currently can't see this happening, charybdis uses BMASK, not sure what insp uses. fix! (DONE)
 * Add mass mode command, convert mode::type_mask to use this and also levels, this allows setting a tonne of modes together compressed (DONE)
-* Add a session limting/clone detection module OPERSERV
+* Add a session limting/clone detection module OPERSERV (DONE)
 * Add AKILL system OPERSERV
 * Add timers to +b flags (DONE)
 * Add chanserv invite/add +i flag to enable use of it (DONE)
