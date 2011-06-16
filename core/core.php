@@ -283,7 +283,7 @@ class core
 			}
 			// here we output debug data, if there is any.
 			
-			usleep( 20000 );
+			usleep( 40000 );
 			// 50000 breaks /hop and /cycle
 			// 40000 is quite slow when handling alot of data
 			// 15/20/25 000 has high cpu usage for 10 mins or so, i'm settling at 15000
