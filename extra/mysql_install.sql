@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 10, 2011 at 11:36 AM
+-- Generation Time: Jun 18, 2011 at 06:56 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `system_chans` (
   `suspended` tinyint(1) NOT NULL DEFAULT '0',
   `suspend_reason` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_chans`
@@ -59,14 +59,12 @@ CREATE TABLE IF NOT EXISTS `system_chans_flags` (
   `modelock` text NOT NULL,
   `topicmask` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_chans_flags`
 --
 
-INSERT INTO `system_chans_flags` (`id`, `channel`, `flags`, `desc`, `url`, `email`, `welcome`, `modelock`, `topicmask`) VALUES
-(1, '#services', 'FSGKdwT', 'test', '', '', 'You fucking prick!', '', '');
 
 -- --------------------------------------------------------
 
@@ -77,11 +75,14 @@ INSERT INTO `system_chans_flags` (`id`, `channel`, `flags`, `desc`, `url`, `emai
 CREATE TABLE IF NOT EXISTS `system_chans_levels` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
   `channel` varchar(255) NOT NULL,
+  `setby` varchar(255) NOT NULL,
   `target` varchar(255) NOT NULL,
   `flags` varchar(255) NOT NULL,
   `reason` varchar(255) NOT NULL,
+  `expire` int(10) NOT NULL,
+  `timestamp` int(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_chans_levels`
@@ -167,6 +168,30 @@ CREATE TABLE IF NOT EXISTS `system_logon_news` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `system_sessions`
+--
+
+CREATE TABLE IF NOT EXISTS `system_sessions` (
+  `id` int(10) NOT NULL AUTO_INCREMENT,
+  `nick` varchar(255) NOT NULL,
+  `ip_address` varchar(15) NOT NULL,
+  `limit` int(3) NOT NULL,
+  `description` varchar(255) NOT NULL,
+  `time` int(20) NOT NULL,
+  `expire` int(20) NOT NULL,
+  `hostmask` varchar(255) NOT NULL,
+  `akill` int(1) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
+
+--
+-- Dumping data for table `system_sessions`
+--
+
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `system_users`
 --
 
@@ -185,15 +210,12 @@ CREATE TABLE IF NOT EXISTS `system_users` (
   `suspended` tinyint(1) NOT NULL DEFAULT '0',
   `suspend_reason` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_users`
 --
 
-INSERT INTO `system_users` (`id`, `display`, `pass`, `salt`, `timestamp`, `last_timestamp`, `last_hostmask`, `vhost`, `identified`, `validated`, `real_user`, `suspended`, `suspend_reason`) VALUES
-(1, 'Ricki', '5e250ba71cd4eb37c3cea1367d37a1a151d4c10f', 'McOxsxSz', 1306508166, 0, 'Ricki!ricki@netadmin.omega.org.za', '', 1, 1, 1, 0, ''),
-(2, 'dongboy', '', '', 1306517904, 1306517904, '', '', 0, 0, 0, 1, 'No reason');
 
 -- --------------------------------------------------------
 
@@ -208,14 +230,12 @@ CREATE TABLE IF NOT EXISTS `system_users_flags` (
   `email` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 --
 -- Dumping data for table `system_users_flags`
 --
 
-INSERT INTO `system_users_flags` (`id`, `nickname`, `flags`, `email`, `url`) VALUES
-(1, 'Ricki', 'eP', 'rickihastings22@gmail.com', '');
 
 -- --------------------------------------------------------
 
