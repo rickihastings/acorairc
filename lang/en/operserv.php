@@ -38,6 +38,7 @@ $help = (object) array(
 	'OS_HELP_RESTART_1'		=> '     RESTART   - Restart the Services program',
 	'OS_HELP_STATS_1'		=> '     STATS     - Show status of Services and network',
 	'OS_HELP_SESSION_1'		=> '     SESSION   - Manage session limits',
+	'OS_HELP_AKILL_1'		=> '     AKILL     - Manage network autokills',
 	'OS_HELP_MODULES_1'		=> '     MODLIST   - List loaded modules',
 	'OS_HELP_MODLOAD_1'		=> '     MODLOAD   - Load a module',
 	'OS_HELP_MODUNLOAD_1'	=> '     MODUNLOAD - Unload a module',
@@ -139,6 +140,23 @@ $help = (object) array(
 		'=---- End of {operserv} Help ----=',
 	),
 	// SESSION
+	
+	'OS_HELP_AKILL_ALL' 		=> array(
+		'=---- {operserv} Help ----=',
+		'Syntax: AKILL ADD hostmask expiry reason',
+		'        AKILL DEL hostmask',
+		'        AKILL LIST',
+		' ',
+		'Allows management of network autokills, hostmask can be in the',
+		'format of nick!user@host, wildcards supported. Expiry time and',
+		'reasons are not required although are recommended. If no expiry',
+		'time is added the ban will never expire. Expiry times should be',
+		'in the format of 1d2h2m, equating to 1 day 2 hours 2 minutes.',
+		' ',
+		'Command limited to Services Roots.',
+		'=---- End of {operserv} Help ----=',
+	),
+	// AKILL
 	
 	'OS_HELP_MODLIST_ALL'		=> array(
 		'=---- {operserv} Help ----=',
@@ -395,7 +413,14 @@ $help = (object) array(
 	'OS_EXCP_LIST'		=> '{num} {ip_addr}  {limit} [Added by: {nick}] [Reason: {desc}]',
 	'OS_EXCP_LIST_B'	=> 'End of list - {num} exception(s)',
 	// session
-	
+	'OS_AKILL_ADD'		=> 'Auto kill added for {hostname} set to expire in {expire}',
+	'OS_AKILL_EXISTS'	=> 'Auto kill for {hostname} already exists',
+	'OS_AKILL_DEL'		=> 'Auto kill for {hostname} removed',
+	'OS_AKILL_NOEXISTS'	=> 'No auto kill exists for {hostname}',
+	'OS_AKILL_LIST_T'	=> 'Entry  Hostmask                                          Details',
+	'OS_AKILL_LIST_D'	=> '-----  ------------------------------------------------  -------',
+	'OS_AKILL_LIST'		=> '{num} {hostname}[Added by: {nick}] [Expires in: {expire}] [Reason: {desc}]',
+	'OS_AKILL_LIST_B'	=> 'End of list - {num} exception(s)',
 	// akill
 );
 

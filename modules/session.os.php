@@ -17,7 +17,7 @@
 class os_session implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -140,6 +140,7 @@ class os_session implements module
 		{
 			$nick = $connect_data['nick'];
 			$clients = core::$ips[$connect_data['ip_address']];
+			$kill = true;
 		
 			if ( $clients > 1 )
 				core::alog( 'WARNING: multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
@@ -151,6 +152,13 @@ class os_session implements module
 			
 			while ( $sessions = database::fetch( core::$session_rows ) )
 			{
+				if ( $sessions->akill == 1 )
+				{
+					$kill = false;
+					continue;
+				}
+				// if akill is set to 1 skip
+			
 				if ( $sessions->ip_address != $connect_data['ip_address'] )
 					continue;
 				// it doesnt match the record, skip to next one.
@@ -166,10 +174,10 @@ class os_session implements module
 			}
 			// check the sessions database
 			
-			if ( $clients > $match )
+			if ( $kill && $clients > $match )
 			{
 				ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
-				core::alog( 'WARNING: client limit reached ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
+				core::alog( 'WARNING: client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 			}
 			// their limit has been bypassed >:) KILL THEM
 		}

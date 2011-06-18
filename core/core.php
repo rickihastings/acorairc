@@ -364,7 +364,7 @@ class core
 		{
 			ircd::handle_on_connect( $ircdata, $startup );
 			// handle connect
-			core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'akill' ) );
+			core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 			// check for session rows here so both modules (session/akill) can access it.
 		}
 		// log shit on connect, basically the users host etc.
@@ -999,10 +999,10 @@ class core
 		if ( $mins > 0 ) $return .= $mins.'m ';
 		// minutes
 		
-		$return .= $remaining.'s';
+		if ( $remaining > 0 ) $return .= $remaining.'s';
 		// seconds
 		
-		return $return;
+		return trim( $return );
 		// return the result.
 	}
 }

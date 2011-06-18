@@ -473,6 +473,8 @@ class cs_levels implements module
 				}
 				// loop through calculating it into seconds
 				
+				$expire = ( count( $parsed ) == 0 ) ? 0 : $expire;
+				
 				if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 				{
 					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );

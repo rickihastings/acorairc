@@ -30,12 +30,10 @@
 * Look into bans being set upon burst, we currently can't see this happening, charybdis uses BMASK, not sure what insp uses. fix! (DONE)
 * Add mass mode command, convert mode::type_mask to use this and also levels, this allows setting a tonne of modes together compressed (DONE)
 * Add a session limting/clone detection module OPERSERV (DONE)
-* Add AKILL system OPERSERV
+* Add AKILL system OPERSERV (DONE)
 * Add timers to +b flags (DONE)
 * Add chanserv invite/add +i flag to enable use of it (DONE)
 * Add +R flag to enable use of CLEAR (DONE)
 * Change timers to hours/minutes (DONE)
-* Add ACCESS module, to simplify adding to access lists, it's quite complicated atm, levels are going to stay, this is going to be a short cut
-* Add BANS module, to simplify bans through levels system, also to view bans seperate from access
 * Change listing modules to new style lists*, and listing ignore*, stats opers* and also vhosts* (DONE)
 * Notify user when channel is CLEAR, SYNC (DONE)
