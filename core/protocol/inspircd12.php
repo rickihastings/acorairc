@@ -825,7 +825,7 @@ class ircd implements protocol
 		// if ircop ignore
 	
 		$rduration = ( $duration * 60 );
-		$mask = '*@'.$user['ip_address']
+		$mask = '*@'.$user['ip_address'];
 		// set some vars
 	
 		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask.' '.$nick.' '.core::$network_time.' '.$rduration.' :'.$message );
@@ -900,7 +900,7 @@ class ircd implements protocol
 	*/
 	static public function set_registered_mode( $nick, $channel )
 	{
-		ircd::mode( $nick, $channel, '+r' );
+		//ircd::mode( $nick, $channel, '+r' );
 	}
 	
     /*

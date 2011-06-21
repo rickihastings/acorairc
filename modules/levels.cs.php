@@ -788,7 +788,7 @@ class cs_levels implements module
 			
 			foreach ( $chans as $chan )
 			{
-				if ( !chanserv::$chan_q[$chan] === false )
+				if ( chanserv::$chan_q[$chan] === false )
 					continue;
 				// if the channel doesn't exist we return false, to save us the hassle of wasting
 				// resources on this stuff below.
