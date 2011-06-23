@@ -108,7 +108,7 @@ $help = (object) array(
 		'More than one flag can be set at once, for example "-P+S". With multiple',
 		'parameters.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "nickserv_op" oper priv.',
 		'=---- End of {nickserv} Help ----=',
 	),
 	// NS SAFLAGS
@@ -130,7 +130,7 @@ $help = (object) array(
 		'Changes the password of the specified user used to identify',
 		'them as the nickname\'s owner.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "nickserv_op" oper priv.',
 		'=---- End of {nickserv} Help ----=',
 	),
 	// SAPASS
@@ -241,7 +241,8 @@ $help = (object) array(
 		'to re register by anyone.',
 		' ',
 		'You will also lose any channels registered and all',
-		'channel access under that nickname.',
+		'channel access under that nickname. IRC Operators with',
+		'"nickserv_op" privs can drop any nickname.',
 		'=---- End of {nickserv} Help ----=',
 	),
 	// DROP

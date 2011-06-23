@@ -434,7 +434,7 @@ class chanserv implements service
 		// we're asuming that check has already been done (Y)
 		// we just grab it.
 		
-		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identifed'] ) )
+		if ( self::check_levels( $nick, $chan, array( 'F' ) ) || services::oper_privs( $nick, "chanserv_op" ) )
 			return true;
 		else
 			return false;
@@ -573,9 +573,9 @@ class chanserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, $help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $privs = '' )
 	{
-		commands::add_help( 'chanserv', $module, $command, $help, $oper_help );
+		commands::add_help( 'chanserv', $module, $command, $help, $privs );
 	}
 	
 	/*

@@ -91,7 +91,7 @@ class ns_recover implements module
 			}
 			// you can't ghost yourself.. waste of time, and clearly useless.
 		
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
 			{
 				$random_nick = 'Unknown'.rand( 10000, 99999 );
 				// generate a random nick
@@ -145,7 +145,7 @@ class ns_recover implements module
 
 		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
 			{
 				if ( !isset( self::$held_nicks[$unick] ) )
 				{

@@ -289,8 +289,9 @@ $help = (object) array(
 		' ',
 		'Unregisters the given channel providing you have +F channel',
 		'level. Once a channel is dropped all data associated with the',
-		'channel is removed and cannot be restored. IRC Operators can',
-		'drop any channel without needing +F channel level.',
+		'channel is removed and cannot be restored. IRC Operatoprs with',
+		'"chanserv_op" privs can drop any channel without needing +F',
+		'channel level.',
 		'=---- End of {chanserv} Help ----=',
 	),
 	// DROP
@@ -339,7 +340,7 @@ $help = (object) array(
 		'be cancelled by using the UNSUSPEND command to preserve',
 		'all previous settings and data.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "chanserv_op" oper priv.',
 		'=---- End of {chanserv} Help ----=',
 	),
 	// SUSPEND
@@ -351,7 +352,7 @@ $help = (object) array(
 		'Releases a suspended channel. All data and settings',
 		'are preserved from before the suspension.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "chanserv_op" oper priv.',
 		'=---- End of {chanserv} Help ----=',
 	),
 	// UNSUSPEND

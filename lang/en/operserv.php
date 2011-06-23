@@ -62,7 +62,7 @@ $help = (object) array(
 		'Global Messenger. The hostmask shoudld be in the format of',
 		'nick!user@host',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "global_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// GLOBAL
@@ -77,7 +77,7 @@ $help = (object) array(
 		'etc. It is recommended to turn this off once finished with, as it can easily',
 		'be constructed as a "power trip".',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// SHUTDOWN
@@ -88,7 +88,7 @@ $help = (object) array(
 		' ',
 		'Causes the services program to shutdown.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// SHUTDOWN
@@ -99,7 +99,7 @@ $help = (object) array(
 		' ',
 		'Causes the services program to reboot.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// RESTART
@@ -114,8 +114,6 @@ $help = (object) array(
 		'recorded information, such as number of users and channels.',
 		'OPERS will show a list of all opers, when they connected and',
 		'their full hostmask.',
-		' ',
-		'Command limited to IRC Operators.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// STATS
@@ -136,7 +134,7 @@ $help = (object) array(
 		'in the log channel. When the limit is reached any new clients',
 		'are killed.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "global_op" oper priv to ADD/DEL.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// SESSION
@@ -153,7 +151,7 @@ $help = (object) array(
 		'time is added the ban will never expire. Expiry times should be',
 		'in the format of 1d2h2m, equating to 1 day 2 hours 2 minutes.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "global_op" oper priv to ADD/DEL.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// AKILL
@@ -163,8 +161,6 @@ $help = (object) array(
 		'Syntax: MODLIST',
 		' ',
 		'Lists all currently loaded modules.',
-		' ',
-		'Command limited to IRC Operators.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
@@ -176,7 +172,7 @@ $help = (object) array(
 		'This command loads and initiates the requested',
 		'module from the modules directory.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
@@ -189,7 +185,7 @@ $help = (object) array(
 		'module. The module can be reloaded with the',
 		'MODLOAD command.',
 		' ',
-		'Command limited to Services Roots.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// MODLIST
@@ -207,7 +203,7 @@ $help = (object) array(
 		'commands and fantasy commands. When adding a hostmask',
 		'it should be in the format (nick!user@host).',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "global_op" oper priv ADD/DEL.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// IGNORE
@@ -223,7 +219,7 @@ $help = (object) array(
 		'to them. If there are more than three news messages, only',
 		'the three most recent will be sent to avoid flooding the user.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "global_op" oper priv ADD/DEL.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// LOGONNEWS
@@ -241,7 +237,7 @@ $help = (object) array(
 		'All IRCops are ignored from this, services staff have',
 		'to be opered up for this command to ignore them.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "global_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// CHANCLEAR
@@ -252,7 +248,7 @@ $help = (object) array(
 		' ',
 		'Reloads the services configuration file.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "root" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// REHASH
@@ -267,7 +263,7 @@ $help = (object) array(
 		'a numeric value, note that some ircds don\'t take this',
 		'into account so a dummy value can be entered.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "local_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// JUPE
@@ -281,7 +277,7 @@ $help = (object) array(
 		'command. The kick message will have the nickname of the',
 		'IRCop sending the KICK command prepended.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "local_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// KICK
@@ -294,7 +290,7 @@ $help = (object) array(
 		'Parameters are the same as for the standard /MODE',
 		'command.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "local_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// MODE
@@ -321,7 +317,7 @@ $help = (object) array(
 		'10 would be 30-10. The basic format for limit is',
 		'offset-max.',
 		' ',
-		'Command limited to IRC Operators.',
+		'Requires "local_op" oper priv.',
 		'=---- End of {operserv} Help ----=',
 	),
 	// VHOST
@@ -360,9 +356,9 @@ $help = (object) array(
 	'OS_STATS_N_4'		=> '  Current users: {users}',
 	'OS_STATS_N_5'		=> '  Current chans: {chans}',
 	// stats NETWORK
-	'OS_STATS_O_T'		=> 'Entry  Hostmask                                          Online Since',
-	'OS_STATS_O_D'		=> '-----  ------------------------------------------------  ------------',
-	'OS_STATS_O_L'		=> '{num} {host}[{time}]',
+	'OS_STATS_O_T'		=> 'Entry  Hostmask                                          Details',
+	'OS_STATS_O_D'		=> '-----  ------------------------------------------------  -------',
+	'OS_STATS_O_L'		=> '{num} {host}[{time}]{privs}',
 	'OS_STATS_O_B'		=> 'End of list - {num} opers online',
 	// stats OPERS
 	'OS_MODLIST_TOP'	=> 'Module           Version       Module Info',

@@ -35,8 +35,8 @@ class os_ignore implements module
 		modules::init_module( 'os_ignore', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1 );
-		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL );
+		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, 'global_op' );
+		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'ignore', 'os_ignore', 'ignore_command' );
@@ -122,12 +122,12 @@ class os_ignore implements module
 	{
 		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
 		
-		if ( services::is_root( $who ) && !services::is_root( $nick ) )
+		if ( services::has_privs( $who ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
-		// is a non-root trying to drop a root?
+		// cant ignore someone with privs, regardless of what privs you have.
 			
 		if ( database::num_rows( $check_nick_q ) == 0 )
 		{

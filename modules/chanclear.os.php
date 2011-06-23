@@ -35,8 +35,8 @@ class os_chanclear implements module
 		modules::init_module( 'os_chanclear', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1 );
-		operserv::add_help( 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL );
+		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, 'global_op' );
+		operserv::add_help( 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'chanclear', 'os_chanclear', 'chanclear_command' );
@@ -56,6 +56,12 @@ class os_chanclear implements module
 		$reason = core::get_data_after( $ircdata, 2 );
 		$mode = strtoupper( $ircdata[0] );
 		// get the data.
+		
+		if ( !services::oper_privs( $nick, 'global_op' ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
 			
 		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'BAN' ) ) )
 		{

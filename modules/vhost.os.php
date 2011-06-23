@@ -35,8 +35,8 @@ class os_vhost implements module
 		modules::init_module( 'os_vhost', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1 );
-		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL );
+		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, 'local_op' );
+		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL, 'local_op' );
 		// add the help
 		
 		operserv::add_command( 'vhost', 'os_vhost', 'vhost_command' );
@@ -67,6 +67,13 @@ class os_vhost implements module
 				return false;
 			}
 			// are we missing nick? invalid syntax if so.
+			
+			if ( !services::oper_privs( $nick, 'local_op' ) )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+				return false;
+			}
+			// access?
 			
 			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
 			{
@@ -125,6 +132,13 @@ class os_vhost implements module
 		{
 			$unick = $ircdata[1];
 			// some variables.
+			
+			if ( !services::oper_privs( $nick, 'local_op' ) )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+				return false;
+			}
+			// access?
 			
 			if ( trim( $unick ) == '' )
 			{

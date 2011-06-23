@@ -35,15 +35,15 @@ class os_shutdown implements module
 		modules::init_module( 'os_shutdown', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_SHUTDOWN_1 );
-		operserv::add_help( 'os_shutdown', 'help shutdown', operserv::$help->OS_HELP_SHUTDOWN_ALL );
+		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_SHUTDOWN_1, 'root' );
+		operserv::add_help( 'os_shutdown', 'help shutdown', operserv::$help->OS_HELP_SHUTDOWN_ALL, 'root' );
 		// add the help
 		
 		operserv::add_command( 'shutdown', 'os_shutdown', 'shutdown_command' );
 		// add the shutdown command
 		
-		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_RESTART_1 );
-		operserv::add_help( 'os_shutdown', 'help restart', operserv::$help->OS_HELP_RESTART_ALL );
+		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_RESTART_1, 'root' );
+		operserv::add_help( 'os_shutdown', 'help restart', operserv::$help->OS_HELP_RESTART_ALL, 'root' );
 		// add the help
 			
 		operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
@@ -62,7 +62,7 @@ class os_shutdown implements module
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
 		
-		if ( services::is_root( $nick ) )
+		if ( services::oper_privs( $nick, 'root' ) )
 		{
 			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			{
@@ -94,7 +94,7 @@ class os_shutdown implements module
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
 		
-		if ( services::is_root( $nick ) )
+		if ( services::oper_privs( $nick, 'root' ) )
 		{
 			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			{

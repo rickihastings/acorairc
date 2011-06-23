@@ -36,8 +36,8 @@ class ns_password implements module
 		
 		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_PASSWORD_1 );
 		nickserv::add_help( 'ns_password', 'help password', nickserv::$help->NS_HELP_PASSWORD_ALL );
-		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_SAPASS_1, true );
-		nickserv::add_help( 'ns_password', 'help sapass', nickserv::$help->NS_HELP_SAPASS_ALL, true );
+		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_SAPASS_1, 'nickserv_op' );
+		nickserv::add_help( 'ns_password', 'help sapass', nickserv::$help->NS_HELP_SAPASS_ALL, 'nickserv_op' );
 		// add the help docs
 		
 		nickserv::add_command( 'password', 'ns_password', 'password_command' );
@@ -117,14 +117,14 @@ class ns_password implements module
 		}
 		// find out if our user is registered
 		
-		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
+		if ( services::has_privs( $unick ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to change a root's password?
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;

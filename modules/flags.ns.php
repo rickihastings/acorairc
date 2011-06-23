@@ -45,8 +45,8 @@ class ns_flags implements module
 		
 		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1 );
 		nickserv::add_help( 'ns_flags', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL );
-		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, true );
-		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, true );
+		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, 'nickserv_op' );
+		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'flags', 'ns_flags', 'flags_command' );
@@ -245,14 +245,14 @@ class ns_flags implements module
 		}
 		// find out if our user is registered
 		
-		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
+		if ( services::has_privs( $unick ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
-		// is a non-root trying to change a root's password?
+		// is someone trying to change someones details who has oper flags?
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;

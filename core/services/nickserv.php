@@ -248,9 +248,9 @@ class nickserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, $help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $privs = '' )
 	{
-		commands::add_help( 'nickserv', $module, $command, $help, $oper_help );
+		commands::add_help( 'nickserv', $module, $command, $help, $privs );
 	}
 	
 	/*

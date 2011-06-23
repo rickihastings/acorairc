@@ -16,8 +16,82 @@
 class services
 {
 	
-	public function __construct() {}
+	public function __construct() { }
 	// __construct, makes everyone happy.
+	
+	/*
+	* oper_privs
+	*
+	* @params
+	* $nick - The nickname to check.
+	* $privs - Privs to check
+	*/
+	static public function oper_privs( $nick, $privs )
+	{
+		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+			return false;
+	
+		foreach ( core::$config->opers as $i => $data )
+		{
+			$split = explode( ':', $data );
+			
+			if ( strtolower( $split[0] ) != strtolower( $nick ) )
+				continue;
+			// no privs here.
+			
+			unset( $split[0] );
+			
+			if ( in_array( $privs, $split ) )
+				return true;
+			// we've found some privs for the nick, let's get the privs and try match them against $privs
+		}
+		// loop for privs!
+		
+		return false;
+	}
+	
+	/*
+	* has_privs
+	*
+	* @params
+	* $nick - The nickname to check.
+	*/
+	static public function has_privs( $nick )
+	{
+		foreach ( core::$config->opers as $i => $data )
+		{
+			$split = explode( ':', $data );
+			
+			if ( strtolower( $split[0] ) == strtolower( $nick ) )
+				return true;
+			// no privs here.
+		}
+	
+		return false;
+	}
+	
+	/*
+	* show_privs
+	*
+	* @params
+	* $nick - The nickname to check.
+	*/
+	static public function show_privs( $nick )
+	{
+		foreach ( core::$config->opers as $i => $data )
+		{
+			$split = explode( ':', $data );
+			
+			if ( strtolower( $split[0] ) == strtolower( $nick ) )
+			{
+				unset( $split[0] );
+				return implode( ':', $split );
+			}
+			// no privs here.
+		}
+	
+		return false;
+	}
 	
 	/*
 	* user_exists
@@ -88,24 +162,7 @@ class services
 		
 		return $row;
 		// if it is registered return the object.
-	}
-	
-	/*
-	* is_root
-	* 
-	* @params
-	* $nick - Which nickname to check.
-	*/
-	static public function is_root( $nick )
-	{
-		$root_array = (array) core::$config->root;
-		
-		if ( in_array( $nick, $root_array ) )
-			return true;
-		else
-			return false;
-	}
-	
+	}	
 		
 	/*
 	* communicate

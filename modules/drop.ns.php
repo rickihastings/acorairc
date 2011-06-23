@@ -56,19 +56,19 @@ class ns_drop implements module
 		$password = $ircdata[1];
 		// get the nick.
 		
-		if ( trim( $unick ) == '' || ( trim( $password ) == '' && ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] ) ) )
+		if ( trim( $unick ) == '' || ( trim( $password ) == '' && !services::oper_privs( $nick, "nickserv_op" ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
 			return false;
 		}
 		// invalid syntax
 		
-		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
+		if ( services::has_privs( $unick ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
-		// is a non-root trying to drop a root?
+		// invalid syntax
 		
 		if ( $user = services::user_exists( $unick, false, array( 'id', 'display', 'pass', 'salt', 'suspended' ) ) )
 		{
@@ -79,7 +79,7 @@ class ns_drop implements module
 			}
 			// are they suspended?
 			
-			if ( $user->pass == sha1( $password.$user->salt ) || ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] ) )
+			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
 			{
 				database::delete( 'users', array( 'display', '=', $user->display ) );
 				database::delete( 'users_flags', array( 'nickname', '=', $user->display ) );

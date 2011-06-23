@@ -36,11 +36,11 @@ class os_module implements module
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODULES_1 );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1 );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1 );
+		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1, 'root' );
+		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1, 'root' );
 		operserv::add_help( 'os_module', 'help modlist', operserv::$help->OS_HELP_MODLIST_ALL );
-		operserv::add_help( 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL );
-		operserv::add_help( 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL );
+		operserv::add_help( 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL, 'root' );
+		operserv::add_help( 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL, 'root' );
 		// add the help
 		
 		operserv::add_command( 'modlist', 'os_module', 'modlist_command' );
@@ -100,7 +100,7 @@ class os_module implements module
 		$file = $file[1].'.'.$file[0].'.php';
 		// get the module thats been requested.
 		
-		if ( services::is_root( $nick ) )
+		if ( services::oper_privs( $nick, 'root' ) )
 		{
 			if ( trim( $module ) == '' )
 			{
@@ -167,7 +167,7 @@ class os_module implements module
 		$module = $ircdata[0];
 		// get the module thats been requested.
 		
-		if ( services::is_root( $nick ) )
+		if ( services::oper_privs( $nick, 'root' ) )
 		{
 			if ( trim( $module ) == '' )
 			{

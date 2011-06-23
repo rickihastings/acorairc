@@ -35,10 +35,10 @@ class cs_suspend implements module
 		modules::init_module( 'cs_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, true );
-		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_UNSUSPEND_1, true );
-		chanserv::add_help( 'cs_suspend', 'help suspend', chanserv::$help->CS_HELP_SUSPEND_ALL, true );
-		chanserv::add_help( 'cs_suspend', 'help unsuspend', chanserv::$help->CS_HELP_UNSUSPEND_ALL, true );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_UNSUSPEND_1, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help suspend', chanserv::$help->CS_HELP_SUSPEND_ALL, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help unsuspend', chanserv::$help->CS_HELP_UNSUSPEND_ALL, 'chanserv_op' );
 		// add the help
 		
 		chanserv::add_command( 'suspend', 'cs_suspend', 'suspend_command' );
@@ -60,7 +60,7 @@ class cs_suspend implements module
 		$chan_info = array();
 		// get the channel.
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, 'chanserv_op' ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -136,7 +136,7 @@ class cs_suspend implements module
 		$chan = core::get_chan( $ircdata, 0 );
 		// get the channel.
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, 'chanserv_op' ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;

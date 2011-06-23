@@ -160,7 +160,7 @@ class cs_drop implements module
 		{
 			return true;
 		}
-		elseif ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
+		elseif ( services::oper_privs( $nick, 'chanserv_op' ) )
 		{
 			ircd::wallops( core::$config->chanserv->nick, $nick.' used DROP on '.$chan );
 			return true;

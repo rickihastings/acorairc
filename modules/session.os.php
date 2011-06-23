@@ -65,7 +65,7 @@ class os_session implements module
 			$description = core::get_data_after( $ircdata, 3 );
 			// get our vars
 			
-			if ( !services::is_root( $nick ) )
+			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;
@@ -95,7 +95,7 @@ class os_session implements module
 			$ip_address = $ircdata[1];
 			// get our vars
 			
-			if ( !services::is_root( $nick ) )
+			if ( !services::global_op( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;

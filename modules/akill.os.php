@@ -74,7 +74,7 @@ class os_akill implements module
 			$rexpire = $ircdata[2]; 
 			$reason = core::get_data_after( $ircdata, 3 );
 			
-			if ( !services::is_root( $nick ) )
+			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;
@@ -134,7 +134,7 @@ class os_akill implements module
 			$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
 			// get our vars
 		
-			if ( !services::is_root( $nick ) )
+			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;

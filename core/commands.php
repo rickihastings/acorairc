@@ -227,9 +227,9 @@ class commands
 	* $module - The name of the module.
 	* $command - The command to hook the array to.
 	* $help - The array to hook.
-	* $oper_help - should be a true or false boolean
+	* $privs - oper privs
 	*/
-	static public function add_help( $hook, $module, $command, $help, $oper_help = false )
+	static public function add_help( $hook, $module, $command, $help, $privs = '' )
 	{
 		$command = strtolower( $command );
 		// make it lowercase
@@ -253,7 +253,7 @@ class commands
 				$meta_data = array(
 					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
-					'oper_help' => $oper_help,
+					'privs' => $privs,
 				);
 			
 				self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -269,7 +269,7 @@ class commands
 			$meta_data = array(
 				'info' => ( $help == ' ' ) ? '' : $help,
 				'module' => $module,
-				'oper_help' => $oper_help,
+				'privs' => $privs,
 			);
 		
 			self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -329,9 +329,9 @@ class commands
 		{
 			$meta = unserialize( $meta_data );
 			
-			if ( $meta['oper_help'] && core::$nicks[$nick]['identified'] && core::$nicks[$nick]['ircop'] )
+			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) )
 				services::communicate( $bot, $nick, $meta['info'] );
-			elseif ( !$meta['oper_help'] )
+			elseif ( $meta['privs'] == '' )
 				services::communicate( $bot, $nick, $meta['info'] );
 		}
 		// display the main stuff

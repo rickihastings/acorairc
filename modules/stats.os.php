@@ -89,6 +89,8 @@ class os_stats implements module
 				
 				$x++;
 				$false_host = core::get_full_hostname( $user );
+				$privs = services::show_privs( $user );
+				$privs = ( !$privs ) ? '' : ' ['.$privs.']';
 				// some vars.
 				
 				$num = $x;
@@ -104,7 +106,7 @@ class os_stats implements module
 				}
 				// this is just a bit of fancy fancy, so everything displays neat
 				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_L, array( 'num' => $num, 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ) ) );
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_L, array( 'num' => $num, 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ), 'privs' => $privs ) );
 			}
 			// opers info.
 			

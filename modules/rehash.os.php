@@ -35,8 +35,8 @@ class os_rehash implements module
 		modules::init_module( 'os_rehash', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1 );
-		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL );
+		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1, 'root' );
+		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL, 'root' );
 		// add the help
 		
 		operserv::add_command( 'rehash', 'os_rehash', 'rehash_command' );
@@ -52,6 +52,13 @@ class os_rehash implements module
 	*/
 	static public function rehash_command( $nick, $ircdata = array() )
 	{
+		if ( !services::oper_privs( $nick, 'root' ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
+		// access?
+	
 		$parser = new parser( CONFPATH.'services.conf' );
 		// load the parser
 		

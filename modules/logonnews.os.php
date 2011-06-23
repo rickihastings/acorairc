@@ -35,8 +35,8 @@ class os_logonnews implements module
 		modules::init_module( 'os_logonnews', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1 );
-		operserv::add_help( 'os_logonnews', 'help logonnews', operserv::$help->OS_HELP_LOGONNEWS_ALL );
+		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1, 'global_op' );
+		operserv::add_help( 'os_logonnews', 'help logonnews', operserv::$help->OS_HELP_LOGONNEWS_ALL, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'logonnews', 'os_logonnews', 'logonnews_command' );
@@ -64,6 +64,13 @@ class os_logonnews implements module
 				return false;
 			}
 			
+			if ( !services::oper_privs( $nick, 'global_op' ) )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+				return false;
+			}
+			// access?
+			
 			self::_add_news( $nick, $title, $text );
 			// add a news article
 		}
@@ -77,6 +84,13 @@ class os_logonnews implements module
 				// wrong syntax
 				return false;
 			}
+			
+			if ( !services::oper_privs( $nick, 'global_op' ) )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+				return false;
+			}
+			// access?
 			
 			self::_del_news( $nick, $title );
 			// delete a news article, FROM the title.

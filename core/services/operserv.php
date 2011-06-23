@@ -44,8 +44,8 @@ class operserv implements service
 		
 		if ( core::$config->operserv->override )
 		{
-			self::add_help( 'operserv', 'help', self::$help->OS_HELP_OVERRIDE_1 );
-			self::add_help( 'operserv', 'help override', self::$help->OS_HELP_OVERRIDE_ALL );
+			self::add_help( 'operserv', 'help', self::$help->OS_HELP_OVERRIDE_1, 'root' );
+			self::add_help( 'operserv', 'help override', self::$help->OS_HELP_OVERRIDE_ALL, 'root' );
 			// add the help
 			
 			self::add_command( 'override', 'operserv', 'override_command' );
@@ -65,7 +65,7 @@ class operserv implements service
 	{
 		$mode = strtolower( $ircdata[0] );
 		
-		if ( services::is_root( $nick ) )
+		if ( services::has_privs( $nick, 'root' ) )
 		{
 			if ( trim( $mode ) == '' || !in_array( $mode, array( 'on', 'off' ) ) )
 			{
@@ -179,9 +179,9 @@ class operserv implements service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, $help, $oper_help = false )
+	static public function add_help( $module, $command, $help, $privs = '' )
 	{
-		commands::add_help( 'operserv', $module, $command, $help, $oper_help );
+		commands::add_help( 'operserv', $module, $command, $help, $privs );
 	}
 	
 	/*

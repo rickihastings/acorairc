@@ -40,8 +40,8 @@ class os_global implements module
 		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1 );
-		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL );
+		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, 'global_op' );
+		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'global', 'os_global', 'global_command' );
@@ -87,6 +87,13 @@ class os_global implements module
 	{
 		$mask = $ircdata[0];
 		$message = core::get_data_after( $ircdata, 1 );
+		
+		if ( !services::oper_privs( $nick, 'global_op' ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
+		// access?
 		
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{

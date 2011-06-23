@@ -35,10 +35,10 @@ class ns_suspend implements module
 		modules::init_module( 'ns_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true );
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, true );
-		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, true );
-		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, true );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'suspend', 'ns_suspend', 'suspend_command' );
@@ -60,7 +60,7 @@ class ns_suspend implements module
 		$user_info = array();
 		// get the nick etc.
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
@@ -74,7 +74,7 @@ class ns_suspend implements module
 		}
 		// make sure unick isnt empty!
 		
-		if ( services::is_root( $unick ) && !services::is_root( $nick ) )
+		if ( services::has_privs( $unick ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
@@ -144,7 +144,7 @@ class ns_suspend implements module
 		$unick = $ircdata[0];
 		// get the nick etc.
 		
-		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
+		if ( !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
