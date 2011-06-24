@@ -145,444 +145,14 @@ class cs_flags implements module
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- +d ----------- //
-			if ( $flag == 'd' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+d', $params['d'] );
-				// +d the target in question
-			}
-			// ----------- +d ----------- //
-			
-			// ----------- +u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+u', $params['u'] );
-				// +u the target in question
-			}
-			// ----------- +u ----------- //
-			
-			// ----------- +e ----------- //
-			elseif ( $flag == 'e' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+e', $params['e'] );
-				// +e the target in question
-			}
-			// ----------- +e ----------- //
-			
-			// ----------- +w ----------- //
-			elseif ( $flag == 'w' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+w', $params['w'] );
-				// +w the target in question
-			}
-			// ----------- +w ----------- //
-			
-			// ----------- +m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+m', $params['m'] );
-				// +m the target in question
-			}
-			// ----------- +m ----------- //
-			
-			// ----------- +t ----------- //
-			elseif ( $flag == 't' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+t', $params['t'] );
-				// +t the target in question
-			}
-			// ----------- +t ----------- //
-			
-			// non paramtized modes go here.
-			
-			// ----------- +S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+S', '' );
-				// +S the target in question
-			}
-			// ----------- +S ----------- //
-			
-			// ----------- +F ----------- //
-			elseif ( $flag == 'F' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+F', '' );
-				// +F the target in question
-			}
-			// ----------- +F ----------- //
-			
-			// ----------- +G ----------- //
-			elseif ( $flag == 'G' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				if ( self::set_flag( $nick, $chan, '+G', '' ) !== false && count( core::$chans[$chan]['users'] ) > 0 )
-				{
-					ircd::join_chan( core::$config->chanserv->nick, $chan );
-					// join the chan.
-					
-					if ( ircd::$protect )
-						ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
-						// +ao its self.
-					else
-						ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
-						// +o its self.
-				}
-				// only join if channel has above 0 users in it.
-				// +G the target in question
-			}
-			// ----------- +G ----------- //
-			
-			// ----------- +T ----------- //
-			elseif ( $flag == 'T' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+T', '' );
-				// +F the target in question
-			}
-			// ----------- +T ----------- //
-			
-			// ----------- +K ----------- //
-			elseif ( $flag == 'K' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '+K', '' );
-				// +K the target in question
-			}
-			// ----------- +K ----------- //
-			
-			// ----------- +L ----------- //
-			elseif ( $flag == 'L' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				if ( self::set_flag( $nick, $chan, '+L', '' ) != false )
-				{
-					self::increase_limit( $chan );
-					// execute it directly.
-				}
-				// +L the target in question
-			}
-			// ----------- +L ----------- //
-			
-			// ----------- +I ----------- //
-			elseif ( $flag == 'I' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				if ( self::set_flag( $nick, $chan, '+I', '' ) != false )
-				{
-					foreach ( core::$chans[$chan]['users'] as $unick => $mode )
-					{
-						if ( core::$nicks[$unick]['server'] == core::$config->server->name )
-							continue;
-					
-						if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
-						{
-							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
-							ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
-						}
-						// they don't have +k, KICKEM
-					}
-				}
-				// +I the target in question
-			}
-			// ----------- +I ----------- //
+			self::_set_flags( $nick, $chan, $flag, '+', $params );
 		}
 		// loop through the flags being set, and do what we need to do with them.
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- -d ----------- //
-			if ( $flag == 'd' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-d', $params['d'] );
-				// -d the target in question
-			}
-			// ----------- -d ----------- //
-			
-			// ----------- -u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-u', $params['u'] );
-				// -u the target in question
-			}
-			// ----------- -u ----------- //
-			
-			// ----------- -e ----------- //
-			elseif ( $flag == 'e' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-e', $params['e'] );
-				// -e the target in question
-			}
-			// ----------- -e ----------- //
-			
-			// ----------- -w ----------- //
-			elseif ( $flag == 'w' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-w', $params['w'] );
-				// -w the target in question
-			}
-			// ----------- -w ----------- //
-			
-			// ----------- -m ----------- //
-			elseif ( $flag == 'm' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-m', $params['m'] );
-				// -m the target in question
-			}
-			// ----------- -m ----------- //
-			
-			// ----------- -t ----------- //
-			elseif ( $flag == 't' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-t', $params['t'] );
-				// -t the target in question
-			}
-			// ----------- -t ----------- //
-			
-			// non paramatized modes go here
-			
-			// ----------- -S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-S', '' );
-				// +S the target in question
-			}
-			// ----------- -S ----------- //
-			
-			// ----------- -F ----------- //
-			elseif ( $flag == 'F' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-F', '' );
-				// -F the target in question
-			}
-			// ----------- -F ----------- //
-			
-			// ----------- -G ----------- //
-			elseif ( $flag == 'G' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				if ( self::set_flag( $nick, $chan, '-G', '' ) != false )
-				{
-					ircd::part_chan( core::$config->chanserv->nick, $chan );
-					// leave the channel
-				}
-				// -G the target in question
-			}
-			// ----------- -G ----------- //
-			
-			// ----------- -T ----------- //
-			elseif ( $flag == 'T' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-T', '' );
-				// -T the target in question
-			}
-			// ----------- -T ----------- //
-			
-			// ----------- -K ----------- //
-			elseif ( $flag == 'K' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-K', '' );
-				// -K the target in question
-			}
-			// ----------- -K ----------- //
-			
-			// ----------- -L ----------- //
-			elseif ( $flag == 'L' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				if ( self::set_flag( $nick, $chan, '-L', '' ) != false )
-				{
-					ircd::mode( core::$config->chanserv->nick, $chan, '-l' );
-					// -l the channel
-				}
-				// -L the target in question
-			}
-			// ----------- -L ----------- //
-			
-			// ----------- -I ----------- //
-			elseif ( $flag == 'I' )
-			{
-				if ( $levels_result === false )
-				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-					return false;
-				}
-				// do they have access to alter this?
-				
-				self::set_flag( $nick, $chan, '-I', '' );
-				// -I the target in question
-			}
-			// ----------- -I ----------- //
+			self::_set_flags( $nick, $chan, $flag, '-', $params );
 		}
 		// loop through the flags being unset, and do what we need to do with them.
 		
@@ -606,6 +176,255 @@ class cs_flags implements module
 			unset( self::$not_set[$chan] );
 		}
 		// send back the target stuff..
+	}
+	
+	/*
+	* _set_flags
+	* 
+	* $nick, $chan, $mode, $params
+	*/
+	public function _set_flags( $nick, $chan, $flag, $mode, $params )
+	{	
+		// ----------- d ----------- //
+		if ( $flag == 'd' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'d', $params['d'] );
+			// d the target in question
+		}
+		// ----------- d ----------- //
+		
+		// ----------- u ----------- //
+		elseif ( $flag == 'u' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'u', $params['u'] );
+			// u the target in question
+		}
+		// ----------- u ----------- //
+		
+		// ----------- e ----------- //
+		elseif ( $flag == 'e' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'e', $params['e'] );
+			// e the target in question
+		}
+		// ----------- e ----------- //
+		
+		// ----------- w ----------- //
+		elseif ( $flag == 'w' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'w', $params['w'] );
+			// -w the target in question
+		}
+		// ----------- w ----------- //
+		
+		// ----------- m ----------- //
+		elseif ( $flag == 'm' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'m', $params['m'] );
+			// -m the target in question
+		}
+		// ----------- m ----------- //
+		
+		// ----------- t ----------- //
+		elseif ( $flag == 't' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'t', $params['t'] );
+			// t the target in question
+		}
+		// ----------- t ----------- //
+		
+		// non paramatized modes go here
+		
+		// ----------- S ----------- //
+		elseif ( $flag == 'S' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'S', '' );
+			// S the target in question
+		}
+		// ----------- S ----------- //
+		
+		// ----------- F ----------- //
+		elseif ( $flag == 'F' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'F', '' );
+			// F the target in question
+		}
+		// ----------- F ----------- //
+		
+		// ----------- G ----------- //
+		elseif ( $flag == 'G' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			$return = self::set_flag( $nick, $chan, $mode.'G', '' );
+			if ( $return !== false && $mode == '-' )
+			{
+				ircd::part_chan( core::$config->chanserv->nick, $chan );
+				// leave the channel
+			}
+			else if ( $return !== false && $mode == '+' && count( core::$chans[$chan]['users'] ) > 0 )
+			{
+				ircd::join_chan( core::$config->chanserv->nick, $chan );
+				// join the chan.
+				
+				if ( ircd::$protect )
+					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
+					// +ao its self.
+				else
+					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
+					// +o its self.
+			}
+			// only join if channel has above 0 users in it.
+			// G the target in question
+		}
+		// ----------- G ----------- //
+		
+		// ----------- T ----------- //
+		elseif ( $flag == 'T' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'T', '' );
+			// T the target in question
+		}
+		// ----------- T ----------- //
+		
+		// ----------- K ----------- //
+		elseif ( $flag == 'K' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'K', '' );
+			// K the target in question
+		}
+		// ----------- K ----------- //
+		
+		// ----------- L ----------- //
+		elseif ( $flag == 'L' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			self::set_flag( $nick, $chan, $mode.'L', '' );
+			if ( $return !== false && $mode == '-' )
+			{
+				ircd::mode( core::$config->chanserv->nick, $chan, '-l' );
+				// -l the channel
+			}
+			else if ( $return !== false && $mode == '+' )
+			{
+				self::increase_limit( $chan );
+				// execute it directly.
+			}
+			// L the target in question
+		}
+		// ----------- L ----------- //
+		
+		// ----------- -I ----------- //
+		elseif ( $flag == 'I' )
+		{
+			if ( $levels_result === false )
+			{
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+				return false;
+			}
+			// do they have access to alter this?
+			
+			$return = self::set_flag( $nick, $chan, $mode.'I', '' );
+			if ( $return !== false && $mode == '+' )
+			{
+				foreach ( core::$chans[$chan]['users'] as $unick => $mode )
+				{
+					if ( core::$nicks[$unick]['server'] == core::$config->server->name )
+						continue;
+				
+					if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
+					{
+						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
+						ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
+					}
+					// they don't have +k, KICKEM
+				}
+				// loop everyone in this chan.
+			}
+			// I the target in question
+		}
+		// ----------- I ----------- //
 	}
 	
 	/*
@@ -665,8 +484,8 @@ class cs_flags implements module
 			
 			if ( chanserv::check_flags( $chan, array( 'L' ) ) )
 			{
-				timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 10, 1 );
-				// add a timer to update the limit, in 15 seconds
+				timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
+				// add a timer to update the limit, in 5 seconds
 			}
 			// is there auto-limit enabled?
 		}
@@ -678,8 +497,8 @@ class cs_flags implements module
 			{
 				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
 				{
-					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 10, 1 );
-					// add a timer to update the limit, in 15 seconds
+					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
+					// add a timer to update the limit, in 5 seconds
 				}
 				// is there auto-limit enabled?
 			}
@@ -723,8 +542,8 @@ class cs_flags implements module
 				
 				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
 				{
-					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 10, 1 );
-					// add a timer to update the limit, in 15 seconds
+					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
+					// add a timer to update the limit, in 5 seconds
 				}
 				// is there auto-limit enabled?
 			}
@@ -801,7 +620,7 @@ class cs_flags implements module
 	static public function increase_limit( $chan, $force = 0 )
 	{
 		$current_users = count( core::$chans[$chan]['users'] );
-		$new_limit = $current_users + 2 + $force;
+		$new_limit = $current_users + 7 + $force;
 		// plus 3
 		
 		ircd::mode( core::$config->chanserv->nick, $chan, '+l '.$new_limit );

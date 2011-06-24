@@ -119,79 +119,13 @@ class ns_flags implements module
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- +e ----------- //
-			if ( $flag == 'e' )
-			{
-				self::set_flag( $nick, $nick, '+e', $params['e'] );
-				// +e the target in question
-			}
-			// ----------- +e ----------- //
-			
-			// ----------- +u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				self::set_flag( $nick, $nick, '+u', $params['u'] );
-				// +u the target in question
-			}
-			// ----------- +u ----------- //
-			
-			// non paramatized flags (uppercase)
-			
-			// ----------- +S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				self::set_flag( $nick, $nick, '+S', '' );
-				// +S the target in question
-			}
-			// ----------- +S ----------- //
-			
-			// ----------- +P ----------- //
-			elseif ( $flag == 'P' )
-			{
-				self::set_flag( $nick, $nick, '+P', '' );
-				// +P the target in question
-			}
-			// ----------- +P ----------- //
+			self::_set_flags( $nick, $nick, $flag, '+', $params );
 		}
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- -e ----------- //
-			if ( $flag == 'e' )
-			{
-				self::set_flag( $nick, $nick, '-e', $params['e'] );
-				// -e the target in question
-			}
-			// ----------- -e ----------- //
-			
-			// ----------- -u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				self::set_flag( $nick, $nick, '-u', $params['u'] );
-				// -u the target in question
-			}
-			// ----------- -u ----------- //
-			
-			// non paramatized flags (uppercase)
-			
-			// ----------- -S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				self::set_flag( $nick, $nick, '-S', '' );
-				// -S the target in question
-			}
-			// ----------- -S ----------- //
-			
-			// ----------- -P ----------- //
-			elseif ( $flag == 'P' )
-			{
-				self::set_flag( $nick, $nick, '-P', '' );
-				// -P the target in question
-			}
-			// ----------- -P ----------- //
+			self::_set_flags( $nick, $nick, $flag, '-', $params );
 		}
 		
 		if ( isset( self::$set[$nick] ) )
@@ -286,79 +220,13 @@ class ns_flags implements module
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- +e ----------- //
-			if ( $flag == 'e' )
-			{
-				self::set_flag( $nick, $unick, '+e', $params['e'] );
-				// +e the target in question
-			}
-			// ----------- +e ----------- //
-			
-			// ----------- +u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				self::set_flag( $nick, $unick, '+u', $params['u'] );
-				// +u the target in question
-			}
-			// ----------- +u ----------- //
-			
-			// non paramatized flags (uppercase)
-			
-			// ----------- +S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				self::set_flag( $nick, $unick, '+S', '' );
-				// +S the target in question
-			}
-			// ----------- +S ----------- //
-			
-			// ----------- +P ----------- //
-			elseif ( $flag == 'P' )
-			{
-				self::set_flag( $nick, $unick, '+P', '' );
-				// +P the target in question
-			}
-			// ----------- +P ----------- //
+			self::_set_flags( $nick, $unick, $flag, '+', $params );
 		}
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
 		{
 			// paramtized flags (lowercase) ones come first
-			
-			// ----------- -e ----------- //
-			if ( $flag == 'e' )
-			{
-				self::set_flag( $nick, $unick, '-e', $params['e'] );
-				// -e the target in question
-			}
-			// ----------- -e ----------- //
-			
-			// ----------- -u ----------- //
-			elseif ( $flag == 'u' )
-			{
-				self::set_flag( $nick, $unick, '-u', $params['u'] );
-				// -u the target in question
-			}
-			// ----------- -u ----------- //
-			
-			// non paramatized flags (uppercase)
-			
-			// ----------- -S ----------- //
-			elseif ( $flag == 'S' )
-			{
-				self::set_flag( $nick, $unick, '-S', '' );
-				// -S the target in question
-			}
-			// ----------- -S ----------- //
-			
-			// ----------- -P ----------- //
-			elseif ( $flag == 'P' )
-			{
-				self::set_flag( $nick, $unick, '-P', '' );
-				// -P the target in question
-			}
-			// ----------- -P ----------- //
+			self::_set_flags( $nick, $unick, $flag, '-', $params );
 		}
 		
 		if ( isset( self::$set[$unick] ) )
@@ -381,6 +249,48 @@ class ns_flags implements module
 			unset( self::$not_set[$unick] );
 		}
 		// send back the target stuff..	
+	}
+	
+	/*
+	* _set_flags
+	* 
+	* $nick, $unick, $mode, $params
+	*/
+	public function _set_flags( $nick, $unick, $flag, $mode, $params )
+	{
+		// ----------- e ----------- //
+		if ( $flag == 'e' )
+		{
+			self::set_flag( $nick, $unick, $mode.'e', $params['e'] );
+			// e the target in question
+		}
+		// ----------- e ----------- //
+		
+		// ----------- u ----------- //
+		elseif ( $flag == 'u' )
+		{
+			self::set_flag( $nick, $unick, $mode.'u', $params['u'] );
+			// u the target in question
+		}
+		// ----------- u ----------- //
+		
+		// non paramatized flags (uppercase)
+		
+		// ----------- S ----------- //
+		elseif ( $flag == 'S' )
+		{
+			self::set_flag( $nick, $unick, $mode.'S', '' );
+			// S the target in question
+		}
+		// ----------- S ----------- //
+		
+		// ----------- P ----------- //
+		elseif ( $flag == 'P' )
+		{
+			self::set_flag( $nick, $unick, $mode.'P', '' );
+			// P the target in question
+		}
+		// ----------- P ----------- //
 	}
 	
 	/*

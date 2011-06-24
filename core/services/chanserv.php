@@ -452,8 +452,9 @@ class chanserv implements service
 	* $ident - whether to check for identifications
 	* $return - whether to return the ban reason
 	* $or_check - whether to check for override
+	* $rnick - whether to check the account name of $nick, or actually check against $nick
 	*/
-	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true )
+	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true, $rnick = true )
 	{
 		if ( $ident && core::$nicks[$nick]['identified'] === false )
 			return false;
@@ -462,7 +463,10 @@ class chanserv implements service
 		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp', 'expire' ), array( 'channel', '=', $chan ) );
 		// get our flags records
 		
-		$account_name = core::$nicks[$nick]['account'];
+		if ( $rnick )
+			$account_name = core::$nicks[$nick]['account'];
+		else
+			$account_name = $nick;
 		$hostname = core::get_full_hostname( $nick );
 		// generate a hostname
 		
