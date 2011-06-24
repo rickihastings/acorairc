@@ -117,7 +117,6 @@ class ns_register implements module
 			'last_hostmask' =>	core::get_full_hostname( $nick ),
 			'last_timestamp'=>	core::$network_time,
 			'timestamp'		=>	core::$network_time,
-			'identified'	=>	0,
 			'validated'		=>	( core::$config->nickserv->force_validation === true ) ? 0 : 1,
 			'real_user'		=>	1,
 		);

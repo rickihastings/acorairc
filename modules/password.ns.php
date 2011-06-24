@@ -58,14 +58,14 @@ class ns_password implements module
 		$conf_pass = $ircdata[1];
 		// new password.
 		
-		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id', 'identified', 'salt' ) ) )
+		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id', 'salt' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
 			return false;	
 		}
 		// find out if our user is registered
 		
-		if ( $user->identified == 0 )
+		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
 			return false;
@@ -110,7 +110,7 @@ class ns_password implements module
 		$conf_pass = $ircdata[2];
 		// new password.
 		
-		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'salt' ) ) )
+		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'salt' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;	

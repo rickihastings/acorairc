@@ -75,7 +75,7 @@ class os_vhost implements module
 			}
 			// access?
 			
-			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
+			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'vhost' ) ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 				return false;
@@ -113,7 +113,7 @@ class os_vhost implements module
 			// update it and log it
 			
 			$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
-			if ( isset( $unicks[strtolower( $unick )] ) && $user->identified == 1 )
+			if ( isset( $unicks[strtolower( $unick )] ) && $unicks[strtolower( $unick )]['identified'] )
 			{
 				$unick = $unicks[$unick]['nick'];
 				if ( substr_count( $realhost, '@' ) == 1 )
@@ -147,7 +147,7 @@ class os_vhost implements module
 			}
 			// are we missing nick? invalid syntax if so.
 			
-			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'identified', 'vhost' ) ) )
+			if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'vhost' ) ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 				return false;

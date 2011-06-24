@@ -103,10 +103,10 @@ class services
 	*/
 	static public function user_exists( $nick, $identified = true, $array )
 	{
-		if ( $identified === true )
-			$user_q = database::select( 'users', $array, array( 'display', '=', $nick, 'AND', 'identified', '=', '1' ) );
-		else
-			$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );
+		if ( $identified && !core::$nicks[$nick]['identified'] )
+			return false;
+			
+		$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );
 
 		if ( database::num_rows( $user_q ) == 0 )
 			return false;

@@ -62,7 +62,7 @@ class nickserv implements service
 		if ( $return !== false )
 		{
 			$nick = $return['nick'];
-			$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
+			$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
 			self::$nick_q[strtolower( $nick )] = $user;
 		}
 		// on connect

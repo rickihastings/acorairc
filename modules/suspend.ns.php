@@ -104,7 +104,6 @@ class ns_suspend implements module
 				'display'		=>	$unick,
 				'last_timestamp'=>	core::$network_time,
 				'timestamp'		=>	core::$network_time,
-				'identified'	=>	0,
 				'real_user'		=>	0,
 				'suspended'		=>	1,
 				'suspend_reason'=>	$reason,
