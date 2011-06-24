@@ -16,7 +16,7 @@
 
 class ns_password implements module
 {
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -58,13 +58,6 @@ class ns_password implements module
 		$conf_pass = $ircdata[1];
 		// new password.
 		
-		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id', 'salt' ) ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
-			return false;	
-		}
-		// find out if our user is registered
-		
 		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
@@ -86,13 +79,14 @@ class ns_password implements module
 		}
 		// the passwords are different
 			
-		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $nick ) );
+		$user = services::user_exists( $nick, false, array( 'display', 'id', 'salt' ) );
+		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $user->display ) );
 		// we update the password here, with the users salt.
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NEW_PASSWORD, array( 'pass' => $new_pass ) );
 		// let them know
 		
-		core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' changed their password' );
+		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') changed their password' );
 		// logchan
 	}
 	
@@ -110,26 +104,20 @@ class ns_password implements module
 		$conf_pass = $ircdata[2];
 		// new password.
 		
-		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'salt' ) ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;	
-		}
-		// find out if our user is registered
-		
-		if ( services::has_privs( $unick ) )
+		if ( services::has_privs( $unick ) || !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is a non-root trying to change a root's password?
 		
-		if ( !services::oper_privs( $nick, "nickserv_op" ) )
+		$user = database::select( 'nicks', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
+		if ( database::num_rows( $user ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 		}
-		// do we have access to do this?
+		// look for the user
 		
 		if ( strtolower( $new_pass ) == strtolower( $unick ) )
 		{
@@ -144,14 +132,15 @@ class ns_password implements module
 			return false;
 		}
 		// the passwords are different
-			
+		
+		$user = database::fetch( $user );
 		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $unick ) );
 		// we update the password here, with the users salt.
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NEW_PASSWORD_U, array( 'nick' => $unick, 'pass' => $new_pass ) );
 		// let them know
 		
-		core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' changed the password for '.$unick );
+		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') changed the password for '.$unick );
 		// logchan
 	}
 	

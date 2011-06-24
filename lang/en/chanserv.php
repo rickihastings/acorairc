@@ -520,7 +520,7 @@ $help = (object) array(
 	'CS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {chanserv} HELP for more information',
 	'CS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {chanserv} HELP {help} for more information',
 	
-	'CS_ACCESS_DENIED'		=> 	'Access Denied',
+	'CS_ACCESS_DENIED'		=> 	'You do not have access to do this',
 	'CS_UNREGISTERED'		=>	'You need to be registered and identified to register a channel',
 	'CS_REGISTERED_CHAN'	=>	'{chan} is already registered',
 	'CS_FORBIDDEN_CHAN'		=>	'{chan} is forbidden from being registered',

@@ -17,7 +17,7 @@
 class ns_identify implements module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.0.6';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -59,16 +59,26 @@ class ns_identify implements module
 	*/
 	static public function identify_command( $nick, $ircdata = array() )
 	{
-		$password = $ircdata[0];
+		if ( count( $ircdata ) == 1 )
+		{
+			$account = $nick;
+			$password = $ircdata[0];
+		}
+		else
+		{
+			$account = $ircdata[0];
+			$password = $ircdata[1];
+		}
+		// determine how many params we have
 		
-		if ( trim( $password ) == '' )
+		if ( trim( $account ) == '' || trim( $password ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
 			return false;
 		}
 		// wrong syntax damit!
 		
-		if ( $user = services::user_exists( $nick, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) )
+		if ( $user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) )
 		{
 			if ( $user->validated == 0 )
 			{
@@ -88,13 +98,14 @@ class ns_identify implements module
 					// remove the secured timer. if there is one
 					
 					ircd::on_user_login( $nick );
+					core::$nicks[$nick]['account'] = $account;
 					core::$nicks[$nick]['identified'] = true;
 					// registered mode
 					
-					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $nick ) );
+					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $account ) );
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
 					// right, standard identify crap
-					core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' identified for nick '.core::$nicks[$nick]['nick'] );
+					core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
 					// logchan
 					
 					if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) )
@@ -105,17 +116,17 @@ class ns_identify implements module
 							$ident = $new_host[0];
 							$host = $new_host[1];
 							
-							ircd::setident( core::$config->operserv->nick, $user->display, $ident );
-							ircd::sethost( core::$config->operserv->nick, $user->display, $host );
+							ircd::setident( core::$config->operserv->nick, $nick, $ident );
+							ircd::sethost( core::$config->operserv->nick, $nick, $host );
 						}
 						else
 						{
-							ircd::sethost( core::$config->operserv->nick, $user->display, $user->vhost );
+							ircd::sethost( core::$config->operserv->nick, $nick, $user->vhost );
 						}
 					}
 					// first thing we do, check if they have a vhost, if they do, apply it.
 					
-					$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $nick ) );
+					$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $account ) );
 					
 					if ( database::num_rows( $failed_attempts ) > 0 )
 					{
@@ -126,7 +137,7 @@ class ns_identify implements module
 							services::communicate( core::$config->nickserv->nick, $nick, 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
 						}
 						// loop through the failed attempts messaging them to the user
-						database::delete( 'failed_attempts', array( 'nick', '=', $nick ) );
+						database::delete( 'failed_attempts', array( 'nick', '=', $account ) );
 						// clear them now that they've been seen
 					}
 					// we got any failed attempts? HUMM
@@ -134,7 +145,7 @@ class ns_identify implements module
 					$hostname = core::get_full_hostname( $nick );
 					// generate a hostname.
 					
-					if ( core::$config->settings->mode_on_id == 'yes' && isset( modules::$list['cs_levels'] ) )
+					if ( core::$config->settings->mode_on_id && isset( modules::$list['cs_levels'] ) )
 					{
 						foreach ( core::$chans as $chan => $cdata )
 						{
@@ -160,10 +171,10 @@ class ns_identify implements module
 				else
 				{
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-					core::alog( core::$config->nickserv->nick.': Invalid password from '.core::get_full_hostname( $nick ) );
+					core::alog( core::$config->nickserv->nick.': Invalid password from ('.core::get_full_hostname( $nick ).') for '.$account );
 					// some logging stuff
 					
-					database::insert( 'failed_attempts', array( 'nick' => $nick, 'mask' => core::get_full_hostname( $nick ), 'time' => core::$network_time ) );
+					database::insert( 'failed_attempts', array( 'nick' => $account, 'mask' => core::get_full_hostname( $nick ), 'time' => core::$network_time ) );
 					core::$nicks[$nick]['failed_attempts']++;
 					// ooh, we have something to log :)
 					
@@ -177,7 +188,7 @@ class ns_identify implements module
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $nick ) );
 			return false;
 			// doesn't even exist..
 		}
@@ -193,33 +204,26 @@ class ns_identify implements module
 	*/
 	static public function logout_command( $nick, $ircdata = array() )
 	{
-		// no parameter commands ftw.
+		$account_name = core::$nicks[$nick]['account'];
 		
-		if ( $user = services::user_exists( $nick, false, array( 'display', 'id', 'vhost' ) ) )
+		if ( core::$nicks[$nick]['identified'] )
 		{
-			if ( $user->identified == 1 )
-			{
-				ircd::on_user_logout( $nick );
-				core::$nicks[$nick]['identified'] = false;
-					
-				// here we set unregistered mode
-				database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
-				// unidentify them
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
-				// let them know
-				core::alog( core::$config->nickserv->nick.': '.core::get_full_hostname( $nick ).' logged out of '.core::$nicks[$nick]['nick'] );
-				// and log it.
-			}
-			else
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
-				// not even identified
-			}
+			// here we set unregistered mode
+			database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
+			// unidentify them
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
+			// let them know
+			core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+			// and log it.
+			
+			ircd::on_user_logout( $nick );
+			core::$nicks[$nick]['account'] = '';
+			core::$nicks[$nick]['identified'] = false;
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
-			// unregistered nick name
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
+			// not even identified
 		}
 	}
 	
@@ -248,6 +252,7 @@ class ns_identify implements module
 			elseif ( $user->validated == 0 && $user->suspended == 0 )
 			{
 				ircd::on_user_logout( $nick );
+				core::$nicks[$nick]['account'] = '';
 				core::$nicks[$nick]['identified'] = false;
 				// they shouldn't really have registered mode
 				
@@ -260,10 +265,11 @@ class ns_identify implements module
 			elseif ( core::$nicks[$nick]['identified'] && $user->last_hostmask == core::get_full_hostname( $nick ) )
 			{
 				ircd::on_user_login( $nick );
+				core::$nicks[$nick]['account'] = $nick;
 				core::$nicks[$nick]['identified'] = true;
 				
 				if ( !$startup )
-					core::alog( core::$config->nickserv->nick.': '.$connect_data['ident'].'@'.$connect_data['host'].' automatically identified for '.$nick );
+					core::alog( core::$config->nickserv->nick.': ('.$connect_data['ident'].'@'.$connect_data['host'].') automatically identified for '.$nick );
 			}
 			else
 			{
@@ -282,8 +288,6 @@ class ns_identify implements module
 			
 			timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
 			// remove the secured timer. if there is one
-			ircd::on_user_logout( $nick );
-			// we remove the registered mode
 			
 			if ( $user = services::user_exists( $nick, false, array( 'display', 'validated', 'last_hostmask', 'suspended' ) ) )
 			{
@@ -294,6 +298,7 @@ class ns_identify implements module
 				elseif ( $user->validated == 0 && $user->suspended == 0 )
 				{
 					ircd::on_user_logout( $nick );
+					core::$nicks[$nick]['account'] = '';
 					core::$nicks[$nick]['identified'] = false;
 					// they shouldn't really have registered mode
 					
@@ -306,9 +311,10 @@ class ns_identify implements module
 				elseif ( core::$nicks[$nick]['identified'] && $user->last_hostmask == core::get_full_hostname( $nick ) )
 				{
 					ircd::on_user_login( $nick );
+					core::$nicks[$nick]['account'] = $nick;
 					core::$nicks[$nick]['identified'] = true;
 					
-					core::alog( core::$config->nickserv->nick.': '.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['host'].' automatically identified for '.$nick );
+					core::alog( core::$config->nickserv->nick.': ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['host'].') automatically identified for '.$nick );
 				}
 				else
 				{
@@ -325,7 +331,7 @@ class ns_identify implements module
 			// remove the secured timer. if there is one
 			
 			database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
-			// change nick to unidentified imo
+			// update timestamp
 		}
 	}
 	
@@ -346,12 +352,13 @@ class ns_identify implements module
 	* _registered_nick (private)
 	* 
 	* @params
-	* $nick - the nick to usee
+	* $nick - the nick to use
 	* $user - a valid user record from the database.
 	*/
 	static public function _registered_nick( $nick, $user )
 	{
 		ircd::on_user_logout( $nick );
+		core::$nicks[$nick]['account'] = '';
 		core::$nicks[$nick]['identified'] = false;
 		// they shouldn't really have registered mode
 		

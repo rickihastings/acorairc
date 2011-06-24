@@ -110,7 +110,7 @@ class cs_suspend implements module
 		}
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
-		core::alog( core::$config->chanserv->nick.': '.$nick.' SUSPENDED '.$chan.' with the reason: '.$reason );
+		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') SUSPENDED '.$chan.' with the reason ('.$reason.')' );
 		ircd::wallops( core::$config->chanserv->nick, $nick.' SUSPENDED '.$chan );
 		
 		if ( !empty( core::$chans[$chan]['users'] ) )
@@ -180,7 +180,7 @@ class cs_suspend implements module
 		}
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
-		core::alog( core::$config->chanserv->nick.': '.$nick.' UNSUSPENDED '.$chan );
+		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$chan );
 		ircd::wallops( core::$config->chanserv->nick, $nick.' UNSUSPENDED '.$chan );
 		// oh well, was fun while it lasted eh?
 		// unsuspend it :P

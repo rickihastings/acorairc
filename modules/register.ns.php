@@ -135,7 +135,7 @@ class ns_register implements module
 		{
 			$validation_code = mt_rand();
 			
-			core::alog( core::$config->nickserv->nick.': '.$nick.' requested by '.core::get_full_hostname( $nick ) );
+			core::alog( core::$config->nickserv->nick.': '.$nick.' requested by ('.core::get_full_hostname( $nick ).')' );
 			// logchan
 			database::insert( 'validation_codes', array( 'nick' => $nick, 'code' => $validation_code ) );
 			// insert the random code to the database
@@ -166,7 +166,7 @@ You will then be able to identify with the password you chose by typing
 		else
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_REGISTERED );
-			core::alog( core::$config->nickserv->nick.': '.$nick.' registered by '.core::get_full_hostname( $nick ) );
+			core::alog( core::$config->nickserv->nick.': '.$nick.' registered by ('.core::get_full_hostname( $nick ).')' );
 			// logchan
 			
 			core::alog( 'register_command(): '.$nick.' registered by '.core::get_full_hostname( $nick ), 'BASIC' );

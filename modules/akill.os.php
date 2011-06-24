@@ -17,7 +17,7 @@
 class os_akill implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -219,10 +219,10 @@ class os_akill implements module
 		{
 			database::insert( 'sessions', array( 'nick' => $nick, 'hostmask' => $hostname, 'description' => $reason, 'expire' => $time, 'time' => core::$network_time, 'akill' => 1, 'limit' => 0 ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
-			core::alog( core::$config->operserv->nick.': WARNING: '.$nick.' added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
 			// as simple, as.
 			
-			foreach ( core::$nicks as $nick => $data )
+			foreach ( core::$nicks as $unick => $data )
 			{
 				if ( $data['ircop'] )
 					continue;
@@ -230,8 +230,8 @@ class os_akill implements module
 				
 				if ( services::match( $data['oldhost'], $mask ) )
 				{
-					ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$reason );
-					core::alog( 'WARNING: Auto kill matched ('.$data['nick'].'!'.$data['ident'].'@'.$data['host'].'). Killed client' );
+					ircd::kill( core::$config->operserv->nick, $unick, 'AKILLED: '.$reason );
+					core::alog( 'Auto kill matched ('.core::get_full_hostname( $unick ).'). Killed client' );
 				}
 				// search old vhost incase they've got a vee-host
 			}
@@ -262,12 +262,12 @@ class os_akill implements module
 			
 			if ( $expired )
 			{
-				core::alog( core::$config->operserv->nick.': WARNING: Auto kill for ('.$hostname.') expired' );
+				core::alog( core::$config->operserv->nick.': Auto kill for ('.$hostname.') expired' );
 			}
 			else
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
-				core::alog( core::$config->operserv->nick.': WARNING: '.$nick.' removed the auto kill for ('.$hostname.')' );
+				core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
 			}
 			// is it expiring or what??
 		}

@@ -62,7 +62,7 @@ class cs_register implements module
 		{
 			if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' || stristr( $channel, ' ' ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
+				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
 				// wrong syntax
 				return false;
 			}
@@ -105,10 +105,10 @@ class cs_register implements module
 			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
 			// create the channel! WOOOH
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
-			core::alog( core::$config->chanserv->nick.': '.$chan.' registered by '.core::get_full_hostname( $nick ) );
+			core::alog( core::$config->chanserv->nick.': '.$chan.' registered by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
 			// logchan
 			
-			core::alog( 'register_command(): '.$chan.' registered by '.core::get_full_hostname( $nick ), 'BASIC' );
+			core::alog( 'register_command(): '.$chan.' registered by '.core::get_full_hostname( $nick ).' under: '.core::$nicks[$nick]['account'], 'BASIC' );
 			// log what we need to log.
 			
 			chanserv::$chan_q[$chan] = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp',  'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );

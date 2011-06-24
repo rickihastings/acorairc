@@ -83,7 +83,7 @@ class os_chanclear implements module
 			{
 				if ( core::$nicks[$user]['ircop'] )
 				{
-					core::alog( core::$config->operserv->nick.': Ignoring IRC Operator ('.$user.')' );
+					core::alog( core::$config->operserv->nick.': CHANCLEAR: Ignoring IRC Operator ('.$user.')' );
 					// ignore irc operator, infact, logchan it too
 				}
 				else

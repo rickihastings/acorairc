@@ -80,7 +80,7 @@ class os_utilities implements module
 		
 		if ( $server == core::$config->server->name || isset( core::$servers[$server] ) )
 		{
-			core::alog( core::$config->operserv->nick.': WARNING '.$nick.' tried to jupe '.$server );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') tried to jupe ('.$server.')' );
 			core::alog( 'jupe_command(): WARNING '.$nick.' tried to jupe '.$server, 'BASIC' );
 			// log what we need to log.
 		}
@@ -92,7 +92,7 @@ class os_utilities implements module
 			// add it to the jupes & servers array
 			
 			ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick, $numeric );
-			core::alog( core::$config->operserv->nick.': WARNING '.$nick.' juped '.$server );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') juped ('.$server.')' );
 			ircd::wallops( core::$config->operserv->nick, $nick.' juped '.$server );
 			
 			core::alog( 'jupe_command(): '.$server.' juped', 'BASIC' );
@@ -178,7 +178,7 @@ class os_utilities implements module
 		{
 			$unick = $unicks[$unick]['nick'];
 			ircd::kick( core::$config->operserv->nick, $unick, $channel, $reason );
-			core::alog( core::$config->operserv->nick.': '.$nick.' used KICK to remove '.$unick.' from '.$chan );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') used KICK to remove ('.$unick.') from ('.$chan.')' );
 		}
 		// now we check 3 things, if the user exists, if the channel exists
 		// and if the user is even in that channel, if they arn't we just leave it

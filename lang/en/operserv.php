@@ -326,7 +326,7 @@ $help = (object) array(
 	'OS_INVALID_SYNTAX_RE'	=> 	'Invalid syntax: /msg {operserv} HELP {help} for more information',
 	
 	'OS_DENIED_ACCESS' 		=> 	'{operserv} is not available to you',
-	'OS_ACCESS_DENIED' 		=> 	'Access denied',
+	'OS_ACCESS_DENIED' 		=> 	'',
 	'OS_CHAN_INVALID'		=> 	'{chan} doesn\'t exist',	
 	'OS_UNREGISTERED_NICK'	=>	'{nick} isn\'t a registered nickname',
 	'OS_COMMAND_LIMIT_1'	=>	'You have triggered services flood protection',

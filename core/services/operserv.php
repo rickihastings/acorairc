@@ -145,7 +145,7 @@ class operserv implements service
 			$command = substr( $return['msg'], 1 );
 			// convert to lower case because all the tingy wags are in lowercase
 			
-			core::alog( core::$config->operserv->nick.': '.$nick.': '.$command );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).'): '.$command );
 			// logchan it
 			
 			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )

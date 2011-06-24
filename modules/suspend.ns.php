@@ -115,7 +115,7 @@ class ns_suspend implements module
 		}
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
-		core::alog( core::$config->nickserv->nick.': '.$nick.' SUSPENDED '.$unick.' with the reason: '.$reason );
+		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') SUSPENDED '.$unick.' with the reason ('.$reason.')' );
 		ircd::wallops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
 		
 		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
@@ -180,7 +180,7 @@ class ns_suspend implements module
 		// nick isn't even registered.
 		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
-		core::alog( core::$config->nickserv->nick.': '.$nick.' UNSUSPENDED '.$unick );
+		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$unick );
 		ircd::wallops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
 		// oh well, was fun while it lasted eh?
 		// unsuspend it :P

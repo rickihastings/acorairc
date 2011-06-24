@@ -102,7 +102,7 @@ class ns_recover implements module
 				// to make sure the ircd class can preserve all information
 				// about the target, and not have it overwritten with introduce_client()
 				
-				core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by '.core::get_full_hostname( $nick ) );
+				core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
 				// introduce a client, logchan everything etc.
 				
@@ -155,7 +155,7 @@ class ns_recover implements module
 				}
 				
 				ircd::remove_client( $unick, 'RELEASED by '.$nick );
-				core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by '.core::get_full_hostname( $nick ) );
+				core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
 				timer::remove( array( 'ns_recover', 'remove_callback', array( $unick ) ) );
 				// if they are, remove client, respectively
 				// unsetting data and removing them.

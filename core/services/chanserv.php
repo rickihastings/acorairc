@@ -455,13 +455,14 @@ class chanserv implements service
 	*/
 	static public function check_levels( $nick, $chan, $flags, $force = true, $ident = true, $return = false, $or_check = true )
 	{
-		if ( $ident && !$user = services::user_exists( $nick, true, array( 'id', 'display' ) ) )
+		if ( $ident && core::$nicks[$nick]['identified'] === false )
 			return false;
 		// they aint even identified..
 		
 		$user_flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp', 'expire' ), array( 'channel', '=', $chan ) );
 		// get our flags records
 		
+		$account_name = core::$nicks[$nick]['account'];
 		$hostname = core::get_full_hostname( $nick );
 		// generate a hostname
 		
@@ -469,10 +470,9 @@ class chanserv implements service
 		{
 			if ( $or_check && core::$nicks[$nick]['override'] )
 				return true;
-
 			// is override enabled for this user?
 			
-			if ( $nick == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
+			if ( $account_name == $chan_flags->target || ( $force && ( strpos( $chan_flags->target, '@' ) !== false && services::match( $hostname, $chan_flags->target ) ) ) )
 			{
 				foreach ( $flags as $flag )
 				{

@@ -145,7 +145,7 @@ class os_module implements module
 			// onload handler.
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module, 'version' => modules::$list[$module]['version'], 'extra' => modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'] ) );
-			core::alog( $nick.' loaded module '.$module.' ['.modules::$list[$module]['version'].'] ['.modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'].']' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') loaded module ('.$module.') ('.modules::$list[$module]['version'].') ('.modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'].')' );
 			ircd::wallops( core::$config->operserv->nick, $nick.' loaded module '.$module );
 			// let everyone know
 		}
@@ -214,7 +214,7 @@ class os_module implements module
 			// unset the modules help docs etc.
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module, 'version' => $data['version'], 'extra' => $data['author'].'/'.$data['type'].'/'.$data['extra'] ) );
-			core::alog( $nick.' unloaded module '.$module.' ['.$data['version'].'] ['.$data['author'].'/'.$data['type'].'/'.$data['extra'].']' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') unloaded module ('.$module.') ('.$data['version'].') ('.$data['author'].'/'.$data['type'].'/'.$data['extra'].')' );
 			ircd::wallops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
 			// let everyone know :D	
 		}

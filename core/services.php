@@ -30,12 +30,14 @@ class services
 	{
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 			return false;
+			
+		$account_nick = strtolower( core::$nicks[$nick]['account'] );
 	
 		foreach ( core::$config->opers as $i => $data )
 		{
 			$split = explode( ':', $data );
 			
-			if ( strtolower( $split[0] ) != strtolower( $nick ) )
+			if ( strtolower( $split[0] ) != $account_nick )
 				continue;
 			// no privs here.
 			
@@ -58,11 +60,13 @@ class services
 	*/
 	static public function has_privs( $nick )
 	{
+		$account_nick = strtolower( core::$nicks[$nick]['account'] );
+	
 		foreach ( core::$config->opers as $i => $data )
 		{
 			$split = explode( ':', $data );
 			
-			if ( strtolower( $split[0] ) == strtolower( $nick ) )
+			if ( strtolower( $split[0] ) == $account_nick )
 				return true;
 			// no privs here.
 		}
@@ -106,36 +110,16 @@ class services
 		if ( $identified && !core::$nicks[$nick]['identified'] )
 			return false;
 			
-		$user_q = database::select( 'users', $array, array( 'display', '=', $nick ) );
+		if ( $identified )
+			$snick = core::$nicks[$nick]['account'];
+		else
+			$snick = $nick;
+			
+		$user_q = database::select( 'users', $array, array( 'display', '=', $snick ) );
 
 		if ( database::num_rows( $user_q ) == 0 )
 			return false;
 		// user isnt registered || isnt identified
-		
-		$row = database::fetch( $user_q );
-		
-		return $row;
-		// if it is registered return the object.
-	}
-	
-	/*
-	* user_exists_id
-	*
-	* @params
-	* $uid - The uid to check.
-	* $identified - Do you want to check if they're identified?
-	* $array - This is what they want to grab, can be *
-	*/
-	static public function user_exists_id( $uid, $identified = true, $array )
-	{
-		if ( $identified )
-			$user_q = database::select( 'users', $array, array( 'id', '=', $uid, 'AND', 'identified', '=', '1' ) );
-		else
-			$user_q = database::select( 'users', $array, array( 'id', '=', $uid ) );
-			
-		if ( $user_q == 0 )
-			return false;
-		// chan isnt even registered.
 		
 		$row = database::fetch( $user_q );
 		

@@ -82,13 +82,13 @@ class os_rehash implements module
 					modules::$list[$name]['class']->modunload();
 				// if the module has an unload method, call it now before we destroy the class.
 				
+				core::alog( core::$config->operserv->nick.': REHASH unloaded module ('.$name.') ('.modules::$list[$name]['version'].') ('.modules::$list[$name]['author'].'/'.modules::$list[$name]['type'].'/'.modules::$list[$name]['extra'].')' );
+				ircd::wallops( core::$config->operserv->nick, 'unloaded module '.$name );
+				// unset the module
+				
 				unset( modules::$list[$name] );
 				modules::_unset_docs( $name );
 				// destory relevant data to the module
-				
-				core::alog( core::$config->operserv->nick.': unloaded module '.$name );
-				ircd::wallops( core::$config->operserv->nick, 'unloaded module '.$name );
-				// unset the module
 				
 				core::alog( 'rehash_command(): '.$name.' unloaded from rehash', 'BASIC' );
 				// log what we need to log.
@@ -115,7 +115,7 @@ class os_rehash implements module
 					}
 				}
 				
-				core::alog( core::$config->operserv->nick.': loaded module '.$name );
+				core::alog( core::$config->operserv->nick.': REHASH loaded module ('.$name.') ('.modules::$list[$name]['version'].') ('.modules::$list[$name]['author'].'/'.modules::$list[$name]['type'].'/'.modules::$list[$name]['extra'].')' );
 				ircd::wallops( core::$config->operserv->nick, 'loaded module '.$name );
 				// load it up
 					
@@ -131,7 +131,7 @@ class os_rehash implements module
 		
 		modules::on_rehash();
 		
-		core::alog( core::$config->operserv->nick.': Successfully reloaded configuration.' );
+		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') Successfully performed a REHASH' );
 		ircd::wallops( core::$config->operserv->nick, $nick.' performed a REHASH' );
 		
 		core::alog( 'rehash_command(): sucessful rehash', 'BASIC' );

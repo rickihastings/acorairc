@@ -17,7 +17,7 @@
 class cs_topic implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -71,7 +71,7 @@ class cs_topic implements module
 		}
 		// make sure the channel exists.
 		
-		if ( chanserv::check_levels( $nick, $channel->channel, array( 't', 'S', 'F' ) ) === false )
+		if ( chanserv::check_levels( $nick, $chan, array( 't', 'S', 'F' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;

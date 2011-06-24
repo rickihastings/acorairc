@@ -137,7 +137,7 @@ class os_ignore implements module
 			
 			database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time, 'temp' => '0' ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
-			core::alog( core::$config->operserv->nick.': '.$nick.' added '.$who.' to services ignore list' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added ('.$who.') to services ignore list' );
 			// as simple, as.
 		}
 		else
@@ -166,7 +166,7 @@ class os_ignore implements module
 		{
 			database::delete( 'ignored_users', array( 'who', '=', $who ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
-			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$who.' from the services ignore list' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') deleted ('.$who.') from the services ignore list' );
 			// as simple, as.
 		}
 		else

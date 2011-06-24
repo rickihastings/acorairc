@@ -17,7 +17,7 @@
 class cs_levels implements module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -881,7 +881,7 @@ class cs_levels implements module
 			
 			foreach ( $access_array as $target => $level )
 			{
-				if ( $target == $nick && core::$nicks[$nick]['identified'] && !isset( $new_nusers_give[$nick] ) )
+				if ( $target == core::$nicks[$nick]['account'] && core::$nicks[$nick]['identified'] && !isset( $new_nusers_give[$nick] ) )
 				{
 					$new_nusers_give[$nick] .= 'strict:'.implode( '', $level );
 				}

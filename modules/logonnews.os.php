@@ -159,7 +159,7 @@ class os_logonnews implements module
 		{
 			database::insert( 'logon_news', array( 'nick' => $nick, 'time' => core::$network_time, 'title' => $title, 'message' => $text ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_ADD );
-			core::alog( core::$config->operserv->nick.': '.$nick.' added a logon news message entitled '.$title );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added a logon news message entitled ('.$title.')' );
 			// as simple, as.
 		}
 		else
@@ -184,7 +184,7 @@ class os_logonnews implements module
 		{
 			database::delete( 'logon_news', array( 'title', '=', $title ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
-			core::alog( core::$config->operserv->nick.': '.$nick.' deleted '.$title.' from logonnews' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') deleted ('.$title.') from logonnews' );
 			// as simple, as.
 		}
 		else

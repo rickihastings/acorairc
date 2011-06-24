@@ -108,7 +108,7 @@ class cs_drop implements module
 		// remember we DON'T unset the channel record, because the channel
 		// is still there, just isnt registered, completely different things
 		
-		core::alog( core::$config->chanserv->nick.': '.$chan.' has been dropped by '.core::get_full_hostname( $nick ) );
+		core::alog( core::$config->chanserv->nick.': '.$chan.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
 		// logchan it
 		
 		core::alog( 'drop_command(): '.$chan.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );

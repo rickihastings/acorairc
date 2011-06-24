@@ -82,7 +82,7 @@ class ns_ghost implements module
 			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
 			{
 				ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
-				core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by '.core::get_full_hostname( $nick ) );
+				core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
 			}
 			else
 			{

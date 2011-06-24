@@ -88,7 +88,7 @@ class ns_drop implements module
 				database::delete( 'chans_levels', array( 'target', '=', $user->display ) );
 				// also delete this users channel access.
 				
-				core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ) );
+				core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
 				// logchan it
 				
 				core::alog( 'drop_command(): '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
@@ -99,6 +99,7 @@ class ns_drop implements module
 				// if the nick is being used unregister it, even though it shouldn't be?
 				
 				core::$nicks[$user->display]['identified'] = false;
+				core::$nicks[$user->display]['account'] = '';
 				// set identified to false
 				
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );

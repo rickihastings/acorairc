@@ -17,7 +17,7 @@
 class ns_flags implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -71,13 +71,6 @@ class ns_flags implements module
 		$param = core::get_data_after( $ircdata, 1 );
 		$rparams = explode( '||', $param );
 		// get the channel.
-		
-		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id', 'salt' ) ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
-			return false;	
-		}
-		// find out if our user is registered
 		
 		if ( !core::$nicks[$nick]['identified'] )
 		{
@@ -238,26 +231,20 @@ class ns_flags implements module
 		$rparams = explode( '||', $param );
 		// get the channel.
 		
-		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'salt' ) ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;	
-		}
-		// find out if our user is registered
-		
-		if ( services::has_privs( $unick ) )
+		if ( services::has_privs( $unick ) || !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// is someone trying to change someones details who has oper flags?
 		
-		if ( !services::oper_privs( $nick, "nickserv_op" ) )
+		$user = database::select( 'nicks', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
+		if ( database::num_rows( $user ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
 		}
-		// do we have access to do this?
+		// look for the user
 		
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )

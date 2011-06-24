@@ -141,9 +141,9 @@ class os_session implements module
 			$nick = $connect_data['nick'];
 			$clients = core::$ips[$connect_data['ip_address']];
 			$kill = true;
-		
+			
 			if ( $clients > 1 )
-				core::alog( 'WARNING: multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
+				core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 			// log multiple sessions
 			
 			if ( database::num_rows( core::$session_rows ) == 0 )
@@ -177,7 +177,7 @@ class os_session implements module
 			if ( $kill && $clients > $match )
 			{
 				ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
-				core::alog( 'WARNING: client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
+				core::alog( core::$config->operserv->nick.': Client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 			}
 			// their limit has been bypassed >:) KILL THEM
 		}
@@ -200,7 +200,7 @@ class os_session implements module
 		{
 			database::insert( 'sessions', array( 'nick' => $nick, 'ip_address' => $ip_address, 'description' => $description, 'limit' => $limit, 'time' => core::$network_time, 'akill' => 0 ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_ADD, array( 'ip_addr' => $ip_address, 'limit' => $limit ) );
-			core::alog( core::$config->operserv->nick.': '.$nick.' added an exception limit for '.$ip_address.' at '.$limit );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an exception limit for ('.$ip_address.') at ('.$limit.')' );
 			// as simple, as.
 		}
 		else
@@ -225,7 +225,7 @@ class os_session implements module
 		{
 			database::delete( 'sessions', array( 'ip_address', '=', $ip_address ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_DEL, array( 'ip_addr' => $ip_address ) );
-			core::alog( core::$config->operserv->nick.': '.$nick.' removed the exception limit for '.$ip_address );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the exception limit for ('.$ip_address.')' );
 		}
 		else
 		{
