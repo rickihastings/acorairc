@@ -149,6 +149,9 @@ class ns_identify implements module
 					{
 						foreach ( core::$chans as $chan => $cdata )
 						{
+							if ( !isset( core::$chans[$chan]['users'][$nick] ) )
+								continue;
+						
 							if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 								return false;
 							// if the channel doesn't exist we return false, to save us the hassle of wasting
