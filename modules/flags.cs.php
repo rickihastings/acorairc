@@ -561,10 +561,10 @@ class cs_flags implements module
 			{
 				$nusers = core::$chans[$chan]['users'];
 				
-				if ( !chanserv::$chan_q[$chan] === false )
+				if ( chanserv::$chan_q[$chan] === false )
 					return false;	
 				// channel isnt registered
-				
+					
 				if ( chanserv::check_flags( $chan, array( 'I' ) ) )
 				{
 					foreach ( $nusers as $nick => $mode )
@@ -600,8 +600,8 @@ class cs_flags implements module
 				
 				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
 				{
-					cs_flags::increase_limit( $chan, 1 );
-					// add a timer to update the limit, in 15 seconds
+					cs_flags::increase_limit( $chan );
+					// add a timer to update the limit, in 5 seconds
 				}
 				// is there auto-limit enabled?
 			}
@@ -620,9 +620,12 @@ class cs_flags implements module
 	static public function increase_limit( $chan, $force = 0 )
 	{
 		$current_users = count( core::$chans[$chan]['users'] );
-		$new_limit = $current_users + 7 + $force;
+		$new_limit = $current_users + 4 + $force;
+		if ( $new_limit == core::$chans[$chan]['internal_limit'] )
+			return false;
 		// plus 3
 		
+		core::$chans[$chan]['internal_limit'] = $new_limit;
 		ircd::mode( core::$config->chanserv->nick, $chan, '+l '.$new_limit );
 		// mode change.
 	}
