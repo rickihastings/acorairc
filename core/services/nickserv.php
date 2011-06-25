@@ -79,50 +79,6 @@ class nickserv implements service
 		// this is what we use to handle command listens
 		// should be quite epic.
 		
-		$return = ircd::on_mode( $ircdata );
-		if ( $return !== false && core::$config->server->help_chan )
-		{
-			$chan = $return['chan'];
-			
-			if ( $chan == strtolower( core::$config->server->help_chan ) )
-			{
-				//$re_data = $ircdata;
-				//unset( $re_data[0], $re_data[1], $re_data[2], $re_data[3] );
-				
-				/*foreach ( $re_data as $nick )
-				{
-					// we're going to guess that it's a nick here, lol.
-					if ( strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
-						ircd::umode( core::$config->nickserv->nick, $nick, '+h' );
-						// user has +o, lets give em +h!
-				}*/
-			}
-			// only deal with it if we're talking about the help chan
-		}
-		// here we deal with giving umode +h to ops :D
-		
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false && core::$config->server->help_chan )
-		{
-			$chans = explode( ',', $ircdata[2] );
-			// chans
-			
-			foreach ( $chans as $chan )
-			{
-				if ( $chan == strtolower( core::$config->server->help_chan ) )
-				{
-					foreach ( core::$chans[$chan]['users'] as $nick => $modes )
-					{
-						if ( strstr( $modes, 'o' ) )
-							ircd::umode( core::$config->nickserv->nick, $nick, '+h' );
-							// user has +o, lets give em +h!
-					}
-				}
-				// only deal with it if we're talking about the help chan
-			}
-		}
-		// and on_chan_create
-		
 		foreach ( modules::$list as $module => $data )
 		{
 			if ( $data['type'] == 'nickserv' )
