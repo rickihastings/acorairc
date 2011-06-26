@@ -104,12 +104,12 @@ class ns_password implements module
 		$conf_pass = $ircdata[2];
 		// new password.
 		
-		if ( services::has_privs( $unick ) || !services::oper_privs( $nick, "nickserv_op" ) )
+		if ( ( core::$nicks[$nick]['account'] != $unick && services::has_privs( $unick ) ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
-		// is a non-root trying to change a root's password?
+		// access denied.
 		
 		$user = database::select( 'nicks', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		if ( database::num_rows( $user ) == 0 )

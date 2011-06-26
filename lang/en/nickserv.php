@@ -34,6 +34,7 @@ $help = (object) array(
 	'NS_HELP_RECOVER_1' 	=> '     RECOVER   - Kill another user who has taken your nickname',
 	'NS_HELP_RELEASE_1' 	=> '     RELEASE   - Regain custody of your nickname after RECOVER',
 	'NS_HELP_DROP_1' 		=> '     DROP      - Cancel the registration of a nickname',
+	'NS_HELP_SADROP_1' 		=> '     SADROP    - Forces the dropping of a nickname without a password',
 	'NS_HELP_SUSPEND_1' 	=> '     SUSPEND   - Suspend a given nickname',
 	'NS_HELP_UNSUSPEND_1' 	=> '     UNSUSPEND - Unsuspend a given nickname',
 	'NS_HELP_LIST_1' 		=> '     LIST      - Allows you to search for registered nicknames',
@@ -246,8 +247,21 @@ $help = (object) array(
 		'to re register by anyone.',
 		' ',
 		'You will also lose any channels registered and all',
-		'channel access under that nickname. IRC Operators with',
-		'"nickserv_op" privs can drop any nickname.',
+		'channel access under that nickname.',
+		'=---- End of {nickserv} Help ----=',
+	),
+	// DROP
+	
+	'NS_HELP_FDROP_ALL' 	=> array(
+		'=---- {nickserv} Help ----=',
+		'Syntax: FDROP nickname',
+		' ',
+		'FDROP forces the dropping of a registered account, the',
+		'command is limited to Services Operators with "nickserv_op"',
+		'priviledge.',
+		' ',
+		'The nickname will also lose any channels registered and all',
+		'channel access under that nickname.',
 		'=---- End of {nickserv} Help ----=',
 	),
 	// DROP

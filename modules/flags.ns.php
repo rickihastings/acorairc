@@ -165,12 +165,12 @@ class ns_flags implements module
 		$rparams = explode( '||', $param );
 		// get the channel.
 		
-		if ( services::has_privs( $unick ) || !services::oper_privs( $nick, "nickserv_op" ) )
+		if ( ( core::$nicks[$nick]['account'] != $unick && services::has_privs( $unick ) ) || !services::oper_privs( $nick, "nickserv_op" ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
-		// is someone trying to change someones details who has oper flags?
+		// they don't even have access to do this.
 		
 		$user = database::select( 'nicks', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		if ( database::num_rows( $user ) == 0 )
