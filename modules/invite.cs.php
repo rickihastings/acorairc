@@ -17,7 +17,7 @@
 class cs_invite implements module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -64,7 +64,6 @@ class cs_invite implements module
 			// wrong syntax
 		}
 		// make sure they've entered a channel and user and they're both invalid
-		$who = $unicks[$who]['nick'];
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
