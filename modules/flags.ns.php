@@ -17,7 +17,7 @@
 class ns_flags implements module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -79,6 +79,18 @@ class ns_flags implements module
 		}
 		// are they identified?
 		
+		if ( $flags == '' )
+		{
+			$flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', core::$nicks[$nick]['account'] ) );
+			$flags_q = database::fetch( $flags_q );
+			// get the flag records
+			
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST, array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST2, array( 'nick' => $flags_q->nickname ) );
+			return false;
+		}
+		// are no flags sent? ie they're using /ns flags, asking for the current flags.
+		
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )
 		{
@@ -130,21 +142,21 @@ class ns_flags implements module
 		
 		if ( isset( self::$set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => $nick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
 			unset( self::$set[$nick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$already_set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => $nick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
 			unset( self::$already_set[$nick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => $nick ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
 			unset( self::$not_set[$nick] );
 		}
 		// send back the target stuff..			
@@ -179,6 +191,18 @@ class ns_flags implements module
 			return false;
 		}
 		// look for the user
+		
+		if ( $flags == '' )
+		{
+			$flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $unick ) );
+			$flags_q = database::fetch( $flags_q );
+			// get the flag records
+			
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST, array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST2, array( 'nick' => $flags_q->nickname ) );
+			return false;
+		}
+		// are no flags sent? ie they're using /ns flags, asking for the current flags.
 		
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )
@@ -369,9 +393,9 @@ class ns_flags implements module
 		}
 		// check for invalid values
 		
-		if ( nickserv::check_flags( $target, array( $r_flag ) ) )
+		if ( nickserv::check_flags( core::$nicks[$target]['account'], array( $r_flag ) ) )
 		{
-			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $target ) );
+			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );
 			
 			if ( $mode == '-' )
 			{
@@ -386,12 +410,12 @@ class ns_flags implements module
 				
 				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', $target ) );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.
 				}
 				else
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', $target ) );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.
 				}
 				
@@ -416,7 +440,7 @@ class ns_flags implements module
 				$nick_flag = database::fetch( $nick_flag_q );
 				// get the flag record
 				
-				database::update( 'user_flags', array( $param_field => $param ), array( 'nickname', '=', $target ) );	
+				database::update( 'user_flags', array( $param_field => $param ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 				// update the row with the new flags.
 				
 				self::$set[$target] .= $r_flag;
@@ -428,7 +452,7 @@ class ns_flags implements module
 		}
 		else
 		{
-			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', $target ) );
+			$nick_flag_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );
 			
 			if ( $mode == '+' )
 			{
@@ -443,7 +467,7 @@ class ns_flags implements module
 				
 				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', $target ) );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.
 					
 					self::$set[$target] .= $r_flag;
@@ -452,7 +476,7 @@ class ns_flags implements module
 				}
 				else
 				{
-					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', $target ) );	
+					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.
 					
 					self::$set[$target] .= $r_flag;
