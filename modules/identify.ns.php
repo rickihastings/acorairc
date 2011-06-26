@@ -125,6 +125,7 @@ class ns_identify implements module
 					ircd::on_user_login( $nick, $account );
 					core::$nicks[$nick]['account'] = $account;
 					core::$nicks[$nick]['identified'] = true;
+					core::$nicks[$nick]['failed_attempts'] = 0;
 					// registered mode
 					
 					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $account ) );
@@ -133,7 +134,7 @@ class ns_identify implements module
 					core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
 					// logchan
 					
-					if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) )
+					if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) && nickserv::check_flags( $nick, array( 'H' ) ) )
 					{
 						if ( substr_count( $user->vhost, '@' ) == 1 )
 						{

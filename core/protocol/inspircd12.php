@@ -737,7 +737,7 @@ class ircd implements protocol
 	*/
 	static public function sethost( $from, $nick, $host )
 	{
-		if ( self::$chghost )
+		if ( self::$chghost && core::$nicks[$nick]['host'] != $host )
 		{
 			$ufrom = ircd_handle::get_uid( $from );
 			$unick = ircd_handle::get_uid( $nick );

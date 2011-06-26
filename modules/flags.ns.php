@@ -53,7 +53,7 @@ class ns_flags implements module
 		nickserv::add_command( 'saflags', 'ns_flags', 'saflags_command' );
 		// add the command
 		
-		self::$flags = '+-eusSP';
+		self::$flags = '+-eusSPH';
 		self::$p_flags = 'eus';
 		// flags WITH parameters
 	}
@@ -315,6 +315,14 @@ class ns_flags implements module
 			// P the target in question
 		}
 		// ----------- P ----------- //
+		
+		// ----------- H ----------- //
+		elseif ( $flag == 'H' )
+		{
+			self::set_flag( $nick, $unick, $mode.'H', '' );
+			// H the target in question
+		}
+		// ----------- H ----------- //
 	}
 	
 	/*
