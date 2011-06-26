@@ -27,7 +27,7 @@ $help = (object) array(
 	
 	'OS_HELP_SUFFIX' 	=> array(
 		' ',
-		'Notice: All commands sent to {operserv} are logged!',
+		'Notice: All commands sent to {operserv} are logged!',
 		' ',
 		'=---- End of {operserv} Help ----=',
 	),
@@ -270,7 +270,7 @@ $help = (object) array(
 	
 	'OS_HELP_KICK_ALL'		=> array(
 		'=---- {operserv} Help ----=',
-		'Syntax: KICK channel user reason',
+		'Syntax: KICK channel user reason',
 		' ',
 		'Allows staff to kick a user from any channel.',
 		'Parameters are the same as for the standard /KICK',
@@ -284,7 +284,7 @@ $help = (object) array(
 	
 	'OS_HELP_MODE_ALL'		=> array(
 		'=---- {operserv} Help ----=',
-		'Syntax: MODE channel modes',
+		'Syntax: MODE channel modes',
 		' ',
 		'Allows staff to set channel modes for any channel.',
 		'Parameters are the same as for the standard /MODE',
@@ -322,8 +322,8 @@ $help = (object) array(
 	),
 	// VHOST
 	
-	'OS_INVALID_SYNTAX' 	=> 	'Invalid syntax: /msg {operserv} HELP for more information',
-	'OS_INVALID_SYNTAX_RE'	=> 	'Invalid syntax: /msg {operserv} HELP {help} for more information',
+	'OS_INVALID_SYNTAX' 	=> 	'Invalid syntax: /msg {operserv} HELP for more information',
+	'OS_INVALID_SYNTAX_RE'	=> 	'Invalid syntax: /msg {operserv} HELP {help} for more information',
 	
 	'OS_DENIED_ACCESS' 		=> 	'{operserv} is not available to you',
 	'OS_ACCESS_DENIED' 		=> 	'',

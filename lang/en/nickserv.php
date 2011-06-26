@@ -33,6 +33,7 @@ $help = (object) array(
 	'NS_HELP_GHOST_1' 		=> '     GHOST     - Disconnects a "ghost" IRC session using your nickname',
 	'NS_HELP_RECOVER_1' 	=> '     RECOVER   - Kill another user who has taken your nickname',
 	'NS_HELP_RELEASE_1' 	=> '     RELEASE   - Regain custody of your nickname after RECOVER',
+	'NS_HELP_REQUEST_1' 	=> '     REQUEST   - Request a virtual host',
 	'NS_HELP_DROP_1' 		=> '     DROP      - Cancel the registration of a nickname',
 	'NS_HELP_SADROP_1' 		=> '     SADROP    - Forces the dropping of a nickname without a password',
 	'NS_HELP_SUSPEND_1' 	=> '     SUSPEND   - Suspend a given nickname',
@@ -60,7 +61,7 @@ $help = (object) array(
 	
 	'NS_HELP_FLAGS_ALL'		=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: FLAGS flags [params]',
+		'Syntax: FLAGS flags [params]',
 		' ',
 		'The FLAGS command allows for setting nickname specific settings.',
 		'Some flags flags require a parameter to be set, for instance +u',
@@ -90,7 +91,7 @@ $help = (object) array(
 	
 	'NS_HELP_SAFLAGS_ALL'		=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: SAFLAGS nickname flags [params]',
+		'Syntax: SAFLAGS nickname flags [params]',
 		' ',
 		'The FLAGS command allows for setting nickname specific settings on another',
 		'user. Some flags flags require a parameter to be set, for instance +u',
@@ -144,7 +145,7 @@ $help = (object) array(
 	
 	'NS_HELP_REGISTER_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: REGISTER password email',
+		'Syntax: REGISTER password email',
 		' ',
 		'Registers your nickname in the {nickserv} database, once your',
 		'nickname is registered, you can identify with the IDENTIFY',
@@ -158,7 +159,7 @@ $help = (object) array(
 	
 	'NS_HELP_CONFIRM_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: CONFIRM passcode',
+		'Syntax: CONFIRM passcode',
 		' ',
 		'This is the second step of nickname registration process.',
 		'You must perform this command in order to get your nickname',
@@ -200,7 +201,7 @@ $help = (object) array(
 	
 	'NS_HELP_GHOST_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: GHOST nickname password',
+		'Syntax: GHOST nickname password',
 		' ',
 		'Terminates a "ghost" IRC session using your nickname. A',
 		'"ghost" session is one which is not actually connected,',
@@ -214,7 +215,7 @@ $help = (object) array(
 	
 	'NS_HELP_RECOVER_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: RECOVER nickname password',
+		'Syntax: RECOVER nickname password',
 		' ',
 		'Allows you to recover your nickname if someone else has',
 		'taken it.',
@@ -233,19 +234,30 @@ $help = (object) array(
 	
 	'NS_HELP_RELEASE_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: RELEASE nickname password',
+		'Syntax: RELEASE nickname password',
 		' ',
 		'Instructs {nickserv} to remove any hold on your nickname',
-		'caused by automatic kill protection or use of the RECOVER',
+		'caused by automatic kill protection or use of the RECOVER',
 		'command. This holds lasts for 1 minute; this command gets',
 		'rid of them sooner.',
 		'=---- End of {nickserv} Help ----=',
 	),
 	// RELEASE
 	
+	'NS_HELP_REQUEST_ALL' 	=> array(
+		'=---- {nickserv} Help ----=',
+		'Syntax: REQUEST vhost',
+		' ',
+		'Request a custom vhost from the network staff. You must be registered',
+		'and identified to use this command. Please be patient while your',
+		'request is considered by network staff.',
+		'=---- End of {nickserv} Help ----=',
+	),
+	// REQUEST
+	
 	'NS_HELP_DROP_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: DROP nickname password',
+		'Syntax: DROP nickname password',
 		' ',
 		'Using this command makes {nickserv} drop the nickname, a',
 		'password is required even if you are identified to that',
@@ -260,7 +272,7 @@ $help = (object) array(
 	
 	'NS_HELP_FDROP_ALL' 	=> array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: FDROP nickname',
+		'Syntax: FDROP nickname',
 		' ',
 		'FDROP forces the dropping of a registered account, the',
 		'command is limited to Services Operators with "nickserv_op"',
@@ -337,8 +349,8 @@ $help = (object) array(
 		'or identify via /msg {nickserv} identify password',
 	),
 	
-	'NS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {nickserv} HELP for more information',
-	'NS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {nickserv} HELP {help} for more information',
+	'NS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {nickserv} HELP for more information',
+	'NS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {nickserv} HELP {help} for more information',
 	
 	'NS_ACCESS_DENIED'		=> 	'You do not have access to do this',
 	'NS_ISNT_REGISTERED'	=>	'{nick} isn\'t registered',
@@ -407,6 +419,10 @@ $help = (object) array(
 	'NS_FLAGS_LIST'			=>	'The current flags set for {nick} are {flags}',
 	'NS_FLAGS_LIST2'		=>	'See /ns info {nick} for more information',
 	// flags
+	'NS_INVALID_HOSTNAME'	=>	'Invalid characters in hostname',
+	'NS_REQUESTED_HOST'		=>	'Your vhost has been requested, it may take a few days to be approved, please be patient',
+	'NS_PENDING_REQUEST'	=>	'You already have a pending vhost request',
+	// request
 );
 
 // EOF;
