@@ -175,7 +175,7 @@ class services
 		// IF there is a $data defined, we do some replacing
 		// otherwise leave it alone
 		
-		if ( core::$nicks[$nick]['identified'] && nickserv::check_flags( $to, array( 'P' ) ) )
+		if ( core::$nicks[$nick]['identified'] && nickserv::check_flags( core::$nicks[$to]['account'], array( 'P' ) ) )
 			ircd::msg( $from, $to, $ntemplate );
 		else
 			ircd::notice( $from, $to, $ntemplate );
