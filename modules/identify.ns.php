@@ -296,6 +296,11 @@ class ns_identify implements module
 			{
 				if ( $user->suspended == 1 )
 				{
+					ircd::on_user_logout( $nick );
+					core::$nicks[$nick]['account'] = '';
+					core::$nicks[$nick]['identified'] = false;
+					// they shouldn't really have registered mode
+					
 					return false;
 				}
 				elseif ( $user->validated == 0 && $user->suspended == 0 )
@@ -307,19 +312,7 @@ class ns_identify implements module
 					
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 				}
-				elseif ( !core::$nicks[$nick]['identified'] && $user->suspended == 0 )
-				{
-					self::_registered_nick( $nick, $user );
-				}
-				elseif ( core::$nicks[$nick]['identified'] && $user->last_hostmask == core::get_full_hostname( $nick ) )
-				{
-					ircd::on_user_login( $nick );
-					core::$nicks[$nick]['account'] = $nick;
-					core::$nicks[$nick]['identified'] = true;
-					
-					core::alog( core::$config->nickserv->nick.': ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['host'].') automatically identified for '.$nick );
-				}
-				else
+				elseif ( core::$nicks[$nick]['identified'] && $nick == core::$nicks[$nick]['account'] )
 				{
 					self::_registered_nick( $nick, $user );
 				}

@@ -128,7 +128,7 @@ class os_akill implements module
 			// add a timer to remove the ban.
 		}
 		// mode is add
-		else if ( $mode == 'del' )
+		elseif ( $mode == 'del' )
 		{
 			$hostname = $ircdata[1];
 			$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
@@ -145,7 +145,7 @@ class os_akill implements module
 			// call del ip akill
 		}
 		// mode is del
-		else if ( $mode == 'list' )
+		elseif ( $mode == 'list' )
 		{
 			self::_list_akill( $nick );
 			// call list akill

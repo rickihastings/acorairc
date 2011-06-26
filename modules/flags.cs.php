@@ -97,7 +97,7 @@ class cs_flags implements module
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_LIST2, array( 'chan' => $chan ) );
 			return false;
 		}
-		else if ( $target == '' && $flags == '' && !$levels_result )
+		elseif ( $target == '' && $flags == '' && !$levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -323,7 +323,7 @@ class cs_flags implements module
 				ircd::part_chan( core::$config->chanserv->nick, $chan );
 				// leave the channel
 			}
-			else if ( $return !== false && $mode == '+' && count( core::$chans[$chan]['users'] ) > 0 )
+			elseif ( $return !== false && $mode == '+' && count( core::$chans[$chan]['users'] ) > 0 )
 			{
 				ircd::join_chan( core::$config->chanserv->nick, $chan );
 				// join the chan.
@@ -386,7 +386,7 @@ class cs_flags implements module
 				ircd::mode( core::$config->chanserv->nick, $chan, '-l' );
 				// -l the channel
 			}
-			else if ( $return !== false && $mode == '+' )
+			elseif ( $return !== false && $mode == '+' )
 			{
 				self::increase_limit( $chan );
 				// execute it directly.

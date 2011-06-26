@@ -83,7 +83,7 @@ class cs_drop implements module
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROP_CODE, array( 'chan' => $chan, 'code' => $drop_code ) );
 			return false;
 		}
-		else if ( $code != core::$chans[$chan]['drop_code'] )
+		elseif ( $code != core::$chans[$chan]['drop_code'] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_INVALID_CODE );
 			return false;

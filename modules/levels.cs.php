@@ -158,7 +158,7 @@ class cs_levels implements module
 		}
 		// no params
 		// lets show the current flags.
-		else if ( $target == '' && $flags == '' && !$levels_result )
+		elseif ( $target == '' && $flags == '' && !$levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
@@ -539,7 +539,7 @@ class cs_levels implements module
 					ircd::mode( core::$config->chanserv->nick, $chan, '-b '.$target );
 				// is the hostname in our cache? if not unban it..
 			}
-			else if ( $return !== false && $mode == '+' )
+			elseif ( $return !== false && $mode == '+' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $user => $modes )
 				{

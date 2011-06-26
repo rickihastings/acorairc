@@ -90,7 +90,7 @@ class os_session implements module
 			// call add ip exception
 		}
 		// mode is add
-		else if ( $mode == 'del' )
+		elseif ( $mode == 'del' )
 		{
 			$ip_address = $ircdata[1];
 			// get our vars
@@ -113,7 +113,7 @@ class os_session implements module
 			// call del ip exception
 		}
 		// mode is del
-		else if ( $mode == 'list' )
+		elseif ( $mode == 'list' )
 		{
 			self::_list_exception( $nick );
 			// call list exception
