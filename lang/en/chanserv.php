@@ -139,7 +139,7 @@ $help = (object) array(
 	
 	'CS_HELP_REGISTER_ALL' 	=> array(
 		'=---- {chanserv} Help ----=',
-		'Syntax: REGISTER channel description',
+		'Syntax: REGISTER channel description',
 		' ',
 		'Registers a channel in the {chanserv} database.',
 		'The last parameter, which must be included, is a',
@@ -159,7 +159,7 @@ $help = (object) array(
 	
 	'CS_HELP_FLAGS_ALL'		=> array(
 		'=---- {chanserv} Help ----=',
-		'Syntax: FLAGS channel flags [params]',
+		'Syntax: FLAGS channel flags [params]',
 		' ',
 		'The FLAGS command allows for setting channel specific settings.',
 		'Some flags flags require a parameter to be set, for instance +m',
@@ -204,8 +204,8 @@ $help = (object) array(
 	
 	'CS_HELP_LEVELS_ALL' 	=> array(
 		'=---- {chanserv} Help ----=',
-		'Syntax: LEVELS channel flags { nickname | hostmask }',
-		'        LEVELS channel flags { nickname | hostmask } expiry reason',
+		'Syntax: LEVELS channel flags { nickname | hostmask }',
+		'        LEVELS channel flags { nickname | hostmask } expiry reason',
 		'        LEVELS channel',
 		' ',
 		'The LEVELS command allows for the granting/removal of channel',
@@ -517,8 +517,8 @@ $help = (object) array(
 	),
 	// KICK/KICKBAN
 	
-	'CS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {chanserv} HELP for more information',
-	'CS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {chanserv} HELP {help} for more information',
+	'CS_INVALID_SYNTAX'		=>	'Invalid syntax: /msg {chanserv} HELP for more information',
+	'CS_INVALID_SYNTAX_RE'	=>	'Invalid syntax: /msg {chanserv} HELP {help} for more information',
 	
 	'CS_ACCESS_DENIED'		=> 	'You do not have access to do this',
 	'CS_UNREGISTERED'		=>	'You need to be registered and identified to register a channel',
