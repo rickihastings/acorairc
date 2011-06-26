@@ -53,8 +53,8 @@ class ns_flags implements module
 		nickserv::add_command( 'saflags', 'ns_flags', 'saflags_command' );
 		// add the command
 		
-		self::$flags = '+-eumSP';
-		self::$p_flags = 'eum';
+		self::$flags = '+-eusSP';
+		self::$p_flags = 'eus';
 		// flags WITH parameters
 	}
 	
@@ -68,6 +68,7 @@ class ns_flags implements module
 	static public function flags_command( $nick, $ircdata = array() )
 	{
 		$flags = $ircdata[0];
+		$full_flags = core::get_data_after( $ircdata, 0 );
 		$param = core::get_data_after( $ircdata, 1 );
 		$rparams = explode( '||', $param );
 		// get the channel.
@@ -79,7 +80,7 @@ class ns_flags implements module
 		}
 		// are they identified?
 		
-		if ( $flags == '' )
+		if ( $full_flags == '' )
 		{
 			$flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', core::$nicks[$nick]['account'] ) );
 			$flags_q = database::fetch( $flags_q );
@@ -115,7 +116,7 @@ class ns_flags implements module
 			$flags .= $flag;
 		// reconstruct the flags
 		
-		$flag_array = mode::sort_modes( $flags, false );
+		$flag_array = mode::sort_modes( $full_flags, false );
 		// sort our flags up
 		
 		foreach ( str_split( self::$p_flags ) as $flag )
@@ -126,37 +127,31 @@ class ns_flags implements module
 				$params[$flag] = trim( $rparams[$param_num] );
 			// we do!
 		}
-		// check if we have any paramtized flags, eg +me
+		// check if we have any paramtized flags, eg +eus
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
-		{
-			// paramtized flags (lowercase) ones come first
 			self::_set_flags( $nick, $nick, $flag, '+', $params );
-		}
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-		{
-			// paramtized flags (lowercase) ones come first
 			self::_set_flags( $nick, $nick, $flag, '-', $params );
-		}
 		
 		if ( isset( self::$set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
 			unset( self::$set[$nick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$already_set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
 			unset( self::$already_set[$nick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$nick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => core::$nicks[$unick]['account'] ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
 			unset( self::$not_set[$nick] );
 		}
 		// send back the target stuff..			
@@ -173,6 +168,7 @@ class ns_flags implements module
 	{
 		$unick = $ircdata[0];
 		$flags = $ircdata[1];
+		$full_flags = core::get_data_after( $ircdata, 1 );
 		$param = core::get_data_after( $ircdata, 2 );
 		$rparams = explode( '||', $param );
 		// get the channel.
@@ -228,7 +224,7 @@ class ns_flags implements module
 			$flags .= $flag;
 		// reconstruct the flags
 		
-		$flag_array = mode::sort_modes( $flags, false );
+		$flag_array = mode::sort_modes( $full_flags, false );
 		// sort our flags up
 		
 		foreach ( str_split( self::$p_flags ) as $flag )
@@ -242,16 +238,10 @@ class ns_flags implements module
 		// check if we have any paramtized flags, eg +me
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
-		{
-			// paramtized flags (lowercase) ones come first
 			self::_set_flags( $nick, $unick, $flag, '+', $params );
-		}
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-		{
-			// paramtized flags (lowercase) ones come first
 			self::_set_flags( $nick, $unick, $flag, '-', $params );
-		}
 		
 		if ( isset( self::$set[$unick] ) )
 		{
@@ -282,6 +272,8 @@ class ns_flags implements module
 	*/
 	public function _set_flags( $nick, $unick, $flag, $mode, $params )
 	{
+		// paramtized flags (lowercase) ones come first
+	
 		// ----------- e ----------- //
 		if ( $flag == 'e' )
 		{
@@ -297,6 +289,14 @@ class ns_flags implements module
 			// u the target in question
 		}
 		// ----------- u ----------- //
+		
+		// ----------- s ----------- //
+		elseif ( $flag == 's' )
+		{
+			self::set_flag( $nick, $unick, $mode.'s', $params['s'] );
+			// s the target in question
+		}
+		// ----------- s ----------- //
 		
 		// non paramatized flags (uppercase)
 		
@@ -355,8 +355,8 @@ class ns_flags implements module
 			$param_field = 'email';
 		if ( $r_flag == 'u' )
 			$param_field = 'url';
-		if ( $r_flag == 'm' )
-			$param_field = 'msn';
+		if ( $r_flag == 's' )
+			$param_field = 'secured_time';
 		// translate. some craq.
 		
 		if ( $r_flag == 'e' && $mode == '-' )
@@ -384,12 +384,12 @@ class ns_flags implements module
 			}
 			// is the email invalid?
 			
-			if ( $r_flag == 'm' && services::valid_email( $param ) === false )
+			if ( $r_flag == 's' && ( $param < 5 || $param > core::$config->nickserv->secure_time ) )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_INVALID_S, array( 'flag' => $flag, 'limit' => core::$config->nickserv->secure_time ) );
 				return false;
 			}
-			// is the email invalid?
+			// is secure time valid?
 		}
 		// check for invalid values
 		

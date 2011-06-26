@@ -286,19 +286,6 @@ class ns_identify implements module
 				
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			}
-			elseif ( !core::$nicks[$nick]['identified'] && $user->suspended == 0 )
-			{
-				self::_registered_nick( $nick, $user );
-			}
-			elseif ( core::$nicks[$nick]['identified'] && $user->last_hostmask == core::get_full_hostname( $nick ) )
-			{
-				ircd::on_user_login( $nick );
-				core::$nicks[$nick]['account'] = $nick;
-				core::$nicks[$nick]['identified'] = true;
-				
-				if ( !$startup )
-					core::alog( core::$config->nickserv->nick.': ('.$connect_data['ident'].'@'.$connect_data['host'].') automatically identified for '.$nick );
-			}
 			else
 			{
 				self::_registered_nick( $nick, $user );
@@ -337,7 +324,7 @@ class ns_identify implements module
 					
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 				}
-				elseif ( core::$nicks[$nick]['identified'] && $nick == core::$nicks[$nick]['account'] )
+				elseif ( $nick != core::$nicks[$nick]['account'] )
 				{
 					self::_registered_nick( $nick, $user );
 				}
@@ -398,8 +385,11 @@ class ns_identify implements module
 		
 		if ( nickserv::check_flags( $nick, array( 'S' ) ) && isset( modules::$list['ns_flags'] ) )
 		{
-			timer::add( array( 'ns_identify', 'secured_callback', array( $nick ) ), core::$config->nickserv->secure_time, 1 );
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SECURED_NICK, array( 'seconds' => core::$config->nickserv->secure_time ) );
+			$limit = nickserv::get_flags( $nick, 's' );
+			$limit = ( $limit == 0 ) ? core::$config->nickserv->secure_time : $limit;
+		
+			timer::add( array( 'ns_identify', 'secured_callback', array( $nick ) ), $limit, 1 );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SECURED_NICK, array( 'seconds' => $limit ) );
 		}
 		// if the nickname has secure enabled, we let them know that we're watching them :o
 	}

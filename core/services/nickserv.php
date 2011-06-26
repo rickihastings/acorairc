@@ -170,8 +170,8 @@ class nickserv implements service
 			$param_field = 'email';
 		elseif ( $flag == 'u' )
 			$param_field = 'url';
-		elseif ( $flag == 'm' )
-			$param_field = 'msn';
+		elseif ( $flag == 's' )
+			$param_field = 'secured_time';
 		else
 			return false;
 		// translate. some craq.
