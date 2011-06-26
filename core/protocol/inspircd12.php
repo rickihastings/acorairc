@@ -915,10 +915,10 @@ class ircd implements protocol
 	* @params
 	* $nick - nick
 	*/
-	static public function on_user_login( $nick )
+	static public function on_user_login( $nick, $account )
 	{
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :'.$nick );
+		self::send( ':'.self::$sid.' METADATA '.$uid.' accountname :'.$account );
 	}
 	
 	/*

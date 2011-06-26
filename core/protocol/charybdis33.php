@@ -883,11 +883,11 @@ class ircd implements protocol
 	* @params
 	* $nick - nick
 	*/
-	static public function on_user_login( $nick )
+	static public function on_user_login( $nick, $account )
 	{
 		// TODO
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$nick );
+		self::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$account );
 	}
 	
 	/*

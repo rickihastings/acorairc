@@ -247,13 +247,22 @@ class parser
 		}
 		// check for undefined vars.
 		
-		foreach ( self::$config as $var => $value )
+		foreach ( self::$config as $var => $values )
 		{
-			if ( $value == 'yes' || $value == 'true' || $value == '1' )
-				self::$config[$var] = true;
+			if ( $values == 'yes' || $values == 'true' || $values == '1' )
+				self::$config[$values] = true;
 			
-			if ( $value == 'no' || $value == 'false' || $value == '0' )
-				self::$config[$var] = false;
+			if ( $values == 'no' || $values == 'false' || $values == '0' )
+				self::$config[$values] = false;
+		
+			foreach ( $values as $name => $value )
+			{
+				if ( $value == 'yes' || $value == 'true' || $value == '1' )
+					self::$config[$var][$name] = true;
+				
+				if ( $value == 'no' || $value == 'false' || $value == '0' )
+					self::$config[$var][$name] = false;
+			}
 		}
 		// convert 'yes', 'true', '1' and their opposites to booleans
 	}

@@ -59,6 +59,9 @@ class ns_identify implements module
 	*/
 	static public function identify_command( $nick, $ircdata = array() )
 	{
+		$allow_multiple_sessions = ( isset( core::$config->nickserv->allow_multiple_sessions ) ) ? core::$config->nickserv->allow_multiple_sessions : true;
+		$session_limit = ( isset( core::$config->nickserv->session_limit ) ) ? core::$config->nickserv->session_limit : 2;
+		
 		if ( count( $ircdata ) == 1 )
 		{
 			$account = $nick;
@@ -94,10 +97,32 @@ class ns_identify implements module
 			{
 				if ( $user->pass == sha1( $password.$user->salt ) )
 				{
+					$sessions = 0;
+					foreach ( core::$nicks as $n => $d )
+					{
+						if ( $d['account'] == $account )
+							$sessions++;
+						if ( $allow_multiple_sessions && $sessions == $session_limit )
+							break;
+					}
+					// check how many sessions we're in, if any
+					
+					if ( $allow_multiple_sessions && $sessions == $session_limit )
+					{
+						services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REACHED_LIMIT, array( 'limit' => $session_limit ) );
+						return false;
+					}
+					if ( $sessions >= 1 && !$allow_multiple_sessions )
+					{
+						services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_MULTIPLE_SESS );
+						return false;
+					}
+					// if we're in more than the limit specified in the config, bail!
+				
 					timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 					// remove the secured timer. if there is one
 					
-					ircd::on_user_login( $nick );
+					ircd::on_user_login( $nick, $account );
 					core::$nicks[$nick]['account'] = $account;
 					core::$nicks[$nick]['identified'] = true;
 					// registered mode
