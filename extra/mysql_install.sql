@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Jun 18, 2011 at 06:56 PM
+-- Generation Time: Jun 27, 2011 at 03:13 PM
 -- Server version: 5.5.8
 -- PHP Version: 5.3.5
 
@@ -37,11 +37,6 @@ CREATE TABLE IF NOT EXISTS `system_chans` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `system_chans`
---
-
-
 -- --------------------------------------------------------
 
 --
@@ -61,11 +56,6 @@ CREATE TABLE IF NOT EXISTS `system_chans_flags` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `system_chans_flags`
---
-
-
 -- --------------------------------------------------------
 
 --
@@ -84,11 +74,6 @@ CREATE TABLE IF NOT EXISTS `system_chans_levels` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `system_chans_levels`
---
-
-
 -- --------------------------------------------------------
 
 --
@@ -101,11 +86,6 @@ CREATE TABLE IF NOT EXISTS `system_core` (
   `max_userstime` int(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
---
--- Dumping data for table `system_core`
---
-
 
 -- --------------------------------------------------------
 
@@ -121,11 +101,6 @@ CREATE TABLE IF NOT EXISTS `system_failed_attempts` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `system_failed_attempts`
---
-
-
 -- --------------------------------------------------------
 
 --
@@ -139,11 +114,6 @@ CREATE TABLE IF NOT EXISTS `system_ignored_users` (
   `temp` int(11) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
---
--- Dumping data for table `system_ignored_users`
---
-
 
 -- --------------------------------------------------------
 
@@ -159,11 +129,6 @@ CREATE TABLE IF NOT EXISTS `system_logon_news` (
   `time` int(20) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
---
--- Dumping data for table `system_logon_news`
---
-
 
 -- --------------------------------------------------------
 
@@ -183,11 +148,6 @@ CREATE TABLE IF NOT EXISTS `system_sessions` (
   `akill` int(1) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
---
--- Dumping data for table `system_sessions`
---
-
 
 -- --------------------------------------------------------
 
@@ -212,11 +172,6 @@ CREATE TABLE IF NOT EXISTS `system_users` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
---
--- Dumping data for table `system_users`
---
-
-
 -- --------------------------------------------------------
 
 --
@@ -225,17 +180,13 @@ CREATE TABLE IF NOT EXISTS `system_users` (
 
 CREATE TABLE IF NOT EXISTS `system_users_flags` (
   `id` int(10) NOT NULL AUTO_INCREMENT,
+  `secured_time` int(3) NOT NULL,
   `nickname` varchar(255) NOT NULL,
   `flags` varchar(100) NOT NULL,
   `email` varchar(255) NOT NULL,
   `url` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
-
---
--- Dumping data for table `system_users_flags`
---
-
 
 -- --------------------------------------------------------
 
@@ -250,7 +201,17 @@ CREATE TABLE IF NOT EXISTS `system_validation_codes` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `system_validation_codes`
+-- Table structure for table `system_vhost_request`
 --
 
+CREATE TABLE IF NOT EXISTS `system_vhost_request` (
+  `id` int(5) NOT NULL AUTO_INCREMENT,
+  `vhost` varchar(255) NOT NULL,
+  `nickname` varchar(255) NOT NULL,
+  `hostname` varchar(255) NOT NULL,
+  `timestamp` int(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
