@@ -29,7 +29,6 @@ interface protocol
 	static public function handle_quit( $ircdata, $startup = false );
 	static public function handle_host_change( $ircdata );
 	static public function handle_mode( $ircdata );
-	static public function handle_ftopic( $ircdata );
 	static public function handle_topic( $ircdata );
 	static public function handle_channel_create( $ircdata );
 	static public function handle_join( $ircdata );
@@ -86,7 +85,6 @@ interface protocol
 	static public function on_mode( $ircdata );
 	static public function on_kick( $ircdata );
 	static public function on_topic( $ircdata );
-	static public function on_ftopic( $ircdata );
 	static public function on_oper_up( $ircdata );
 	static public function on_msg( $ircdata );
 	static public function on_notice( $ircdata );

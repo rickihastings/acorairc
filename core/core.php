@@ -366,10 +366,6 @@ class core
 			return true;
 		// on mode
 		
-		if ( ircd::on_ftopic( $ircdata ) )
-			return true;
-		// on ftopic
-		
 		if ( ircd::on_topic( $ircdata ) )
 			return true;	
 		// on topic

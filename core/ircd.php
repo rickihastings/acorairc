@@ -301,31 +301,6 @@ class ircd_handle
 	}
 	
 	/*
-	* handle_ftopic
-	*
-	* @params
-	* $chan, $topic, $nick
-	*/
-	static public function handle_ftopic( $chan, $topic, $nick )
-	{
-		core::$chans[$chan]['topic'] = $topic;
-		core::$chans[$chan]['topic_setter'] = $nick;
-		core::alog( 'on_topic(): topic for '.$chan.' changed', 'BASIC' );
-		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_topic' ) )
-				$class->on_topic( $nick, $chan, $topic );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_topic' ) )
-				modules::$list[$module]['class']->on_topic( $nick, $chan, $topic );
-		}
-	}
-	
-	/*
 	* handle_topic
 	*
 	* @params

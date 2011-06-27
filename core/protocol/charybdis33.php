@@ -223,24 +223,6 @@ class ircd implements protocol
 	}
 	
 	/*
-	* handle_ftopic
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_ftopic( $ircdata )
-	{
-		$nick = explode( '!', $ircdata[4] );
-		$nick = $nick[0];
-		// get the nick
-		$chan = core::get_chan( $ircdata, 2 );
-		$topic = trim( substr( core::get_data_after( $ircdata, 5 ), 1 ) );
-		// grab the topic
-	
-		ircd_handle::handle_ftopic( $chan, $topic, $nick );
-	}
-	
-	/*
 	* handle_topic
 	*
 	* @params
@@ -248,10 +230,22 @@ class ircd implements protocol
 	*/
 	static public function handle_topic( $ircdata )
 	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
-		$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
-		// grab the topic
+	
+		if ( $ircdata[1] == 'TB' )
+		{
+			$nick = explode( '!', $ircdata[4] );
+			$nick = $nick[0];
+			// get the nick
+			$topic = trim( substr( core::get_data_after( $ircdata, 5 ), 1 ) );
+			// grab the topic
+		}
+		else if ( $ircdata[1] == 'TOPIC' )
+		{
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
+			$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
+			// grab the topic
+		}
 	
 		ircd_handle::handle_topic( $chan, $topic, $nick );
 	}
@@ -1136,19 +1130,11 @@ class ircd implements protocol
 	*/
 	static public function on_mode( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'BMASK' )
+		if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'BMASK' || $ircdata[1] == 'TMODE' ) )
 		{
 			ircd::handle_mode( $ircdata );
 			return true;
 		}
-		// listen for BMASK. handle_mode decides what we want to parse!
-	
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TMODE' )
-		{
-			ircd::handle_mode( $ircdata );
-			return true;
-		}
-		// return true when any channel has a mode change, because $chan isnt set.
 		
 		return false;
 	}
@@ -1179,30 +1165,11 @@ class ircd implements protocol
 	*/
 	static public function on_topic( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TOPIC' )
+		if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'TOPIC' || $ircdata[1] == 'TB' ) )
 		{
 			ircd::handle_topic( $ircdata );	
 			return true;
 		}
-		// return true when any channel's topic is changed, because $chan isnt set.
-		
-		return false;
-	}
-	
-	/*
-	* on_ftopic
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function on_ftopic( $ircdata )
-	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TB' )
-		{
-			ircd::handle_ftopic( $ircdata );
-			return true;
-		}
-		// return true when any channel's topic is changed, because $chan isnt set.
 		
 		return false;
 	}
