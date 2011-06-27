@@ -88,8 +88,8 @@ interface protocol
 	static public function on_topic( $ircdata );
 	static public function on_ftopic( $ircdata );
 	static public function on_oper_up( $ircdata );
-	static public function on_msg( $ircdata, $where = '' );
-	static public function on_notice( $ircdata, $where = '' );
+	static public function on_msg( $ircdata );
+	static public function on_notice( $ircdata );
 	static public function on_nick_change( $ircdata, $startup = false );
 	static public function on_ident_change( $ircdata );
 	static public function on_gecos_change( $ircdata );
@@ -110,7 +110,6 @@ interface protocol
 interface service
 {
 	
-	public function main( $ircdata, $startup = false );
 	static public function add_help_fix( $module, $what, $command, $help );
 	static public function add_help( $module, $command, $help, $privs = '' );
 	static public function get_help( $nick, $command );

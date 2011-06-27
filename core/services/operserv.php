@@ -143,24 +143,6 @@ class operserv implements service
 	}
 	
 	/*
-	* main (event_hook)
-	* 
-	* @params
-	* $ircdata - ..
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( $data['type'] == 'operserv' )
-			{
-				modules::$list[$module]['class']->main( $ircdata, $startup );
-				// loop through the modules for operserv.
-			}
-		}
-	}
-	
-	/*
 	* add_help_prefix
 	* 
 	* @params

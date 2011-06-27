@@ -1233,7 +1233,7 @@ class ircd implements protocol
 	* $ircdata - ..
 	* $where - optional
 	*/
-	static public function on_msg( $ircdata, $where = '' )
+	static public function on_msg( $ircdata )
 	{
 		$nick = ircd_handle::get_nick( $ircdata, 0 );
 		$msg = core::get_data_after( $ircdata, 3 );
@@ -1259,31 +1259,11 @@ class ircd implements protocol
 	* $ircdata - ..
 	* $where - optional
 	*/
-	static public function on_notice( $ircdata, $where = '' )
+	static public function on_notice( $ircdata )
 	{
-		$return = array(
-			'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-			'msg' => core::get_data_after( $ircdata, 3 ),
-		);
-		
-		if ( $ircdata[2][0] != '#' )
-			$return['target'] = ircd_handle::get_nick( $ircdata, 2 );
-		else
-			$return['target'] = core::get_chan( $ircdata, 2 );
-	
-		if ( $where != '' )
-		{
-			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' && $ircdata[2] == $where )
-				return $return;
-			// return true providing $where matches where it was sent, crafty.
-			// clearly doesn't make much sence imo. lol
-		}
-		else
-		{
-			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
-				return $return;
-			// return true on any notice, because $where aint set.
-		}
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
+			return true;
+		// return true on any notice, because $where aint set.
 		
 		return false;
 	}

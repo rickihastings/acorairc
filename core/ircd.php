@@ -414,6 +414,9 @@ class ircd_handle
 			
 			core::alog( 'on_join(): '.$nick.' joined '.$chan, 'BASIC' );
 			
+			core::join_flood_check( $nick, $chan );
+			// flood check
+			
 			foreach ( core::$bots as $bot => $class )
 			{
 				if ( method_exists( $class, 'on_join' ) )
@@ -499,6 +502,8 @@ class ircd_handle
 	static public function handle_msg( $nick, $target, $msg )
 	{
 		commands::ctcp( $nick, $target, $msg );
+		core::flood_check( $nick, $target, $msg );
+		// commands and flood checking!
 		
 		foreach ( core::$bots as $bot => $class )
 		{

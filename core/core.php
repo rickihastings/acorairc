@@ -297,22 +297,21 @@ class core
 	*/
 	public function process( $ircdata, $startup = false )
 	{
-		if ( self::$end_burst )
-			ircd::ping( $ircdata );
+		if ( self::$end_burst && ircd::ping( $ircdata ) )
+			return true;
 		// pingpong my name is tingtong
-	
-		self::log_changes( $ircdata, $startup );
-		// log peoples hostnames, used for bans etc.
 		
-		ircd::on_msg( $ircdata );
+		if ( ircd::on_notice( $ircdata ) )
+			return true;
+		// ignore notices
+		
+		if ( ircd::on_msg( $ircdata ) )
+			return true;
 		// look for msgs
 		
-		//if ( self::flood_check( $ircdata ) ) return true;
-		// this just does some checking, this is quite
-		// important as it deals with the main anti-flood support
-		
-		//if ( commands::motd( $ircdata ) ) return true;
-		// motd
+		if ( self::log_changes( $ircdata, $startup ) )
+			return true;
+		// log peoples hostnames, used for bans etc.
 		
 		if ( $ircdata[0] == 'ERROR' )
 		{
@@ -321,17 +320,6 @@ class core
 			ircd::shutdown( 'ERROR', true );
 		}
 		// act upon ERROR messages.
-		
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( $data['type'] == 'core' )
-				modules::$list[$module]['class']->main( $ircdata, $startup );
-		}	
-		// any core modules? humm
-		
-		foreach ( self::$bots as $bot => $class )
-			$class->main( $ircdata, $startup );
-		// we hook to each of our bots
 	}
 	
 	/*
@@ -342,55 +330,74 @@ class core
 	*/
 	static public function log_changes( $ircdata, $startup = false )
 	{
-		ircd::on_server( $ircdata );
+		if ( ircd::on_server( $ircdata ) )
+			return true;
 		// let's us keep track of the linked servers
 		
-		ircd::on_squit( $ircdata );
+		if ( ircd::on_squit( $ircdata ) )
+			return true;
 		// let's us keep track of the linked servers
 		
-		ircd::on_connect( $ircdata, $startup );
+		if ( ircd::on_connect( $ircdata, $startup ) )
+			return true;
 		// log shit on connect, basically the users host etc.
 		
-		ircd::on_nick_change( $ircdata, $startup );
+		if ( ircd::on_nick_change( $ircdata, $startup ) )
+			return true;
 		// on nick change, make sure the variable changes too.
 		
-		ircd::on_quit( $ircdata, $startup );
+		if ( ircd::on_quit( $ircdata, $startup ) )
+			return true;
 		// on quit.
 		
-		ircd::on_fhost( $ircdata );
+		if ( ircd::on_fhost( $ircdata ) )
+			return true;
 		// on hostname change.
 		
-		ircd::on_ident_change( $ircdata );
+		if ( ircd::on_ident_change( $ircdata ) )
+			return true;
 		// on ident change
 		
-		ircd::on_gecos_change( $ircdata );
+		if ( ircd::on_gecos_change( $ircdata ) )
+			return true;
 		// on realname (gecos) change
 		
-		ircd::on_mode( $ircdata );	
+		if ( ircd::on_mode( $ircdata ) )
+			return true;
 		// on mode
 		
-		ircd::on_ftopic( $ircdata );
+		if ( ircd::on_ftopic( $ircdata ) )
+			return true;
 		// on ftopic
 		
-		ircd::on_topic( $ircdata );	
+		if ( ircd::on_topic( $ircdata ) )
+			return true;	
 		// on topic
 		
-		ircd::on_chan_create( $ircdata );
+		if ( ircd::on_chan_create( $ircdata ) )
+			return true;
 		// on channel create
 		
 		if ( ircd::on_join( $ircdata ) )
-		{}
+			return true;
 		// on join
 		
-		ircd::on_part( $ircdata );
+		if ( ircd::on_part( $ircdata ) )
+			return true;
 		// and on part.
 		
-		ircd::on_kick( $ircdata );
+		if ( ircd::on_kick( $ircdata ) )
+			return true;
 		// and on kick.
 		
-		if ( ircd::on_oper_up( $ircdata ) !== false )
+		if ( ircd::on_oper_up( $ircdata ) )
+		{
 			core::alog( 'OPER UP' );
+			return true;
+		}
 		// on oper ups
+		
+		return false;
 	}
 	
 	/*
@@ -507,8 +514,8 @@ class core
 		if ( count( self::$nicks ) > self::$max_users )
 		{
 			$update_array = array(
-				'max_users'		=>	count( self::$nicks ),
-				'max_userstime'	=>	self::$network_time
+				'max_users' => count( self::$nicks ),
+				'max_userstime' => self::$network_time
 			);
 			
 			$update = database::update( 'core', $update_array, array( 'id', '=', '1' ) );
@@ -615,57 +622,40 @@ class core
 	}
 	
 	/*
-	* flood_check
-	*
-	* @params
-	* $ircdata - ..
+	* join_flood_check
 	*/
-	static public function flood_check( $ircdata )
+	static public function join_flood_check( $nick, $chan )
 	{
-		/*if ( trim( $ircdata[0] ) == '' )
-			return true;
-		// the data is empty, omgwtf..
-		
-		$return = ircd::on_join( $ircdata );
-		if ( $return !== false && ( self::$chans[$chan]['joins'] >= 10 ) )
+		if ( self::$chans[$chan]['joins'] >= 10 )
 		{
-			$chans = explode( ',', $return['chan'] );
-			// find the chans.
-			
-			foreach ( $chans as $chan )
-			{
-				ircd::mode( ircd::$sid, $chan, '+i' );
-				self::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
-				return true;
-			}
+			ircd::mode( ircd::$sid, $chan, '+i' );
+			self::alog( self::$config->operserv->nick.': Flood protection triggered for '.$chan.', +i set' );
 		}
-		// check for join floods.
-		
-		$return = ircd::on_msg( $ircdata );
-		if ( $return !== false && $return['target'][0] == '#' && $return['msg'][1] != self::$config->chanserv->fantasy_prefix )
+		// trigger flood protection
+	}
+	
+	/*
+	* flood_check
+	*/
+	static public function flood_check( $nick, $target, $msg )
+	{
+		if ( $target[0] == '#' && $msg[1] != self::$config->chanserv->fantasy_prefix )
 			return true;
 		// this is just here to instantly ignore any normal channel messages 
 		// otherwise we get lagged up on flood attempts
 		
-		if ( ircd::on_notice( $ircdata ) !== false )
-			return true;
-		// and ignore notices, since we shouldnt respond to any 
-		// notices what so ever, just saves wasting cpu cycles when we get a notice
-		
-		if ( $return !== false && $return['target'][0] == '#' )
+		if ( $target[0] != '#' )
 		{
 			if ( self::$config->settings->flood_msgs == 0 || self::$config->settings->flood_time == 0 )
 				return false;	
 			// check if it's disabled.
 			
-			$nick = self::get_nick( $ircdata, 0 );
 			$time_limit = time() - self::$config->settings->flood_time;
 			self::$nicks[$nick]['commands'][] = time();
-			$from = self::get_nick( $ircdata, 2 );
 			
 			if ( self::$nicks[$nick]['ircop'] )
 				return false;
-			// ignore ircops
+			// ignore ircops (with caution!)
 			
 			$inc = 0;
 			foreach ( self::$nicks[$nick]['commands'] as $index => $timestamp )
@@ -692,8 +682,8 @@ class core
 					$message = ( self::$nicks[$nick]['offences'] == 1 ) ? 'This is your first offence' : 'This is your last warning';
 					// compose a message.
 					
-					services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_1 );
-					services::communicate( $from, $nick, operserv::$help->OS_COMMAND_LIMIT_2, array( 'message' => $message ) );
+					services::communicate( $target, $nick, operserv::$help->OS_COMMAND_LIMIT_1 );
+					services::communicate( $target, $nick, operserv::$help->OS_COMMAND_LIMIT_2, array( 'message' => $message ) );
 					self::alog( self::$config->operserv->nick.': Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ).' being ignored for 2 minutes' );
 					self::alog( 'flood_check(): Offence #'.self::$nicks[$nick]['offences'].' for '.self::get_full_hostname( $nick ), 'BASIC' );
 					
@@ -711,7 +701,7 @@ class core
 				}
 			}
 			// they're flooding
-		}*/
+		}
 		// TODO
 	}
 	

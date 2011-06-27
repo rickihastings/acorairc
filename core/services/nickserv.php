@@ -75,24 +75,6 @@ class nickserv implements service
 	}
 	
 	/*
-	* main (event_hook)
-	* 
-	* @params
-	* $ircdata - ..
-	*/
-	public function main( $ircdata, $startup = false )
-	{	
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( $data['type'] == 'nickserv' )
-			{
-				modules::$list[$module]['class']->main( $ircdata, $startup );
-				// loop through the modules for nickserv.
-			}
-		}
-	}
-	
-	/*
 	* check_expire (private)
 	* 
 	* @params
