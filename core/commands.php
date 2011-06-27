@@ -33,43 +33,32 @@ class commands
 	* @params
 	* $ircdata - ..
 	*/
-	static public function ctcp( $ircdata )
+	static public function ctcp( $nick, $who, $msg )
 	{
-		$return = ircd::on_msg( $ircdata );
-		if ( $return !== false )
+		$msg = explode( ' ', substr( $msg, 1 ) );
+		$part_one = preg_replace( '/[^a-zA-Z0-9\s]/', '', $msg[0] );
+		
+		if ( $part_one == 'VERSION' )
 		{
-			$nick = $return['nick'];
-			$who = $return['target'];
-			$msg = explode( ' ', substr( $return['msg'], 1 ) );
-			$part_one = preg_replace( '/[^a-zA-Z0-9\s]/', '', $msg[0] );
-			
-			if ( $part_one == 'VERSION' )
-			{
-				ircd::notice( $who, $nick, 'VERSION acora-'.core::$version.' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
-				ircd::notice( $who, $nick, 'VERSION (C) 2009 GamerGrid #acora @ irc.ircnode.org' );
-			}
-			// only reply on version.
-			elseif ( $part_one == 'TIME' )
-			{
-				ircd::notice( $who, $nick, 'TIME '.date( 'D M j G:i:s Y', core::$network_time ).'' );
-			}
-			// only reply on time.
-			elseif ( $part_one == 'PING' )
-			{
-				ircd::notice( $who, $nick, 'PING 0secs' );
-			}
-			// only reply on ping.
-			elseif ( $part_one == 'FINGER' )
-			{
-				ircd::notice( $who, $nick, 'FINGER Get your finger out of my socket!' );
-			}
-			// only reply on finger, teehee :D
-			else
-			{
-				return false;
-			}
+			ircd::notice( $who, $nick, 'VERSION acora-'.core::$version.' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+			ircd::notice( $who, $nick, 'VERSION (C) 2009 GamerGrid #acora @ irc.ircnode.org' );
 		}
-		// only trigger when we're being messaged.
+		// only reply on version.
+		elseif ( $part_one == 'TIME' )
+		{
+			ircd::notice( $who, $nick, 'TIME '.date( 'D M j G:i:s Y', core::$network_time ).'' );
+		}
+		// only reply on time.
+		elseif ( $part_one == 'PING' )
+		{
+			ircd::notice( $who, $nick, 'PING 0secs' );
+		}
+		// only reply on ping.
+		elseif ( $part_one == 'FINGER' )
+		{
+			ircd::notice( $who, $nick, 'FINGER Get your finger out of my socket!' );
+		}
+		// only reply on finger, teehee :D
 	}
 	
 	/*
@@ -121,18 +110,16 @@ class commands
 	* on_fantasy_cmd
 	*
 	* @params
-	* $return - a valid array from ircd::on_msg()
+	* $from, $chan, $msg < obvious
 	* $command - The command to listen for, !op, !deop
 	* $nick - The bot which listens for the command.
 	*/
-	static public function on_fantasy_cmd( $return, $command, $nick )
+	static public function on_fantasy_cmd( $from, $chan, $msg, $command, $nick )
 	{
 		$prefix = core::$config->chanserv->fantasy_prefix;
-		$chan = $return['target'];
 		$command = strtolower( $command );
-		$commands = explode( ' ', $return['msg'] );
+		$commands = explode( ' ', $msg );
 		$realdata = strtolower( $commands[0] );
-		$from = $return['nick'];
 		
 		if ( services::check_mask_ignore( $nick ) === true )
 			return false;

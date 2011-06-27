@@ -40,6 +40,21 @@ class cs_help implements module
 	}
 	
 	/*
+	* on_msg (event hook)
+	*/
+	public function on_msg( $nick, $target, $msg )
+	{
+		if ( $target != core::$config->chanserv->nick )
+			return false;
+			
+		$query = substr( $msg, 1 );
+		// convert to lower case because all the tingy wags are in lowercase
+		$query = strtolower( $query );
+		
+		chanserv::get_help( $nick, $query );
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -47,20 +62,8 @@ class cs_help implements module
 	*/
     public function main( $ircdata, $startup = false )
 	{
-		$return = ircd::on_msg( $ircdata, core::$config->chanserv->nick );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$query = substr( $return['msg'], 1 );
-			// convert to lower case because all the tingy wags are in lowercase
-			$query = strtolower( $query );
-			
-			chanserv::get_help( $nick, $query );
-		}
-		// only hook to the privmsg towards ChanServ, not channel messages
-		// although chanserv shouldn't even be in any channels :P
+		return false;
 	}
-    
 }
 
 // EOF;

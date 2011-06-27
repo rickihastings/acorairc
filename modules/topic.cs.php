@@ -115,6 +115,30 @@ class cs_topic implements module
 	}
 	
 	/*
+	* on_topic (event hook)
+	*/
+	static public function on_topic( $setter, $chan, $topic )
+	{
+		if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic' ) ) )
+		{
+			if ( chanserv::check_flags( $chan, array( 'T' ) ) && chanserv::check_flags( $chan, array( 'K' ) ) && $channel->topic != $topic )
+			{
+				ircd::topic( core::$config->chanserv->nick, $channel->channel, $channel->topic );
+				database::update( 'chans', array( 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
+				return false;
+				// reset it i reckon.
+			}
+			elseif ( $channel->topiclock == 0 )
+			{
+				database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => $setter ), array( 'channel', '=', $chan ) );
+				// OTHERWISE, update it.
+			}
+			// some housekeepin.
+		}
+		// make sure the channel exists.
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -122,40 +146,7 @@ class cs_topic implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		$return = ircd::on_topic( $ircdata );
-		if ( $return !== false )
-			$chan = $return;
-		$b_return = ircd::on_ftopic( $ircdata );
-		if ( $b_return !== false )
-			$chan = $b_return;
-		
-		if ( $return !== false || $b_return !== false )
-		{
-			$topic = core::$chans[$chan]['topic'];
-			$setter = core::$chans[$chan]['topic_setter'];
-			// i forgot this was done by the protocol modules
-			
-			if ( $channel = services::chan_exists( $chan, array( 'channel', 'topic' ) ) )
-			{
-				if ( chanserv::check_flags( $chan, array( 'T' ) ) && chanserv::check_flags( $chan, array( 'K' ) ) && $channel->topic != $topic )
-				{
-					ircd::topic( core::$config->chanserv->nick, $channel->channel, $channel->topic );
-					database::update( 'chans', array( 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
-					return false;
-					// reset it i reckon.
-				}
-				elseif ( $channel->topiclock == 0 )
-				{
-					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => $setter ), array( 'channel', '=', $chan ) );
-					// OTHERWISE, update it.
-				}
-				// some housekeepin.
-			}
-			// make sure the channel exists.
-		}
-		// now we check for topiclocking
-		// moved this from cs_set to here
-		// there was 2 versions O.o
+		return false;
 	}
 }
 

@@ -33,6 +33,7 @@ class core
 	static public $session_rows;
 	// our main static variables, these are all very important.
 	
+	static public $bots = array();
 	static public $servers = array();
 	static public $chans = array();
 	static public $nicks = array();
@@ -47,7 +48,6 @@ class core
 	
 	static public $end_burst = false;
 	static public $capab_start = false;
-	static public $pullout = false;
 	static public $lines_processed;
 	static public $lines_sent;
 	static public $buffer;
@@ -80,7 +80,7 @@ class core
 		if ( isset( self::$config->chanserv ) ) self::$service_bots[] = 'chanserv';
 		// setup our $config->service_bots dir
 		
-		require( BASEPATH.'/lang/'.core::$config->server->lang.'/core.php' );
+		require( BASEPATH.'/lang/'.self::$config->server->lang.'/core.php' );
 		self::$help = $help;
 		// load the help file
 		
@@ -154,7 +154,7 @@ class core
 			timer::loop();
 			// this is our timer counting function
 			
-			if ( self::$end_burst && count( self::$nbuffer ) > 0 )
+			if ( self::$end_burst === true && count( self::$nbuffer ) > 0 )
 			{
 				foreach ( self::$nbuffer as $index => $ircdata )
 				{
@@ -172,7 +172,7 @@ class core
 			}
 			// but only when the burst has finished ^_^
 			
-			if ( self::$end_burst && count( self::$buffer ) > 0 )
+			if ( self::$end_burst === true && count( self::$buffer ) > 0 )
 			{
 				foreach ( self::$buffer as $index => $ircdata )
 				{
@@ -223,14 +223,11 @@ class core
 				ircd::get_information( $ircdata );
 				// modes and stuff we check for here.
 				
-				if ( !self::$pullout )
-					$this->log_changes( $ircdata, false );
-				
 				if ( ircd::on_start_burst( $ircdata ) )
 				{
 					self::$end_burst = false;
 					
-					if ( strstr( core::$config->server->ircd, 'inspircd' ) )
+					if ( strstr( self::$config->server->ircd, 'inspircd' ) )
 						self::$network_time = $ircdata[2];
 					
 					self::$burst_time = microtime( true );
@@ -307,22 +304,15 @@ class core
 		self::log_changes( $ircdata, $startup );
 		// log peoples hostnames, used for bans etc.
 		
-		if ( self::max_users( $ircdata ) ) return true;
-		// check for max users.
+		ircd::on_msg( $ircdata );
+		// look for msgs
 		
-		if ( self::flood_check( $ircdata ) ) return true;
+		//if ( self::flood_check( $ircdata ) ) return true;
 		// this just does some checking, this is quite
 		// important as it deals with the main anti-flood support
 		
-		if ( commands::ctcp( $ircdata ) ) return true;
-		// ctcp stuff :D
-		
-		if ( commands::motd( $ircdata ) ) return true;
+		//if ( commands::motd( $ircdata ) ) return true;
 		// motd
-		
-		if ( ircd::on_timeset( $ircdata ) && $ircdata[3] == 'FORCE' )
-			self::$network_time = $ircdata[2];
-		// we're getting a new time, update it
 		
 		if ( $ircdata[0] == 'ERROR' )
 		{
@@ -339,8 +329,8 @@ class core
 		}	
 		// any core modules? humm
 		
-		foreach ( self::$service_bots as $bot )
-			$this->$bot->main( $ircdata, $startup );
+		foreach ( self::$bots as $bot => $class )
+			$class->main( $ircdata, $startup );
 		// we hook to each of our bots
 	}
 	
@@ -352,73 +342,54 @@ class core
 	*/
 	static public function log_changes( $ircdata, $startup = false )
 	{
-		if ( ircd::on_server( $ircdata ) !== false )
-			ircd::handle_on_server( $ircdata );
+		ircd::on_server( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_squit( $ircdata ) !== false )
-			ircd::handle_on_squit( $ircdata );
+		ircd::on_squit( $ircdata );
 		// let's us keep track of the linked servers
 		
-		if ( ircd::on_connect( $ircdata ) !== false )
-		{
-			ircd::handle_on_connect( $ircdata, $startup );
-			// handle connect
-			core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
-			// check for session rows here so both modules (session/akill) can access it.
-		}
+		ircd::on_connect( $ircdata, $startup );
 		// log shit on connect, basically the users host etc.
 		
-		if ( ircd::on_nick_change( $ircdata ) !== false )
-			ircd::handle_nick_change( $ircdata, $startup );
+		ircd::on_nick_change( $ircdata, $startup );
 		// on nick change, make sure the variable changes too.
 		
-		if ( ircd::on_quit( $ircdata ) !== false )
-			ircd::handle_quit( $ircdata, $startup );
+		ircd::on_quit( $ircdata, $startup );
 		// on quit.
 		
-		if ( ircd::on_fhost( $ircdata ) !== false )
-			ircd::handle_host_change( $ircdata );
+		ircd::on_fhost( $ircdata );
 		// on hostname change.
 		
-		if ( ircd::on_ident_change( $ircdata ) !== false )
-			ircd::handle_ident_change( $ircdata );
+		ircd::on_ident_change( $ircdata );
 		// on ident change
 		
-		if ( ircd::on_gecos_change( $ircdata ) !== false )
-			ircd::handle_gecos_change( $ircdata );
+		ircd::on_gecos_change( $ircdata );
 		// on realname (gecos) change
 		
-		if ( ircd::on_mode( $ircdata ) !== false )
-			ircd::handle_mode( $ircdata );	
+		ircd::on_mode( $ircdata );	
 		// on mode
 		
-		if ( ircd::on_ftopic( $ircdata ) !== false )
-			ircd::handle_ftopic( $ircdata );
+		ircd::on_ftopic( $ircdata );
 		// on ftopic
 		
-		if ( ircd::on_topic( $ircdata ) !== false )
-			ircd::handle_topic( $ircdata );	
+		ircd::on_topic( $ircdata );	
 		// on topic
 		
-		if ( ircd::on_chan_create( $ircdata ) !== false )
-			ircd::handle_channel_create( $ircdata );
+		ircd::on_chan_create( $ircdata );
 		// on channel create
 		
-		if ( ircd::on_join( $ircdata ) !== false )
-			ircd::handle_join( $ircdata );
+		if ( ircd::on_join( $ircdata ) )
+		{}
 		// on join
 		
-		if ( ircd::on_part( $ircdata ) !== false )
-			ircd::handle_part( $ircdata );
+		ircd::on_part( $ircdata );
 		// and on part.
 		
-		if ( ircd::on_kick( $ircdata ) !== false )
-			ircd::handle_kick( $ircdata );
+		ircd::on_kick( $ircdata );
 		// and on kick.
 		
 		if ( ircd::on_oper_up( $ircdata ) !== false )
-			ircd::handle_oper_up( $ircdata );
+			core::alog( 'OPER UP' );
 		// on oper ups
 	}
 	
@@ -453,7 +424,7 @@ class core
 		foreach ( self::$service_bots as $bot )
 		{
 			require( BASEPATH.'/core/services/'.$bot.'.php' );
-			$this->$bot = new $bot();
+			self::$bots[$bot] = new $bot();
 		}
 		// start our bots up.
 		
@@ -478,7 +449,7 @@ class core
 	*/
 	static public function check_services()
 	{
-		if ( core::$services_account === false )
+		if ( self::$services_account === false )
 		{
 			self::alog( 'ERROR: service accounts is required, startup halted.', 'BASIC' );
 			// log it
@@ -491,9 +462,9 @@ class core
 		}
 		// services account isn't found, quit out letting them know.
 		
-		if ( core::$hide_chans === false )
+		if ( self::$hide_chans === false )
 		{
-			core::alog( 'WARNING: +I is either not loaded or not available, this is NOT advised.' );
+			self::alog( 'WARNING: +I is either not loaded or not available, this is NOT advised.' );
 			// alog, don't exit, not needed.
 		}
 		// let the dude know that we don't have a module that hides chans +I
@@ -531,29 +502,25 @@ class core
 	* @params
 	* $ircdata - ..
 	*/
-	static public function max_users( $ircdata )
+	static public function max_users()
 	{
-		if ( ircd::on_connect( $ircdata ) !== false )
+		if ( count( self::$nicks ) > self::$max_users )
 		{
-			if ( count( self::$nicks ) > self::$max_users )
-			{
-				$update_array = array(
-					'max_users'		=>	count( self::$nicks ),
-					'max_userstime'	=>	self::$network_time
-				);
-				
-				$update = database::update( 'core', $update_array, array( 'id', '=', '1' ) );
-				self::$max_users = count( self::$nicks );
-				// update the max users
-				
-				self::alog( self::$config->operserv->nick.': New user peak: '.count( self::$nicks ).' users' );
-				// logchan
-				
-				return true;
-			}
-			// if the current number of users is more than the previous max
+			$update_array = array(
+				'max_users'		=>	count( self::$nicks ),
+				'max_userstime'	=>	self::$network_time
+			);
+			
+			$update = database::update( 'core', $update_array, array( 'id', '=', '1' ) );
+			self::$max_users = count( self::$nicks );
+			// update the max users
+			
+			self::alog( self::$config->operserv->nick.': New user peak: '.count( self::$nicks ).' users' );
+			// logchan
+			
+			return true;
 		}
-		// if someone has logged in
+		// if the current number of users is more than the previous max
 	}
 	
 	/*
@@ -605,7 +572,7 @@ class core
 		
 			if ( count( self::$chans[$chan]['users'] ) == 0 )
 			{
-				if ( strstr( core::$config->server->ircd, 'inspircd' ) && strstr( self::$chans[$chan]['modes'], 'P' ) )
+				if ( strstr( self::$config->server->ircd, 'inspircd' ) && strstr( self::$chans[$chan]['modes'], 'P' ) )
 					continue;
 				// there isnt any users, BUT, does the channel have +P set?
 				// if it does, continue;
@@ -655,12 +622,12 @@ class core
 	*/
 	static public function flood_check( $ircdata )
 	{
-		if ( trim( $ircdata[0] ) == '' )
+		/*if ( trim( $ircdata[0] ) == '' )
 			return true;
 		// the data is empty, omgwtf..
 		
 		$return = ircd::on_join( $ircdata );
-		if ( $return !== false && ( core::$chans[$chan]['joins'] >= 10 ) )
+		if ( $return !== false && ( self::$chans[$chan]['joins'] >= 10 ) )
 		{
 			$chans = explode( ',', $return['chan'] );
 			// find the chans.
@@ -668,7 +635,7 @@ class core
 			foreach ( $chans as $chan )
 			{
 				ircd::mode( ircd::$sid, $chan, '+i' );
-				core::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
+				self::alog( 'WARNING: Flood protection triggered for '.$chan.', +i set' );
 				return true;
 			}
 		}
@@ -717,7 +684,7 @@ class core
 				if ( self::$nicks[$nick]['offences'] == 0 || self::$nicks[$nick]['offences'] == 1 )
 				{
 					self::$nicks[$nick]['offences']++;
-					database::insert( 'ignored_users', array( 'who' => '*!*@'.self::$nicks[$nick]['host'], 'time' => core::$network_time, 'temp' => '1' ) );
+					database::insert( 'ignored_users', array( 'who' => '*!*@'.self::$nicks[$nick]['host'], 'time' => self::$network_time, 'temp' => '1' ) );
 					timer::add( array( 'core', 'remove_ignore', array( '*!*@'.self::$nicks[$nick]['host'] ) ), 120, 1 );
 					// add them to the ignore list.
 					// also, add a timer to unset it in 2 minutes.
@@ -744,7 +711,8 @@ class core
 				}
 			}
 			// they're flooding
-		}
+		}*/
+		// TODO
 	}
 	
 	/*

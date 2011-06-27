@@ -51,6 +51,30 @@ class nickserv implements service
 	}
 	
 	/*
+	* on_connect (event hook)
+	*/
+	public function on_connect( $connect_data )
+	{
+		$nick = strtolower( $connect_data['nick'] );
+		$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
+		self::$nick_q[$nick] = $user;
+	}
+	
+	/*
+	* on_msg (event_hook)
+	*/
+	public function on_msg( $nick, $target, $msg )
+	{
+		if ( $target != core::$config->nickserv->nick )
+			return false;
+		
+		$command = substr( $msg, 1 );
+		// convert to lower case because all the tingy wags are in lowercase
+		
+		self::get_command( $nick, $command );
+	}
+	
+	/*
 	* main (event_hook)
 	* 
 	* @params
@@ -58,27 +82,6 @@ class nickserv implements service
 	*/
 	public function main( $ircdata, $startup = false )
 	{	
-		$return = ircd::on_connect( $ircdata );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
-			self::$nick_q[strtolower( $nick )] = $user;
-		}
-		// on connect
-		
-		$return = ircd::on_msg( $ircdata, core::$config->nickserv->nick );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$command = substr( $return['msg'], 1 );
-			// convert to lower case because all the tingy wags are in lowercase
-			
-			self::get_command( $nick, $command );
-		}
-		// this is what we use to handle command listens
-		// should be quite epic.
-		
 		foreach ( modules::$list as $module => $data )
 		{
 			if ( $data['type'] == 'nickserv' )

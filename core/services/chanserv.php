@@ -52,47 +52,33 @@ class chanserv implements service
 	}
 	
 	/*
+	* on_msg (event_hook)
+	*/
+	public function on_msg( $nick, $target, $msg )
+	{
+		if ( $target != core::$config->chanserv->nick )
+			return false;
+		
+		$command = substr( $msg, 1 );
+		// convert to lower case because all the tingy wags are in lowercase
+		
+		self::get_command( $nick, $command );
+	}
+	
+	/*
 	* main (event_hook)
 	* 
 	* @params
 	* $ircdata - ..
 	*/
 	public function main( $ircdata, $startup = false )
-	{
-		self::on_chan_create( $ircdata );
-		// when a channel is created, NOT registered :)
-		
-		self::on_join( $ircdata );
-		// onjoin hook
-		
-		self::on_part( $ircdata );
-		// is the chan empty? gtfo.
-			
-		self::on_quit( $ircdata );
-		// is the channel empty?
-			
-		self::on_mode( $ircdata );
-		// check mode changes
-			
-		self::on_kick( $ircdata );
-		// on kick event.
-		
+	{	
 		foreach ( modules::$list as $module => $data )
+		{
 			if ( $data['type'] == 'chanserv' )
 				modules::$list[$module]['class']->main( $ircdata, $startup );
 				// loop through the modules for chanserv.
-
-		$return = ircd::on_msg( $ircdata, core::$config->chanserv->nick );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$command = substr( $return['msg'], 1 );
-			// convert to lower case because all the tingy wags are in lowercase
-			
-			self::get_command( $nick, $command );
 		}
-		// this is what we use to handle command listens
-		// should be quite epic.
 	}
 	
 	/*
@@ -110,180 +96,112 @@ class chanserv implements service
 	
 	/*
 	* on_chan_create (event hook)
-	* 
-	* @params
-	* $ircdata - ''
 	*/
-	static public function on_chan_create( $ircdata )
+	static public function on_chan_create( $chan )
 	{
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$chans = explode( ',', $populated_chan );
-			// chans
-			
-			foreach ( $chans as $chan )
-			{
-				self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+		self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
 				
-				if ( self::$chan_q[$chan] )
-					self::_join_channel( self::$chan_q[$chan] );
-				// join the channel
-			}
-		}
-		// hook to the event when a channel is created.
+		if ( self::$chan_q[$chan] )
+			self::_join_channel( self::$chan_q[$chan] );
+		// join the channel
 	}
 	
 	/*
 	* on_part (event hook)
-	* 
-	* @params
-	* $ircdata - ..
 	*/
-	static public function on_part( $ircdata )
+	static public function on_part( $nick, $chan )
 	{
-		$return = ircd::on_part( $ircdata );
-		if ( $return !== false )
+		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
 		{
-			$chan = $return['chan'];
-			// get the channel
-			
-			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
-			{
-				timer::add( array( 'chanserv', 'part_chan_callback', array( $chan ) ), 1, 1 );
-				// instead of leaving straight away we add it to a timer, to be checked and
-				// left in the next loop, incase someone has joined.
-			}
-			// we're the only person in the channel..
+			timer::add( array( 'chanserv', 'part_chan_callback', array( $chan ) ), 1, 1 );
+			// instead of leaving straight away we add it to a timer, to be checked and
+			// left in the next loop, incase someone has joined.
 		}
+		// we're the only person in the channel..
 	}
 	
 	/*
 	* on_join (event hook)
-	*
-	* @params
-	* $ircdata - ..
 	*/
-	static public function on_join( $ircdata )
+	static public function on_join( $nick, $chan )
 	{
-		$populated_chan = ircd::on_join( $ircdata );
-		if ( $populated_chan !== false )
+		self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+			
+		if ( self::$chan_q[$chan] !== false )
 		{
-			$chans = explode( ',', $populated_chan['chan'] );
-			// find the chans.
-			
-			foreach ( $chans as $chan )
-			{
-				self::$chan_q[$chan] = services::chan_exists( $chan, array( 'id', 'channel', 'timestamp', 'last_timestamp', 'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
-			
-				if ( self::$chan_q[$chan] !== false )
-				{
-					database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $chan ) );
-					// lets update the last used timestamp
-				}
-				// is the channel registered?
-			}
-			// we have to do this shit, because unreal has JOINs made up of #chan1,#chan2 craq
-			// seriously, in server 2 server? have a laugh son.
+			database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $chan ) );
+			// lets update the last used timestamp
 		}
+		// is the channel registered?
 	}
 	
 	/*
 	* on_quit (event hook)
-	* 
-	* @params
-	* $ircdata - ''
 	*/
-	static public function on_quit( $ircdata )
+	static public function on_quit( $nick )
 	{
-		if ( ircd::on_quit( $ircdata ) !== false )
+		foreach ( core::$chans as $chan => $data )
 		{
-			foreach ( core::$chans as $chan => $data )
-			{
-				if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
-				{
-					ircd::part_chan( core::$config->chanserv->nick, $chan );
-					// leave the channel.
-				}
-				// ok now we check whos left in the channel, if its only us lets leave
-			}
-			// are they in any channels?
-		}
-		// only trigger on_quit
-	}
-	
-	/*
-	* on_mode (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	static public function on_mode( $ircdata )
-	{
-		$return = ircd::on_mode( $ircdata );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$chan = $return['chan'];
-			$mode_queue = $return['modes'];
-			
-			$a_mode = strpos( $mode_queue, 'a' );
-			$o_mode = strpos( $mode_queue, 'o' );
-			$cs_uid = array_search( core::$config->chanserv->nick, core::$uids );
-			// bleh.
-			
-			if ( ( strpos( $mode_queue, core::$config->chanserv->nick ) || strpos( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
-			{
-				if ( ircd::$protect )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
-					// +ao its self.
-				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
-					// +o its self.
-			}
-			// we're being deopped! WHAT THE FUCK! :D
-		}
-	}
-	
-	/*
-	* on_kick (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	static public function on_kick( $ircdata )
-	{
-		$return = ircd::on_kick( $ircdata );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$chan = $return['chan'];
-			$who = $return['who'];
-			
-			if ( $who == core::$config->server->name || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
-			{
-				ircd::join_chan( core::$config->chanserv->nick, $chan );
-				// join the chan.
-				core::$chans[$chan]['users'][core::$config->chanserv->nick] = '';
-				// add chanserv to the users array, housekeeping it :D
-				
-				if ( ircd::$protect )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
-					// +ao its self.
-				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
-					// +o its self.
-			}
-			// what the fuck is this tool doing.. kicking us!!?! we SHOULD kick their ass
-			// but we're not gonna x]
-			
 			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
 			{
 				ircd::part_chan( core::$config->chanserv->nick, $chan );
 				// leave the channel.
 			}
-			// we're the only person in the channel.. hopefully, lets leave x]
+			// ok now we check whos left in the channel, if its only us lets leave
 		}
+		// are they in any channels?
+	}
+	
+	/*
+	* on_mode (event hook)
+	*/
+	static public function on_mode( $nick, $chan, $mode_queue )
+	{
+		$a_mode = strpos( $mode_queue, 'a' );
+		$o_mode = strpos( $mode_queue, 'o' );
+		$cs_uid = array_search( core::$config->chanserv->nick, core::$uids );
+		// bleh.
+		
+		if ( ( strpos( $mode_queue, core::$config->chanserv->nick ) || strpos( $mode_queue, $cs_uid ) ) && ( $a_mode !== false || $o_mode !== false ) )
+		{
+			if ( ircd::$protect )
+				ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
+				// +ao its self.
+			else
+				ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
+				// +o its self.
+		}
+		// we're being deopped! WHAT THE FUCK! :D
+	}
+	
+	/*
+	* on_kick (event hook)
+	*/
+	static public function on_kick( $nick, $chan, $who )
+	{
+		if ( $who == core::$config->server->name || str_replace( ':', '', $ircdata[0] ) == array_search( core::$config->chanserv->nick, core::$uids ) )
+		{
+			ircd::join_chan( core::$config->chanserv->nick, $chan );
+			// join the chan.
+			core::$chans[$chan]['users'][core::$config->chanserv->nick] = '';
+			// add chanserv to the users array, housekeeping it :D
+			
+			if ( ircd::$protect )
+				ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
+				// +ao its self.
+			else
+				ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
+				// +o its self.
+		}
+		// what the fuck is this tool doing.. kicking us!!?! we SHOULD kick their ass
+		// but we're not gonna x]
+		
+		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
+		{
+			ircd::part_chan( core::$config->chanserv->nick, $chan );
+			// leave the channel.
+		}
+		// we're the only person in the channel.. hopefully, lets leave x]
 	}
 	
 	/*

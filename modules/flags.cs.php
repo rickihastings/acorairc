@@ -428,60 +428,12 @@ class cs_flags implements module
 	}
 	
 	/*
-	* main (event)
-	* 
-	* @params
-	* $ircdata - ''
+	* on_quit (event hook)
 	*/
-	public function main( $ircdata, $startup = false )
+	public function on_quit( $nick, $startup = false )
 	{
-		$return = ircd::on_mode( $ircdata );
-		if ( $return !== false )
+		foreach ( core::$chans as $chan => $data )
 		{
-			$nick = $return['nick'];
-			$chan = $return['chan'];
-			$mode_queue = $return['modes'];
-			
-			if ( strpos( $nick, '.' ) !== false )
-				$server = $nick;
-			elseif ( strlen( $nick ) == 3 )
-				$server = core::$servers[$nick]['sid'];
-			else
-				$server = '';
-			// we've found a.in nick, which means it's a server?
-			
-			if ( $server == core::$config->ulined_servers || ( is_array( core::$config->ulined_servers ) && in_array( $server, core::$config->ulined_servers ) ) )
-				return false;
-			// ignore mode changing from ulined servers.
-			
-			if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
-				return false;	
-			// channel isnt registered
-			
-			$modelock = chanserv::get_flags( $chan, 'm' );
-			// get the modelock
-			
-			if ( $modelock != null )
-			{
-				$nmodelock = explode( ' ', $modelock );
-				
-				foreach ( str_split( $nmodelock[0] ) as $mode )
-				{
-					if ( strstr( $mode_queue, $mode ) )
-						ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
-					// reset the modes
-				}
-			}
-			// modelock?
-		}
-		// we need to check for any modechanges here, for modelocking
-		
-		$return = ircd::on_part( $ircdata );
-		if ( $return !== false )
-		{
-			$chan = $return['chan'];
-			// get the channel
-			
 			if ( chanserv::check_flags( $chan, array( 'L' ) ) )
 			{
 				timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
@@ -489,125 +441,159 @@ class cs_flags implements module
 			}
 			// is there auto-limit enabled?
 		}
-		// on part we check for
+	}
+	
+	/*
+	* on_mode (event hook)
+	*/
+	static public function on_mode( $nick, $chan, $mode_queue )
+	{
+		if ( strpos( $nick, '.' ) !== false )
+			$server = $nick;
+		elseif ( strlen( $nick ) == 3 )
+			$server = core::$servers[$nick]['sid'];
+		else
+			$server = '';
+		// we've found a.in nick, which means it's a server?
 		
-		if ( ircd::on_quit( $ircdata ) !== false )
-		{
-			foreach ( core::$chans as $chan => $data )
-			{
-				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
-				{
-					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
-					// add a timer to update the limit, in 5 seconds
-				}
-				// is there auto-limit enabled?
-			}
-		}
-		// on part we check for
+		if ( $server == core::$config->ulined_servers || ( is_array( core::$config->ulined_servers ) && in_array( $server, core::$config->ulined_servers ) ) )
+			return false;
+		// ignore mode changing from ulined servers.
 		
-		$populated_chan = ircd::on_join( $ircdata );
-		if ( $populated_chan !== false )
+		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+			return false;	
+		// channel isnt registered
+		
+		$modelock = chanserv::get_flags( $chan, 'm' );
+		// get the modelock
+		
+		if ( $modelock != null )
 		{
-			$nick = $populated_chan['nick'];
-			$chans = explode( ',', $populated_chan['chan'] );
-			// find the nick & chan
+			$nmodelock = explode( ' ', $modelock );
 			
-			foreach ( $chans as $chan )
+			foreach ( str_split( $nmodelock[0] ) as $mode )
 			{
-				if ( chanserv::$chan_q[$chan] === false )
-					return false;	
-				// channel isnt registered
-				
-				if ( chanserv::check_flags( $chan, array( 'I' ) ) )
-				{
-					if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
-					{
-						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
-						ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
-						return false;
-					}
-					// they don't have +k, KICKEM
-				}
-				// is the channel +I, eg, +k users only?
-				
-				$welcome = chanserv::get_flags( $chan, 'w' );
-				// get the welcome msg
-				
-				if ( $welcome != null )
-				{
-					ircd::notice( core::$config->chanserv->nick, $nick, '('.$chan.') '.$welcome );
-					// we give them the welcome msg
-				}
-				// is there any welcome msg? notice it to them
-				
-				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
-				{
-					timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
-					// add a timer to update the limit, in 5 seconds
-				}
-				// is there auto-limit enabled?
+				if ( strstr( $mode_queue, $mode ) )
+					ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
+				// reset the modes
 			}
 		}
-		// on_join entry msg
-		// this is just a basic JOIN trigger
+		// modelock?
+	}
+	
+	/*
+	* on_chan_create (event hook)
+	*/
+	static public function on_chan_create( $chan )
+	{
+		$nusers = core::$chans[$chan]['users'];
 		
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$chans = explode( ',', $populated_chan );
-			// chan
+		if ( chanserv::$chan_q[$chan] === false )
+			return false;	
+		// channel isnt registered
 			
-			foreach ( $chans as $chan )
+		if ( chanserv::check_flags( $chan, array( 'I' ) ) )
+		{
+			foreach ( $nusers as $nick => $mode )
 			{
-				$nusers = core::$chans[$chan]['users'];
-				
-				if ( chanserv::$chan_q[$chan] === false )
-					return false;	
-				// channel isnt registered
-					
-				if ( chanserv::check_flags( $chan, array( 'I' ) ) )
+				if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 				{
-					foreach ( $nusers as $nick => $mode )
-					{
-						if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
-						{
-							if ( core::$nicks[$nick]['server'] == core::$config->server->name )
-								continue;
-						
-							ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
-							ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
-						}
-						// they don't have +k, KICKEM
-					}
-				}
-				// is the channel +I, eg, +k users only?
+					if ( core::$nicks[$nick]['server'] == core::$config->server->name )
+						continue;
 				
-				$welcome = chanserv::get_flags( $chan, 'w' );
-				// get the welcome msg
-				
-				if ( $welcome != null )
-				{
-					foreach ( $nusers as $nick => $mode )
-					{
-						if ( $nick == core::$config->chanserv->nick ) continue;
-						// skip if it's chanserv
-						ircd::notice( core::$config->chanserv->nick, $nick, '('.$chan.') '.$welcome );
-						// we give them the entrymsg
-					}
+					ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
+					ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
 				}
-				// check for a welcome msg, if so
-				// message it to the joining users.
-				
-				if ( chanserv::check_flags( $chan, array( 'L' ) ) )
-				{
-					cs_flags::increase_limit( $chan );
-					// add a timer to update the limit, in 5 seconds
-				}
-				// is there auto-limit enabled?
+				// they don't have +k, KICKEM
 			}
 		}
-		// on channel create, we send out the welcome message
-		// if there is one.
+		// is the channel +I, eg, +k users only?
+		
+		$welcome = chanserv::get_flags( $chan, 'w' );
+		// get the welcome msg
+		
+		if ( $welcome != null )
+		{
+			foreach ( $nusers as $nick => $mode )
+			{
+				if ( $nick == core::$config->chanserv->nick ) continue;
+				// skip if it's chanserv
+				ircd::notice( core::$config->chanserv->nick, $nick, '('.$chan.') '.$welcome );
+				// we give them the entrymsg
+			}
+		}
+		// check for a welcome msg, if so
+		// message it to the joining users.
+		
+		if ( chanserv::check_flags( $chan, array( 'L' ) ) )
+		{
+			cs_flags::increase_limit( $chan );
+			// add a timer to update the limit, in 5 seconds
+		}
+		// is there auto-limit enabled?
+	}
+	
+	/*
+	* on_join (event hook)
+	*/
+	static public function on_join( $nick, $chan )
+	{
+		if ( chanserv::$chan_q[$chan] === false )
+			return false;	
+		// channel isnt registered
+		
+		if ( chanserv::check_flags( $chan, array( 'I' ) ) )
+		{
+			if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
+			{
+				ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
+				ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
+				return false;
+			}
+			// they don't have +k, KICKEM
+		}
+		// is the channel +I, eg, +k users only?
+		
+		$welcome = chanserv::get_flags( $chan, 'w' );
+		// get the welcome msg
+		
+		if ( $welcome != null )
+		{
+			ircd::notice( core::$config->chanserv->nick, $nick, '('.$chan.') '.$welcome );
+			// we give them the welcome msg
+		}
+		// is there any welcome msg? notice it to them
+		
+		if ( chanserv::check_flags( $chan, array( 'L' ) ) )
+		{
+			timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
+			// add a timer to update the limit, in 5 seconds
+		}
+		// is there auto-limit enabled?
+	}
+	
+	/*
+	* on_part (event hook)
+	*/
+	static public function on_part( $nick, $chan )
+	{
+		if ( chanserv::check_flags( $chan, array( 'L' ) ) )
+		{
+			timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
+			// add a timer to update the limit, in 5 seconds
+		}
+		// is there auto-limit enabled?
+	}
+	
+	/*
+	* main (event)
+	* 
+	* @params
+	* $ircdata - ''
+	*/
+	public function main( $ircdata, $startup = false )
+	{
+		return false;
 	}
 	
 	/*

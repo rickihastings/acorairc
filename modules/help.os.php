@@ -40,6 +40,22 @@ class os_help implements module
 	}
 	
 	/*
+	* on_msg (event hook)
+	*/
+	public function on_msg( $nick, $target, $msg )
+	{
+		if ( $target != core::$config->operserv->nick )
+			return false;
+			
+		$query = substr( $msg, 1 );
+		// convert to lower case because all the tingy wags are in lowercase
+		$query = strtolower( $query );
+		
+		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
+			operserv::get_help( $nick, $query );
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -47,20 +63,8 @@ class os_help implements module
 	*/
     public function main( $ircdata, $startup = false )
 	{
-		$return = ircd::on_msg( $ircdata, core::$config->operserv->nick );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$query = substr( $return['msg'], 1 );
-			// convert to lower case because all the tingy wags are in lowercase
-			$query = strtolower( $query );
-			
-			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
-				operserv::get_help( $nick, $query );
-		}
-		// only hook to the privmsg towards OperServ
+		return false;
 	}
-    
 }
 
 // EOF;

@@ -39,9 +39,6 @@ class ircd_handle
 				
 		if ( !core::$end_burst )
 			ircd::send_burst( $our_sid );
-			
-		core::$pullout = true;
-		// MUST MUST MUST be true, otherwise a whole world of problems occur (trust me!)
 	}
 	
 	/*
@@ -72,6 +69,8 @@ class ircd_handle
 	*/
 	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $ip_addr, $server, $timestamp, $modes, $startup = false )
 	{
+		//debug_print_backtrace();
+	
 		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
 		// yey for this, saves us massive intensive cpu raeps
@@ -105,6 +104,25 @@ class ircd_handle
 		if ( core::$config->settings->logconnections && $startup === false )
 			core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
 		// log
+		
+		core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
+		
+		core::max_users();
+		// handle connect
+		core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		// check for session rows here so both modules (session/akill) can access it.a
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_connect' ) )
+				$class->on_connect( core::$nicks[$nick], $startup );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_connect' ) )
+				modules::$list[$module]['class']->on_connect( core::$nicks[$nick], $startup );
+		}
 	}
 	
 	/*
@@ -147,6 +165,20 @@ class ircd_handle
 		if ( core::$config->settings->logconnections && $startup === false )
 			core::alog( 'NICK: '.$nick.' ('.core::$nicks[$new_nick]['ident'].'@'.core::$nicks[$new_nick]['oldhost'].' => '.core::$nicks[$new_nick]['host'].') ('.core::$nicks[$new_nick]['gecos'].') changed nick to '.$new_nick.' ('.core::$nicks[$new_nick]['server'].')' );
 		// log
+		
+		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_nick_change' ) )
+				$class->on_nick_change( $nick, $new_nick );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_nick_change' ) )
+				modules::$list[$module]['class']->on_nick_change( $nick, $new_nick );
+		}
 	}
 	
 		
@@ -182,6 +214,20 @@ class ircd_handle
 			else
 				continue;
 		}
+		
+		core::alog( 'on_quit(): '.$nick.' quit', 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_quit' ) )
+				$class->on_quit( $nick, $startup );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_quit' ) )
+				modules::$list[$module]['class']->on_quit( $nick, $startup );
+		}
 	}
 	
 	/*
@@ -195,6 +241,7 @@ class ircd_handle
 	{
 		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];	
 		core::$nicks[$nick]['host'] = $ircdata[2];
+		core::alog( 'on_host_change(): '.$nick.'\'s host changed to '.$host, 'BASIC' );
 	}
 	
 	/*
@@ -207,6 +254,7 @@ class ircd_handle
 	static public function handle_ident_change( $nick, $ident )
 	{
 		core::$nicks[$nick]['ident'] = $ident;
+		core::alog( 'on_ident_change(): '.$nick.' changed ident to '.$ident, 'BASIC' );
 	}
 	
 	/*
@@ -219,6 +267,7 @@ class ircd_handle
 	static public function handle_gecos_change( $nick, $gecos )
 	{
 		core::$nicks[$nick]['gecos'] = $gecos;
+		core::alog( 'on_gecos_change(): '.$nick.' changed gecos to '.$gecos, 'BASIC' );
 	}
 	
 	/*
@@ -228,13 +277,27 @@ class ircd_handle
 	* $chan
 	* $mode_queue
 	*/
-	static public function handle_mode( $chan, $mode_queue )
+	static public function handle_mode( $nick, $chan, $mode_queue )
 	{
 		$mode_array = mode::sort_modes( $mode_queue );
 		
 		mode::append_modes( $chan, $mode_array );
 		mode::handle_params( $chan, $mode_array );
 		// handle modes
+		
+		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_mode' ) )
+				$class->on_mode( $nick, $chan, $modes );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_mode' ) )
+				modules::$list[$module]['class']->on_mode( $nick, $chan, $modes );
+		}
 	}
 	
 	/*
@@ -247,6 +310,19 @@ class ircd_handle
 	{
 		core::$chans[$chan]['topic'] = $topic;
 		core::$chans[$chan]['topic_setter'] = $nick;
+		core::alog( 'on_topic(): topic for '.$chan.' changed', 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_topic' ) )
+				$class->on_topic( $nick, $chan, $topic );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_topic' ) )
+				modules::$list[$module]['class']->on_topic( $nick, $chan, $topic );
+		}
 	}
 	
 	/*
@@ -259,6 +335,19 @@ class ircd_handle
 	{
 		core::$chans[$chan]['topic'] = $topic;
 		core::$chans[$chan]['topic_setter'] = $nick;
+		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_topic' ) )
+				$class->on_topic( $nick, $chan, $topic );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_topic' ) )
+				modules::$list[$module]['class']->on_topic( $nick, $chan, $topic );
+		}
 	}
 	
 	/*
@@ -291,6 +380,18 @@ class ircd_handle
 			mode::handle_params( $chan, $mode_array );
 			// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in FJOIN now, upon bursts, and also resent
 			// when users join channels (not sure why here, probably just because they can and it shouldn't break a good parser)
+			
+			foreach ( core::$bots as $bot => $class )
+			{
+				if ( method_exists( $class, 'on_chan_create' ) )
+					$class->on_chan_create( $chan );
+			}
+				
+			foreach ( modules::$list as $module => $data )
+			{
+				if ( method_exists( modules::$list[$module]['class'], 'on_chan_create' ) )
+					modules::$list[$module]['class']->on_chan_create( $chan );
+			}
 		}
 	}
 	
@@ -310,6 +411,20 @@ class ircd_handle
 			if ( !isset( core::$chans[$chan]['users'][$nick] ) )
 				core::$chans[$chan]['users'][$nick] = '';
 			// maintain the logged users array
+			
+			core::alog( 'on_join(): '.$nick.' joined '.$chan, 'BASIC' );
+			
+			foreach ( core::$bots as $bot => $class )
+			{
+				if ( method_exists( $class, 'on_join' ) )
+					$class->on_join( $nick, $chan );
+			}
+				
+			foreach ( modules::$list as $module => $data )
+			{
+				if ( method_exists( modules::$list[$module]['class'], 'on_join' ) )
+					modules::$list[$module]['class']->on_join( $nick, $chan );
+			}
 		}
 	}
 
@@ -323,6 +438,19 @@ class ircd_handle
 	{
 		unset( core::$chans[$chan]['users'][$nick] );
 		// remove the user out of the array
+		core::alog( 'on_part(): '.$nick.' left '.$chan, 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_part' ) )
+				$class->on_part( $nick, $chan );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_part' ) )
+				modules::$list[$module]['class']->on_part( $nick, $chan );
+		}
 	}
 	
 	/*
@@ -331,10 +459,23 @@ class ircd_handle
 	* @params
 	* $chan, $who
 	*/
-	static public function handle_kick( $chan, $who )
+	static public function handle_kick( $nick, $chan, $who )
 	{
 		unset( core::$chans[$chan]['users'][$who] );
 		// again, move them out.
+		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_kick' ) )
+				$class->on_kick( $nick, $who, $chan );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_kick' ) )
+				modules::$list[$module]['class']->on_kick( $nick, $who, $chan );
+		}
 	}
 	
 	/*
@@ -343,9 +484,33 @@ class ircd_handle
 	* @params
 	* $nick
 	*/
-	static public function handle_oper_up( $nick )
+	static public function handle_oper_up( $nick, $type = '' )
 	{
 		core::$nicks[$nick]['ircop'] = true;
+		core::alog( 'on_oper_up(): '.$nick.' opered up to '.$type, 'BASIC' );
+	}
+	
+	/*
+	* handle_msg
+	*
+	* @params
+	* $nick, $target, $msg
+	*/
+	static public function handle_msg( $nick, $target, $msg )
+	{
+		commands::ctcp( $nick, $target, $msg );
+		
+		foreach ( core::$bots as $bot => $class )
+		{
+			if ( method_exists( $class, 'on_msg' ) )
+				$class->on_msg( $nick, $target, $msg );
+		}
+			
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_msg' ) )
+				modules::$list[$module]['class']->on_msg( $nick, $target, $msg );
+		}
 	}
 
 	/*
@@ -759,160 +924,6 @@ class ircd_handle
 	* These are all the core event functions, core::on_start etc.
 	* not many of these apply to this class.
 	*/
-
-	/*
-	* on_timeset
-	*
-	* @params
-	* $timestamp
-	*/
-	static public function on_timeset( $timestamp )
-	{
-		core::alog( 'on_timeset(): force timechange to '.$timestamp, 'BASIC' );
-	}
-	
-	/*
-	* on_connect
-	*
-	* @params
-	* $nick, $server
-	*/
-	static public function on_connect( $nick, $server )
-	{
-		core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
-	}
-	
-	/*
-	* on_quit
-	*
-	* @params
-	* $nick
-	*/
-	static public function on_quit( $nick )
-	{
-		core::alog( 'on_quit(): '.$nick.' quit', 'BASIC' );
-	}
-	
-	/*
-	* on_fhost
-	*
-	* @params
-	* $nick, $host
-	*/
-	static public function on_fhost( $nick, $host )
-	{
-		core::alog( 'on_fhost(): '.$nick.'\'s host changed to '.$host, 'BASIC' );
-	}
-	
-	/*
-	* on_join
-	*
-	* @params
-	* $nick, $chan
-	*/
-	static public function on_join( $nick, $chan )
-	{
-		core::alog( 'on_join(): '.$nick.' joined '.$chan, 'BASIC' );
-	}
-	
-	/*
-	* on_part
-	*
-	* @params
-	* $nick, $chan
-	*/
-	static public function on_part( $nick, $chan )
-	{
-		core::alog( 'on_part(): '.$nick.' left '.$chan, 'BASIC' );
-	}
-	
-	/*
-	* on_mode
-	*
-	* @params
-	* $nick, $mode, $chan
-	*/
-	static public function on_mode( $nick, $mode, $chan )
-	{
-		core::alog( 'on_mode(): '.$nick.' set '.$mode.' on '.$chan, 'BASIC' );
-	}
-	
-	/*
-	* on_kick
-	*
-	* @params
-	* $nick, $user, $chan
-	*/
-	static public function on_kick( $nick, $user, $chan )
-	{
-		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
-	}
-	
-	/*
-	* on_topic
-	*
-	* @params
-	* $chan
-	*/
-	static public function on_topic( $chan )
-	{
-		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'BASIC' );
-	}
-	
-	/*
-	* on_ftopic
-	*
-	* @params
-	* $chan
-	*/
-	static public function on_ftopic( $chan )
-	{
-		core::alog( 'on_topic(): topic for '.$chan.' changed', 'BASIC' );
-	}
-	
-	/*
-	* on_oper_up
-	*
-	* @params
-	* $nick, $type
-	*/
-	static public function on_oper_up( $nick, $type )
-	{
-		core::alog( 'on_oper_up(): '.$nick.' opered up to '.$type, 'BASIC' );
-	}
-	
-	/*
-	* on_nick_change
-	*
-	* @params
-	* $nick, $new_nick
-	*/
-	static public function on_nick_change( $nick, $new_nick )
-	{
-		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'BASIC' );
-	}
-	
-	/*
-	* on_ident_change
-	*
-	* @params
-	* $nick, $ident
-	*/
-	static public function on_ident_change( $nick, $ident )
-	{
-		core::alog( 'on_ident_change(): '.$nick.' changed ident to '.$ident, 'BASIC' );
-	}
-	
-	/*
-	* on_gecos_change
-	*
-	* @params
-	* $nick, $gecos
-	*/
-	static public function on_gecos_change( $nick, $gecos )
-	{
-		core::alog( 'on_gecos_change(): '.$nick.' changed gecos to '.$gecos, 'BASIC' );
-	}
 	
 	/*
 	* get_server

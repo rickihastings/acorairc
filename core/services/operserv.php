@@ -122,6 +122,27 @@ class operserv implements service
 	}
 	
 	/*
+	* on_msg (event_hook)
+	*/
+	public function on_msg( $nick, $target, $msg )
+	{
+		if ( $target != core::$config->operserv->nick )
+			return false;
+		
+		$command = substr( $msg, 1 );
+		// convert to lower case because all the tingy wags are in lowercase
+		
+		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).'): '.$command );
+		// logchan it
+		
+		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
+			self::get_command( $nick, $command );
+		else
+			services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );
+		// theyre an oper.
+	}
+	
+	/*
 	* main (event_hook)
 	* 
 	* @params
@@ -137,25 +158,6 @@ class operserv implements service
 				// loop through the modules for operserv.
 			}
 		}
-		
-		$return = ircd::on_msg( $ircdata, core::$config->operserv->nick );
-		if ( $return !== false )
-		{
-			$nick = $return['nick'];
-			$command = substr( $return['msg'], 1 );
-			// convert to lower case because all the tingy wags are in lowercase
-			
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).'): '.$command );
-			// logchan it
-			
-			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
-				self::get_command( $nick, $command );
-			else
-				services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );
-			// theyre an oper.
-		}
-		// this is what we use to handle command listens
-		// should be quite epic.
 	}
 	
 	/*

@@ -126,15 +126,11 @@ class os_global implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
+	* on_connect (event hook)
 	*/
-	public function main( $ircdata, $startup = false )
+	public function on_connect( $connect_data )
 	{
-		$connect_data = ircd::on_connect( $ircdata );
-		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) && $connect_data !== false )
+		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) )
 		{
 			$nick = $connect_data['nick'];
 			// get nick
@@ -142,21 +138,27 @@ class os_global implements module
 			ircd::notice( core::$config->global->nick, $nick, 'Services are currently running in debug mode, please be careful when sending passwords.' );
 			// give them a quick notice that people can see their passwords.
 		}
-		
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$chans = explode( ',', $populated_chan );
-			// chan
-			
-			foreach ( $chans as $chan )
-			{
-				if ( core::$config->settings->logchan == $chan )
-					self::join_logchan();
-				// join global to the logchan.	
-			}
-			// on chan create bring our bot into it.
-		}
+	}
+	
+	/*
+	* on_chan_create (event hook)
+	*/
+	static public function on_chan_create( $chan )
+	{
+		if ( core::$config->settings->logchan == $chan )
+			self::join_logchan();
+		// join global to the logchan.	
+	}
+	
+	/*
+	* main (event hook)
+	* 
+	* @params
+	* $ircdata - ''
+	*/
+	public function main( $ircdata, $startup = false )
+	{	
+		return false;
 	}
 }
 

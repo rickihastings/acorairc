@@ -77,8 +77,8 @@ interface protocol
 	static public function on_server( $ircdata );
 	static public function on_squit( $ircdata );
 	static public function on_ping( $ircdata );
-	static public function on_connect( $ircdata );
-	static public function on_quit( $ircdata );
+	static public function on_connect( $ircdata, $startup = false );
+	static public function on_quit( $ircdata, $startup = false );
 	static public function on_fhost( $ircdata );
 	static public function on_chan_create( $ircdata );
 	static public function on_join( $ircdata );
@@ -90,7 +90,7 @@ interface protocol
 	static public function on_oper_up( $ircdata );
 	static public function on_msg( $ircdata, $where = '' );
 	static public function on_notice( $ircdata, $where = '' );
-	static public function on_nick_change( $ircdata );
+	static public function on_nick_change( $ircdata, $startup = false );
 	static public function on_ident_change( $ircdata );
 	static public function on_gecos_change( $ircdata );
 	// core events

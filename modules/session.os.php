@@ -128,6 +128,55 @@ class os_session implements module
 	}
 	
 	/*
+	* on_connect (event hook)
+	*/
+	public function on_connect( $connect_data )
+	{
+		$nick = $connect_data['nick'];
+		$clients = core::$ips[$connect_data['ip_address']];
+		$kill = true;
+		
+		if ( $clients > 1 )
+			core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
+		// log multiple sessions
+		
+		if ( database::num_rows( core::$session_rows ) == 0 )
+			$match = self::$session_limit;
+		// determine match if there is no session exceptions
+		
+		while ( $sessions = database::fetch( core::$session_rows ) )
+		{
+			if ( $sessions->akill == 1 )
+			{
+				$kill = false;
+				continue;
+			}
+			// if akill is set to 1 skip
+		
+			if ( $sessions->ip_address != $connect_data['ip_address'] )
+				continue;
+			// it doesnt match the record, skip to next one.
+				
+			if ( $sessions->limit > self::$session_limit )
+				$match = $sessions->limit;
+			else
+				$match = self::$session_limit;
+			// the session limit in the database is higher than the config file limit..
+			// determine which limit we actually use.
+			
+			break;
+		}
+		// check the sessions database
+		
+		if ( $kill && $clients > $match )
+		{
+			ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
+			core::alog( core::$config->operserv->nick.': Client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
+		}
+		// their limit has been bypassed >:) KILL THEM
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -135,52 +184,7 @@ class os_session implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		$connect_data = ircd::on_connect( $ircdata );
-		if ( $connect_data !== false )
-		{
-			$nick = $connect_data['nick'];
-			$clients = core::$ips[$connect_data['ip_address']];
-			$kill = true;
-			
-			if ( $clients > 1 )
-				core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
-			// log multiple sessions
-			
-			if ( database::num_rows( core::$session_rows ) == 0 )
-				$match = self::$session_limit;
-			// determine match if there is no session exceptions
-			
-			while ( $sessions = database::fetch( core::$session_rows ) )
-			{
-				if ( $sessions->akill == 1 )
-				{
-					$kill = false;
-					continue;
-				}
-				// if akill is set to 1 skip
-			
-				if ( $sessions->ip_address != $connect_data['ip_address'] )
-					continue;
-				// it doesnt match the record, skip to next one.
-					
-				if ( $sessions->limit > self::$session_limit )
-					$match = $sessions->limit;
-				else
-					$match = self::$session_limit;
-				// the session limit in the database is higher than the config file limit..
-				// determine which limit we actually use.
-				
-				break;
-			}
-			// check the sessions database
-			
-			if ( $kill && $clients > $match )
-			{
-				ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
-				core::alog( core::$config->operserv->nick.': Client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
-			}
-			// their limit has been bypassed >:) KILL THEM
-		}
+		return false;
 	}
 	
 	/*

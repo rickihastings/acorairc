@@ -257,25 +257,53 @@ class ns_identify implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
+	* on_connect (event hook)
 	*/
-	public function main( $ircdata, $startup = false )
+	public function on_connect( $connect_data )
 	{
-		$connect_data = ircd::on_connect( $ircdata );
-		if ( $connect_data !== false )
-		{
-			$nick = $connect_data['nick'];
-			$user = nickserv::$nick_q[strtolower( $nick )];
-			// get nick
+		$nick = $connect_data['nick'];
+		$user = nickserv::$nick_q[strtolower( $nick )];
+		// get nick
+		
+		if ( !isset( $user ) || $user === false )
+			return false;
 			
-			if ( !isset( $user ) || $user === false )
-				return false;
-				
+		if ( $user->suspended == 1 )
+		{
+			return false;
+		}
+		elseif ( $user->validated == 0 && $user->suspended == 0 )
+		{
+			ircd::on_user_logout( $nick );
+			core::$nicks[$nick]['account'] = '';
+			core::$nicks[$nick]['identified'] = false;
+			// they shouldn't really have registered mode
+			
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
+		}
+		else
+		{
+			self::_registered_nick( $nick, $user );
+		}
+	}
+	
+	/*
+	* on_nick_change (event hook)
+	*/
+	public function on_nick_change( $old_nick, $nick )
+	{
+		timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
+		// remove the secured timer. if there is one
+		
+		if ( $user = services::user_exists( $nick, false, array( 'display', 'validated', 'last_hostmask', 'suspended' ) ) )
+		{
 			if ( $user->suspended == 1 )
 			{
+				ircd::on_user_logout( $nick );
+				core::$nicks[$nick]['account'] = '';
+				core::$nicks[$nick]['identified'] = false;
+				// they shouldn't really have registered mode
+				
 				return false;
 			}
 			elseif ( $user->validated == 0 && $user->suspended == 0 )
@@ -287,61 +315,35 @@ class ns_identify implements module
 				
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			}
-			else
+			elseif ( $nick != core::$nicks[$nick]['account'] )
 			{
 				self::_registered_nick( $nick, $user );
 			}
 		}
-		// on connect let them know that they're using
-		// an identified nickname
+		// is the new nick registered? let them know
+	}
+	
+	/*
+	* on_quit (event hook)
+	*/
+	public function on_quit( $nick, $startup = false )
+	{
+		timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
+		// remove the secured timer. if there is one
 		
-		$return = ircd::on_nick_change( $ircdata );
-		if ( $return !== false )
-		{
-			$nick = $return['new_nick'];
-			$old_nick = $return['nick'];
-			// get the nicknames
-			
-			timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
-			// remove the secured timer. if there is one
-			
-			if ( $user = services::user_exists( $nick, false, array( 'display', 'validated', 'last_hostmask', 'suspended' ) ) )
-			{
-				if ( $user->suspended == 1 )
-				{
-					ircd::on_user_logout( $nick );
-					core::$nicks[$nick]['account'] = '';
-					core::$nicks[$nick]['identified'] = false;
-					// they shouldn't really have registered mode
-					
-					return false;
-				}
-				elseif ( $user->validated == 0 && $user->suspended == 0 )
-				{
-					ircd::on_user_logout( $nick );
-					core::$nicks[$nick]['account'] = '';
-					core::$nicks[$nick]['identified'] = false;
-					// they shouldn't really have registered mode
-					
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
-				}
-				elseif ( $nick != core::$nicks[$nick]['account'] )
-				{
-					self::_registered_nick( $nick, $user );
-				}
-			}
-			// is the new nick registered? let them know
-		}
-		
-		$quit_nick = ircd::on_quit( $ircdata );
-		if ( $quit_nick !== false )
-		{
-			timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
-			// remove the secured timer. if there is one
-			
-			database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
-			// update timestamp
-		}
+		database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
+		// update timestamp
+	}
+	
+	/*
+	* main (event hook)
+	* 
+	* @params
+	* $ircdata - ''
+	*/
+	public function main( $ircdata, $startup = false )
+	{
+		return false;
 	}
 	
 	/*

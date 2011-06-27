@@ -109,6 +109,31 @@ class os_logonnews implements module
 	}
 	
 	/*
+	* on_connect (event hook)
+	*/
+	public function on_connect( $connect_data, $startup )
+	{
+		if ( $startup )
+			return false;
+		
+		$nick = $connect_data['nick'];
+		
+		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ), array( 0 => 3 ) );
+		// get our news
+		
+		if ( database::num_rows( $get_news ) > 0 )
+		{
+			while ( $news = database::fetch( $get_news ) )
+			{
+				services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+				services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+			}
+			// loop through the news
+		}
+		// there is news! epic
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -116,31 +141,7 @@ class os_logonnews implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		if ( $startup )
-			return false;
-		// we're booting, fuck sending messages to everyone, they don't want to see
-		// it if it's just a restart, and we don't want to waste the resources on it.
-		
-		$connect_data = ircd::on_connect( $ircdata );
-		if ( $connect_data !== false )
-		{
-			$nick = $connect_data['nick'];
-			
-			$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ), array( 0 => 3 ) );
-			// get our news
-			
-			if ( database::num_rows( $get_news ) > 0 )
-			{
-				while ( $news = database::fetch( $get_news ) )
-				{
-					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-					services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
-				}
-				// loop through the news
-			}
-			// there is news! epic
-		}
-		// trigger on connects
+		return false;
 	}
 	
 	/*

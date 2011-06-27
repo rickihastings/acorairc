@@ -1059,7 +1059,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'UID' )
 		{
-			ircd_handle::on_connect( $ircdata[4], ircd_handle::get_server( $ircdata, 0 ) );
+			ircd::handle_on_connect( $ircdata[4], ircd_handle::get_server( $ircdata, 0 ) );
 			return core::$nicks[$ircdata[4]];
 		}
 		// return true when the $ircdata finds a (remote)connect.
@@ -1078,7 +1078,7 @@ class ircd implements protocol
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
 		{
 			$nick = ircd_handle::get_nick( $ircdata, 0 );
-			ircd_handle::on_connect( $nick );
+			ircd_handle::on_quit( $nick );
 			return $nick;
 		}
 		// return true when the $ircdata finds a quit.

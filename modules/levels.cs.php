@@ -570,6 +570,41 @@ class cs_levels implements module
 	}
 	
 	/*
+	* on_chan_create (event hook)
+	*/
+	static public function on_chan_create( $chan )
+	{
+		if ( chanserv::$chan_q[$chan] === false )
+			continue;
+		// if the channel doesn't exist we return false, to save us the hassle of wasting
+		// resources on this stuff below.
+		
+		self::on_create( core::$chans[$chan]['users'], chanserv::$chan_q[$chan], true );
+		// on_create event
+	}
+	
+	/*
+	* on_join (event hook)
+	*/
+	static public function on_join( $nick, $chan )
+	{
+		if ( chanserv::$chan_q[$chan] === false )
+			continue;
+		// if the channel doesn't exist we return false, to save us the hassle of wasting
+		// resources on this stuff below.
+		
+		if ( $nick == core::$config->chanserv->nick )
+			continue;
+		// skip us :D
+		
+		$hostname = core::get_full_hostname( $nick );
+		// generate a hostname
+		
+		self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), chanserv::$chan_q[$chan], false );
+		// on_create event
+	}
+	
+	/*
 	* main (event)
 	* 
 	* @params
@@ -577,51 +612,7 @@ class cs_levels implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$chans = explode( ',', $populated_chan );
-			// the chans
-			
-			foreach ( $chans as $chan )
-			{
-				if ( chanserv::$chan_q[$chan] === false )
-					continue;
-				// if the channel doesn't exist we return false, to save us the hassle of wasting
-				// resources on this stuff below.
-				
-				self::on_create( core::$chans[$chan]['users'], chanserv::$chan_q[$chan], true );
-				// on_create event
-			}
-		}
-		// we give out the nessicary access when a channel is created :)
-		
-		$populated_chan = ircd::on_join( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$nick = $populated_chan['nick'];
-			$chans = explode( ',', $populated_chan['chan'] );
-			// get the channel & nick
-			
-			foreach ( $chans as $chan )
-			{
-				if ( chanserv::$chan_q[$chan] === false )
-					continue;
-				// if the channel doesn't exist we return false, to save us the hassle of wasting
-				// resources on this stuff below.
-				
-				if ( $nick == core::$config->chanserv->nick )
-					continue;
-				// skip us :D
-				
-				$hostname = core::get_full_hostname( $nick );
-				// generate a hostname
-				
-				self::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), chanserv::$chan_q[$chan], false );
-				// on_create event
-			}
-		}
-		// and the same when someone joins
+		return false;
 	}
 	
 	/*

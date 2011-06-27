@@ -187,6 +187,46 @@ class cs_suspend implements module
 	}
 	
 	/*
+	* on_chan_create (event hook)
+	*/
+	static public function on_chan_create( $chan )
+	{
+		$nusers = core::$chans[$chan]['users'];
+		$channel = chanserv::$chan_q[$chan];
+		
+		if ( $channel === false )
+			return false;
+		if ( $channel->suspended == 0 )
+			return false;
+		// channel isnt registered or suspended!
+		
+		foreach ( $nusers as $nick => $modes )
+		{
+			if ( !core::$nicks[$nick]['ircop'] )
+				ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
+		}
+		// boot
+	}
+	
+	/*
+	* on_join (event hook)
+	*/
+	static public function on_join( $nick, $chan )
+	{
+		$channel = chanserv::$chan_q[$chan];
+	
+		if ( $channel === false )
+			return false;
+		if ( $channel->suspended == 0 )
+			return false;
+		// channel isnt registered or suspended
+			
+		if ( !core::$nicks[$nick]['ircop'] )
+			ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
+		// boot
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -194,56 +234,7 @@ class cs_suspend implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		$populated_chan = ircd::on_join( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$nick = $populated_chan['nick'];
-			$chans = explode( ',', $populated_chan['chan'] );
-			// find the nick & chan
-			
-			foreach ( $chans as $chan )
-			{
-				$channel = chanserv::$chan_q[$chan];
-			
-				if ( $channel === false )
-					continue;
-				if ( $channel->suspended == 0 )
-					continue;
-				// channel isnt registered or suspended
-					
-				if ( !core::$nicks[$nick]['ircop'] )
-					ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
-				// boot
-			}
-		}
-		// on_join trigger for forbidden channels
-		
-		$populated_chan = ircd::on_chan_create( $ircdata );
-		if ( $populated_chan !== false )
-		{
-			$chans = explode( ',', $populated_chan );
-			// chans
-			
-			foreach ( $chans as $chan )
-			{
-				$nusers = core::$chans[$chan]['users'];
-				$channel = chanserv::$chan_q[$chan];
-				
-				if ( $channel === false )
-					continue;
-				if ( $channel->suspended == 0 )
-					continue;
-				// channel isnt registered or suspended!
-				
-				foreach ( $nusers as $nick => $modes )
-				{
-					if ( !core::$nicks[$nick]['ircop'] )
-						ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
-				}
-				// boot
-			}
-		}
-		// and same with channels being created
+		return false;
 	}
 }
 

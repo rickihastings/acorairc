@@ -160,6 +160,41 @@ class os_akill implements module
 	}
 	
 	/*
+	* on_connect (event hook)
+	*/
+	public function on_connect( $connect_data )
+	{
+		$nick = $connect_data['nick'];
+		$kill = false;
+		// some vars
+		
+		if ( database::num_rows( core::$session_rows ) == 0 )
+			return;
+		// determine match if there is no session exceptions
+		
+		while ( $sessions = database::fetch( core::$session_rows ) )
+		{
+			if ( $sessions->akill == 0 )
+				continue;
+			// check limits
+			
+			if ( services::match( $connect_data['host'], $sessions->hostmask ) )
+				continue;
+			// no akill found, check next one.
+			
+			$reason = $sessions->description;
+			$kill = true;
+			break;
+			// we've found an akill, let's do some KILLING!
+		}
+		// check the sessions database
+		
+		if ( $kill )
+			ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$reason );
+		// they're banned for some reason.
+	}
+	
+	/*
 	* main (event hook)
 	* 
 	* @params
@@ -167,38 +202,7 @@ class os_akill implements module
 	*/
 	public function main( $ircdata, $startup = false )
 	{
-		$connect_data = ircd::on_connect( $ircdata );
-		if ( $connect_data !== false )
-		{
-			$nick = $connect_data['nick'];
-			$kill = false;
-			// some vars
-			
-			if ( database::num_rows( core::$session_rows ) == 0 )
-				return;
-			// determine match if there is no session exceptions
-			
-			while ( $sessions = database::fetch( core::$session_rows ) )
-			{
-				if ( $sessions->akill == 0 )
-					continue;
-				// check limits
-				
-				if ( services::match( $connect_data['host'], $sessions->hostmask ) )
-					continue;
-				// no akill found, check next one.
-				
-				$reason = $sessions->description;
-				$kill = true;
-				break;
-				// we've found an akill, let's do some KILLING!
-			}
-			// check the sessions database
-			
-			if ( $kill )
-				ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$reason );
-			// they're banned for some reason.
-		}
+		return false;
 	}
 	
 	/*
