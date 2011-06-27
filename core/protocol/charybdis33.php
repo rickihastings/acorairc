@@ -52,7 +52,7 @@ class ircd implements protocol
 	static public $prefix_modes = array();
 	
 	static public $service_modes = array(
-		'enforcer' 	=> '+Si',
+		'enforcer' 	=> '+i',
 		'service'	=> '+Sio',
 	);
 	// we have a bunch of variables here
@@ -278,7 +278,7 @@ class ircd implements protocol
 		$mode_queue = trim( $mode_queue[0] );
 		// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
 	
-		ircd_handle::handle_channel_create( $chans, $nusers, $ircdata[2], $mode_queue );
+		ircd_handle::handle_channel_create( $chan, $nusers, $ircdata[2], $mode_queue );
 	}
 	
 	/*

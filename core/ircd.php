@@ -109,8 +109,6 @@ class ircd_handle
 		
 		core::max_users();
 		// handle connect
-		core::$session_rows = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
-		// check for session rows here so both modules (session/akill) can access it.a
 		
 		foreach ( core::$bots as $bot => $class )
 		{
@@ -331,42 +329,40 @@ class ircd_handle
 	* @params
 	* $chans, $nusers, $timestamp, $mode_queue
 	*/
-	static public function handle_channel_create( $chans, $nusers, $timestamp, $mode_queue )
+	static public function handle_channel_create( $chan, $nusers, $timestamp, $mode_queue )
 	{
-		foreach ( $chans as $chan )
+		core::$chans[$chan]['channel'] = $chan;
+		core::$chans[$chan]['timestamp'] = $timestamp;
+		core::$chans[$chan]['p_modes'] = array();
+		core::$chans[$chan]['joins'] = 0;
+		// we don't count bursts as joins as this is only here for flood protection
+		// and flood protection would be activated on bursts which is what we DON'T want
+		// for instance if a server splits loses 30 users on a channel, when it reconnects
+		// 30 users join in a second causing chanserv to trigger flood.
+		
+		if ( is_array( core::$chans[$chan]['users'] ) )
+			core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );
+		else
+			core::$chans[$chan]['users'] = $nusers;
+		// basically check if we already have an array, because FJOIN can happen on
+		// existing channels, idk why, maybe on bursts etc?
+		
+		$mode_array = mode::sort_modes( $mode_queue );
+		mode::append_modes( $chan, $mode_array );
+		mode::handle_params( $chan, $mode_array );
+		// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in SJOIN/FJOIN now, upon bursts, and also resent
+		// when users join channels
+		
+		foreach ( core::$bots as $bot => $class )
 		{
-			core::$chans[$chan]['timestamp'] = $timestamp;
-			core::$chans[$chan]['p_modes'] = array();
-			core::$chans[$chan]['joins'] = 0;
-			// we don't count bursts as joins as this is only here for flood protection
-			// and flood protection would be activated on bursts which is what we DON'T want
-			// for instance if a server splits loses 30 users on a channel, when it reconnects
-			// 30 users join in a second causing chanserv to trigger flood.
+			if ( method_exists( $class, 'on_chan_create' ) )
+				$class->on_chan_create( $chan );
+		}
 			
-			if ( is_array( core::$chans[$chan]['users'] ) )
-				core::$chans[$chan]['users'] = array_merge( $nusers, core::$chans[$chan]['users'] );
-			else
-				core::$chans[$chan]['users'] = $nusers;
-			// basically check if we already have an array, because FJOIN can happen on
-			// existing channels, idk why, maybe on bursts etc?
-			
-			$mode_array = mode::sort_modes( $mode_queue );
-			mode::append_modes( $chan, $mode_array );
-			mode::handle_params( $chan, $mode_array );
-			// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in FJOIN now, upon bursts, and also resent
-			// when users join channels (not sure why here, probably just because they can and it shouldn't break a good parser)
-			
-			foreach ( core::$bots as $bot => $class )
-			{
-				if ( method_exists( $class, 'on_chan_create' ) )
-					$class->on_chan_create( $chan );
-			}
-				
-			foreach ( modules::$list as $module => $data )
-			{
-				if ( method_exists( modules::$list[$module]['class'], 'on_chan_create' ) )
-					modules::$list[$module]['class']->on_chan_create( $chan );
-			}
+		foreach ( modules::$list as $module => $data )
+		{
+			if ( method_exists( modules::$list[$module]['class'], 'on_chan_create' ) )
+				modules::$list[$module]['class']->on_chan_create( $chan );
 		}
 	}
 	

@@ -165,33 +165,25 @@ class os_akill implements module
 	public function on_connect( $connect_data )
 	{
 		$nick = $connect_data['nick'];
-		$kill = false;
+		$query = database::select( 'sessions', array( 'hostmask', 'description' ), array( 'akill', '=', '1' ) );
 		// some vars
 		
-		if ( database::num_rows( core::$session_rows ) == 0 )
+		if ( database::num_rows( $query ) == 0 )
 			return;
 		// determine match if there is no session exceptions
 		
-		while ( $sessions = database::fetch( core::$session_rows ) )
+		while ( $sessions = database::fetch( $query ) )
 		{
-			if ( $sessions->akill == 0 )
-				continue;
-			// check limits
-			
 			if ( services::match( $connect_data['host'], $sessions->hostmask ) )
 				continue;
 			// no akill found, check next one.
 			
-			$reason = $sessions->description;
-			$kill = true;
+			ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$sessions->description );
+			// they're banned for some reason.
 			break;
 			// we've found an akill, let's do some KILLING!
 		}
 		// check the sessions database
-		
-		if ( $kill )
-			ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$reason );
-		// they're banned for some reason.
 	}
 	
 	/*

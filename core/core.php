@@ -30,7 +30,6 @@ class core
 	static public $debug = false;
 	static public $services_account = false;
 	static public $hide_chans = true;
-	static public $session_rows;
 	// our main static variables, these are all very important.
 	
 	static public $bots = array();
@@ -622,11 +621,11 @@ class core
 	*/
 	static public function join_flood_check( $nick, $chan )
 	{
-		if ( self::$chans[$chan]['joins'] >= 10 )
+		/*if ( self::$chans[$chan]['joins'] >= 10 )
 		{
-			ircd::mode( ircd::$sid, $chan, '+i' );
-			self::alog( self::$config->operserv->nick.': Flood protection triggered for '.$chan.', +i set' );
-		}
+			ircd::mode( self::$config->chanserv->nick, $chan, '+isb *!*@*', true );
+			self::alog( self::$config->operserv->nick.': Flood protection triggered for '.$chan.', +isb *!*@* set' );
+		}*/
 		// trigger flood protection
 	}
 	

@@ -21,8 +21,6 @@ class os_session implements module
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	static public $session_limit;
-	
 	public function __construct() {}
 	// __construct, makes everyone happy.
 	
@@ -43,8 +41,6 @@ class os_session implements module
 		
 		operserv::add_command( 'session', 'os_session', 'session_command' );
 		// add the command
-		
-		self::$session_limit = ( !isset( core::$config->operserv->session_limit ) || core::$config->operserv->session_limit <= 0 ) ? 5 : core::$config->operserv->session_limit;
 	}
 	
 	/*
@@ -95,7 +91,7 @@ class os_session implements module
 			$ip_address = $ircdata[1];
 			// get our vars
 			
-			if ( !services::global_op( $nick, 'global_op' ) )
+			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;
@@ -132,35 +128,29 @@ class os_session implements module
 	*/
 	public function on_connect( $connect_data )
 	{
+		$session_limit = ( !isset( core::$config->operserv->connection_limit ) || core::$config->operserv->connection_limit <= 0 ) ? 5 : core::$config->operserv->connection_limit;
+	
 		$nick = $connect_data['nick'];
 		$clients = core::$ips[$connect_data['ip_address']];
-		$kill = true;
+		$query = database::select( 'sessions', array( 'ip_address', 'limit' ), array( 'akill', '=', '0' ) );
 		
 		if ( $clients > 1 )
 			core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 		// log multiple sessions
 		
-		if ( database::num_rows( core::$session_rows ) == 0 )
-			$match = self::$session_limit;
+		$match = $session_limit;
 		// determine match if there is no session exceptions
 		
-		while ( $sessions = database::fetch( core::$session_rows ) )
+		while ( $sessions = database::fetch( $query ) )
 		{
-			if ( $sessions->akill == 1 )
-			{
-				$kill = false;
-				continue;
-			}
-			// if akill is set to 1 skip
-		
 			if ( $sessions->ip_address != $connect_data['ip_address'] )
 				continue;
 			// it doesnt match the record, skip to next one.
 				
-			if ( $sessions->limit > self::$session_limit )
+			if ( $sessions->limit > $session_limit )
 				$match = $sessions->limit;
 			else
-				$match = self::$session_limit;
+				$match = $session_limit;
 			// the session limit in the database is higher than the config file limit..
 			// determine which limit we actually use.
 			
@@ -168,12 +158,12 @@ class os_session implements module
 		}
 		// check the sessions database
 		
-		if ( $kill && $clients > $match )
+		if ( $clients > $match )
 		{
 			ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
 			core::alog( core::$config->operserv->nick.': Client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 		}
-		// their limit has been bypassed >:) KILL THEM
+		// their limit has been bypassed >:) KILL THEMa
 	}
 	
 	/*
@@ -236,6 +226,7 @@ class os_session implements module
 	static public function _list_exception( $nick )
 	{
 		$check_record_q = database::select( 'sessions', array( 'nick', 'ip_address', 'description', 'limit' ), array( 'akill', '=', 0 ) );
+		$session_limit = ( !isset( core::$config->operserv->connection_limit ) || core::$config->operserv->connection_limit <= 0 ) ? 5 : core::$config->operserv->connection_limit;
 		
 		if ( database::num_rows( $check_record_q ) > 0 )
 		{
@@ -243,7 +234,7 @@ class os_session implements module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
 			// t-o-l
 			
-			$limit = self::$session_limit;
+			$limit = $session_limit;
 			$y_x = strlen( $limit );
 			for ( $i_x = $y_x; $i_x <= 5; $i_x++ )
 				$limit .= ' ';
@@ -292,7 +283,7 @@ class os_session implements module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
 			// t-o-l
 			
-			$limit = self::$session_limit;
+			$limit = $session_limit;
 			$y_x = strlen( $limit );
 			for ( $i_x = $y_x; $i_x <= 5; $i_x++ )
 				$limit .= ' ';
