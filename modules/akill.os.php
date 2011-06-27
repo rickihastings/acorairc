@@ -195,17 +195,6 @@ class os_akill implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* _add_akill (private)
 	* 
 	* @params

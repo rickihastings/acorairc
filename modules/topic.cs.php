@@ -137,17 +137,6 @@ class cs_topic implements module
 		}
 		// make sure the channel exists.
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
 }
 
 // EOF;

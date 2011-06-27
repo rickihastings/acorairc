@@ -123,19 +123,6 @@ class ns_info implements module
 			// if the nick in question has staff powers, we show the expiry times.
 		}
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
 }
 
 // EOF;

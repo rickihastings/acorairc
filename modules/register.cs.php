@@ -127,22 +127,6 @@ class cs_register implements module
 			// ph00s aint even registered..
 		}
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// the main core registered stuff is in chanserv core
-		// incase people want to unload register for web registration
-		// or something, and still allow chanserv to be properly functional
-		//
-		// so instead we just return true.
-	}
 }
 
 // EOF;

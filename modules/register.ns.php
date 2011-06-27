@@ -221,18 +221,6 @@ You will then be able to identify with the password you chose by typing
 		}
 		// no passcode found
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{		
-		return true;
-		// nothing to do here.
-	}
 }
 
 // EOF;

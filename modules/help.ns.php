@@ -53,18 +53,6 @@ class ns_help implements module
 		
 		nickserv::get_help( $nick, $query );
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-    public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-    
 }
 
 // EOF;

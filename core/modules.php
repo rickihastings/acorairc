@@ -17,7 +17,7 @@
 class modules
 {
 	
-	static public $list	=	array();
+	static public $list	= array();
 	// setup the core module list
 	
 	public function __construct() { }

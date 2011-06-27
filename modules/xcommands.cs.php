@@ -721,20 +721,6 @@ class cs_xcommands implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// straight out of this function
-		// as we don't have to listen for anything..
-		// triggers etc.
-	}
-	
-	/*
 	* check_channel (private)
 	* 
 	* @params

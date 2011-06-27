@@ -605,17 +605,6 @@ class cs_levels implements module
 	}
 	
 	/*
-	* main (event)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* on_create (private)
 	* 
 	* @params

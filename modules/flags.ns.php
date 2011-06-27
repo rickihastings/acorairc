@@ -326,17 +326,6 @@ class ns_flags implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-	}
-	
-	/*
 	* set_flag (private)
 	* 
 	* @params

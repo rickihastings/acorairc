@@ -136,19 +136,6 @@ class os_rehash implements module
 		
 		core::alog( 'rehash_command(): sucessful rehash', 'BASIC' );
 		// log what we need to log.
-	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
 	}	
 }
 

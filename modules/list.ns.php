@@ -129,20 +129,6 @@ class ns_list implements module
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_DLM );
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $nicks ) == 0 ) ? 0 : database::num_rows( $nicks ), 'total' => $total ) );
 	}
-
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
-	
 	
 	/*
 	* _find_match (private)

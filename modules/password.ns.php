@@ -143,17 +143,6 @@ class ns_password implements module
 		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') changed the password for '.$unick );
 		// logchan
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-	}
 }
 
 // EOF;

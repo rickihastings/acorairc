@@ -54,17 +54,6 @@ class os_help implements module
 		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
 			operserv::get_help( $nick, $query );
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-    public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
 }
 
 // EOF;

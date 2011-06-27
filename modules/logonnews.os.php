@@ -134,17 +134,6 @@ class os_logonnews implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* _add_news (private)
 	* 
 	* @params

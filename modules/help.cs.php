@@ -53,17 +53,6 @@ class cs_help implements module
 		
 		chanserv::get_help( $nick, $query );
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-    public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
 }
 
 // EOF;

@@ -182,19 +182,6 @@ class os_utilities implements module
 		}
 		// now we check 3 things, if the user exists, if the channel exists
 		// and if the user is even in that channel, if they arn't we just leave it
-	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
 	}	
 }
 

@@ -120,19 +120,6 @@ class cs_drop implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
-	
-	/*
 	* _drop_check (private)
 	* 
 	* @params

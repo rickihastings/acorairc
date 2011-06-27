@@ -177,17 +177,6 @@ class os_session implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* _add_exception (private)
 	* 
 	* @params

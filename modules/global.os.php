@@ -149,17 +149,6 @@ class os_global implements module
 			self::join_logchan();
 		// join global to the logchan.	
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{	
-		return false;
-	}
 }
 
 // EOF;

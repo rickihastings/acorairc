@@ -227,18 +227,6 @@ class ns_suspend implements module
 		ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
 		// change nick
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
 }
 
 // EOF;

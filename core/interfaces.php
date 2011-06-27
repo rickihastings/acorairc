@@ -127,7 +127,6 @@ interface module
 {
 	
 	public function modload();
-	public function main( $ircdata, $startup = false );
 	// main functions
 }
 

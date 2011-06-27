@@ -586,17 +586,6 @@ class cs_flags implements module
 	}
 	
 	/*
-	* main (event)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* increase_limit (private)
 	*
 	* @params

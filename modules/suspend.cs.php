@@ -225,17 +225,6 @@ class cs_suspend implements module
 			ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $channel->suspend_reason );
 		// boot
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
 }
 
 // EOF;

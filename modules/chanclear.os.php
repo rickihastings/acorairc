@@ -113,19 +113,6 @@ class os_chanclear implements module
 		}
 		// check if the channel is in use..
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
 }
 
 // EOF;

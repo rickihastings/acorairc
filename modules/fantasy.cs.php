@@ -423,17 +423,6 @@ class cs_fantasy implements module
 		}
 		// !sync command (experimental)
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
 }
 
 // EOF;

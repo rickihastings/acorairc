@@ -336,17 +336,6 @@ class ns_identify implements module
 	}
 	
 	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return false;
-	}
-	
-	/*
 	* secured_callback (timer)
 	* 
 	* @params

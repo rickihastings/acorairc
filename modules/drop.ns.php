@@ -180,20 +180,6 @@ class ns_drop implements module
 			// doesn't even exist..
 		}
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
-	
 }
 
 //EOF;

@@ -90,19 +90,6 @@ class cs_invite implements module
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_INVITE, array( 'nick' => $who, 'chan' => $chan ) );
 		// invite the user!
 	}
-	
-	/*
-	* main (event hook)
-	* 
-	* @params
-	* $ircdata - ''
-	*/
-	public function main( $ircdata, $startup = false )
-	{
-		return true;
-		// we don't need to listen for anything in this module
-		// so we just return true immediatly.
-	}
 }
 
 // EOF;
