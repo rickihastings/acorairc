@@ -575,7 +575,7 @@ class cs_levels implements module
 	static public function on_chan_create( $chan )
 	{
 		if ( chanserv::$chan_q[$chan] === false )
-			continue;
+			return false;
 		// if the channel doesn't exist we return false, to save us the hassle of wasting
 		// resources on this stuff below.
 		
@@ -589,12 +589,12 @@ class cs_levels implements module
 	static public function on_join( $nick, $chan )
 	{
 		if ( chanserv::$chan_q[$chan] === false )
-			continue;
+			return false;
 		// if the channel doesn't exist we return false, to save us the hassle of wasting
 		// resources on this stuff below.
 		
 		if ( $nick == core::$config->chanserv->nick )
-			continue;
+			return false;
 		// skip us :D
 		
 		$hostname = core::get_full_hostname( $nick );

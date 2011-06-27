@@ -30,13 +30,13 @@ class ircd_handle
 	*
 	* @params
 	* $server - server name
-	* $sid - server sid (n/a in some circumstances, no biggie.
+	* $sid - server sid (n/a in some circumstances, no biggie)
 	* $our_sid - also n/a in some circumstances
 	*/
 	static public function handle_on_server( $server, $sid, $our_sid )
 	{
 		core::$servers[$server] = array( 'name' => $server, 'sid' => $sid );
-				
+		
 		if ( !core::$end_burst )
 			ircd::send_burst( $our_sid );
 	}

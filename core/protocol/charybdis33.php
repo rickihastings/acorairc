@@ -83,8 +83,10 @@ class ircd implements protocol
 	{
 		if ( $ircdata[0] == 'PASS' )
 			self::$last_sid = substr( $ircdata[4], 1 );
-		else	
+		elseif ( $ircdata[0] == 'SERVER' )
 			ircd_handle::handle_on_server( $ircdata[1], self::$last_sid, self::$sid );
+		elseif ( $ircdata[1] == 'SID' )
+			ircd_handle::handle_on_server( $ircdata[2], $ircdata[4], self::$sid );
 	}
 	
 	/*
@@ -464,7 +466,7 @@ class ircd implements protocol
 			$service_mode = self::$service_modes['service'];
 		// what do we use?
 		
-		self::send( ':'.self::$sid.' UID '.$nick.' 0 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' :'.$gecos );		
+		self::send( ':'.self::$sid.' EUID '.$nick.' 0 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' * * :'.$gecos );		
 		
 		ircd_handle::introduce_client( $nick, $uid, $ident, $hostname, $gecos, $enforcer );
 		// handle it
@@ -980,8 +982,12 @@ class ircd implements protocol
 			self::send_version( $ircdata );
 		// handle version
 	
-		if ( isset( $ircdata[0] ) && ( $ircdata[0] == 'PASS' || $ircdata[0] == 'SERVER' ) )
+		if ( isset( $ircdata[1] ) && ( $ircdata[0] == 'PASS' || $ircdata[0] == 'SERVER' || $ircdata[1] == 'SID' ) )
+		{
+			ircd::handle_on_server( $ircdata );
 			return true;
+		}
+		// handle new servers
 		
 		return false;
 	}
