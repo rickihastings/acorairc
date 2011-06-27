@@ -885,7 +885,6 @@ class ircd implements protocol
 	*/
 	static public function on_user_login( $nick, $account )
 	{
-		// TODO
 		$uid = ircd_handle::get_uid( $nick );
 		self::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$account );
 	}
@@ -1263,7 +1262,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
 			return true;
-		// return true on any notice, because $where aint set.
+		// return true on any notice
 		
 		return false;
 	}
@@ -1296,13 +1295,8 @@ class ircd implements protocol
 	{
 		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
 		{
-			$return = array(
-				'nick' => ( count( $ircdata ) == 7 ) ? ircd_handle::get_nick( $ircdata, 0 ) : ircd_handle::get_nick( $ircdata, 4 ),
-				'ident' => ( count( $ircdata ) == 7 ) ? $ircdata[3] : $ircdata[5],
-			);
-		
 			ircd::handle_ident_change( $ircdata );
-			return $return;
+			return true;
 		}
 		// return true on setident.
 		
@@ -1319,13 +1313,8 @@ class ircd implements protocol
 	{
 		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
 		{
-			$return = array(
-				'nick' => ( count( $ircdata ) == 7 ) ? ircd_handle::get_nick( $ircdata, 0 ) : ircd_handle::get_nick( $ircdata, 4 ),
-				'gecos' => ( count( $ircdata ) == 7 ) ? substr( core::get_data_after( $ircdata, 7 ), 1 ) : substr( core::get_data_after( $ircdata, 9 ), 1 ),
-			);
-			
 			ircd::handle_gecos_change( $ircdata );
-			return $return;
+			return true;
 		}
 		// return true on fname.
 		

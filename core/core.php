@@ -702,7 +702,6 @@ class core
 			}
 			// they're flooding
 		}
-		// TODO
 	}
 	
 	/*

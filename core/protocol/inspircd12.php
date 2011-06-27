@@ -111,7 +111,6 @@ class ircd implements protocol
 		if ( $server[0] == ':' ) $server = substr( $server, 1 );
 		// strip :
 		
-		// todo
 		ircd_handle::handle_on_connect( $nick, $ircdata[2], $ircdata[7], $ircdata[6], $ircdata[5], $gecos, $server, $ircdata[3], $ircdata[11], $startup );
 	}
 	
@@ -203,10 +202,11 @@ class ircd implements protocol
 	*/
 	static public function handle_mode( $ircdata )
 	{
+		$nick = core::get_nick( $ircdata, 0 );
 		$chan = core::get_chan( $ircdata, 2 );
 		$mode_queue = core::get_data_after( $ircdata, 4 );
 	
-		ircd_handle::handle_mode( $chan, $mode_queue );
+		ircd_handle::handle_mode( $nick, $chan, $mode_queue );
 	}
 	
 	/*
@@ -1059,8 +1059,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'UID' )
 		{
-			ircd::handle_on_connect( $ircdata[4], ircd_handle::get_server( $ircdata, 0 ) );
-			return core::$nicks[$ircdata[4]];
+			ircd::handle_on_connect( $ircdata, $startup );
+			return true;
 		}
 		// return true when the $ircdata finds a (remote)connect.
 		
@@ -1077,9 +1077,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
 		{
-			$nick = ircd_handle::get_nick( $ircdata, 0 );
-			ircd_handle::on_quit( $nick );
-			return $nick;
+			ircd::handle_quit( $ircdata, $startup );
+			return true;
 		}
 		// return true when the $ircdata finds a quit.
 		
@@ -1096,12 +1095,7 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FHOST' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'new_host' => $ircdata[2],
-			);
-		
-			ircd_handle::on_fhost( $return['nick'], $return['new_host'] );
+			ircd::handle_host_change( $ircdata );
 			return true;
 		}
 		// return true when the $ircdata finds a host change
@@ -1118,7 +1112,10 @@ class ircd implements protocol
 	static public function on_chan_create( $ircdata )
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FJOIN' )
-			return $ircdata[2];
+		{
+			ircd::handle_channel_create( $ircdata );
+			return true;
+		}
 		// return true when any channel is created, because $chan isnt set.
 		
 		return false;
@@ -1134,13 +1131,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'JOIN' )
 		{
-			$return = array(
-				'chan' => core::get_chan( $ircdata, 2 ),
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-			);
-			
-			ircd_handle::on_join( $return['nick'], $return['chan'] );
-			return $return;
+			ircd::handle_join( $ircdata );
+			return true;
 		}
 		// return true when any channel is joined, because $chan isnt set.
 		
@@ -1157,13 +1149,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'PART' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'chan' => core::get_chan( $ircdata, 2 ),
-			);
-		
-			ircd_handle::on_part( $return['nick'], $return['chan'] );
-			return $return;
+			ircd::handle_part( $ircdata );
+			return true;
 		}
 		// return true when any channel is parted, because $chan isnt set.
 		
@@ -1180,14 +1167,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FMODE' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'chan' => core::get_chan( $ircdata, 2 ),
-				'modes' => core::get_data_after( $ircdata, 4 ),
-			);
-		
-			ircd_handle::on_mode( $return['nick'], $return['modes'], $return['chan'] );
-			return $return;
+			ircd::handle_mode( $ircdata );
+			return true;
 		}
 		// return true when any channel has a mode change, because $chan isnt set.
 		
@@ -1204,14 +1185,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'KICK' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'chan' => core::get_chan( $ircdata, 2 ),
-				'who' => ircd_handle::get_nick( $ircdata, 3 ),
-			);
-		
-			ircd_handle::on_kick( $return['nick'], $return['who'], $return['chan'] );
-			return $return;
+			ircd::handle_kick( $ircdata );
+			return true;
 		}
 		// return true when anyone is kicked from any channel, because $chan isnt set.
 		
@@ -1228,9 +1203,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TOPIC' )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
-			ircd_handle::on_topic( $chan );
-			return $chan;
+			ircd::handle_topic( $ircdata );	
+			return true;
 		}
 		// return true when any channel's topic is changed, because $chan isnt set.
 		
@@ -1247,9 +1221,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FTOPIC' )
 		{
-			$chan = core::get_chan( $ircdata, 2 );
-			ircd_handle::on_ftopic( $chan );
-			return $chan;
+			ircd::handle_ftopic( $ircdata );
+			return true;
 		}
 		// return true when any channel's topic is changed, because $chan isnt set.
 		
@@ -1266,13 +1239,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'OPERTYPE' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'type' => str_replace( '_', ' ', $ircdata[2] ),
-			);
-			
-			ircd_handle::on_oper_up( $return['nick'], $return['type'] );
-			return $return;
+			ircd::handle_oper_up( $ircdata );
+			return true;
 		}
 		// return true when a oper up is matched, and not an oper warning x]
 		
@@ -1286,30 +1254,20 @@ class ircd implements protocol
 	* $ircdata - ..
 	* $where - optional
 	*/
-	static public function on_msg( $ircdata, $where = '' )
+	static public function on_msg( $ircdata )
 	{
-		$return = array(
-			'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-			'msg' => core::get_data_after( $ircdata, 3 ),
-		);
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$msg = core::get_data_after( $ircdata, 3 );
 		
 		if ( $ircdata[2][0] != '#' )
-			$return['target'] = ircd_handle::get_nick( $ircdata, 2 );
+			$target = ircd_handle::get_nick( $ircdata, 2 );
 		else
-			$return['target'] = core::get_chan( $ircdata, 2 );
-	
-		if ( $where != '' )
+			$target = core::get_chan( $ircdata, 2 );
+		
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'PRIVMSG' )
 		{
-			if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'PRIVMSG' && $return['target'] == $where ) )
-				return $return;
-			// return true providing $where matches where it was sent, crafty.
-			// clearly doesn't make much sence imo. lol
-		}
-		else
-		{
-			if ( isset( $ircdata[1] ) && $ircdata[1] == 'PRIVMSG' )
-				return $return;
-			// return true on any privmsg, because $where aint set.
+			ircd_handle::handle_msg( $nick, $target, $msg );
+			return true;
 		}
 		
 		return false;
@@ -1322,31 +1280,11 @@ class ircd implements protocol
 	* $ircdata - ..
 	* $where - optional
 	*/
-	static public function on_notice( $ircdata, $where = '' )
+	static public function on_notice( $ircdata )
 	{
-		$return = array(
-			'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-			'msg' => core::get_data_after( $ircdata, 3 ),
-		);
-		
-		if ( $ircdata[2][0] != '#' )
-			$return['target'] = ircd_handle::get_nick( $ircdata, 2 );
-		else
-			$return['target'] = core::get_chan( $ircdata, 2 );
-	
-		if ( $where != '' )
-		{
-			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' && $ircdata[2] == $where )
-				return $return;
-			// return true providing $where matches where it was sent, crafty.
-			// clearly doesn't make much sence imo. lol
-		}
-		else
-		{
-			if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
-				return $return;
-			// return true on any notice, because $where aint set.
-		}
+		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
+			return true;
+		// return true on any notice
 		
 		return false;
 	}
@@ -1361,13 +1299,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 4 )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'new_nick' => $ircdata[2],
-			);
-			
-			ircd_handle::on_nick_change( $return['nick'], $return['new_nick'] );
-			return $return;
+			ircd::handle_nick_change( $ircdata, $startup );
+			return true;
 		}
 		// return true on any nick change.
 		
@@ -1384,25 +1317,15 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGIDENT' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[3], 1 ),
-			);
-		
-			ircd_handle::on_ident_change( $return['nick'], $return['ident'] );
-			return $return;
+			ircd::handle_ident_change( $ircdata );
+			return true;
 		}
 		// return true on chgident.
 		
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SETIDENT' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'ident' => substr( $ircdata[2], 1 ),
-			);
-		
-			ircd_handle::on_ident_change( $return['nick'], $return['ident'] );
-			return $return;
+			ircd::handle_ident_change( $ircdata );
+			return true;
 		}
 		// return true on setident.
 		
@@ -1419,13 +1342,8 @@ class ircd implements protocol
 	{
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'FNAME' )
 		{
-			$return = array(
-				'nick' => ircd_handle::get_nick( $ircdata, 0 ),
-				'gecos' => substr( core::get_data_after( $ircdata, 2 ), 1 ),
-			);
-			
-			ircd_handle::on_gecos_change(  $return['nick'], $return['gecos'] );
-			return $return;
+			ircd::handle_gecos_change( $ircdata );
+			return true;
 		}
 		// return true on fname.
 		
