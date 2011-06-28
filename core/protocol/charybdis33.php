@@ -201,6 +201,7 @@ class ircd implements protocol
 	static public function handle_mode( $ircdata )
 	{
 		$nick = core::get_nick( $ircdata, 0 );
+		$nick = ( $nick == '' ) ? ircd_handle::get_server( $ircdata, 0 ) : $nick;
 		$chan = core::get_chan( $ircdata, 3 );
 		// get the channel!
 	
@@ -466,7 +467,7 @@ class ircd implements protocol
 			$service_mode = self::$service_modes['service'];
 		// what do we use?
 		
-		self::send( ':'.self::$sid.' EUID '.$nick.' 0 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' * * :'.$gecos );		
+		self::send( ':'.self::$sid.' EUID '.$nick.' 1 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' * * :'.$gecos );		
 		
 		ircd_handle::introduce_client( $nick, $uid, $ident, $hostname, $gecos, $enforcer );
 		// handle it

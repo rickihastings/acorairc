@@ -621,11 +621,11 @@ class core
 	*/
 	static public function join_flood_check( $nick, $chan )
 	{
-		/*if ( self::$chans[$chan]['joins'] >= 10 )
+		if ( self::$chans[$chan]['joins'] >= 10 )
 		{
 			ircd::mode( self::$config->chanserv->nick, $chan, '+isb *!*@*', true );
 			self::alog( self::$config->operserv->nick.': Flood protection triggered for '.$chan.', +isb *!*@* set' );
-		}*/
+		}
 		// trigger flood protection
 	}
 	
