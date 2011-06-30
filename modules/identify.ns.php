@@ -17,7 +17,7 @@
 class ns_identify implements module
 {
 	
-	const MOD_VERSION = '0.0.6';
+	const MOD_VERSION = '0.0.7';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -142,12 +142,12 @@ class ns_identify implements module
 							$ident = $new_host[0];
 							$host = $new_host[1];
 							
-							ircd::setident( core::$config->operserv->nick, $nick, $ident );
-							ircd::sethost( core::$config->operserv->nick, $nick, $host );
+							ircd::setident( core::$config->nickserv->nick, $nick, $ident );
+							ircd::sethost( core::$config->nickserv->nick, $nick, $host );
 						}
 						else
 						{
-							ircd::sethost( core::$config->operserv->nick, $nick, $user->vhost );
+							ircd::sethost( core::$config->nickserv->nick, $nick, $user->vhost );
 						}
 					}
 					// first thing we do, check if they have a vhost, if they do, apply it.
