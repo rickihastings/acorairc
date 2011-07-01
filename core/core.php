@@ -623,7 +623,7 @@ class core
 	{
 		if ( self::$chans[$chan]['joins'] >= 10 )
 		{
-			ircd::mode( self::$config->chanserv->nick, $chan, '+isb *!*@*', true );
+			mode::set( self::$config->chanserv->nick, $chan, '+isb *!*@*', true );
 			self::alog( self::$config->operserv->nick.': Flood protection triggered for '.$chan.', +isb *!*@* set' );
 		}
 		// trigger flood protection

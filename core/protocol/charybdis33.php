@@ -573,21 +573,12 @@ class ircd implements protocol
 		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		if ( $mode[0] != '-' && $mode[0] != '+' ) $mode = '+'.$mode;
-		
-		$old_mode = $mode;
-		$mode = mode::check_modes( $mode );
-		// we don't want nobody messing about
-
-		if ( trim( $mode ) == '' )
-			return false;
-		
 		$from = ( $boolean ) ? self::$sid : $unick;
 		// check what we send
 		
 		self::send( ':'.$from.' TMODE '.core::$chans[$chan]['timestamp'].' '.$chan.' '.$mode );
 		ircd_handle::mode( $nick, $chan, $mode );
-		// send the mode then handle it internally
+		// send the mode
 	}
 	
 	/*

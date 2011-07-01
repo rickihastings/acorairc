@@ -94,9 +94,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '+q', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '+q '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '+q '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '+q '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '+q '.$nick );
 			// check if another param is specified
 		}
 		// !owner command
@@ -108,9 +108,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '-q', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '-q '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '-q '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '-q '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '-q '.$nick );
 			// check if another param is specified
 		}
 		// !deowner command
@@ -122,9 +122,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '+a', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '+a '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '+a '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '+a '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '+a '.$nick );
 			// check if another param is specified
 		}
 		// !protect command
@@ -132,14 +132,13 @@ class cs_fantasy implements module
 		if ( ircd::$protect && commands::on_fantasy_cmd( $nick, $chan, $msg, 'deprotect', core::$config->chanserv->nick ) )
 		{
 			if ( chanserv::check_levels( $nick, $channel->channel, array( 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
-			if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 			
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '-a', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '-a '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '-a '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '-a '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '-a '.$nick );
 			// check if another param is specified
 		}
 		// !protect command
@@ -151,9 +150,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '+o', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '+o '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '+o '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '+o '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '+o '.$nick );
 			// check if another param is specified
 		}
 		// !op command
@@ -161,14 +160,13 @@ class cs_fantasy implements module
 		if ( commands::on_fantasy_cmd( $nick, $chan, $msg, 'deop', core::$config->chanserv->nick ) )
 		{
 			if ( chanserv::check_levels( $nick, $channel->channel, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
-			if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 			
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '-o', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '-o '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '-o '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '-o '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '-o '.$nick );
 			// check if another param is specified
 		}
 		// !deop command
@@ -180,9 +178,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '+h', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '+h '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '+h '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '+h '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '+h '.$nick );
 			// check if another param is specified
 		}
 		// !hop command
@@ -190,14 +188,13 @@ class cs_fantasy implements module
 		if ( ircd::$halfop && commands::on_fantasy_cmd( $nick, $chan, $msg, 'dehalfop', core::$config->chanserv->nick ) )
 		{
 			if ( chanserv::check_levels( $nick, $channel->channel, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false ) return false;
-			if ( strtolower( $msgs[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
 			
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '-h', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '-h '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '-h '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '-h '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '-h '.$nick );
 			// check if another param is specified
 		}
 		// !dehop command
@@ -209,9 +206,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '+v', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '+v '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '+v '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '+v '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '+v '.$nick );
 			// check if another param is specified
 		}
 		// !voice command
@@ -223,9 +220,9 @@ class cs_fantasy implements module
 			if ( strpos( $msgs[1], ':' ) !== false )
 				mode::type_check( $chan, $msgs[1], '-v', core::$config->chanserv->nick );
 			elseif ( isset( $msgs[1] ) )
-				ircd::mode( core::$config->chanserv->nick, $chan, '-v '.$msgs[1] );
+				mode::set( core::$config->chanserv->nick, $chan, '-v '.$msgs[1] );
 			else
-				ircd::mode( core::$config->chanserv->nick, $chan, '-v '.$nick );
+				mode::set( core::$config->chanserv->nick, $chan, '-v '.$nick );
 			// check if another param is specified
 		}
 		// !devoice command
@@ -275,7 +272,7 @@ class cs_fantasy implements module
 					$mode_queue = str_replace( 'O', '', $mode_queue );
 				// don't let them MODE +O if they're not an IRCop
 				
-				ircd::mode( core::$config->chanserv->nick, $chan, $mode_queue );
+				mode::set( core::$config->chanserv->nick, $chan, $mode_queue );
 				// check if there are any other parameters in the !mode command
 			}
 			// are we even setting a mode?
@@ -323,7 +320,7 @@ class cs_fantasy implements module
 				
 				if ( $user = core::search_nick( $msgs[1] ) )
 				{
-					ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );
+					mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );
 					
 					if ( isset( $msgs[2] ) )
 					{
@@ -360,9 +357,9 @@ class cs_fantasy implements module
 				// you can't k/b anyone with either +S or +F, others can be k/bed though.
 				
 				if ( strpos( $msgs[1], '@' ) === false && $user = core::search_nick( $msgs[1] ) )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );
+					mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+b '.$msgs[1] );
+					mode::set( core::$config->chanserv->nick, $chan, '+b '.$msgs[1] );
 				// is the hostname in our cache? if not just set a ban on it lol.
 			}
 		}
@@ -375,9 +372,9 @@ class cs_fantasy implements module
 			if ( isset( $msgs[1] ) )
 			{
 				if ( strpos( $msgs[1], '@' ) === false && $user = core::search_nick( $msgs[1] ) )
-					ircd::mode( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );
+					mode::set( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '-b '.$msgs[1] );
+					mode::set( core::$config->chanserv->nick, $chan, '-b '.$msgs[1] );
 				// is the hostname in our cache? if not unban it..
 			}
 		}

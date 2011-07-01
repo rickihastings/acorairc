@@ -135,7 +135,7 @@ class os_utilities implements module
 		}
 		// does the channel exist?
 		
-		ircd::mode( core::$config->operserv->nick, $channel, $modes );
+		mode::set( core::$config->operserv->nick, $channel, $modes );
 		ircd::wallops( core::$config->operserv->nick, $nick.' used MODE '.$modes.' on '.$channel );
 		// set the mode, globops it.
 	}

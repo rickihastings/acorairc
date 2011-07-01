@@ -329,10 +329,10 @@ class cs_flags implements module
 				// join the chan.
 				
 				if ( ircd::$protect )
-					ircd::mode( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
+					mode::set( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
 					// +ao its self.
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
+					mode::set( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
 					// +o its self.
 			}
 			// only join if channel has above 0 users in it.
@@ -383,7 +383,7 @@ class cs_flags implements module
 			self::set_flag( $nick, $chan, $mode.'L', '' );
 			if ( $return !== false && $mode == '-' )
 			{
-				ircd::mode( core::$config->chanserv->nick, $chan, '-l' );
+				mode::set( core::$config->chanserv->nick, $chan, '-l' );
 				// -l the channel
 			}
 			elseif ( $return !== false && $mode == '+' )
@@ -415,7 +415,7 @@ class cs_flags implements module
 				
 					if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 					{
-						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
+						mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
 						ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
 					}
 					// they don't have +k, KICKEM
@@ -474,7 +474,7 @@ class cs_flags implements module
 			foreach ( str_split( $nmodelock[0] ) as $mode )
 			{
 				if ( strstr( $mode_queue, $mode ) )
-					ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
+					mode::set( core::$config->chanserv->nick, $chan, $modelock );
 				// reset the modes
 			}
 		}
@@ -501,7 +501,7 @@ class cs_flags implements module
 					if ( core::$nicks[$nick]['server'] == core::$config->server->name )
 						continue;
 				
-					ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
+					mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
 					ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
 				}
 				// they don't have +k, KICKEM
@@ -546,7 +546,7 @@ class cs_flags implements module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 			{
-				ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
+				mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$nick]['host'] );
 				ircd::kick( core::$config->chanserv->nick, $nick, $chan, '+k only channel' );
 				return false;
 			}
@@ -601,7 +601,7 @@ class cs_flags implements module
 		// plus 3
 		
 		core::$chans[$chan]['internal_limit'] = $new_limit;
-		ircd::mode( core::$config->chanserv->nick, $chan, '+l '.$new_limit );
+		mode::set( core::$config->chanserv->nick, $chan, '+l '.$new_limit );
 		// mode change.
 	}
 	

@@ -169,7 +169,7 @@ class cs_xcommands implements module
 		}
 		// do they have access?
 		
-		ircd::mode( core::$config->chanserv->nick, $chan, '-'.core::$chans[$chan]['modes'] );
+		mode::set( core::$config->chanserv->nick, $chan, '-'.core::$chans[$chan]['modes'] );
 		// remove standard modes
 
 		mode::mass_mode( $chan, '-', core::$chans[$chan]['users'], core::$config->chanserv->nick );
@@ -180,9 +180,9 @@ class cs_xcommands implements module
 		// store some flag values in variables.
 		
 		if ( $modelock != null )
-			ircd::mode( core::$config->chanserv->nick, $chan, $modelock );
+			mode::set( core::$config->chanserv->nick, $chan, $modelock );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
+			mode::set( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CLEAR_CHAN, array( 'chan' => $chan ) );
@@ -244,7 +244,7 @@ class cs_xcommands implements module
 		
 		if ( $ircdata[1] == '' )
 		{
-			ircd::mode( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
+			mode::set( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 			// we reset the channel modes if there is no first value
 		}
 		else
@@ -256,7 +256,7 @@ class cs_xcommands implements module
 				$mode_queue[0] = str_replace( 'O', '', $mode_queue[0] );
 			// don't let them MODE +O if they're not an IRCop
 						
-			ircd::mode( core::$config->chanserv->nick, $chan, $mode_queue );
+			mode::set( core::$config->chanserv->nick, $chan, $mode_queue );
 			// mode has parameters so set the whole mode string
 		}
 	}
@@ -287,9 +287,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '+q', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+q '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+q '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+q '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '+q '.$nick );
 	}
 	
 	/*
@@ -315,14 +315,12 @@ class cs_xcommands implements module
 		}
 		// do they have access?
 			
-		if ( strtolower( $ircdata[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
-		
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '-q', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-q '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-q '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-q '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '-q '.$nick );
 	}
 		
 	/*
@@ -351,9 +349,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '+a', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+a '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+a '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+a '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '+a '.$nick );
 	}
 	
 	/*
@@ -379,14 +377,12 @@ class cs_xcommands implements module
 		}
 		// do they have access?
 			
-		if ( strtolower( $ircdata[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
-		
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '-a', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-a '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-a '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-a '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '-a '.$nick );
 	}
 	
 	/*
@@ -415,9 +411,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '+o', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+o '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+o '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+o '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '+o '.$nick );
 	}
 	
 	/*
@@ -443,14 +439,12 @@ class cs_xcommands implements module
 		}
 		// do they have access?
 		
-		if ( strtolower( $ircdata[1] ) == strtolower( core::$config->chanserv->nick ) ) return false;
-		
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '-o', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-o '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-o '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-o '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '-o '.$nick );
 	}
 	
 	/*
@@ -479,9 +473,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '+h', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+h '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+h '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+h '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '+h '.$nick );
 	}
 	
 	/*
@@ -510,9 +504,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '-h', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-h '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-h '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-h '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '-h '.$nick );
 	}
 	
 	/*
@@ -541,9 +535,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '+v', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+v '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+v '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+v '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '+v '.$nick );
 	}
 	
 	/*
@@ -572,9 +566,9 @@ class cs_xcommands implements module
 		if ( strpos( $ircdata[1], ':' ) !== false )
 			mode::type_check( $chan, $ircdata[1], '-v', core::$config->chanserv->nick );
 		elseif ( isset( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-v '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-v '.$ircdata[1] );
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-v '.$nick );
+			mode::set( core::$config->chanserv->nick, $chan, '-v '.$nick );
 	}
 	
 	/*
@@ -643,7 +637,7 @@ class cs_xcommands implements module
 		
 		if ( $user = core::search_nick( $ircdata[1] ) )
 		{
-			ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
+			mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
 			ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 			// kick them with the reason
 		}
@@ -683,9 +677,9 @@ class cs_xcommands implements module
 		// you can't k/b anyone with either +S or +F, others can be k/bed though.
 		
 		if ( strpos( $ircdata[1], '@' ) === false && $user = core::search_nick( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
+			mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '+b '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '+b '.$ircdata[1] );
 		// +b
 	}
 	
@@ -714,9 +708,9 @@ class cs_xcommands implements module
 		// do they have access?
 		
 		if ( strpos( $ircdata[1], '@' ) === false && $user = core::search_nick( $ircdata[1] ) )
-			ircd::mode( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );			
+			mode::set( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );			
 		else
-			ircd::mode( core::$config->chanserv->nick, $chan, '-b '.$ircdata[1] );
+			mode::set( core::$config->chanserv->nick, $chan, '-b '.$ircdata[1] );
 		// -b
 	}
 	

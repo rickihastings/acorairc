@@ -569,6 +569,89 @@ class mode
 	}
 	
 	/*
+	* set (private)
+	* 
+	* @params
+	* $nick - who is to set these modes
+	* $chan - the channel to deal with.
+	* $mode - a valid mode string, ie +ooi Ricki Shaun
+	* $bool - whether to send the mode from our server or $nick
+	*/
+	static public function set( $nick, $chan, $mode, $bool = false )
+	{
+		if ( $mode[0] != '-' && $mode[0] != '+' ) $mode = '+'.$mode;
+		
+		$old_mode = $mode;
+		$mode = self::check_modes( $mode );
+		// we don't want nobody messing about
+
+		if ( trim( $mode ) == '' )
+			return false;
+		// do some checks etc
+		
+		$params = explode( ' ', $mode );
+		$modes = $params[0];
+		unset( $params[0] );
+		$i = $x = $y = $it = $num_modes = 0;
+		
+		$split = str_split( $modes );
+		foreach ( $split as $num => $letter )
+		{
+			
+			if ( ( $letter == '-' || $letter == '+' ) && $num_modes < ircd::$max_params )
+			{
+				$plus = ( $letter == '-' ) ? false : true;
+				$mode_string[$it] .= $letter;
+				continue;
+			}
+			
+			$num_modes++;
+			if ( $num_modes > ircd::$max_params )
+			{
+				$num_modes = 0;
+				$it++;
+			}
+			
+			if ( in_array( $letter, ircd::$status_modes ) )
+			{
+				if ( ( $plus && strpos( core::$chans[$chan]['users'][$params[($y)]], $letter ) !== false ) || 
+					 ( !$plus && strpos( core::$chans[$chan]['users'][$params[($y)]], $letter ) === false ) || 
+					 ( !$plus && ( strtolower( $params[($y)] ) == strtolower( core::$config->chanserv->nick ) ) ) )
+				{
+					unset( $params[($y - 1)] );
+					continue;
+				}
+			}
+			$mode_string[$it] .= $letter;
+			// check status modes, to prevent the likes of
+			//	@Ricki !deop
+			//	* ChanServ removes channel operator status from Ricki
+			//	Ricki !deop
+			//	* ChanServ removes channel operator status from Ricki
+		}
+		// this might seem complicated, it is, sort of.
+		// basically we're splitting the modes and params via ircd::$max_params
+		
+		foreach ( $params as $o => $param )
+		{
+			$i++;
+			// do some ++'s etc
+			
+			if ( $i > ircd::$max_params )
+			{
+				$i = 0;
+				$x++;
+			}
+			
+			$param_string[$x] .= $param.' ';
+		}
+		
+		foreach ( $mode_string as $q => $string )
+			ircd::mode( $nick, $chan, $type.$mode_string[$q].' '.trim( $param_string[$q] ), $bool );
+		// set the modes!
+	}
+	
+	/*
 	* mass_mode (private)
 	* 
 	* @params
@@ -586,8 +669,7 @@ class mode
 		$nick_string = array();
 		// set some vars
 		
-		$i = 0;
-		$x = 0;
+		$i = $x = 0;
 		foreach ( $params as $param => $mode )
 		{
 			if ( $param == core::$config->chanserv->nick || $mode == '' )

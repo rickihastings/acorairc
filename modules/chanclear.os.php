@@ -91,7 +91,7 @@ class os_chanclear implements module
 					if ( $mode == 'KICK' )
 					{
 						ircd::kick( core::$config->operserv->nick, $user, $chan, 'CHANKILL by '.$nick.' ('.$reason.')' );
-						ircd::mode( core::$config->operserv->nick, $chan, '+b *@'.core::$nicks[$user]['host'] );
+						mode::set( core::$config->operserv->nick, $chan, '+b *@'.core::$nicks[$user]['host'] );
 						// kick and +b them
 					}
 					elseif ( $mode == 'KILL' )

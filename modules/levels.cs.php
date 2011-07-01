@@ -534,9 +534,9 @@ class cs_levels implements module
 			if ( $return !== false && $mode == '-' )
 			{
 				if ( strpos( $target, '@' ) === false && $user = core::search_nick( $target ) )
-					ircd::mode( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );
+					mode::set( core::$config->chanserv->nick, $chan, '-b *@'.$user['host'] );
 				else
-					ircd::mode( core::$config->chanserv->nick, $chan, '-b '.$target );
+					mode::set( core::$config->chanserv->nick, $chan, '-b '.$target );
 				// is the hostname in our cache? if not unban it..
 			}
 			elseif ( $return !== false && $mode == '+' )
@@ -551,7 +551,7 @@ class cs_levels implements module
 							continue;
 						// don't trigger if they are on the old access list.
 						
-						ircd::mode( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$user]['host'] );
+						mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$user]['host'] );
 						ircd::kick( core::$config->chanserv->nick, $user, $chan, $reason );
 						// kickban them, but don't stop looping, because there could be more than one match.
 					}
@@ -650,7 +650,7 @@ class cs_levels implements module
 			
 			if ( $reason = chanserv::check_levels( $nick, $channel->channel, array( 'b' ), true, false, true, false ) )
 			{
-				ircd::mode( core::$config->chanserv->nick, $channel->channel, '+b *@'.core::$nicks[$nick]['host'] );
+				mode::set( core::$config->chanserv->nick, $channel->channel, '+b *@'.core::$nicks[$nick]['host'] );
 				ircd::kick( core::$config->chanserv->nick, $nick, $channel->channel, $reason );
 				continue;
 			}
