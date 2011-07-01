@@ -17,7 +17,7 @@
 class cs_invite implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -75,6 +75,13 @@ class cs_invite implements module
 		if ( !isset( core::$chans[$chan] ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_NOEXIST, array( 'chan' => $chan ) );
+			return false;
+		}
+		// channel is registered, but does it exist?
+		
+		if ( isset( core::$chans[$chan]['users'][$who] ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVITE_IN_CHAN, array( 'nick' => $who, 'chan' => $chan ) );
 			return false;
 		}
 		// channel is registered, but does it exist?

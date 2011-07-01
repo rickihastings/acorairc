@@ -111,7 +111,7 @@ class ns_password implements module
 		}
 		// access denied.
 		
-		$user = database::select( 'nicks', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
+		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		if ( database::num_rows( $user ) == 0 )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
