@@ -17,7 +17,7 @@
 class ns_suspend implements module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -122,11 +122,14 @@ class ns_suspend implements module
 		if ( isset( $unicks[strtolower( $unick )] ) )
 		{
 			$unick = $unicks[$unick]['nick'];
+			ircd::on_user_logout( $unick );
+			core::$nicks[$unick]['identified'] = false;
+			core::$nicks[$unick]['account'] = '';
 			$random_nick = 'Unknown'.rand( 10000, 99999 );
 			
 			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
 			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
-			ircd::svsnick( $unick, $random_nick, core::$nicks[$nick]['timestamp'] );
+			ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
 		}
 		// is the nick in use? we need to force change it.
 	}
