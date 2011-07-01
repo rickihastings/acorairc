@@ -597,7 +597,6 @@ class mode
 		$split = str_split( $modes );
 		foreach ( $split as $num => $letter )
 		{
-			
 			if ( ( $letter == '-' || $letter == '+' ) && $num_modes < ircd::$max_params )
 			{
 				$plus = ( $letter == '-' ) ? false : true;
@@ -614,11 +613,12 @@ class mode
 			
 			if ( in_array( $letter, ircd::$status_modes ) )
 			{
+				$y++;
 				if ( ( $plus && strpos( core::$chans[$chan]['users'][$params[($y)]], $letter ) !== false ) || 
 					 ( !$plus && strpos( core::$chans[$chan]['users'][$params[($y)]], $letter ) === false ) || 
 					 ( !$plus && ( strtolower( $params[($y)] ) == strtolower( core::$config->chanserv->nick ) ) ) )
 				{
-					unset( $params[($y - 1)] );
+					unset( $params[($y)] );
 					continue;
 				}
 			}
@@ -645,6 +645,9 @@ class mode
 			
 			$param_string[$x] .= $param.' ';
 		}
+		
+		print_r( $mode_string );
+		print_r( $param_string );
 		
 		foreach ( $mode_string as $q => $string )
 			ircd::mode( $nick, $chan, $type.$mode_string[$q].' '.trim( $param_string[$q] ), $bool );

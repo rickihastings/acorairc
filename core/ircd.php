@@ -49,6 +49,7 @@ class ircd_handle
 	*/
 	static public function handle_on_squit( $server )
 	{
+		$server_name = self::get_server( $server );
 		unset( core::$servers[$server] );
 		
 		if ( in_array( $server, ircd::$jupes ) )
@@ -59,6 +60,13 @@ class ircd_handle
 		// if it's one of our servers we act upon the command! :o
 		// need to revise this, can't remember the protocol stuff for insp 1.2
 		// will have to look into it.
+		
+		foreach ( core::$nicks as $nick => $data )
+		{
+			if ( $data['server'] == $server_name )
+				print 'test';
+		}
+		// unset all nicks that were connected to $server
 	}
 	
 	/*
