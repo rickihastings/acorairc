@@ -97,9 +97,7 @@ class ircd implements protocol
 	*/
 	static public function handle_on_squit( $ircdata )
 	{
-		$server = str_replace( ':', '', $server );
-		
-		ircd_handle::handle_on_squit( $server );
+		ircd_handle::handle_on_squit( $ircdata[1] );
 	}
 	
 	/*
@@ -992,8 +990,11 @@ class ircd implements protocol
 	*/
 	static public function on_squit( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SQUIT' )
+		if ( isset( $ircdata[0] ) && $ircdata[0] == 'SQUIT' )
+		{
+			ircd::handle_on_squit( $ircdata );
 			return true;
+		}
 		
 		return false;
 	}

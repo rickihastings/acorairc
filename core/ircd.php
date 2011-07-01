@@ -49,7 +49,7 @@ class ircd_handle
 	*/
 	static public function handle_on_squit( $server )
 	{
-		$server_name = self::get_server( $server );
+		$server = self::get_server( array( $server ), 0 );
 		unset( core::$servers[$server] );
 		
 		if ( in_array( $server, ircd::$jupes ) )
@@ -63,8 +63,8 @@ class ircd_handle
 		
 		foreach ( core::$nicks as $nick => $data )
 		{
-			if ( $data['server'] == $server_name )
-				print 'test';
+			if ( $data['server'] == $server )
+				unset( core::$nicks[$nick] );
 		}
 		// unset all nicks that were connected to $server
 	}

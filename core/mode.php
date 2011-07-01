@@ -646,9 +646,6 @@ class mode
 			$param_string[$x] .= $param.' ';
 		}
 		
-		print_r( $mode_string );
-		print_r( $param_string );
-		
 		foreach ( $mode_string as $q => $string )
 			ircd::mode( $nick, $chan, $type.$mode_string[$q].' '.trim( $param_string[$q] ), $bool );
 		// set the modes!
