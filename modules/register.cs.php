@@ -113,7 +113,7 @@ class cs_register implements module
 			
 			chanserv::$chan_q[$chan] = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp',  'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
 				
-			if ( !chanserv::$chan_q[$chan] )
+			if ( chanserv::$chan_q[$chan] === false )
 			{
 				chanserv::_join_channel( chanserv::$chan_q[$chan] );
 				// join the channel

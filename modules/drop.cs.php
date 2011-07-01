@@ -53,7 +53,7 @@ class cs_drop implements module
 	static public function drop_command( $nick, $ircdata = array() )
 	{
 		$chan = core::get_chan( $ircdata, 0 );
-		$code = $ircdata[1];
+		$code = ( $ircdata[1] == '' ) ? '' : $ircdata[1];
 		// get the channel.
 		
 		if ( self::_drop_check( $nick, $chan ) === false )
@@ -78,12 +78,12 @@ class cs_drop implements module
 				$drop_code .= $characters[mt_rand( 0, strlen( $characters ) )];
 			// generate random code
 				
-			core::$chans[$chan]['drop_code'] = $drop_code;
+			core::$nicks[$nick]['drop_code'][$chan] = $drop_code;
 			
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROP_CODE, array( 'chan' => $chan, 'code' => $drop_code ) );
 			return false;
 		}
-		elseif ( $code != core::$chans[$chan]['drop_code'] )
+		if ( trim( $code ) != '' && $code != core::$nicks[$nick]['drop_code'][$chan] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_INVALID_CODE );
 			return false;
@@ -115,7 +115,6 @@ class cs_drop implements module
 		// log what we need to log.
 		
 		unset( chanserv::$chan_q[$chan] );
-		unset( chanserv::$chan_flags_q[$chan] );
 		// remove chanserv::$chan_q[$chan] just incase
 	}
 	
