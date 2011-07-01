@@ -1184,7 +1184,7 @@ class ircd implements protocol
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MODE' && ( substr( $ircdata[3], 1, 1 ) == '+' && strpos( $ircdata[3], 'o' ) !== false ) )
 		{
 			ircd::handle_oper_up( $ircdata );
-			return true;
+			return ircd_handle::get_nick( $ircdata, 2 );
 		}
 		// return true when a oper up is matched, and not an oper warning x]
 		
