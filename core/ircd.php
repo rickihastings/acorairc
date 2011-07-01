@@ -285,6 +285,11 @@ class ircd_handle
 	*/
 	static public function handle_mode( $nick, $chan, $mode_queue )
 	{
+		$mode_array = mode::sort_modes( $mode_queue );
+		mode::append_modes( $chan, $mode_array );
+		mode::handle_params( $chan, $mode_array );
+		// we only send it if the mode actually has anything in it.
+	
 		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'BASIC' );
 		
 		foreach ( core::$bots as $bot => $class )
