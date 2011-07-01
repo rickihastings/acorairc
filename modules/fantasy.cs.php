@@ -43,6 +43,10 @@ class cs_fantasy implements module
 		$msg = substr( $msg, 1 );
 		$msgs = explode( ' ', $msg );
 		
+		if ( $msgs[0][0] != core::$config->chanserv->fantasy_prefix )
+			return false;
+		// ignore everything that doesn't start with !
+		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 			return false;
 		// channel isnt registered, halt immediatly.. 
@@ -382,8 +386,8 @@ class cs_fantasy implements module
 		
 		if ( commands::on_fantasy_cmd( $nick, $chan, $msg, 'flags', core::$config->chanserv->nick ) && isset( modules::$list['cs_flags'] ) )
 		{
-			$n_ircdata = $ircdata;
-			unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
+			$n_ircdata = $msgs;
+			unset( $n_ircdata[0] );
 			array_unshift( $n_ircdata, $chan );
 			// construct a new ircdata array
 			
@@ -397,8 +401,8 @@ class cs_fantasy implements module
 		
 		if ( commands::on_fantasy_cmd( $nick, $chan, $msg, 'levels', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
 		{
-			$n_ircdata = $ircdata;
-			unset( $n_ircdata[0], $n_ircdata[1], $n_ircdata[2], $n_ircdata[3] );
+			$n_ircdata = $msgs;
+			unset( $n_ircdata[0] );
 			array_unshift( $n_ircdata, $chan );
 			// construct a new ircdata array
 			
@@ -412,11 +416,13 @@ class cs_fantasy implements module
 		
 		if ( commands::on_fantasy_cmd( $nick, $chan, $msg, 'sync', core::$config->chanserv->nick ) && isset( modules::$list['cs_levels'] ) )
 		{
+			if ( chanserv::check_levels( $nick, $channel->channel, array( 'f', 'S', 'F' ) ) === false ) return false;
+		
 			cs_levels::on_create( core::$chans[$chan]['users'], $channel );
 			// execute on_create, cause we just treat it as that
 			// this is kinda a shortcut, but well worth it.
 			
-			ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' used SYNC' );
+			ircd::notice( core::$config->chanserv->nick, $chan, ''.$nick.' ('.core::$nicks[$nick]['account'].') used SYNC' );
 		}
 		// !sync command (experimental)
 	}

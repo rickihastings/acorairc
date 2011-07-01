@@ -77,8 +77,6 @@ class ircd_handle
 	*/
 	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $ip_addr, $server, $timestamp, $modes, $startup = false )
 	{
-		//debug_print_backtrace();
-	
 		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
 		// yey for this, saves us massive intensive cpu raeps

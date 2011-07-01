@@ -713,24 +713,20 @@ class cs_levels implements module
 		while ( $flags = database::fetch( $user_flags_q ) )
 		{
 			if ( ircd::$owner && strpos( $flags->flags, 'q' ) !== false )
-				$temp_array[] = '5';
+				$temp_array[] = 'q';
 			
 			if ( ircd::$protect && strpos( $flags->flags, 'a' ) !== false )
-				$temp_array[] = '4';
+				$temp_array[] = 'a';
 			
 			if ( strpos( $flags->flags, 'o' ) !== false )
-				$temp_array[] = '3';
+				$temp_array[] = 'o';
 			
 			if ( ircd::$halfop && strpos( $flags->flags, 'h' ) !== false )
-				$temp_array[] = '2';
+				$temp_array[] = 'h';
 			
 			if ( strpos( $flags->flags, 'v' ) !== false )
-				$temp_array[] = '1';
+				$temp_array[] = 'v';
 				
-			sort( $temp_array, SORT_NUMERIC );
-			$temp_array = array_reverse( $temp_array );
-			// sort the array and flip it
-			
 			$access_array[$flags->target] = $temp_array;
 			
 			$temp_array = array();
