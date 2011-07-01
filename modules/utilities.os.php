@@ -149,8 +149,8 @@ class os_utilities implements module
 	*/
 	static public function kick_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$channel = core::get_chan( $ircdata, 1 );
+		$unick = $ircdata[1];
+		$channel = $ircdata[0];
 		$reason = core::get_data_after( $ircdata, 2 );
 		// grab the parameters: nick; channel; reason (optional)
 		
@@ -168,17 +168,16 @@ class os_utilities implements module
 		}
 		// access?
 		
-		$ntemplate = $template;
-		
 		if ( trim( $reason ) == '' ) $reason = 'Kick command issued by '.$nick;
 		// if they haven't suplied a reason let's fill it in.
 		
 		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
-		if ( isset( $unicks[strtolower( $unick )] ) && isset( core::$chans[$channel] ) && isset( core::$chans[$channel]['users'][$unick] ) )
+		$cnicks = array_change_key_case( core::$chans[$channel]['users'], CASE_LOWER );
+		if ( isset( $unicks[strtolower( $unick )] ) && isset( core::$chans[$channel] ) && isset( $cnicks[strtolower( $unick )] ) )
 		{
-			$unick = $unicks[$unick]['nick'];
+			$unick = $unicks[strtolower( $unick )]['nick'];
 			ircd::kick( core::$config->operserv->nick, $unick, $channel, $reason );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') used KICK to remove ('.$unick.') from ('.$chan.')' );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') used KICK to remove ('.$unick.') from ('.$channel.')' );
 		}
 		// now we check 3 things, if the user exists, if the channel exists
 		// and if the user is even in that channel, if they arn't we just leave it
