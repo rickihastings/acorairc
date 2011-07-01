@@ -35,8 +35,8 @@ class ns_list implements module
 		modules::init_module( 'ns_list', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_list', 'help', nickserv::$help->NS_HELP_LIST_1, true );
-		nickserv::add_help( 'ns_list', 'help list', nickserv::$help->NS_HELP_LIST_ALL, true );
+		nickserv::add_help( 'ns_list', 'help', nickserv::$help->NS_HELP_LIST_1, 'nickserv_op' );
+		nickserv::add_help( 'ns_list', 'help list', nickserv::$help->NS_HELP_LIST_ALL, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'list', 'ns_list', 'list_command' );
