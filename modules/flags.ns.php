@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class ns_flags implements module
+class ns_flags extends module
 {
 	
 	const MOD_VERSION = '0.0.4';

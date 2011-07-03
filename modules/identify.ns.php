@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class ns_identify implements module
+class ns_identify extends module
 {
 	
 	const MOD_VERSION = '0.0.7';
@@ -259,7 +259,7 @@ class ns_identify implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = $connect_data['nick'];
 		$user = nickserv::$nick_q[strtolower( $nick )];
@@ -301,7 +301,7 @@ class ns_identify implements module
 	/*
 	* on_nick_change (event hook)
 	*/
-	public function on_nick_change( $old_nick, $nick )
+	static public function on_nick_change( $old_nick, $nick )
 	{
 		timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
 		// remove the secured timer. if there is one
@@ -342,7 +342,7 @@ class ns_identify implements module
 	/*
 	* on_quit (event hook)
 	*/
-	public function on_quit( $nick, $startup = false )
+	static public function on_quit( $nick, $startup = false )
 	{
 		timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 		// remove the secured timer. if there is one

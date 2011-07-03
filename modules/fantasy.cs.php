@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_fantasy implements module
+class cs_fantasy extends module
 {
 	
 	const MOD_VERSION = '0.0.7';
@@ -38,7 +38,7 @@ class cs_fantasy implements module
 	/*
 	* on_msg (event hook)
 	*/
-	public function on_msg( $nick, $chan, $msg )
+	static public function on_msg( $nick, $chan, $msg )
 	{
 		$msg = substr( $msg, 1 );
 		$msgs = explode( ' ', $msg );

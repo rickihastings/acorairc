@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class ns_request implements module
+class ns_request extends module
 {
 	
 	const MOD_VERSION = '0.0.1';

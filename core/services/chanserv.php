@@ -14,8 +14,12 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class chanserv implements service
+class chanserv extends service
 {
+	
+	const SERV_VERSION = '0.1.0';
+	const SERV_AUTHOR = 'Acora';
+	// service info
 	
 	static public $help;
 	// help
@@ -33,6 +37,9 @@ class chanserv implements service
 	*/
 	public function __construct()
 	{
+		modules::init_service( 'chanserv', self::SERV_VERSION, self::SERV_AUTHOR );
+		// these are standard in service constructors
+	
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/chanserv.php' );
 		self::$help = $help;
 		// load the help file
@@ -54,7 +61,7 @@ class chanserv implements service
 	/*
 	* on_msg (event_hook)
 	*/
-	public function on_msg( $nick, $target, $msg )
+	static public function on_msg( $nick, $target, $msg )
 	{
 		if ( $target != core::$config->chanserv->nick )
 			return false;
@@ -71,7 +78,7 @@ class chanserv implements service
 	* @params
 	* void
 	*/
-	static public function part_chan_callback( $chan )
+	public function part_chan_callback( $chan )
 	{
 		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
 			ircd::part_chan( core::$config->chanserv->nick, $chan );

@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_rehash implements module
+class os_rehash extends module
 {
 	
 	const MOD_VERSION = '0.0.2';

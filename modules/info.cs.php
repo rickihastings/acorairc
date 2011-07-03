@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_info implements module
+class cs_info extends module
 {
 	
 	const MOD_VERSION = '0.0.3';

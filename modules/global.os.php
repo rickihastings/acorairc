@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_global implements module
+class os_global extends module
 {
 	
 	const MOD_VERSION = '0.0.4';
@@ -128,7 +128,7 @@ class os_global implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
 		if ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' )
 		{

@@ -116,17 +116,9 @@ class ircd_handle
 		core::max_users();
 		// handle connect
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_connect' ) )
-				$class->on_connect( core::$nicks[$nick], $startup );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_connect' ) )
-				modules::$list[$module]['class']->on_connect( core::$nicks[$nick], $startup );
-		}
+		//foreach ( modules::$event_methods['on_connect'] as $l => $class )
+		//	$class::on_connect( core::$nicks[$nick], $startup );
+		// call the event method
 	}
 	
 	/*
@@ -172,17 +164,9 @@ class ircd_handle
 		
 		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_nick_change' ) )
-				$class->on_nick_change( $nick, $new_nick );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_nick_change' ) )
-				modules::$list[$module]['class']->on_nick_change( $nick, $new_nick );
-		}
+		foreach ( modules::$event_methods['on_nick_change'] as $l => $class )
+			$class::on_nick_change( $nick, $new_nick );
+		// call the event method
 	}
 	
 		
@@ -221,17 +205,9 @@ class ircd_handle
 		
 		core::alog( 'on_quit(): '.$nick.' quit', 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_quit' ) )
-				$class->on_quit( $nick, $startup );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_quit' ) )
-				modules::$list[$module]['class']->on_quit( $nick, $startup );
-		}
+		foreach ( modules::$event_methods['on_quit'] as $l => $class )
+			$class::on_quit( $nick, $startup );
+		// call the event method
 	}
 	
 	/*
@@ -290,17 +266,9 @@ class ircd_handle
 	
 		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_mode' ) )
-				$class->on_mode( $nick, $chan, $modes );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_mode' ) )
-				modules::$list[$module]['class']->on_mode( $nick, $chan, $modes );
-		}
+		foreach ( modules::$event_methods['on_mode'] as $l => $class )
+			$class::on_mode( $nick, $chan, $modes );
+		// call the event method
 	}
 	
 	/*
@@ -315,17 +283,9 @@ class ircd_handle
 		core::$chans[$chan]['topic_setter'] = $nick;
 		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_topic' ) )
-				$class->on_topic( $nick, $chan, $topic );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_topic' ) )
-				modules::$list[$module]['class']->on_topic( $nick, $chan, $topic );
-		}
+		foreach ( modules::$event_methods['on_topic'] as $l => $class )
+			$class::on_topic( $nick, $chan, $topic );
+		// call the event method
 	}
 	
 	/*
@@ -358,17 +318,9 @@ class ircd_handle
 		// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in SJOIN/FJOIN now, upon bursts, and also resent
 		// when users join channels
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_chan_create' ) )
-				$class->on_chan_create( $chan );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_chan_create' ) )
-				modules::$list[$module]['class']->on_chan_create( $chan );
-		}
+		foreach ( modules::$event_methods['on_chan_create'] as $l => $class )
+			$class::on_chan_create( $chan );
+		// call the event method
 	}
 	
 	/*
@@ -393,17 +345,9 @@ class ircd_handle
 			core::join_flood_check( $nick, $chan );
 			// flood check
 			
-			foreach ( core::$bots as $bot => $class )
-			{
-				if ( method_exists( $class, 'on_join' ) )
-					$class->on_join( $nick, $chan );
-			}
-				
-			foreach ( modules::$list as $module => $data )
-			{
-				if ( method_exists( modules::$list[$module]['class'], 'on_join' ) )
-					modules::$list[$module]['class']->on_join( $nick, $chan );
-			}
+			foreach ( modules::$event_methods['on_join'] as $l => $class )
+				$class::on_join( $nick, $chan );
+			// call the event method
 		}
 	}
 
@@ -419,17 +363,9 @@ class ircd_handle
 		// remove the user out of the array
 		core::alog( 'on_part(): '.$nick.' left '.$chan, 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_part' ) )
-				$class->on_part( $nick, $chan );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_part' ) )
-				modules::$list[$module]['class']->on_part( $nick, $chan );
-		}
+		foreach ( modules::$event_methods['on_part'] as $l => $class )
+			$class::on_part( $nick, $chan );
+		// call the event method
 	}
 	
 	/*
@@ -444,17 +380,9 @@ class ircd_handle
 		// again, move them out.
 		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_kick' ) )
-				$class->on_kick( $nick, $who, $chan );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_kick' ) )
-				modules::$list[$module]['class']->on_kick( $nick, $who, $chan );
-		}
+		foreach ( modules::$event_methods['on_kick'] as $l => $class )
+			$class::on_kick( $nick, $who, $chan );
+		// call the event method
 	}
 	
 	/*
@@ -481,17 +409,9 @@ class ircd_handle
 		core::flood_check( $nick, $target, $msg );
 		// commands and flood checking!
 		
-		foreach ( core::$bots as $bot => $class )
-		{
-			if ( method_exists( $class, 'on_msg' ) )
-				$class->on_msg( $nick, $target, $msg );
-		}
-			
-		foreach ( modules::$list as $module => $data )
-		{
-			if ( method_exists( modules::$list[$module]['class'], 'on_msg' ) )
-				modules::$list[$module]['class']->on_msg( $nick, $target, $msg );
-		}
+		foreach ( modules::$event_methods['on_msg'] as $l => $class )
+			$class::on_msg( $nick, $target, $msg );
+		// call the event method
 	}
 
 	/*
@@ -861,7 +781,7 @@ class ircd_handle
 		core::alog( 'shutdown(): '.$message, 'BASIC' );
 		// debug info
 		
-		socket_close( self::$socket );
+		socket_close( core::$socket );
 		if ( $terminate ) exit;
 		// if true, exit;
 	}

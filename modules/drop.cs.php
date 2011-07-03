@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_drop implements module
+class cs_drop extends module
 {
 	
 	const MOD_VERSION = '0.0.3';

@@ -14,8 +14,12 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class operserv implements service
+class operserv extends service
 {
+	
+	const SERV_VERSION = '0.1.0';
+	const SERV_AUTHOR = 'Acora';
+	// service info
 	
 	static public $help;
 	// help
@@ -28,6 +32,9 @@ class operserv implements service
 	*/
 	public function __construct()
 	{
+		modules::init_service( 'operserv', self::SERV_VERSION, self::SERV_AUTHOR );
+		// these are standard in service constructors
+	
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/operserv.php' );
 		self::$help = $help;
 		// load the help file
@@ -124,7 +131,7 @@ class operserv implements service
 	/*
 	* on_msg (event_hook)
 	*/
-	public function on_msg( $nick, $target, $msg )
+	static public function on_msg( $nick, $target, $msg )
 	{
 		if ( $target != core::$config->operserv->nick )
 			return false;

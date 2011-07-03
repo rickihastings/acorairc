@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_help implements module
+class cs_help extends module
 {
 	
 	const MOD_VERSION = '0.0.2';
@@ -42,7 +42,7 @@ class cs_help implements module
 	/*
 	* on_msg (event hook)
 	*/
-	public function on_msg( $nick, $target, $msg )
+	static public function on_msg( $nick, $target, $msg )
 	{
 		if ( $target != core::$config->chanserv->nick )
 			return false;

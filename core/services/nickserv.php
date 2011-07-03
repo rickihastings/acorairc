@@ -14,8 +14,12 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class nickserv implements service
+class nickserv extends service
 {
+	
+	const SERV_VERSION = '0.1.0';
+	const SERV_AUTHOR = 'Acora';
+	// service info
 	
 	static public $help;
 	// help
@@ -33,6 +37,9 @@ class nickserv implements service
 	*/
 	public function __construct()
 	{
+		modules::init_service( 'nickserv', self::SERV_VERSION, self::SERV_AUTHOR );
+		// these are standard in service constructors
+	
 		require( BASEPATH.'/lang/'.core::$config->server->lang.'/nickserv.php' );
 		self::$help = $help;
 		
@@ -53,7 +60,7 @@ class nickserv implements service
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = strtolower( $connect_data['nick'] );
 		$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
@@ -63,7 +70,7 @@ class nickserv implements service
 	/*
 	* on_msg (event_hook)
 	*/
-	public function on_msg( $nick, $target, $msg )
+	static public function on_msg( $nick, $target, $msg )
 	{
 		if ( $target != core::$config->nickserv->nick )
 			return false;

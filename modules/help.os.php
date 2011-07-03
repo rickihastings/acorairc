@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_help implements module
+class os_help extends module
 {
 	
 	const MOD_VERSION = '0.0.2';
@@ -42,7 +42,7 @@ class os_help implements module
 	/*
 	* on_msg (event hook)
 	*/
-	public function on_msg( $nick, $target, $msg )
+	static public function on_msg( $nick, $target, $msg )
 	{
 		if ( $target != core::$config->operserv->nick )
 			return false;

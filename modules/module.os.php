@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_module implements module
+class os_module extends module
 {
 	
 	const MOD_VERSION = '0.0.3';

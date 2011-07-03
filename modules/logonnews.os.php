@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_logonnews implements module
+class os_logonnews extends module
 {
 	
 	const MOD_VERSION = '0.0.3';
@@ -111,7 +111,7 @@ class os_logonnews implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup )
+	static public function on_connect( $connect_data, $startup )
 	{
 		if ( $startup )
 			return false;

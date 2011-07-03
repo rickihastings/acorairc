@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class ns_suspend implements module
+class ns_suspend extends module
 {
 	
 	const MOD_VERSION = '0.0.3';
@@ -192,7 +192,7 @@ class ns_suspend implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = $connect_data['nick'];
 		$user = nickserv::$nick_q[$nick];;
@@ -213,7 +213,7 @@ class ns_suspend implements module
 	/*
 	* on_nick_change (event hook)
 	*/
-	public function on_nick_change( $old_nick, $nick )
+	static public function on_nick_change( $old_nick, $nick )
 	{
 		$user = services::user_exists( $nick, false, array( 'display', 'suspended' ) );
 		

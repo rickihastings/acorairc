@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_flags implements module
+class cs_flags extends module
 {
 	
 	const MOD_VERSION = '0.0.5';
@@ -430,7 +430,7 @@ class cs_flags implements module
 	/*
 	* on_quit (event hook)
 	*/
-	public function on_quit( $nick, $startup = false )
+	static public function on_quit( $nick, $startup = false )
 	{
 		foreach ( core::$chans as $chan => $data )
 		{

@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_akill implements module
+class os_akill extends module
 {
 	
 	const MOD_VERSION = '0.0.2';
@@ -162,8 +162,11 @@ class os_akill implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
+		if ( $startup )
+			return false;
+	
 		$nick = $connect_data['nick'];
 		$query = database::select( 'sessions', array( 'hostmask', 'description' ), array( 'akill', '=', '1' ) );
 		// some vars

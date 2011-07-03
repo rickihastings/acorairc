@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_register implements module
+class cs_register extends module
 {
 	
 	const MOD_VERSION = '0.0.5';

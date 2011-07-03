@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class ns_ghost implements module
+class ns_ghost extends module
 {
 	
 	const MOD_VERSION = '0.0.2';

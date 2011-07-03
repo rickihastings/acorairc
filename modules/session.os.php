@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_session implements module
+class os_session extends module
 {
 	
 	const MOD_VERSION = '0.0.2';
@@ -126,9 +126,9 @@ class os_session implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data, $startup = false )
 	{
-		if ( $connect_data['ip_address'] == '' )
+		if ( $connect_data['ip_address'] == '' || $startup )
 			return false;
 		// this shouldn't EVER occur in a live net, sometimes it did during the stress testing phases though
 		// reason why it occured, the stress tester created clients named "spam" + random 5 digit number

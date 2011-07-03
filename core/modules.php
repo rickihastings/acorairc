@@ -18,6 +18,19 @@ class modules
 {
 	
 	static public $list	= array();
+	static public $event_methods = array();
+	static public $event_handlers = array(
+		'on_connect',
+		'on_nick_change',
+		'on_quit',
+		'on_mode',
+		'on_topic',
+		'on_chan_create',
+		'on_join',
+		'on_part',
+		'on_kick',
+		'on_msg',
+	);
 	// setup the core module list
 	
 	public function __construct() { }
@@ -43,6 +56,30 @@ class modules
 		
 		core::alog( 'init_module(): loaded module '.$name.' ('.$version.'/'.$type.'/'.$extra.')', 'BASIC' );
 		// log it
+		
+		foreach ( self::$event_handlers as $l => $event )
+			if ( method_exists( $name, $event ) ) self::$event_methods[$event][] = $name;
+		// let's find out what we've got in terms of events..
+		
+		print_r ( self::$event_methods['on_connect'] );
+	}
+	
+	/*
+	* init_service
+	*
+	* @params
+	* $name - Name of the service
+	* $version - service version
+	* $author - service author
+	*/
+	static public function init_service( $name, $version, $author )
+	{
+		core::alog( 'init_service(): loaded service '.$name.' ('.$version.')', 'BASIC' );
+		// log it
+		
+		foreach ( self::$event_handlers as $l => $event )
+			if ( method_exists( $name, $event ) ) self::$event_methods[$event][] = $name;
+		// let's find out what we've got in terms of events..
 	}
 	
 	/*
@@ -68,14 +105,8 @@ class modules
 		}
 		// module (exists?) but can't be loaded
 		
-		if ( !self::$list[$module_name]['class'] = new $module_name() )
-		{
-			core::alog( 'load_module(): unable to start: '.$module_name.' (boot error)', 'BASIC' );
-			return false;
-		}
-		// module failed to start
-		
-		self::$list[$module_name]['class']->modload();
+		self::$list[$module_name]['class'] = $module_name;
+		$module_name::modload();
 		// onload handler.
 	}
 	

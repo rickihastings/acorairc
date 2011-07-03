@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class cs_suspend implements module
+class cs_suspend extends module
 {
 	
 	const MOD_VERSION = '0.0.3';

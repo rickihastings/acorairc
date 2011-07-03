@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class os_stats implements module
+class os_stats extends module
 {
 	
 	const MOD_VERSION = '0.0.3';
