@@ -53,7 +53,7 @@ class nickserv implements service
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = strtolower( $connect_data['nick'] );
 		$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );

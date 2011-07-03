@@ -192,7 +192,7 @@ class ns_suspend implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = $connect_data['nick'];
 		$user = nickserv::$nick_q[$nick];;

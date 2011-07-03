@@ -162,7 +162,7 @@ class os_akill implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = $connect_data['nick'];
 		$query = database::select( 'sessions', array( 'hostmask', 'description' ), array( 'akill', '=', '1' ) );

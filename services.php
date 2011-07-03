@@ -35,7 +35,7 @@ set_time_limit( 0 );
 ignore_user_abort( true );
 
 // memory limit.
-ini_set( 'memory_limit', '16M' );
+ini_set( 'memory_limit', '32M' );
 
 // set error reporting to all
 error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING ) );

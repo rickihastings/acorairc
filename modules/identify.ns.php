@@ -284,7 +284,7 @@ class ns_identify implements module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			return false;
 		}
-		elseif ( $startup && ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && ( core::get_full_hostname( $nick ) == $user->last_hostmask ) )
+		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && core::get_full_hostname( $nick ) == $user->last_hostmask )
 		{
 			ircd::on_user_login( $nick, $user->display );
 			core::$nicks[$nick]['account'] = $user->display;

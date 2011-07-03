@@ -128,9 +128,9 @@ class os_global implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
-		if ( ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' ) )
+		if ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' )
 		{
 			$nick = $connect_data['nick'];
 			// get nick

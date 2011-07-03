@@ -126,7 +126,7 @@ class os_session implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
 		$session_limit = ( !isset( core::$config->operserv->connection_limit ) || core::$config->operserv->connection_limit <= 0 ) ? 5 : core::$config->operserv->connection_limit;
 	
