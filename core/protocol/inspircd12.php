@@ -1207,7 +1207,7 @@ class ircd implements protocol
 		if ( isset( $ircdata[1] ) && $ircdata[1] == 'OPERTYPE' )
 		{
 			ircd::handle_oper_up( $ircdata );
-			return ircd_handle::get_nick( $ircdata, 2 );
+			return true;
 		}
 		// return true when a oper up is matched, and not an oper warning x]
 		

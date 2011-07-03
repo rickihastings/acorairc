@@ -22,6 +22,7 @@ class operserv extends service
 	// service info
 	
 	static public $help;
+	static public $session_rows = array();
 	// help
 
 	/*
@@ -59,6 +60,10 @@ class operserv extends service
 			// add the override command
 		}
 		// if override is set to true
+		
+		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		while ( $session = database::fetch( $query ) )
+			self::$session_rows[] = $session;
 	}
 	
 	/*
@@ -147,6 +152,15 @@ class operserv extends service
 		else
 			services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );
 		// theyre an oper.
+	}
+	
+	/*
+	* on_oper_up (event_hook)
+	*/
+	static public function on_oper_up( $nick )
+	{
+		core::alog( core::$config->operserv->nick.': OPER UP from ('.core::get_full_hostname( $nick ).')' );
+		// log the oper up.
 	}
 	
 	/*

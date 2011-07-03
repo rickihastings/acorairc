@@ -29,6 +29,7 @@ class modules
 		'on_join',
 		'on_part',
 		'on_kick',
+		'on_oper_up',
 		'on_msg',
 	);
 	// setup the core module list

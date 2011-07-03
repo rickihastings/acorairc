@@ -128,7 +128,7 @@ class os_session extends module
 	*/
 	static public function on_connect( $connect_data, $startup = false )
 	{
-		if ( $connect_data['ip_address'] == '' || $startup )
+		if ( $connect_data['ip_address'] == '' )
 			return false;
 		// this shouldn't EVER occur in a live net, sometimes it did during the stress testing phases though
 		// reason why it occured, the stress tester created clients named "spam" + random 5 digit number
@@ -140,7 +140,6 @@ class os_session extends module
 	
 		$nick = $connect_data['nick'];
 		$clients = core::$ips[$connect_data['ip_address']];
-		$query = database::select( 'sessions', array( 'ip_address', 'limit' ), array( 'akill', '=', '0' ) );
 		
 		if ( !$startup && $clients > 1 )
 			core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
@@ -149,7 +148,7 @@ class os_session extends module
 		$match = $session_limit;
 		// determine match if there is no session exceptions
 		
-		while ( $sessions = database::fetch( $query ) )
+		foreach ( operserv::$session_rows as $i => $sessions )
 		{
 			if ( $sessions->ip_address != $connect_data['ip_address'] )
 				continue;
@@ -171,7 +170,7 @@ class os_session extends module
 			ircd::kill( core::$config->operserv->nick, $nick, 'Session limit for '.$connect_data['ip_address'].' reached!' );
 			core::alog( core::$config->operserv->nick.': Client limit reached ('.$connect_data['nick'].'!'.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 		}
-		// their limit has been bypassed >:) KILL THEMa
+		// their limit has been bypassed >:) KILL THEM
 	}
 	
 	/*
@@ -199,6 +198,11 @@ class os_session extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_EXISTS, array( 'ip_addr' => $ip_address ) );
 			// already got an exception 
 		}
+		
+		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		while ( $session = database::fetch( $query ) )
+			operserv::$session_rows[] = $session;
+		// re read the session array.
 	}
 	
 	/*
@@ -223,6 +227,11 @@ class os_session extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_NOEXISTS, array( 'ip_addr' => $ip_address ) );
 			// already got an exception
 		}
+		
+		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		while ( $session = database::fetch( $query ) )
+			operserv::$session_rows[] = $session;
+		// re read the session array.
 	}
 	
 	/*

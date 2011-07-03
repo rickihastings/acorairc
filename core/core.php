@@ -387,11 +387,8 @@ class core
 			return true;
 		// and on kick.
 		
-		if ( false !== ( $nick = ircd::on_oper_up( $ircdata ) ) )
-		{
-			core::alog( core::$config->operserv->nick.': OPER UP from ('.self::get_full_hostname( $nick ).')' );
+		if ( ircd::on_oper_up( $ircdata ) )
 			return true;
-		}
 		// on oper ups
 		
 		return false;

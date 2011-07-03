@@ -116,8 +116,8 @@ class ircd_handle
 		core::max_users();
 		// handle connect
 		
-		//foreach ( modules::$event_methods['on_connect'] as $l => $class )
-		//	$class::on_connect( core::$nicks[$nick], $startup );
+		foreach ( modules::$event_methods['on_connect'] as $l => $class )
+			$class::on_connect( core::$nicks[$nick], $startup );
 		// call the event method
 	}
 	
@@ -395,6 +395,10 @@ class ircd_handle
 	{
 		core::$nicks[$nick]['ircop'] = true;
 		core::alog( 'on_oper_up(): '.$nick.' opered up to '.$type, 'BASIC' );
+		
+		foreach ( modules::$event_methods['on_oper_up'] as $l => $class )
+			$class::on_oper_up( $nick );
+		// call the event method
 	}
 	
 	/*

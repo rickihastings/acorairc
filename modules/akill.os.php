@@ -164,18 +164,12 @@ class os_akill extends module
 	*/
 	static public function on_connect( $connect_data, $startup = false )
 	{
-		if ( $startup )
-			return false;
-	
 		$nick = $connect_data['nick'];
-		$query = database::select( 'sessions', array( 'hostmask', 'description' ), array( 'akill', '=', '1' ) );
-		// some vars
-		
-		if ( database::num_rows( $query ) == 0 )
-			return;
+		if ( empty( operserv::$session_rows ) )
+			return false;
 		// determine match if there is no session exceptions
 		
-		while ( $sessions = database::fetch( $query ) )
+		foreach ( operserv::$session_rows as $i => $sessions )
 		{
 			if ( services::match( $connect_data['host'], $sessions->hostmask ) )
 				continue;
@@ -230,6 +224,11 @@ class os_akill extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_EXISTS, array( 'hostname' => $hostname ) );
 			// already got an exception 
 		}
+		
+		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		while ( $session = database::fetch( $query ) )
+			operserv::$session_rows[] = $session;
+		// re read the session array.
 	}
 	
 	/*
@@ -265,6 +264,11 @@ class os_akill extends module
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_NOEXISTS, array( 'hostname' => $hostname ) );
 			// already got an exception
 		}
+		
+		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
+		while ( $session = database::fetch( $query ) )
+			operserv::$session_rows[] = $session;
+		// re read the session array.
 	}
 	
 	/*
@@ -316,7 +320,7 @@ class os_akill extends module
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => 0 ) );
 		}
-		// empty list. display the config record*/
+		// empty list. display the config record
 	}
 }
 
