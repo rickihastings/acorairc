@@ -278,7 +278,7 @@ class commands
 		// let this function do the looping and just send it
 		// straight to the client?
 		
-		if ( services::check_mask_ignore( $nick ) === true )
+		if ( services::check_mask_ignore( $nick ) )
 			return false;
 		// this is basically to check if we have
 		// an ignored user, via their hostmask, or their nickname.
@@ -376,8 +376,8 @@ class commands
 	{
 		// this works better than i imagined
 		
-		//if ( services::check_mask_ignore( $nick ) === true )
-		//	return false;
+		if ( services::check_mask_ignore( $nick ) )
+			return false;
 		// this is basically to check if we have
 		// an ignored user, via their hostmask, or their nickname.
 		

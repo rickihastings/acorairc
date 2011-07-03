@@ -106,8 +106,7 @@ class core
 		// set a global variable
 		
 		timer::add( array( 'core', 'reset_flood_cache', array() ), 120, 0 );
-		// add a timer to reset the flood cache every
-		// 120 seconds, indefinatly
+		// add a timer to reset the flood cache every 120 seconds, indefinatly
 		
 		if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
 			timer::add( array( 'core', 'save_logs', array() ), 300, 0 );	
@@ -116,10 +115,10 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		//if ( is_resource( self::$socket ) )
+		if ( is_resource( self::$socket ) )
 			$this->main_loop();
-		//else
-		//	exit;
+		else
+			exit;
 		// execute the main program loop
 	}
 	
@@ -651,11 +650,11 @@ class core
 				return false;
 			// ignore ircops (with caution!)
 			
-			$inc = 0;
+			$inc = false;
 			foreach ( self::$nicks[$nick]['commands'] as $index => $timestamp )
-				if ( $timestamp > $time_limit ) $inc = 1;
+				if ( $timestamp > $time_limit ) $inc = true;
 
-			if ( $inc == 1 )
+			if ( $inc )
 				self::$nicks[$nick]['floodcmds']++;
 			// we've ++'d the floodcmds, if this goes higher than self::flood_trigger
 			// they're flooding, floodcmds is cleared every 100 seconds.

@@ -184,7 +184,7 @@ class services
 	
 	
 	/*
-	* match (private)
+	* match
 	* 
 	* @params
 	* $hostname - real hostname to check
@@ -234,22 +234,20 @@ class services
 		$hostname = core::get_full_hostname( $nick );
 		// we generate the hostname
 			
-		if ( database::num_rows( $ignored_user ) > 0 )
-		{
-			while ( $ignore = database::fetch( $ignored_user ) )
-			{
-				if ( $nick == $ignore->who )
-					return true;
-				elseif ( strpos( $ignore->who, '@' ) && self::match( $hostname, $ignore->who ) )
-					return true;
-				// we've found a match!
-			}
-			// loop through records, on the first match we instantly break the loop.
-		}
-		else
-		{
+		if ( database::num_rows( $ignored_user ) == 0 )
 			return false;
+		
+		while ( $ignore = database::fetch( $ignored_user ) )
+		{
+			if ( $nick == $ignore->who )
+				return true;
+			elseif ( ( strpos( $ignore->who, '@' ) !== false ) && self::match( $hostname, $ignore->who ) )
+				return true;
+			// we've found a match!
 		}
+		// loop through records, on the first match we instantly break the loop.
+		
+		return false;
 		// there are records
 	}
 	
