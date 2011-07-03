@@ -128,6 +128,14 @@ class os_session implements module
 	*/
 	public function on_connect( $connect_data, $startup = false )
 	{
+		if ( $connect_data['ip_address'] == '' )
+			return false;
+		// this shouldn't EVER occur in a live net, sometimes it did during the stress testing phases though
+		// reason why it occured, the stress tester created clients named "spam" + random 5 digit number
+		// occasionally and rarely the same number was generated, introducing 2 clients with the same nick
+		// the ircd doesn't normally allow this, however our stress tester isn't an ircd, so it introduces
+		// it anyway, causing the real ircd to invalidate the EUID command, forcing a nick change to a UID
+		
 		$session_limit = ( !isset( core::$config->operserv->connection_limit ) || core::$config->operserv->connection_limit <= 0 ) ? 5 : core::$config->operserv->connection_limit;
 	
 		$nick = $connect_data['nick'];

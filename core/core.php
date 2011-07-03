@@ -187,7 +187,7 @@ class core
 			}
 			// this is for normal data, eg. post burst.
 			
-			if ( $raw = socket_read( self::$socket, 4082 ) )
+			if ( $raw = socket_read( self::$socket, 16384 ) )
 				$tinybuffer = explode( "\n", $raw );
 			else
 				$tinybuffer = array();
