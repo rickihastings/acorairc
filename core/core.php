@@ -92,12 +92,10 @@ class core
 		// setup all the subclasses.
 		
 		database::factory( self::$config->database->driver );
-		// setup the db.
-		
-		self::$socket = self::connect();
-		// connect to the socket
-		
+		self::connect();
 		self::protocol_init();
+		// setup the db.
+		// connect to the socket
 		// load the protocol class
 		
 		$select = database::select( 'core', array( 'max_users' ), array( 'id', '=', '1' ) );
@@ -118,10 +116,10 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		if ( is_resource( self::$socket ) )
+		//if ( is_resource( self::$socket ) )
 			$this->main_loop();
-		else
-			exit;
+		//else
+		//	exit;
 		// execute the main program loop
 	}
 	
@@ -188,16 +186,22 @@ class core
 				self::$buffer = array();
 			}
 			// this is for normal data, eg. post burst.
-				
-			if ( $raw = stream_get_line( self::$socket, 4092, "\r\n" ) )
+			
+			if ( $raw = socket_read( self::$socket, 4082 ) )
+				$tinybuffer = explode( "\n", $raw );
+			else
+				$tinybuffer = array();
+			// read from socket.
+			
+			foreach ( $tinybuffer as $l => $raw )
 			{
 				$raw = trim( $raw );
+				if ( $raw == '' ) continue;
 				$ircdata = explode( ' ', $raw );
 				self::$lines_processed++;
 				// grab the data
 				
-				if ( $raw != '' )
-					self::alog( 'recv(): '.$raw, 'SERVER' );
+				if ( $raw != '' ) self::alog( 'recv(): '.$raw, 'SERVER' );
 				// log SERVER
 				
 				if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) && self::$end_burst ) self::save_logs();
@@ -256,9 +260,7 @@ class core
 					self::$buffer[] = $ircdata;
 				// we should really only be processing the data if the burst has finished
 				// so we add it to a buffer and process it in each main loop :)
-				
-				unset( $ircdata, $raw );
-				// unset the variables on each process loop
+				unset( $tinybuffer[$l] );
 			}
 			
 			if ( self::$debug && count( self::$debug_data ) > 0 )
@@ -385,8 +387,7 @@ class core
 			return true;
 		// and on kick.
 		
-		$nick = ircd::on_oper_up( $ircdata );
-		if ( $nick !== false )
+		if ( false !== ( $nick = ircd::on_oper_up( $ircdata ) ) )
 		{
 			core::alog( core::$config->operserv->nick.': OPER UP from ('.self::get_full_hostname( $nick ).')' );
 			return true;
@@ -733,13 +734,20 @@ class core
 	{
 		foreach ( self::$config->uplink as $server => $info )
 		{
-			if ( !$socket = @fsockopen( $info->host, $info->port, $errno, $errstr, self::$config->server->recontime ) )
+			if ( !self::$socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP ) )
 			{
-				self::alog( 'connect(): failed to connect to '.$info->host.':'.$info->port, 'BASIC' );
-				// alog.
-				
+				self::alog( 'connect(): failed: reason: ' . socket_strerror( socket_last_error() ), 'BASIC' );
 				continue;
-				// continue to next uplink (if specified)
+				// alog and continue to next uplink (if specified)
+			}
+			
+			self::alog( 'connect(): attempting to connect to '.$info->host.':'.$info->port, 'BASIC' );
+			$result = socket_connect( self::$socket, $info->host, $info->port );
+			if ( $result === false )
+			{
+				self::alog( 'connect(): failed to connect to '.$info->host.':'.$info->port.' reason: '.socket_strerror( socket_last_error( $socket ) ), 'BASIC' );
+				continue;
+				// alog and continue to next uplink (if specified)
 			}
 			else
 			{
@@ -752,10 +760,8 @@ class core
 				self::$config->conn->vhost = $info->vhost;
 				// we've connected, set our config details up.
 				
-				stream_set_blocking( $socket, 0 );
+				socket_set_nonblock( self::$socket );
 				// set this to blocking
-				
-				return $socket;
 			}
 			// try and connect to the server.
 		}

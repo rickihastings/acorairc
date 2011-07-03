@@ -134,7 +134,7 @@ class os_session implements module
 		$clients = core::$ips[$connect_data['ip_address']];
 		$query = database::select( 'sessions', array( 'ip_address', 'limit' ), array( 'akill', '=', '0' ) );
 		
-		if ( $clients > 1 )
+		if ( !$startup && $clients > 1 )
 			core::alog( core::$config->operserv->nick.': Multiple clients detected ('.$connect_data['ident'].'@'.$connect_data['host'].') ('.$clients.' clients) on ('.$connect_data['ip_address'].')' );
 		// log multiple sessions
 		

@@ -861,6 +861,7 @@ class ircd_handle
 		core::alog( 'shutdown(): '.$message, 'BASIC' );
 		// debug info
 		
+		socket_close( self::$socket );
 		if ( $terminate ) exit;
 		// if true, exit;
 	}
@@ -886,10 +887,11 @@ class ircd_handle
 	static public function send( $command )
 	{
 		$command = trim( $command );
-		fputs( core::$socket, $command."\r\n" );
+		$bytes = strlen( $command."\r" );
+		socket_write( core::$socket, $command."\r", $bytes );
 		// fairly simple, hopefully.
 		
-		core::$outgoing = core::$outgoing + strlen( $command."\r\n" );
+		core::$outgoing = core::$outgoing + $bytes;
 		// add to the outgoing counter.
 		
 		core::alog( 'send(): '.$command, 'SERVER' );
