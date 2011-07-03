@@ -128,7 +128,7 @@ class ns_identify implements module
 					core::$nicks[$nick]['failed_attempts'] = 0;
 					// registered mode
 					
-					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0 ), array( 'display', '=', $account ) );
+					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
 					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
 					// right, standard identify crap
 					core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
@@ -238,7 +238,7 @@ class ns_identify implements module
 		if ( core::$nicks[$nick]['identified'] )
 		{
 			// here we set unregistered mode
-			database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
+			database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
 			// unidentify them
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
 			// let them know
@@ -259,7 +259,7 @@ class ns_identify implements module
 	/*
 	* on_connect (event hook)
 	*/
-	public function on_connect( $connect_data )
+	public function on_connect( $connect_data, $startup = false )
 	{
 		$nick = $connect_data['nick'];
 		$user = nickserv::$nick_q[strtolower( $nick )];
@@ -278,8 +278,19 @@ class ns_identify implements module
 			core::$nicks[$nick]['account'] = '';
 			core::$nicks[$nick]['identified'] = false;
 			// they shouldn't really have registered mode
+			database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+			// store the internal identified state in a database.
 			
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
+			return false;
+		}
+		elseif ( $startup && ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && ( core::get_full_hostname( $nick ) == $user->last_hostmask ) )
+		{
+			ircd::on_user_login( $nick, $user->display );
+			core::$nicks[$nick]['account'] = $user->display;
+			core::$nicks[$nick]['identified'] = true;
+			
+			return false;
 		}
 		else
 		{
@@ -295,7 +306,7 @@ class ns_identify implements module
 		timer::remove( array( 'ns_identify', 'secured_callback', array( $old_nick ) ) );
 		// remove the secured timer. if there is one
 		
-		if ( $user = services::user_exists( $nick, false, array( 'display', 'validated', 'last_hostmask', 'suspended' ) ) )
+		if ( $user = services::user_exists( $nick, false, array( 'display', 'identified', 'validated', 'last_hostmask', 'suspended' ) ) )
 		{
 			if ( $user->suspended == 1 )
 			{
@@ -303,6 +314,8 @@ class ns_identify implements module
 				core::$nicks[$nick]['account'] = '';
 				core::$nicks[$nick]['identified'] = false;
 				// they shouldn't really have registered mode
+				database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+				// store the internal identified state in a database.
 				
 				return false;
 			}
@@ -312,8 +325,11 @@ class ns_identify implements module
 				core::$nicks[$nick]['account'] = '';
 				core::$nicks[$nick]['identified'] = false;
 				// they shouldn't really have registered mode
+				database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+				// store the internal identified state in a database.
 				
 				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
+				return false;
 			}
 			elseif ( $nick != core::$nicks[$nick]['account'] )
 			{
@@ -331,7 +347,7 @@ class ns_identify implements module
 		timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
 		// remove the secured timer. if there is one
 		
-		database::update( 'users', array( 'last_timestamp' => core::$network_time ), array( 'display', '=', $nick ) );
+		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
 		// update timestamp
 	}
 	
@@ -361,6 +377,9 @@ class ns_identify implements module
 		core::$nicks[$nick]['account'] = '';
 		core::$nicks[$nick]['identified'] = false;
 		// they shouldn't really have registered mode
+		
+		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+		// store the internal identified state in a database.
 		
 		if ( is_array( nickserv::$help->NS_REGISTERED_NICK ) )
 		{
