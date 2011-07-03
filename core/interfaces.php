@@ -114,17 +114,6 @@ abstract class service
 	abstract static public function add_command( $command, $class, $function );
 	abstract static public function get_command( $nick, $command );
 	// main functions
-	
-	static public function on_connect( $connect_data, $startup = false ) {}
-	static public function on_nick_change( $nick, $new_nick ) {}
-	static public function on_quit( $nick, $startup = false ) {}
-	static public function on_mode( $nick, $chan, $modes ) {}
-	static public function on_topic( $nick, $chan, $topic ) {}
-	static public function on_chan_create( $chan ) {}
-	static public function on_join( $nick, $chan ) {}
-	static public function on_part( $nick, $chan ) {}
-	static public function on_kick( $nick, $who, $chan ) {}
-	static public function on_msg( $nick, $target, $msg ) {}
 }
 
 /*

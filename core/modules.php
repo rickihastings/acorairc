@@ -60,8 +60,6 @@ class modules
 		foreach ( self::$event_handlers as $l => $event )
 			if ( method_exists( $name, $event ) ) self::$event_methods[$event][] = $name;
 		// let's find out what we've got in terms of events..
-		
-		print_r ( self::$event_methods['on_connect'] );
 	}
 	
 	/*
