@@ -409,13 +409,13 @@ class ircd_handle
 	*/
 	static public function handle_msg( $nick, $target, $msg )
 	{
-		commands::ctcp( $nick, $target, $msg );
-		core::flood_check( $nick, $target, $msg );
-		// commands and flood checking!
-		
 		foreach ( modules::$event_methods['on_msg'] as $l => $class )
 			$class::on_msg( $nick, $target, $msg );
 		// call the event method
+	
+		commands::ctcp( $nick, $target, $msg );
+		core::flood_check( $nick, $target, $msg );
+		// commands and flood checking!
 	}
 
 	/*
