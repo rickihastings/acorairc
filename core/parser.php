@@ -32,7 +32,7 @@ class parser
 	// required
 	
 	static public $multiple = array(
-		'uplink',
+		
 	);
 	// multiple allowed
 	

@@ -115,7 +115,7 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		if ( is_resource( self::$socket ) )
+		if ( is_resource( self::$socket ) && self::$config->conn )
 			$this->main_loop();
 		else
 			exit;
@@ -728,39 +728,39 @@ class core
 	*/
 	static public function connect()
 	{
-		foreach ( self::$config->uplink as $server => $info )
+		$info = self::$config->uplink;
+		if ( !self::$socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP ) )
 		{
-			if ( !self::$socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP ) )
-			{
-				self::alog( 'connect(): failed: reason: ' . socket_strerror( socket_last_error() ), 'BASIC' );
-				continue;
-				// alog and continue to next uplink (if specified)
-			}
-			
-			self::alog( 'connect(): attempting to connect to '.$info->host.':'.$info->port, 'BASIC' );
-			$result = socket_connect( self::$socket, $info->host, $info->port );
-			if ( $result === false )
-			{
-				self::alog( 'connect(): failed to connect to '.$info->host.':'.$info->port.' reason: '.socket_strerror( socket_last_error( $socket ) ), 'BASIC' );
-				continue;
-				// alog and continue to next uplink (if specified)
-			}
-			else
-			{
-				self::alog( 'connect(): established connection to '.$info->uplink.':'.$info->port, 'BASIC' );
-				// alog.
-				
-				self::$config->conn->password = $info->password;
-				self::$config->conn->server = $info->uplink;
-				self::$config->conn->port = $info->port;
-				self::$config->conn->vhost = $info->vhost;
-				// we've connected, set our config details up.
-				
-				socket_set_nonblock( self::$socket );
-				// set this to blocking
-			}
-			// try and connect to the server.
+			self::alog( 'connect(): failed: reason: ' . socket_strerror( socket_last_error() ), 'BASIC' );
+			return false;
+			// alog and attempt to reconnect
 		}
+		
+		self::alog( 'connect(): attempting to connect to '.$info->host.':'.$info->port, 'BASIC' );
+		$result = socket_connect( self::$socket, $info->host, $info->port );
+		if ( $result === false )
+		{
+			self::alog( 'connect(): failed to connect to '.$info->host.':'.$info->port.' reason: '.socket_strerror( socket_last_error( self::$socket ) ), 'BASIC' );
+			sleep( self::$config->server->recontime );
+			self::connect();
+			return false;
+			// alog and attempt to reconnect
+		}
+		else
+		{
+			self::alog( 'connect(): established connection to '.$info->server.':'.$info->port, 'BASIC' );
+			// alog.
+			
+			self::$config->conn->password = $info->password;
+			self::$config->conn->server = $info->server;
+			self::$config->conn->port = $info->port;
+			self::$config->conn->vhost = $info->vhost;
+			// we've connected, set our config details up.
+			
+			socket_set_nonblock( self::$socket );
+			// set this to blocking
+		}
+		// try and connect to the server.
 		
 		// effectively we should have already connected providing the uplink
 		// info is correct, if we've connected we'll have already returned the
@@ -804,7 +804,7 @@ class core
 		{
 			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
 			{
-				if ( !is_resource( self::$socket ) && self::$debug )
+				if ( !isset( self::$config->conn ) )
 					print "[".date( 'H:i:s', time() )."] ".$message."\r\n";
 				elseif ( !in_array( $message, self::$debug_data ) )
 					self::$debug_data[] = $message;
