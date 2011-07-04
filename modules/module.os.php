@@ -100,59 +100,58 @@ class os_module extends module
 		$file = $file[1].'.'.$file[0].'.php';
 		// get the module thats been requested.
 		
-		if ( services::oper_privs( $nick, 'root' ) )
+		if ( !services::oper_privs( $nick, 'root' ) )
 		{
-			if ( trim( $module ) == '' )
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
+		
+		if ( trim( $module ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODLOAD' ) );
+			// wrong syntax
+			return false;
+		}
+	
+		if ( isset( modules::$list[$module] ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_3, array( 'name' => $module ) );
+			return false;
+		}
+		// module exists
+	
+		if ( !class_exists( $module ) )
+		{
+			if ( !file_exists( BASEPATH.'/modules/'.$file ) )
 			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODLOAD' ) );
-				// wrong syntax
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
 				return false;
 			}
 		
-			if ( isset( modules::$list[$module] ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_3, array( 'name' => $module ) );
-				return false;
-			}
-			// module exists
-		
-			if ( !class_exists( $module ) )
-			{
-				if ( !file_exists( BASEPATH.'/modules/'.$file ) )
-				{
-					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
-					return false;
-				}
-			
-				modules::load_module( $name, $file, true );
-				// load the module 
-			}
-			else
-			{
-				if ( !modules::$list[$module]['class'] = new $module() )
-				{
-					services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
-					core::alog( 'modload_command(): unable to load module '.$module.' (boot error)', 'BASIC' );
-					// log what we need to log.
-					
-					return false;
-				}
-				// module failed to start
-			}
-			// load the module, if the class don't exist, include it
-			
-			modules::$list[$module]['class']->modload();
-			// onload handler.
-			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module, 'version' => modules::$list[$module]['version'], 'extra' => modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'] ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') loaded module ('.$module.') ('.modules::$list[$module]['version'].') ('.modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'].')' );
-			ircd::wallops( core::$config->operserv->nick, $nick.' loaded module '.$module );
-			// let everyone know
+			modules::load_module( $name, $file, true );
+			// load the module 
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			if ( !modules::$list[$module]['class'] = new $module() )
+			{
+				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
+				core::alog( 'modload_command(): unable to load module '.$module.' (boot error)', 'BASIC' );
+				// log what we need to log.
+				
+				return false;
+			}
+			// module failed to start
 		}
+		// load the module, if the class don't exist, include it
+		
+		modules::$list[$module]['class']->modload();
+		// onload handler.
+		
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLOAD_2, array( 'name' => $module, 'version' => modules::$list[$module]['version'], 'extra' => modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'] ) );
+		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') loaded module ('.$module.') ('.modules::$list[$module]['version'].') ('.modules::$list[$module]['author'].'/'.modules::$list[$module]['type'].'/'.modules::$list[$module]['extra'].')' );
+		ircd::wallops( core::$config->operserv->nick, $nick.' loaded module '.$module );
+		// let everyone know
 	}
 	
 	/*
@@ -167,61 +166,60 @@ class os_module extends module
 		$module = $ircdata[0];
 		// get the module thats been requested.
 		
-		if ( services::oper_privs( $nick, 'root' ) )
-		{
-			if ( trim( $module ) == '' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODUNLOAD' ) );
-				// wrong syntax
-				return false;
-			}
-		
-			if ( !isset( modules::$list[$module] ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_1, array( 'name' => $module ) );
-				return false;
-			}
-			
-			if ( modules::$list[$module]['extra'] == 'static' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
-				core::alog( 'modunload_command(): unable to unload static module '.$module.' (cannot be unloaded)', 'BASIC' );
-				// log what we need to log.
-				
-				return false;
-			}
-			
-			if ( !class_exists( $module ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
-				core::alog( 'modunload_command(): unable to unload module '.$module.' (not booted)', 'BASIC' );
-				// log what we need to log.
-				
-				return false;
-			}
-			
-			if ( is_callable( array( $module, 'modunload' ), true ) && method_exists( $module, 'modunload' ) )
-			{
-				modules::$list[$module]['class']->modunload();
-			}
-			// if the module has an unload method, call it now before we destroy the class.
-			
-			$data = modules::$list[$module];
-			unset( modules::$list[$module] );
-			// unset the module
-			
-			modules::_unset_docs( $module );
-			// unset the modules help docs etc.
-			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module, 'version' => $data['version'], 'extra' => $data['author'].'/'.$data['type'].'/'.$data['extra'] ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') unloaded module ('.$module.') ('.$data['version'].') ('.$data['author'].'/'.$data['type'].'/'.$data['extra'].')' );
-			ircd::wallops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
-			// let everyone know :D	
-		}
-		else
+		if ( !services::oper_privs( $nick, 'root' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
 		}
+	
+		if ( trim( $module ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODUNLOAD' ) );
+			// wrong syntax
+			return false;
+		}
+	
+		if ( !isset( modules::$list[$module] ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_1, array( 'name' => $module ) );
+			return false;
+		}
+		
+		if ( modules::$list[$module]['extra'] == 'static' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
+			core::alog( 'modunload_command(): unable to unload static module '.$module.' (cannot be unloaded)', 'BASIC' );
+			// log what we need to log.
+			
+			return false;
+		}
+		
+		if ( !class_exists( $module ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_2, array( 'name' => $module ) );
+			core::alog( 'modunload_command(): unable to unload module '.$module.' (not booted)', 'BASIC' );
+			// log what we need to log.
+			
+			return false;
+		}
+		
+		if ( is_callable( array( $module, 'modunload' ), true ) && method_exists( $module, 'modunload' ) )
+		{
+			modules::$list[$module]['class']->modunload();
+		}
+		// if the module has an unload method, call it now before we destroy the class.
+		
+		$data = modules::$list[$module];
+		unset( modules::$list[$module] );
+		// unset the module
+		
+		modules::_unset_docs( $module );
+		// unset the modules help docs etc.
+		
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODUNLOAD_3, array( 'name' => $module, 'version' => $data['version'], 'extra' => $data['author'].'/'.$data['type'].'/'.$data['extra'] ) );
+		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') unloaded module ('.$module.') ('.$data['version'].') ('.$data['author'].'/'.$data['type'].'/'.$data['extra'].')' );
+		ircd::wallops( core::$config->operserv->nick, $nick.' unloaded module '.$module );
+		// let everyone know :D	
 	}
 }
 

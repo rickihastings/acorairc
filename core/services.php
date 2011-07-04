@@ -35,16 +35,14 @@ class services
 	
 		foreach ( core::$config->opers as $i => $data )
 		{
-			$split = explode( ':', $data );
-			
-			if ( strtolower( $split[0] ) != $account_nick )
+			if ( strtolower( $data->opers ) != $account_nick )
 				continue;
 			// no privs here.
 			
-			unset( $split[0] );
-			
-			if ( in_array( $privs, $split ) )
+			if ( in_array( $privs, (array)$data ) )
 				return true;
+			
+			return false;
 			// we've found some privs for the nick, let's get the privs and try match them against $privs
 		}
 		// loop for privs!
@@ -64,9 +62,7 @@ class services
 	
 		foreach ( core::$config->opers as $i => $data )
 		{
-			$split = explode( ':', $data );
-			
-			if ( strtolower( $split[0] ) == $account_nick )
+			if ( strtolower( $data->opers ) == $account_nick )
 				return true;
 			// no privs here.
 		}
@@ -84,12 +80,10 @@ class services
 	{
 		foreach ( core::$config->opers as $i => $data )
 		{
-			$split = explode( ':', $data );
-			
-			if ( strtolower( $split[0] ) == strtolower( $nick ) )
+			if ( strtolower( $data->opers ) == strtolower( $nick ) )
 			{
-				unset( $split[0] );
-				return implode( ':', $split );
+				unset( $data->opers );
+				return implode( ':', $data );
 			}
 			// no privs here.
 		}
