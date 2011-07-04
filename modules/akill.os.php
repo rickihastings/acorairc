@@ -164,10 +164,11 @@ class os_akill extends module
 	*/
 	static public function on_connect( $connect_data, $startup = false )
 	{
-		$nick = $connect_data['nick'];
 		if ( empty( operserv::$session_rows ) )
 			return false;
 		// determine match if there is no session exceptions
+		
+		$nick = $connect_data['nick'];
 		
 		foreach ( operserv::$session_rows as $i => $sessions )
 		{
