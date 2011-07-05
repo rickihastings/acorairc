@@ -1,0 +1,23 @@
+h1. Acora IRC Services
+
+h2. Installing Acora
+
+The very first thing you'll need to do is take the latest tarbell from the repo (this is recommended until a future version is deemed stable enough to be put into a stable branch, download the tarbell from dev until further notice.) you can grab the latest development tarbell by going to this "link":http://github.com/ircnode/acorairc/tarball/dev.
+
+Unpack the tarbell into your desired directory, to do this type
+@tar xvf ircnode*@
+
+The next thing you'll want to be doing are chmodding some files and folders, most of these NEED to be chmodded to run. In this example i've chmodded them to 0777, but be careful when using this, you should only use 0777 in a completely trusted server environment, 0755 should work otherwise.
+
+bc. chmod 0777 log
+chmod 0777 extra/start.php
+chmod 0777 services.php
+chmod 0777 acora
+
+Now go into the conf directory and open up services.conf with your favourite text editor and start configuring it. There is instructions throughout the config file telling you everything you'll need to know, be very careful when doing this making sure there are no mistakes.
+
+Finally you will need to set up your database, make sure your database is already setup and dump the following file into sql "extra/mysql_install.sql" this should create the tables needed to run acora.
+
+h2. Help
+
+If you need any help you should visit "#acora":irc://irc.ircnode.org/acora. Also see our "wiki":https://github.com/ircnode/acorairc/wiki which has a bit of information on upgrading etc, the wiki will be updated more very soon.
