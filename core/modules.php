@@ -105,7 +105,7 @@ class modules
 		// module (exists?) but can't be loaded
 		
 		self::$list[$module_name]['class'] = $module_name;
-		$module_name::modload();
+		call_user_func( array( $module_name, 'modload' ) );
 		// onload handler.
 	}
 	
