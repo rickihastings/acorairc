@@ -35,7 +35,7 @@ class ns_ghost extends module
 		modules::init_module( 'ns_ghost', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_ghost', 'help', nickserv::$help->NS_HELP_GHOST_1 );
+		nickserv::add_help( 'ns_ghost', 'help', nickserv::$help->NS_HELP_GHOST_1, true );
 		nickserv::add_help( 'ns_ghost', 'help ghost', nickserv::$help->NS_HELP_GHOST_ALL );
 		// add the help
 		

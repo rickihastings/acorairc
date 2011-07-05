@@ -35,12 +35,12 @@ class ns_register extends module
 		modules::init_module( 'ns_register', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_REGISTER_1 );
+		nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_REGISTER_1, true );
 		nickserv::add_help( 'ns_register', 'help register', nickserv::$help->NS_HELP_REGISTER_ALL );
 		
 		if ( core::$config->nickserv->force_validation )
 		{
-			nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_CONFIRM_1 );
+			nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_CONFIRM_1, true );
 			nickserv::add_help( 'ns_register', 'help confirm', nickserv::$help->NS_HELP_CONFIRM_ALL );
 		}
 		// add the help

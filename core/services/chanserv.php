@@ -486,9 +486,9 @@ class chanserv extends service
 	* $module - The name of the module.
 	* $help - The array to hook.
 	*/
-	static public function add_help( $module, $command, $help, $privs = '' )
+	static public function add_help( $module, $command, $help, $reorder = false, $privs = '' )
 	{
-		commands::add_help( 'chanserv', $module, $command, $help, $privs );
+		commands::add_help( 'chanserv', $module, $command, $help, $reorder, $privs );
 	}
 	
 	/*

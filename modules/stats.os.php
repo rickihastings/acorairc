@@ -35,7 +35,7 @@ class os_stats extends module
 		modules::init_module( 'os_stats', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_stats', 'help', operserv::$help->OS_HELP_STATS_1 );
+		operserv::add_help( 'os_stats', 'help', operserv::$help->OS_HELP_STATS_1, true );
 		operserv::add_help( 'os_stats', 'help stats', operserv::$help->OS_HELP_STATS_ALL );
 		// add the help
 		

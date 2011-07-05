@@ -35,9 +35,9 @@ class ns_identify extends module
 		modules::init_module( 'ns_identify', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1 );
+		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1, true );
 		nickserv::add_help( 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
-		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_LOGOUT_1 );
+		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_LOGOUT_1, true );
 		nickserv::add_help( 'ns_identify', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
 		// add the help
 		

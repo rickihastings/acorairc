@@ -35,8 +35,8 @@ class os_rehash extends module
 		modules::init_module( 'os_rehash', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1, 'root' );
-		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL, 'root' );
+		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1, true, 'root' );
+		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL, false, 'root' );
 		// add the help
 		
 		operserv::add_command( 'rehash', 'os_rehash', 'rehash_command' );

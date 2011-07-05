@@ -34,10 +34,10 @@ class ns_password extends module
 		modules::init_module( 'ns_password', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_PASSWORD_1 );
+		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_PASSWORD_1, true );
 		nickserv::add_help( 'ns_password', 'help password', nickserv::$help->NS_HELP_PASSWORD_ALL );
-		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_SAPASS_1, 'nickserv_op' );
-		nickserv::add_help( 'ns_password', 'help sapass', nickserv::$help->NS_HELP_SAPASS_ALL, 'nickserv_op' );
+		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_SAPASS_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_password', 'help sapass', nickserv::$help->NS_HELP_SAPASS_ALL, false, 'nickserv_op' );
 		// add the help docs
 		
 		nickserv::add_command( 'password', 'ns_password', 'password_command' );

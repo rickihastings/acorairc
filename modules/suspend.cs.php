@@ -35,10 +35,10 @@ class cs_suspend extends module
 		modules::init_module( 'cs_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, 'chanserv_op' );
-		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_UNSUSPEND_1, 'chanserv_op' );
-		chanserv::add_help( 'cs_suspend', 'help suspend', chanserv::$help->CS_HELP_SUSPEND_ALL, 'chanserv_op' );
-		chanserv::add_help( 'cs_suspend', 'help unsuspend', chanserv::$help->CS_HELP_UNSUSPEND_ALL, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, true, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_UNSUSPEND_1, true, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help suspend', chanserv::$help->CS_HELP_SUSPEND_ALL, false, 'chanserv_op' );
+		chanserv::add_help( 'cs_suspend', 'help unsuspend', chanserv::$help->CS_HELP_UNSUSPEND_ALL, false, 'chanserv_op' );
 		// add the help
 		
 		chanserv::add_command( 'suspend', 'cs_suspend', 'suspend_command' );

@@ -35,8 +35,8 @@ class os_chanclear extends module
 		modules::init_module( 'os_chanclear', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, 'global_op' );
-		operserv::add_help( 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL, 'global_op' );
+		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, true, 'global_op' );
+		operserv::add_help( 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL, false, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'chanclear', 'os_chanclear', 'chanclear_command' );

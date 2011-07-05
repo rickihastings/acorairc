@@ -35,10 +35,10 @@ class ns_drop extends module
 		modules::init_module( 'ns_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1 );
+		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1, true );
 		nickserv::add_help( 'ns_drop', 'help drop', nickserv::$help->NS_HELP_DROP_ALL );
-		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_FDROP_1, 'nickserv_op' );
-		nickserv::add_help( 'ns_drop', 'help sadrop', nickserv::$help->NS_HELP_SADROP_ALL, 'nickserv_op' );
+		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_FDROP_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_drop', 'help sadrop', nickserv::$help->NS_HELP_SADROP_ALL, false, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'drop', 'ns_drop', 'drop_command' );

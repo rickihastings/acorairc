@@ -35,8 +35,8 @@ class os_ignore extends module
 		modules::init_module( 'os_ignore', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, 'global_op' );
-		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL, 'global_op' );
+		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, true, 'global_op' );
+		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL, false, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'ignore', 'os_ignore', 'ignore_command' );

@@ -35,7 +35,7 @@ class cs_topic extends module
 		modules::init_module( 'cs_topic', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1 );
+		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1, true );
 		chanserv::add_help( 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
 		// add the help
 		

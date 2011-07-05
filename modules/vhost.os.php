@@ -35,8 +35,8 @@ class os_vhost extends module
 		modules::init_module( 'os_vhost', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, 'local_op' );
-		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL, 'local_op' );
+		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, true, 'local_op' );
+		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL, false, 'local_op' );
 		// add the help
 		
 		operserv::add_command( 'vhost', 'os_vhost', 'vhost_command' );

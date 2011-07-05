@@ -36,15 +36,15 @@ class cs_xcommands extends module
 		
 		chanserv::add_help_fix( 'cs_xcommands', 'prefix', 'help commands', chanserv::$help->CS_XCOMMANDS_PREFIX );
 		chanserv::add_help_fix( 'cs_xcommands', 'suffix', 'help commands', chanserv::$help->CS_XCOMMANDS_SUFFIX );
-		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_XCOMMANDS_1 );
+		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_XCOMMANDS_1, true );
 		
-		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_CLEAR_1 );
+		chanserv::add_help( 'cs_xcommands', 'help', chanserv::$help->CS_HELP_CLEAR_1, true );
 		// clear command
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICK_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICKBAN_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_BAN_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_UNBAN_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICK_1, true );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_KICKBAN_1, true );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_BAN_1, true );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_UNBAN_1, true );
 		// add them to the "help commands" category
 		
 		chanserv::add_help( 'cs_xcommands', 'help clear', chanserv::$help->CS_HELP_CLEAR_ALL );
@@ -58,8 +58,8 @@ class cs_xcommands extends module
 		
 		if ( ircd::$owner )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OWNER_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOWNER_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OWNER_1, true );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOWNER_1, true );
 			chanserv::add_help( 'cs_xcommands', 'help owner', chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
 			chanserv::add_help( 'cs_xcommands', 'help deowner', chanserv::$help->CS_HELP_XCOMMANDS_OWNER );
 		}
@@ -67,41 +67,41 @@ class cs_xcommands extends module
 		
 		if ( ircd::$protect )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_PROTECT_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEPROTECT_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_PROTECT_1, true );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEPROTECT_1, true );
 			chanserv::add_help( 'cs_xcommands', 'help protect', chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
 			chanserv::add_help( 'cs_xcommands', 'help deprotect', chanserv::$help->CS_HELP_XCOMMANDS_PROTECT );
 		}
 		// add help for protect commands
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OP_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOP_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_OP_1, true );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEOP_1, true );
 		chanserv::add_help( 'cs_xcommands', 'help op', chanserv::$help->CS_HELP_XCOMMANDS_OP );
 		chanserv::add_help( 'cs_xcommands', 'help deop', chanserv::$help->CS_HELP_XCOMMANDS_OP );
 		// now op
 		
 		if ( ircd::$halfop )
 		{
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_HALFOP_1 );
-			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEHALFOP_1 );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_HALFOP_1, true );
+			chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEHALFOP_1, true );
 			chanserv::add_help( 'cs_xcommands', 'help halfop', chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
 			chanserv::add_help( 'cs_xcommands', 'help dehalfop', chanserv::$help->CS_HELP_XCOMMANDS_HALFOP );
 		}
 		// halfop
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_VOICE_1 );
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEVOICE_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_VOICE_1, true );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_DEVOICE_1, true );
 		chanserv::add_help( 'cs_xcommands', 'help voice', chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
 		chanserv::add_help( 'cs_xcommands', 'help devoice', chanserv::$help->CS_HELP_XCOMMANDS_VOICE );
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_MODE_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_MODE_1, true );
 		chanserv::add_help( 'cs_xcommands', 'help mode', chanserv::$help->CS_HELP_MODE_ALL );
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_SYNC_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_SYNC_1, true );
 		chanserv::add_help( 'cs_xcommands', 'help sync', chanserv::$help->CS_HELP_SYNC_ALL );
 		// voice and mode & sync
 		
-		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_TYPEMASK_1 );
+		chanserv::add_help( 'cs_xcommands', 'help commands', chanserv::$help->CS_HELP_TYPEMASK_1, true );
 		chanserv::add_help( 'cs_xcommands', 'help typemask', chanserv::$help->CS_HELP_TYPEMASK_ALL );
 		// typemask
 		

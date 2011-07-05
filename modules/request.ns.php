@@ -35,7 +35,7 @@ class ns_request extends module
 		modules::init_module( 'ns_request', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_request', 'help', nickserv::$help->NS_HELP_REQUEST_1 );
+		nickserv::add_help( 'ns_request', 'help', nickserv::$help->NS_HELP_REQUEST_1, true );
 		nickserv::add_help( 'ns_request', 'help request', nickserv::$help->NS_HELP_REQUEST_ALL );
 		// add the help
 		

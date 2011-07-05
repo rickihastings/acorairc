@@ -35,8 +35,8 @@ class cs_list extends module
 		modules::init_module( 'cs_list', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_list', 'help', chanserv::$help->CS_HELP_LIST_1, 'chanserv_op' );
-		chanserv::add_help( 'cs_list', 'help list', chanserv::$help->CS_HELP_LIST_ALL, 'chanserv_op' );
+		chanserv::add_help( 'cs_list', 'help', chanserv::$help->CS_HELP_LIST_1, true, 'chanserv_op' );
+		chanserv::add_help( 'cs_list', 'help list', chanserv::$help->CS_HELP_LIST_ALL, false, 'chanserv_op' );
 		// add the help
 		
 		chanserv::add_command( 'list', 'cs_list', 'list_command' );

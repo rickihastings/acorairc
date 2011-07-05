@@ -35,10 +35,10 @@ class ns_suspend extends module
 		modules::init_module( 'ns_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, false, 'nickserv_op' );
+		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, false, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'suspend', 'ns_suspend', 'suspend_command' );

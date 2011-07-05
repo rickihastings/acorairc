@@ -40,8 +40,8 @@ class os_global extends module
 		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, 'global_op' );
-		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, 'global_op' );
+		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, true, 'global_op' );
+		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, false, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'global', 'os_global', 'global_command' );

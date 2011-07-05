@@ -35,7 +35,7 @@ class cs_drop extends module
 		modules::init_module( 'cs_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_drop', 'help', chanserv::$help->CS_HELP_DROP_1 );
+		chanserv::add_help( 'cs_drop', 'help', chanserv::$help->CS_HELP_DROP_1, true );
 		chanserv::add_help( 'cs_drop', 'help drop', chanserv::$help->CS_HELP_DROP_ALL );
 		// add the help
 		

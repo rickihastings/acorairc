@@ -35,7 +35,7 @@ class ns_info extends module
 		modules::init_module( 'ns_info', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_info', 'help', nickserv::$help->NS_HELP_INFO_1 );
+		nickserv::add_help( 'ns_info', 'help', nickserv::$help->NS_HELP_INFO_1, true );
 		nickserv::add_help( 'ns_info', 'help info', nickserv::$help->NS_HELP_INFO_ALL );
 		// add the help
 		

@@ -35,7 +35,7 @@ class os_akill extends module
 		modules::init_module( 'os_akill', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_akill', 'help', operserv::$help->OS_HELP_AKILL_1 );
+		operserv::add_help( 'os_akill', 'help', operserv::$help->OS_HELP_AKILL_1, true );
 		operserv::add_help( 'os_akill', 'help akill', operserv::$help->OS_HELP_AKILL_ALL );
 		// add the help
 		

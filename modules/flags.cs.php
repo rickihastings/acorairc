@@ -43,7 +43,7 @@ class cs_flags extends module
 		modules::init_module( 'cs_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1 );
+		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
 		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL );
 		// add the help
 		

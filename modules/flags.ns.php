@@ -43,10 +43,10 @@ class ns_flags extends module
 		modules::init_module( 'ns_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1 );
+		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1, true );
 		nickserv::add_help( 'ns_flags', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL );
-		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, 'nickserv_op' );
-		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, 'nickserv_op' );
+		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, false, 'nickserv_op' );
 		// add the help
 		
 		nickserv::add_command( 'flags', 'ns_flags', 'flags_command' );

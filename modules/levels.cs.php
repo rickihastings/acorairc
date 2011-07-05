@@ -42,7 +42,7 @@ class cs_levels extends module
 		modules::init_module( 'cs_levels', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1 );
+		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1, true );
 		// add the help
 			
 		chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL );

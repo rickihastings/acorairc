@@ -20,6 +20,7 @@ class commands
 	static public $unknown_cmds = 0;
 	static public $commands = array();
 	static public $helpv = array();
+	static public $unordered_help = array();
 	static public $prefix = array();
 	static public $suffix = array();
 	// setup our static variables etc.
@@ -216,7 +217,7 @@ class commands
 	* $help - The array to hook.
 	* $privs - oper privs
 	*/
-	static public function add_help( $hook, $module, $command, $help, $privs = '' )
+	static public function add_help( $hook, $module, $command, $help, $reorder, $privs )
 	{
 		$command = strtolower( $command );
 		// make it lowercase
@@ -241,6 +242,7 @@ class commands
 					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
 					'privs' => $privs,
+					'ordered' => $reorder,
 				);
 			
 				self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -257,6 +259,7 @@ class commands
 				'info' => ( $help == ' ' ) ? '' : $help,
 				'module' => $module,
 				'privs' => $privs,
+				'ordered' => $reorder,
 			);
 		
 			self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -316,12 +319,28 @@ class commands
 		{
 			$meta = unserialize( $meta_data );
 			
-			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) )
-				services::communicate( $bot, $nick, $meta['info'] );
-			elseif ( $meta['privs'] == '' )
+			if ( $meta['ordered'] )
+			{
+				$reordered[] = $meta['info'];
+				$reordered_privs[] = $meta['privs'];
+				continue;
+			}
+			// determine whether we need to reorder, if we do mark that we save the rest for later.
+			
+			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) || $meta['privs'] == '' )
 				services::communicate( $bot, $nick, $meta['info'] );
 		}
 		// display the main stuff
+		
+		sort( $reordered );
+		$privs = '';
+		foreach ( $reordered as $line => $info )
+		{
+			$privs = $reordered_privs[$line];
+			if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
+				services::communicate( $bot, $nick, $info );
+		}
+		// seems the stuff is reordered
 		
 		if ( isset( self::$suffix[$hook][$command] ) )
 		{

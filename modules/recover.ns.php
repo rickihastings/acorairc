@@ -40,9 +40,9 @@ class ns_recover extends module
 		modules::init_module( 'ns_recover', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1 );
+		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1, true );
 		nickserv::add_help( 'ns_recover', 'help recover', nickserv::$help->NS_HELP_RECOVER_ALL );
-		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RELEASE_1 );
+		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RELEASE_1, true );
 		nickserv::add_help( 'ns_recover', 'help release', nickserv::$help->NS_HELP_RELEASE_ALL );
 		// add the help
 		

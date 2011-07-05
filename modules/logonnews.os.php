@@ -35,8 +35,8 @@ class os_logonnews extends module
 		modules::init_module( 'os_logonnews', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1, 'global_op' );
-		operserv::add_help( 'os_logonnews', 'help logonnews', operserv::$help->OS_HELP_LOGONNEWS_ALL, 'global_op' );
+		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1, true, 'global_op' );
+		operserv::add_help( 'os_logonnews', 'help logonnews', operserv::$help->OS_HELP_LOGONNEWS_ALL, false, 'global_op' );
 		// add the help
 		
 		operserv::add_command( 'logonnews', 'os_logonnews', 'logonnews_command' );

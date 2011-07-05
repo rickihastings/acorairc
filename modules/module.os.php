@@ -35,12 +35,12 @@ class os_module extends module
 		modules::init_module( 'os_module', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODULES_1 );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1, 'root' );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1, 'root' );
+		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODULES_1, true );
+		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1, true, 'root' );
+		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1, true, 'root' );
 		operserv::add_help( 'os_module', 'help modlist', operserv::$help->OS_HELP_MODLIST_ALL );
-		operserv::add_help( 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL, 'root' );
-		operserv::add_help( 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL, 'root' );
+		operserv::add_help( 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL, false, 'root' );
+		operserv::add_help( 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL, false, 'root' );
 		// add the help
 		
 		operserv::add_command( 'modlist', 'os_module', 'modlist_command' );

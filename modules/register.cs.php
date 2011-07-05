@@ -37,7 +37,7 @@ class cs_register extends module
 		modules::init_module( 'cs_register', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_register', 'help', chanserv::$help->CS_HELP_REGISTER_1 );
+		chanserv::add_help( 'cs_register', 'help', chanserv::$help->CS_HELP_REGISTER_1, true );
 		chanserv::add_help( 'cs_register', 'help register', chanserv::$help->CS_HELP_REGISTER_ALL );
 		// add the help
 		

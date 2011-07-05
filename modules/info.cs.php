@@ -35,7 +35,7 @@ class cs_info extends module
 		modules::init_module( 'cs_info', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_info', 'help', chanserv::$help->CS_HELP_INFO_1 );
+		chanserv::add_help( 'cs_info', 'help', chanserv::$help->CS_HELP_INFO_1, true );
 		chanserv::add_help( 'cs_info', 'help info', chanserv::$help->CS_HELP_INFO_ALL );
 		// add the help
 		

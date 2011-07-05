@@ -35,7 +35,7 @@ class os_session extends module
 		modules::init_module( 'os_session', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_session', 'help', operserv::$help->OS_HELP_SESSION_1 );
+		operserv::add_help( 'os_session', 'help', operserv::$help->OS_HELP_SESSION_1, true );
 		operserv::add_help( 'os_session', 'help session', operserv::$help->OS_HELP_SESSION_ALL );
 		// add the help
 		
