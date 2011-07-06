@@ -17,7 +17,7 @@
 class os_session extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -128,7 +128,7 @@ class os_session extends module
 	*/
 	static public function on_connect( $connect_data, $startup = false )
 	{
-		if ( $connect_data['ip_address'] == '' )
+		if ( $startup || $connect_data['ip_address'] == '' )
 			return false;
 		// this shouldn't EVER occur in a live net, sometimes it did during the stress testing phases though
 		// reason why it occured, the stress tester created clients named "spam" + random 5 digit number

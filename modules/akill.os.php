@@ -17,7 +17,7 @@
 class os_akill extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -164,7 +164,7 @@ class os_akill extends module
 	*/
 	static public function on_connect( $connect_data, $startup = false )
 	{
-		if ( empty( operserv::$session_rows ) )
+		if ( $startup || empty( operserv::$session_rows ) )
 			return false;
 		// determine match if there is no session exceptions
 		

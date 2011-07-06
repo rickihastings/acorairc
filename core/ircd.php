@@ -113,7 +113,7 @@ class ircd_handle
 		
 		core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
 		
-		core::max_users();
+		if ( !$startup ) core::max_users();
 		// handle connect
 		
 		foreach ( modules::$event_methods['on_connect'] as $l => $class )

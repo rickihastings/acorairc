@@ -49,8 +49,6 @@ class core
 	static public $capab_start = false;
 	static public $lines_processed;
 	static public $lines_sent;
-	static public $buffer;
-	static public $nbuffer;
 	static public $service_bots;
 	static public $booted = false;
 	static public $burst_time;
@@ -150,42 +148,6 @@ class core
 			timer::loop();
 			// this is our timer counting function
 			
-			if ( self::$end_burst === true && count( self::$nbuffer ) > 0 )
-			{
-				foreach ( self::$nbuffer as $index => $ircdata )
-				{
-					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
-					// log our incoming bandwidth
-					
-					if ( $this->process( $ircdata, true ) ) continue;
-					// process the data from the buffer
-					
-					unset( self::$nbuffer[$index], $index, $ircdata );
-				}
-				// is there any data in the burst buffer?
-				
-				self::$nbuffer = array();
-			}
-			// but only when the burst has finished ^_^
-			
-			if ( self::$end_burst === true && count( self::$buffer ) > 0 )
-			{
-				foreach ( self::$buffer as $index => $ircdata )
-				{
-					self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
-					// log our incoming bandwidth
-					
-					if ( $this->process( $ircdata, false ) ) continue;
-					// process normal incoming data
-					
-					unset( self::$buffer[$index], $index, $ircdata );
-				}
-				// is there any data in the buffer?
-				
-				self::$buffer = array();
-			}
-			// this is for normal data, eg. post burst.
-			
 			if ( $raw = socket_read( self::$socket, 16384 ) )
 				$tinybuffer = explode( "\n", $raw );
 			else
@@ -253,12 +215,11 @@ class core
 				}
 				// here we check if we're recieving an endburst
 				
-				if ( !self::$end_burst ) 
-					self::$nbuffer[] = $ircdata;
-				else
-					self::$buffer[] = $ircdata;
-				// we should really only be processing the data if the burst has finished
-				// so we add it to a buffer and process it in each main loop :)
+				self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
+				// log our incoming bandwidth
+				
+				if ( $this->process( $ircdata, !self::$end_burst ) ) continue;
+				// process normal incoming data
 				unset( $tinybuffer[$l] );
 			}
 			
