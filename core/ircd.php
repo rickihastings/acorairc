@@ -312,9 +312,12 @@ class ircd_handle
 		// basically check if we already have an array, because FJOIN can happen on
 		// existing channels, idk why, maybe on bursts etc?
 		
-		$mode_array = mode::sort_modes( $mode_queue );
-		mode::append_modes( $chan, $mode_array );
-		mode::handle_params( $chan, $mode_array );
+		if ( $mode_queue != '+' || $mode_queue != '-' || trim( $mode_queue ) == '' )
+		{
+			$mode_array = mode::sort_modes( $mode_queue );
+			mode::append_modes( $chan, $mode_array );
+			mode::handle_params( $chan, $mode_array );
+		}
 		// parse modes, modes in inspircd 1.2 > (1202 protocol) are sent in SJOIN/FJOIN now, upon bursts, and also resent
 		// when users join channels
 		
