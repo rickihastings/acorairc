@@ -107,14 +107,14 @@ class ircd_handle
 		);
 		// add the array eh
 		
-		if ( core::$config->settings->logconnections && $startup === false )
-			core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
-		// log
-		
-		core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
-		
-		if ( !$startup ) core::max_users();
-		// handle connect
+		if ( $startup === false )
+		{
+			if ( core::$config->settings->logconnections )
+				core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
+			core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
+			core::max_users();
+		}
+		// log and stuff
 		
 		foreach ( modules::$event_methods['on_connect'] as $l => $class )
 			call_user_func( array( $class, 'on_connect' ), core::$nicks[$nick], $startup );

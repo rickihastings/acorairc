@@ -421,7 +421,7 @@ class ircd implements protocol
 	static public function init_server( $name, $pass, $desc, $numeric )
 	{
 		self::send( 'PASS '.$pass.' TS 6 '.self::$sid );
-		self::send( 'CAPAB :QS EX CHW IE KLN GLN KNOCK TB UNKLN CLUSTER ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN MLOCK' );
+		self::send( 'CAPAB :QS EX CHW IE KLN KNOCK TB UNKLN ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN' );
 		self::send( ':'.self::$sid.' SERVER '.$name.' 0 :'.$desc );
 		// handle server, bit of trickery for ON CAPAB START etc does on here ;)
 		
