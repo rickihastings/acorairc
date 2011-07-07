@@ -162,14 +162,12 @@ class core
 				self::$lines_processed++;
 				// grab the data
 				
-				if ( $raw != '' ) self::alog( 'recv(): '.$raw, 'SERVER' );
+				if ( $raw != '' )
+					self::alog( 'recv(): '.$raw, 'SERVER' );
 				// log SERVER
 				
-				if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) && self::$end_burst ) self::save_logs();
-				// we also logfile here, and stop logfiling until we've
-				// reached the end of the burst, then we do it every 5 mins
-				
-				if ( ircd::on_capab_start( $ircdata ) ) self::$capab_start = true;
+				if ( ircd::on_capab_start( $ircdata ) )
+					self::$capab_start = true;
 				// if capab has started we set a true flag, just like
 				// we do with burst
 				
@@ -212,15 +210,18 @@ class core
 					
 					ircd::end_burst( $ircdata );
 					self::$end_burst = true;
+				
+					self::save_logs();
 				}
 				// here we check if we're recieving an endburst
 				
-				self::$incoming = self::$incoming + strlen( implode( ' ', $ircdata ) );
+				self::$incoming = self::$incoming + strlen( $raw );
 				// log our incoming bandwidth
 				
-				if ( $this->process( $ircdata, !self::$end_burst ) ) continue;
-				// process normal incoming data
 				unset( $tinybuffer[$l] );
+				if ( $this->process( $ircdata, !self::$end_burst ) )
+					continue;
+				// process normal incoming data
 			}
 			
 			if ( self::$debug && count( self::$debug_data ) > 0 )
@@ -241,7 +242,7 @@ class core
 			}
 			// here we output debug data, if there is any.
 			
-			usleep( 40000 );
+			usleep( 15000 );
 			// 50000 breaks /hop and /cycle
 			// 40000 is quite slow when handling alot of data
 			// 15/20/25 000 has high cpu usage for 10 mins or so, i'm settling at 15000
@@ -262,6 +263,10 @@ class core
 			return true;
 		// pingpong my name is tingtong
 		
+		if ( self::log_changes( $ircdata, $startup ) )
+			return true;
+		// log peoples hostnames, used for bans etc.
+		
 		if ( ircd::on_notice( $ircdata ) )
 			return true;
 		// ignore notices
@@ -269,10 +274,6 @@ class core
 		if ( ircd::on_msg( $ircdata ) )
 			return true;
 		// look for msgs
-		
-		if ( self::log_changes( $ircdata, $startup ) )
-			return true;
-		// log peoples hostnames, used for bans etc.
 		
 		if ( $ircdata[0] == 'ERROR' )
 		{
@@ -291,6 +292,14 @@ class core
 	*/
 	static public function log_changes( $ircdata, $startup = false )
 	{
+		if ( ircd::on_connect( $ircdata, $startup ) )
+			return true;
+		// log shit on connect, basically the users host etc.
+		
+		if ( ircd::on_chan_create( $ircdata ) )
+			return true;
+		// on channel create
+		
 		if ( ircd::on_server( $ircdata ) )
 			return true;
 		// let's us keep track of the linked servers
@@ -298,10 +307,6 @@ class core
 		if ( ircd::on_squit( $ircdata ) )
 			return true;
 		// let's us keep track of the linked servers
-		
-		if ( ircd::on_connect( $ircdata, $startup ) )
-			return true;
-		// log shit on connect, basically the users host etc.
 		
 		if ( ircd::on_nick_change( $ircdata, $startup ) )
 			return true;
@@ -311,15 +316,15 @@ class core
 			return true;
 		// on quit.
 		
-		if ( ircd::on_fhost( $ircdata ) )
+		if ( !$startup && ircd::on_fhost( $ircdata ) )
 			return true;
 		// on hostname change.
 		
-		if ( ircd::on_ident_change( $ircdata ) )
+		if ( !$startup && ircd::on_ident_change( $ircdata ) )
 			return true;
 		// on ident change
 		
-		if ( ircd::on_gecos_change( $ircdata ) )
+		if ( !$startup && ircd::on_gecos_change( $ircdata ) )
 			return true;
 		// on realname (gecos) change
 		
@@ -330,10 +335,6 @@ class core
 		if ( ircd::on_topic( $ircdata ) )
 			return true;	
 		// on topic
-		
-		if ( ircd::on_chan_create( $ircdata ) )
-			return true;
-		// on channel create
 		
 		if ( ircd::on_join( $ircdata ) )
 			return true;

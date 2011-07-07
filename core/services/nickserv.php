@@ -58,9 +58,17 @@ class nickserv extends service
 	}
 	
 	/*
+	* on_burst_connect (event hook)
+	*/
+	static public function on_burst_connect( $connect_data )
+	{
+		self::on_connect( $connect_data );
+	}
+	
+	/*
 	* on_connect (event hook)
 	*/
-	static public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data )
 	{
 		$nick = strtolower( $connect_data['nick'] );
 		$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );

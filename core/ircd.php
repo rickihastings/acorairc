@@ -79,6 +79,7 @@ class ircd_handle
 	{
 		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
+		$method = ( $startup ) ? 'on_burst_connect' : 'on_connect';
 		// yey for this, saves us massive intensive cpu raeps
 		// on large networks, uses a little more memory but baah!
 		
@@ -107,7 +108,7 @@ class ircd_handle
 		);
 		// add the array eh
 		
-		if ( $startup === false )
+		if ( !$startup )
 		{
 			if ( core::$config->settings->logconnections )
 				core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
@@ -116,8 +117,8 @@ class ircd_handle
 		}
 		// log and stuff
 		
-		foreach ( modules::$event_methods['on_connect'] as $l => $class )
-			call_user_func( array( $class, 'on_connect' ), core::$nicks[$nick], $startup );
+		foreach ( modules::$event_methods[$method] as $l => $class )
+			call_user_func( array( $class, $method ), core::$nicks[$nick] );
 		// call the event method
 	}
 	

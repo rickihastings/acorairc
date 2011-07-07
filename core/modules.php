@@ -20,6 +20,7 @@ class modules
 	static public $list	= array();
 	static public $event_methods = array();
 	static public $event_handlers = array(
+		'on_burst_connect',
 		'on_connect',
 		'on_nick_change',
 		'on_quit',

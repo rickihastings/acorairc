@@ -111,11 +111,8 @@ class os_logonnews extends module
 	/*
 	* on_connect (event hook)
 	*/
-	static public function on_connect( $connect_data, $startup )
+	static public function on_connect( $connect_data )
 	{
-		if ( $startup )
-			return false;
-		
 		$nick = $connect_data['nick'];
 		
 		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ), array( 0 => 3 ) );

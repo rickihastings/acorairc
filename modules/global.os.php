@@ -128,7 +128,7 @@ class os_global extends module
 	/*
 	* on_connect (event hook)
 	*/
-	static public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data )
 	{
 		if ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' )
 		{

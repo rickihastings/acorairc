@@ -162,9 +162,9 @@ class os_akill extends module
 	/*
 	* on_connect (event hook)
 	*/
-	static public function on_connect( $connect_data, $startup = false )
+	static public function on_connect( $connect_data )
 	{
-		if ( $startup || empty( operserv::$session_rows ) )
+		if ( empty( operserv::$session_rows ) )
 			return false;
 		// determine match if there is no session exceptions
 		
