@@ -275,6 +275,10 @@ class core
 			return true;
 		// look for msgs
 		
+		if ( commands::motd( $ircdata ) )
+			return true;
+		// reply to motd
+		
 		if ( $ircdata[0] == 'ERROR' )
 		{
 			self::alog( 'ERROR: '.self::get_data_after( $ircdata, 1 ), 'BASIC' );

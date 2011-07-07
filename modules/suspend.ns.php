@@ -202,11 +202,16 @@ class ns_suspend extends module
 	*/
 	static public function on_connect( $connect_data )
 	{
-		$nick = $connect_data['nick'];
-		$user = nickserv::$nick_q[$nick];;
+		$user = nickserv::$nick_q[$connect_data['nick']];
+		// get nick
 		
 		if ( !isset( $user ) || $user === false )
 			return false;
+			
+		$nick = $connect_data['nick'];
+		// re-allocate it after we know we actually need to use $nick, will shave milliseconds off huge bursts
+		// not amazing but better than nothing.
+			
 		if ( $user->suspended == 0 )
 			return false;
 			

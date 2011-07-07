@@ -104,11 +104,7 @@ class services
 		if ( $identified && !core::$nicks[$nick]['identified'] )
 			return false;
 			
-		if ( $identified )
-			$snick = core::$nicks[$nick]['account'];
-		else
-			$snick = $nick;
-			
+		$snick = ( $identified ) ? core::$nicks[$nick]['account'] : $nick;
 		$user_q = database::select( 'users', $array, array( 'display', '=', $snick ) );
 
 		if ( database::num_rows( $user_q ) == 0 )

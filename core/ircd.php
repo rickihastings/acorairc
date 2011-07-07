@@ -77,16 +77,11 @@ class ircd_handle
 	*/
 	static public function handle_on_connect( $nick, $uid, $ident, $host, $oldhost, $gecos, $ip_addr, $server, $timestamp, $modes, $startup = false )
 	{
-		core::$nicks[$nick] = $nick_array;
 		core::$uids[$uid] = $nick;
-		$method = ( $startup ) ? 'on_burst_connect' : 'on_connect';
 		// yey for this, saves us massive intensive cpu raeps
 		// on large networks, uses a little more memory but baah!
 		
-		if ( !isset( core::$ips[$ip_addr] ) )
-			core::$ips[$ip_addr] = 1;
-		else
-			core::$ips[$ip_addr]++;
+		core::$ips[$ip_addr] += 1;
 		// add an ip_address array
 		
 		core::$nicks[$nick] = array(
@@ -108,12 +103,14 @@ class ircd_handle
 		);
 		// add the array eh
 		
+		$method = 'on_burst_connect';
 		if ( !$startup )
 		{
 			if ( core::$config->settings->logconnections )
 				core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
 			core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
 			core::max_users();
+			$method = 'on_connect';
 		}
 		// log and stuff
 		

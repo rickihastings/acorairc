@@ -86,7 +86,7 @@ class commands
 				$lines[$num] = rtrim( $line );
 			// strip the crap out of it
 			
-			ircd::push( core::$config->server->name, 375, $nick, array( ':', str_replace( '{server}', core::$config->server->name, ircd::$motd_start ) ) );
+			ircd::push( core::$config->server->name, 375, $nick, array( str_replace( '{server}', core::$config->server->name, ircd::$motd_start ) ) );
 			// send the start of the motd.
 			
 			foreach  ( $lines as $num => $line )
@@ -97,14 +97,17 @@ class commands
 					$line = str_replace( '{uptime}', core::format_time( core::$uptime ), $line );
 				// replaceable variables here.
 				
-				ircd::push( core::$config->server->name, 372, $nick, array( ':', '-', $line ) );
+				ircd::push( core::$config->server->name, 372, $nick, array( '-', $line ) );
 			}
 			// loop through, throwing the line at the client :D
 			
-			ircd::push( core::$config->server->name, 376, $nick, array( ':', ircd::$motd_end ) );
+			ircd::push( core::$config->server->name, 376, $nick, array( ircd::$motd_end ) );
 			// send the end of the motd.
+			return true;
 		}
 		// only triggered if someone asks us for a MOTD.
+		
+		return false;
 	}
 	
 	/*

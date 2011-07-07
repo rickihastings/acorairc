@@ -70,9 +70,8 @@ class nickserv extends service
 	*/
 	static public function on_connect( $connect_data )
 	{
-		$nick = strtolower( $connect_data['nick'] );
-		$user = services::user_exists( $nick, false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
-		self::$nick_q[$nick] = $user;
+		$user = services::user_exists( $connect_data['nick'], false, array( 'id', 'display', 'pass', 'salt', 'timestamp', 'last_timestamp', 'last_hostmask', 'vhost', 'identified', 'validated', 'real_user', 'suspended', 'suspend_reason' ) );
+		self::$nick_q[$connect_data['nick']] = $user;
 	}
 	
 	/*
