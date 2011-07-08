@@ -746,7 +746,8 @@ class core
 	*/
 	static public function alog( $message, $type = 'CHAN' )
 	{
-		if ( trim( $message ) == '' ) return false;
+		if ( trim( $message ) == '' )
+			return false;
 		// if there is no message at all just bail.
 	
 		if ( ( isset( self::$config->settings->logchan ) || self::$config->settings->logchan != null ) && $type == 'CHAN' && isset( modules::$list['os_global'] ) )

@@ -294,10 +294,13 @@ class ircd_handle
 	*/
 	static public function handle_channel_create( $chan, $nusers, $timestamp, $mode_queue )
 	{
-		core::$chans[$chan]['channel'] = $chan;
-		core::$chans[$chan]['timestamp'] = $timestamp;
-		core::$chans[$chan]['p_modes'] = array();
-		core::$chans[$chan]['joins'] = 0;
+		if ( !isset( core::$chans[$chan] ) )
+		{
+			core::$chans[$chan]['channel'] = $chan;
+			core::$chans[$chan]['timestamp'] = $timestamp;
+			core::$chans[$chan]['p_modes'] = array();
+			core::$chans[$chan]['joins'] = 0;
+		}
 		// we don't count bursts as joins as this is only here for flood protection
 		// and flood protection would be activated on bursts which is what we DON'T want
 		// for instance if a server splits loses 30 users on a channel, when it reconnects
