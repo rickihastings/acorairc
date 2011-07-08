@@ -56,8 +56,7 @@ class cs_invite extends module
 		$who = ( trim( $ircdata[1] ) == '' ) ? $nick : $ircdata[1];
 		// get the channel.
 		
-		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
-		if ( $chan == '' || $chan[0] != '#' || !isset( $unicks[strtolower( $who )] ) )
+		if ( $chan == '' || $chan[0] != '#' || !core::search_nick( $who ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INVITE' ) );
 			return false;

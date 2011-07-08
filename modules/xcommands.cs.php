@@ -600,8 +600,12 @@ class cs_xcommands extends module
 		// you can't k/b anyone with either +S or +F, others can be k/bed though.	
 		
 		$reason = core::get_data_after( $ircdata, 2 );
-					
-		ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
+		
+		if ( $user = core::search_nick( $who ) )
+		{
+			$who = $user['nick'];
+			ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
+		}
 		// kick them with the reason
 	}
 	
@@ -638,7 +642,7 @@ class cs_xcommands extends module
 		if ( $user = core::search_nick( $ircdata[1] ) )
 		{
 			mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
-			ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
+			ircd::kick( core::$config->chanserv->nick, $user['nick'], $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 			// kick them with the reason
 		}
 		else

@@ -807,7 +807,7 @@ class core
 	*/
 	static public function search_nick( $nick )
 	{
-		foreach( self::$nicks as $unick => $uarray )
+		foreach ( self::$nicks as $unick => $uarray )
 		{
 			if ( strcasecmp( $nick, $unick ) == 0 )
 			{
@@ -819,6 +819,10 @@ class core
 		// i can see this being a bit resourcive on larger networks
 		// but bearing in mind it isnt used often, only on fantasy
 		// and xcommands, using bans.
+		
+		// consider re-thinking this, maybe doing some benchmarks on an xxxx count user network
+		// to see whats quicker, I'm gonna try convert everything that needs to find an active
+		// nick to using this function, I think most of it's done - n0valyfe
 	}
 	
 	/*

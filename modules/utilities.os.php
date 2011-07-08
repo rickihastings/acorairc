@@ -171,11 +171,10 @@ class os_utilities extends module
 		if ( trim( $reason ) == '' ) $reason = 'Kick command issued by '.$nick;
 		// if they haven't suplied a reason let's fill it in.
 		
-		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
 		$cnicks = array_change_key_case( core::$chans[$channel]['users'], CASE_LOWER );
-		if ( isset( $unicks[strtolower( $unick )] ) && isset( core::$chans[$channel] ) && isset( $cnicks[strtolower( $unick )] ) )
+		if ( $user = core::search_nick( $who ) && isset( core::$chans[$channel] ) && isset( $cnicks[strtolower( $unick )] ) )
 		{
-			$unick = $unicks[strtolower( $unick )]['nick'];
+			$unick = $user['nick'];
 			ircd::kick( core::$config->operserv->nick, $unick, $channel, $reason );
 			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') used KICK to remove ('.$unick.') from ('.$channel.')' );
 		}
