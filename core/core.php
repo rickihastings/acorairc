@@ -746,41 +746,30 @@ class core
 	*/
 	static public function alog( $message, $type = 'CHAN' )
 	{
-		if ( trim( $message ) == '' )
-			return false;
-		// if there is no message at all just bail.
-	
-		if ( ( isset( self::$config->settings->logchan ) || self::$config->settings->logchan != null ) && $type == 'CHAN' && isset( modules::$list['os_global'] ) )
+		if ( $type != 'CHAN' && ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
 		{
-			ircd::msg( self::$config->global->nick, self::$config->settings->logchan, $message );
-			// send the message into the logchan
-		}
-		// logging is enabled, so send the message into the channel.
-		
-		if ( ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) && $type != 'CHAN' )
-		{
-			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
+			if ( strcasecmp( self::$config->settings->loglevel, $type ) == 0 || self::$config->settings->loglevel == 'all' )
 			{
-				if ( !in_array( $message, self::$log_data ) )
-					self::$log_data[] = $message;
-			}
-		}
-		// is logging to file enabled? if so, log to file.
-		
-		if ( self::$debug && $type != 'CHAN' )
-		{
-			if ( self::$config->settings->loglevel == strtolower( $type ) || self::$config->settings->loglevel == 'all' )
-			{
-				if ( !isset( self::$config->conn ) )
+				if ( self::$debug && !isset( self::$config->conn ) )
 					print "[".date( 'H:i:s', time() )."] ".$message."\r\n";
 				elseif ( !in_array( $message, self::$debug_data ) )
 					self::$debug_data[] = $message;
+				elseif ( !in_array( $message, self::$log_data ) )
+					self::$log_data[] = $message;
 				// if we're not connected, and in debug mode
 				// just send it out, else they wont actually see the message and
 				// it'll just end up in the log file
+				return false;
 			}
 		}
 		// debug on?
+		elseif ( $type == 'CHAN' && isset( self::$config->settings->logchan ) && isset( modules::$list['os_global'] ) )
+		{
+			ircd::msg( self::$config->global->nick, self::$config->settings->logchan, $message );
+			// send the message into the logchan		
+			return false;
+		}
+		// logging is enabled, so send the message into the channel.
 	}
 	
 	/*
