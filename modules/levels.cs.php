@@ -17,7 +17,7 @@
 class cs_levels extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.0.6';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -123,10 +123,10 @@ class cs_levels extends module
 				for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
 					$x_s .= ' ';
 				
-				if ( !isset( $flags->flags[14] ) )
+				if ( !isset( $flags->flags[15] ) )
 				{
 					$y = strlen( $flags->flags );
-					for ( $i = $y; $i <= 13; $i++ )
+					for ( $i = $y; $i <= 14; $i++ )
 						$false_flag .= ' ';
 				}
 				// this is just a bit of fancy fancy, so everything displays neat, like so:
@@ -144,6 +144,7 @@ class cs_levels extends module
 					$extra = '';
 					$expired = '';
 				}*/
+				// this could maybe be added at a later date, i'm not sure? Look into it soon - n0valyfe
 				
 				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
 				// show the flag
@@ -721,10 +722,10 @@ class cs_levels extends module
 			if ( strpos( $flags->flags, 'o' ) !== false )
 				$temp_array[] = 'o';
 			
-			if ( ircd::$halfop && strpos( $flags->flags, 'h' ) !== false )
+			if ( ircd::$halfop && strpos( $flags->flags, 'h' ) !== false && !in_array( 'o', $temp_array ) )
 				$temp_array[] = 'h';
 			
-			if ( strpos( $flags->flags, 'v' ) !== false )
+			if ( strpos( $flags->flags, 'v' ) !== false && ( !in_array( 'o', $temp_array ) && !in_array( 'h', $temp_array ) ) )
 				$temp_array[] = 'v';
 				
 			$access_array[$flags->target] = $temp_array;
@@ -759,18 +760,6 @@ class cs_levels extends module
 			if ( $strict && !core::$nicks[$nick]['identified'] )
 				continue;
 			// else we move on
-			
-			if ( ircd::$owner && strpos( core::$chans[$chan]['users'][$nick], 'q' ) === false && strpos( $level, '5' ) !== false )
-				$level = str_replace( '5', 'q', $level );
-			if ( ircd::$protect && strpos( core::$chans[$chan]['users'][$nick], 'a' ) === false && strpos( $level, '4' ) !== false )
-				$level = str_replace( '4', 'a', $level );
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'o' ) === false && strpos( $level, '3' ) !== false )
-				$level = str_replace( '3', 'o', $level );
-			if ( ircd::$halfop && strpos( core::$chans[$chan]['users'][$nick], 'h' ) === false && strpos( $level, '2' ) !== false )
-				$level = str_replace( '2', 'h', $level );
-			if ( strpos( core::$chans[$chan]['users'][$nick], 'v' ) === false && strpos( $level, '1' ) !== false )
-				$level = str_replace( '1', 'v', $level );
-			// replace '5' with 'q' etc, where applicable
 			
 			$new_nusers[$nick] = $level;
 		}
