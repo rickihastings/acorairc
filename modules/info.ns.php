@@ -17,7 +17,7 @@
 class ns_info extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -87,10 +87,8 @@ class ns_info extends module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_4, array( 'host' => $hostmask ) );
 			// standard messages
 			
-			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] || $unick == $nick && core::$nicks[$nick]['identified'] )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_5, array( 'email' => nickserv::get_flags( $nick, 'e' ) ) );
-			}
+			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] || $unick == core::$nicks[$nick]['account'] )
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INFO_5, array( 'email' => nickserv::get_flags( $unick, 'e' ) ) );
 			// if the person doing /ns info has staff powers we show the email
 			// or if someone is doing /ns info on themselves we show it.
 			
