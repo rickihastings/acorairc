@@ -32,6 +32,7 @@ class modules
 		'on_kick',
 		'on_oper_up',
 		'on_msg',
+		'on_rehash',
 	);
 	// setup the core module list
 	
@@ -118,21 +119,9 @@ class modules
 	*/
 	public function on_rehash()
 	{
-		foreach ( core::$service_bots as $bot )
-		{
-			if ( method_exists( $bot, 'on_rehash' ) )
-				call_user_func_array( array( $bot, 'on_rehash' ) );
-			// call the method.
-		}
-		// do bots
-	
-		foreach ( self::$list as $name => $details )
-		{
-			if ( method_exists( self::$list[$name]['class'], 'on_rehash' ) )
-				self::$list[$name]['class']->on_rehash();
-			// call the method.
-		}
-		// do modules
+		foreach ( self::$event_methods['on_rehash'] as $l => $class )
+			call_user_func( array( $class, 'on_rehash' ) );
+		// call the event method
 	}
 		
 	/*
