@@ -141,9 +141,7 @@ class modules
 					$meta = unserialize( $meta_data );
 				
 					if ( $meta['module'] == $module )
-					{
 						unset( commands::$helpv[$hook][$command][$index] );
-					}
 					// if it has meta data matching we just unset it.
 				}
 			}
@@ -157,9 +155,7 @@ class modules
 			foreach ( $data as $index => $mdata )
 			{
 				if ( $mdata['class'] == $module )
-				{
 					unset( commands::$commands[$hook][$index] );
-				}
 			}
 		}
 		// we do the same with commands linked to the module, to avoid crashes
@@ -173,9 +169,7 @@ class modules
 					$meta = unserialize( $meta_data );
 					
 					if ( $meta['module'] == $module )
-					{
 						unset( commands::$prefix[$hook][$index][$help] );
-					}
 					// epic unsets.
 				}
 			}
@@ -191,9 +185,7 @@ class modules
 					$meta = unserialize( $meta_data );
 					
 					if ( $meta['module'] == $module )
-					{
 						unset( commands::$suffix[$hook][$index][$help] );
-					}
 					// epic unsets.
 				}
 			}

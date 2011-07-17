@@ -359,7 +359,7 @@ class ircd implements protocol
 		{
 			ircd_handle::ping( $ircdata[1] );
 			
-			self::send( 'PONG '. $ircdata[1], core::$socket );
+			ircd_handle::send( 'PONG '. $ircdata[1] );
 			return true;
         }
 		// ping pong.

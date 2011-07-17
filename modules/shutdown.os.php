@@ -108,7 +108,7 @@ class os_shutdown extends module
 			ircd::shutdown( 'shutdown command from '.$nick, false );
 			// exit the server
 			
-			fclose( core::$socket );
+			socket_engine::close( 'core' );
 			// close the socket first.
 			
 			if ( substr( php_uname(), 0, 7 ) != 'Windows' )

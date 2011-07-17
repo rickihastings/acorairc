@@ -55,6 +55,7 @@ require( BASEPATH.'/core/commands.php' );
 require( BASEPATH.'/core/modules.php' );
 require( BASEPATH.'/core/parser.php' );
 require( BASEPATH.'/core/database.php' );
+require( BASEPATH.'/core/sockets.php' );
 require( BASEPATH.'/core/ircd.php' );
 
 // boot the services.

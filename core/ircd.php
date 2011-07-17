@@ -789,7 +789,7 @@ class ircd_handle
 		core::alog( 'shutdown(): '.$message, 'BASIC' );
 		// debug info
 		
-		socket_close( core::$socket );
+		socket_engine::close( 'core' );
 		if ( $terminate ) exit;
 		// if true, exit;
 	}
@@ -816,7 +816,7 @@ class ircd_handle
 	{
 		$command = trim( $command );
 		$bytes = strlen( $command."\r" );
-		socket_write( core::$socket, $command."\r", $bytes );
+		socket_write( socket_engine::$sockets['core'], $command."\r", $bytes );
 		// fairly simple, hopefully.
 		
 		core::$outgoing = core::$outgoing + $bytes;

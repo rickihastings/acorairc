@@ -17,7 +17,6 @@
 class core
 {
 	
-	static public $socket;
 	static public $times;
 	static public $network_time = 0;
 	static public $uptime = 0;
@@ -81,12 +80,13 @@ class core
 		self::$help = $help;
 		// load the help file
 		
-		$this->timer = new timer();
-		$this->mode = new mode();
-		$this->services = new services();
-		$this->commands = new commands();
-		$this->modules = new modules();
-		$this->ircd_handle = new ircd_handle();
+		new timer();
+		new mode();
+		new services();
+		new commands();
+		new modules();
+		new ircd_handle();
+		new socket_engine();
 		// setup all the subclasses.
 		
 		database::factory( self::$config->database->driver );
@@ -113,7 +113,7 @@ class core
 		timer::add( array( 'core', 'check_unused_chans', array() ), 5, 0 );
 		// and another one to check for unused channels every 5 seconds XD
 		
-		if ( is_resource( self::$socket ) && self::$config->conn )
+		if ( is_resource( socket_engine::$sockets['core'] ) && self::$config->conn )
 			$this->main_loop();
 		else
 			exit;
@@ -148,7 +148,7 @@ class core
 			timer::loop();
 			// this is our timer counting function
 			
-			if ( $raw = socket_read( self::$socket, 16384 ) )
+			if ( $raw = socket_read( socket_engine::$sockets['core'], 16384 ) )
 				$tinybuffer = explode( "\n", $raw );
 			else
 				$tinybuffer = array();
@@ -695,43 +695,34 @@ class core
 	static public function connect()
 	{
 		$info = self::$config->uplink;
-		if ( !self::$socket = socket_create( AF_INET, SOCK_STREAM, SOL_TCP ) )
+		// setup $info
+	
+		do
 		{
-			self::alog( 'connect(): failed: reason: ' . socket_strerror( socket_last_error() ), 'BASIC' );
-			return false;
-			// alog and attempt to reconnect
-		}
-		
-		self::alog( 'connect(): attempting to connect to '.$info->host.':'.$info->port, 'BASIC' );
-		$result = socket_connect( self::$socket, $info->host, $info->port );
-		if ( $result === false )
-		{
-			self::alog( 'connect(): failed to connect to '.$info->host.':'.$info->port.' reason: '.socket_strerror( socket_last_error( self::$socket ) ), 'BASIC' );
-			sleep( self::$config->server->recontime );
-			self::connect();
-			return false;
-			// alog and attempt to reconnect
-		}
-		else
-		{
-			self::alog( 'connect(): established connection to '.$info->server.':'.$info->port, 'BASIC' );
-			// alog.
+			$run = socket_engine::create( 'core', $info->host, $info->port, false );
+			// attempt to create a socket
 			
-			self::$config->conn->password = $info->password;
-			self::$config->conn->server = $info->server;
-			self::$config->conn->port = $info->port;
-			self::$config->conn->vhost = $info->vhost;
-			// we've connected, set our config details up.
+			if ( $run )
+			{
+				self::$config->conn->password = $info->password;
+				self::$config->conn->server = $info->server;
+				self::$config->conn->port = $info->port;
+				self::$config->conn->vhost = $info->vhost;
+				// we've connected, set our config details up.
 			
-			socket_set_nonblock( self::$socket );
-			// set this to blocking
-		}
-		// try and connect to the server.
-		
-		// effectively we should have already connected providing the uplink
-		// info is correct, if we've connected we'll have already returned the
-		// socket information, if we haven't we'll be here, and here is where
-		// we tell them that we can't connect :D
+				self::alog( 'connect(): core socket created' );
+				break;
+			}
+			// socket was created
+			else
+			{
+				self::alog( 'connect(): failed to create socket, attempting again in '.self::$config->server->recontime );
+				sleep( self::$config->server->recontime );
+			}
+			// it wasen't created..
+			
+		} while ( $run === false );
+		// keep attempting to create the socket
 		
 		self::save_logs();
 		// force a log save.
