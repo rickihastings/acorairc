@@ -103,6 +103,22 @@ class socket_engine
 		
 		core::alog( 'close(): sucessfully closed socket \''.$identifier.'\'' );
 	}
+	
+	/*
+	* read
+	*
+	* @params
+	* $identifier - the socket to read from
+	* $bytes - number of bytes to read at a time
+	*/
+	static public function read( $identifier, $bytes )
+	{
+		if ( $raw = socket_read( self::$sockets[$identifier], $bytes ) )
+			return explode( "\n", $raw );
+		else
+			return array();
+		// read from socket.
+	}
 }
 
 // EOF;

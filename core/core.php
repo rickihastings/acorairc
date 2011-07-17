@@ -148,11 +148,8 @@ class core
 			timer::loop();
 			// this is our timer counting function
 			
-			if ( $raw = socket_read( socket_engine::$sockets['core'], 16384 ) )
-				$tinybuffer = explode( "\n", $raw );
-			else
-				$tinybuffer = array();
-			// read from socket.
+			$tinybuffer = socket_engine::read( 'core', 16384 );
+			// read from the socket
 			
 			foreach ( $tinybuffer as $l => $raw )
 			{
