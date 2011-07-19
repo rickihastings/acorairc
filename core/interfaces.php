@@ -141,7 +141,6 @@ interface driver
 	public function row( &$resource );
 	public function fetch( &$resource );
 	public function quote( $string );
-	public function optimize();
 	public function select( $table, $what, $where = '', $order = '', $limit = '' );
 	public function update( $table, $what, $where = '' );
 	public function insert( $table, $what );

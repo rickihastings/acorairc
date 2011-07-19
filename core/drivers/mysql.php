@@ -17,7 +17,7 @@
 class mysql implements driver
 {
 
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -147,7 +147,7 @@ class mysql implements driver
 		// loop through our tables
 		
 		core::alog( core::$config->operserv->nick.': database optimization complete' );
-		core::alog( 'optimize(): database optimization complete.', 'BASIC' );
+		core::alog( 'optimize(): database optimization complete', 'BASIC' );
 	}
 	
 	/*
