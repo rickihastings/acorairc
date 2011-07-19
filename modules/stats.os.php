@@ -82,7 +82,7 @@ class os_stats extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_D );
 			
 			$x = 0;
-			foreach ( core::$nicks as $user => $info )
+			while ( list( $user, $info ) = each( core::$nicks ) )
 			{
 				if ( !$info['ircop'] || $info['server'] == core::$config->server->name ) continue;
 				// skip if they aint an ircop
@@ -108,6 +108,7 @@ class os_stats extends module
 				
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_L, array( 'num' => $num, 'host' => $false_host, 'time' => date( "F j, Y, g:i a", $info['timestamp'] ), 'privs' => $privs ) );
 			}
+			reset( core::$nicks );
 			// opers info.
 			
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_D );

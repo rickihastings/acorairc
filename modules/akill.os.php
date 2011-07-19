@@ -205,7 +205,7 @@ class os_akill extends module
 			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
 			// as simple, as.
 			
-			foreach ( core::$nicks as $unick => $data )
+			while ( list( $unick, $data ) = each( core::$nicks ) )
 			{
 				if ( $data['ircop'] )
 					continue;
@@ -218,6 +218,7 @@ class os_akill extends module
 				}
 				// search old vhost incase they've got a vee-host
 			}
+			reset( core::$nicks );
 			// loop users and autokill them. excluding ircops
 		}
 		else

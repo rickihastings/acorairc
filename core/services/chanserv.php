@@ -131,16 +131,15 @@ class chanserv extends service
 	*/
 	static public function on_quit( $nick )
 	{
-		foreach ( core::$chans as $chan => $data )
+		while ( list( $chan, $data ) = each( core::$chans ) )
 		{
 			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
-			{
 				ircd::part_chan( core::$config->chanserv->nick, $chan );
 				// leave the channel.
-			}
 			// ok now we check whos left in the channel, if its only us lets leave
 		}
 		// are they in any channels?
+		reset( core::$chans );
 	}
 	
 	/*

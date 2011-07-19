@@ -82,14 +82,14 @@ class commands
 				
 			$lines = file( CONFPATH.'services.motd' );
 			
-			foreach( $lines as $num => $line )
+			foreach ( $lines as $num => $line )
 				$lines[$num] = rtrim( $line );
 			// strip the crap out of it
 			
 			ircd::push( core::$config->server->name, 375, $nick, array( str_replace( '{server}', core::$config->server->name, ircd::$motd_start ) ) );
 			// send the start of the motd.
 			
-			foreach  ( $lines as $num => $line )
+			foreach ( $lines as $num => $line )
 			{
 				if ( strpos( $line, '{version}' ) !== false )
 					$line = str_replace( '{version}', core::$version, $line );

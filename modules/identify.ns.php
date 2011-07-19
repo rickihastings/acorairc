@@ -98,13 +98,14 @@ class ns_identify extends module
 				if ( $user->pass == sha1( $password.$user->salt ) )
 				{
 					$sessions = 0;
-					foreach ( core::$nicks as $n => $d )
+					while ( list( $n, $d ) = each( core::$nicks ) )
 					{
 						if ( $d['account'] == $account )
 							$sessions++;
 						if ( $allow_multiple_sessions && $sessions == $session_limit )
 							break;
 					}
+					reset( core::$nicks );
 					// check how many sessions we're in, if any
 					
 					if ( $allow_multiple_sessions && $sessions == $session_limit )
@@ -173,7 +174,7 @@ class ns_identify extends module
 					
 					if ( core::$config->settings->mode_on_id && isset( modules::$list['cs_levels'] ) )
 					{
-						foreach ( core::$chans as $chan => $cdata )
+						while ( list( $chan, $cdata ) = each( core::$chans ) )
 						{
 							if ( !isset( core::$chans[$chan]['users'][$nick] ) )
 								continue;
@@ -193,6 +194,7 @@ class ns_identify extends module
 							cs_levels::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, true );
 							// on_create event
 						}
+						reset( core::$chans );
 						// loop through channels, check if they are in any
 					}
 					// check if mode_on_id is set, also cs_access is enabled, and lets do a remote access gain :D

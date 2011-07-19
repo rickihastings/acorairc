@@ -54,7 +54,7 @@ class socket_engine
 	{
 		if ( !self::$sockets[$identifier] = socket_create( AF_INET, SOCK_STREAM, SOL_TCP ) )
 		{
-			core::alog( 'create(): failed: reason: ' . socket_strerror( socket_last_error() ), 'BASIC' );
+			core::alog( 'create(): failed: reason: '.socket_strerror( socket_last_error() ), 'BASIC' );
 			
 			self::close( $identifier );
 			return false;

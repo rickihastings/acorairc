@@ -61,11 +61,12 @@ class ircd_handle
 		// need to revise this, can't remember the protocol stuff for insp 1.2
 		// will have to look into it.
 		
-		foreach ( core::$nicks as $nick => $data )
+		while ( list( $nick, $data ) = each( core::$nicks ) )
 		{
 			if ( $data['server'] == $server )
 				unset( core::$nicks[$nick] );
 		}
+		reset( core::$nicks );
 		// unset all nicks that were connected to $server
 	}
 	
@@ -144,7 +145,7 @@ class ircd_handle
 			core::$nicks[$new_nick]['timestamp'] = $timestamp;
 			core::$uids[$uuid] = $new_nick;
 			
-			foreach ( core::$chans as $chan => $data )
+			while ( list( $chan, $data ) = each( core::$chans ) )
 			{
 				if ( !isset( $data['users'][$nick] ) )
 					continue;
@@ -153,6 +154,7 @@ class ircd_handle
 				core::$chans[$chan]['users'][$new_nick] = $data['users'][$nick];
 				unset( core::$chans[$chan]['users'][$nick] );
 			}
+			reset( core::$chans );
 			// check if they are in any channels, change their nick if they are.
 		}
 		
@@ -193,13 +195,14 @@ class ircd_handle
 		unset( core::$uids[$uid] );
 		// remove a user if they've quit..
 				
-		foreach ( core::$chans as $chan => $data )
+		while ( list( $chan, $data ) = each( core::$chans ) )
 		{
 			if ( isset( core::$chans[$chan]['users'][$nick] ) )
 				unset( core::$chans[$chan]['users'][$nick] );
 			else
 				continue;
 		}
+		reset( core::$chans );
 		
 		core::alog( 'on_quit(): '.$nick.' quit', 'BASIC' );
 		
@@ -509,8 +512,8 @@ class ircd_handle
 		// we check halfop differently
 		
 		ircd::$status_modes = array_merge( ircd::$status_modes, str_split( preg_replace( '/[^A-Za-z]/', '', $pdata ) ) );			
-		ircd::$modes_params = implode( '', ircd::$status_modes ) . ircd::$restrict_modes . $split_data[1] . ircd::$modes_p_unrequired;
-		ircd::$modes = ircd::$modes_params . $split_data[3];
+		ircd::$modes_params = implode( '', ircd::$status_modes ).ircd::$restrict_modes.$split_data[1].ircd::$modes_p_unrequired;
+		ircd::$modes = ircd::$modes_params.$split_data[3];
 		// causing status modes not to be in ircd::$modes
 		
 		$parsed_pdata = explode( ')', $pdata );
@@ -616,7 +619,7 @@ class ircd_handle
 		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
 		// debug info
 		
-		foreach ( core::$nicks as $user => $data )
+		while ( list( $user, $data ) = each( core::$nicks ) )
 		{
 			$hostname = core::get_full_hostname( $user );
 			// hostname
@@ -624,6 +627,7 @@ class ircd_handle
 			if ( $data['server'] != core::$config->server->name && services::match( $hostname, $mask ) )
 				ircd::notice( $nick, $user, $message );
 		}
+		reset( core::$nicks );
 	}
 	
 	/*

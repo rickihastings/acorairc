@@ -223,7 +223,7 @@ class core
 			
 			if ( self::$debug && count( self::$debug_data ) > 0 )
 			{
-				foreach( self::$debug_data as $line => $message )
+				foreach ( self::$debug_data as $line => $message )
 				{
 					if ( trim( $message ) != '' || trim( $message ) != null )
 						print "[".date( 'H:i:s', time() )."] ".$message."\r\n";
@@ -500,7 +500,7 @@ class core
 		
 		if ( count( self::$log_data ) > 0 )
 		{
-			foreach( self::$log_data as $line => $message )
+			foreach ( self::$log_data as $line => $message )
 			{
 				$filemsg = "[".date( 'H:i:s', time() )."] ".$message."\r\n";
 					
@@ -529,7 +529,7 @@ class core
 	*/
 	static public function check_unused_chans()
 	{
-		foreach ( self::$chans as $chan => $data )
+		while ( list( $chan, $data ) = each( self::$chans ) )
 		{
 			self::$chans[$chan]['joins'] = 0;
 		
@@ -545,6 +545,9 @@ class core
 			}
 			// no users, unset chan
 		}
+		
+		reset( self::$chans );
+		// reset the internal pointer
 	}
 	
 	/*
@@ -555,7 +558,7 @@ class core
 	*/
 	static public function reset_flood_cache()
 	{
-		foreach ( self::$nicks as $nick => $data )
+		while ( list( $nick, $data ) = each( self::$nicks ) )
 		{
 			self::$nicks[$nick]['commands'] = null;
 			self::$nicks[$nick]['floodcmds'] = 0;
@@ -563,6 +566,9 @@ class core
 		}
 		// loop though our users, setting everything to false/0/null
 		// everything flood related, ofc.
+		
+		reset( self::$nicks );
+		// reset the internal pointer, again
 	}
 	
 	/*
@@ -785,15 +791,17 @@ class core
 	*/
 	static public function search_nick( $nick )
 	{
-		foreach ( self::$nicks as $unick => $uarray )
+		while ( list( $unick, $uarray ) = each( self::$nicks ) )
 		{
 			if ( strcasecmp( $nick, $unick ) == 0 )
 			{
-				return $uarray;
+				$break = $uarray;
+				break;
 			}
 		}
 		
-		return false;
+		reset( self::$nicks );
+		return $break;
 		// i can see this being a bit resourcive on larger networks
 		// but bearing in mind it isnt used often, only on fantasy
 		// and xcommands, using bans.

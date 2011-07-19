@@ -64,7 +64,7 @@ class mode
 			if ( strpos( ircd::$restrict_modes, $fp2 ) !== false )
 			{
 				if ( strpos( $first_part[$fpi], '@' ) === false )
-					$first_part[$fpi] = '*@' . $first_part[$fpi];
+					$first_part[$fpi] = '*@'.$first_part[$fpi];
 				// check the hostmask, we don't have a @ ?
 			}
 			// it is a +beI typically. so.. let's make sure its a valid hostmask

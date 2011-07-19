@@ -432,15 +432,13 @@ class cs_flags extends module
 	*/
 	static public function on_quit( $nick, $startup = false )
 	{
-		foreach ( core::$chans as $chan => $data )
+		while ( list( $chan, $data ) = each( core::$chans ) )
 		{
 			if ( chanserv::check_flags( $chan, array( 'L' ) ) )
-			{
 				timer::add( array( 'cs_flags', 'increase_limit', array( $chan ) ), 5, 1 );
-				// add a timer to update the limit, in 5 seconds
-			}
-			// is there auto-limit enabled?
+			// add a timer to update the limit, in 5 seconds
 		}
+		reset( core::$chans );
 	}
 	
 	/*

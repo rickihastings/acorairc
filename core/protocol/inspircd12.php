@@ -470,7 +470,7 @@ class ircd implements protocol
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false )
 	{
 		++self::$uid_count;
-		$uid = self::$sid . self::$uid_count;
+		$uid = self::$sid.self::$uid_count;
 		// produce our random UUID (internal and TS6 specific).
 		
 		if ( $enforcer )

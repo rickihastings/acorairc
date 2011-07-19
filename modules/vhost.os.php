@@ -113,7 +113,7 @@ class os_vhost extends module
 			// update it and log it
 			
 			$lunick = strtolower( $unick );
-			foreach ( core::$nicks as $dnick => $data )
+			while ( list( $dnick, $data ) = each( core::$nicks ) )
 			{
 				if ( strtolower( $data['account'] ) != $lunick )
 					continue;
@@ -131,6 +131,7 @@ class os_vhost extends module
 					ircd::sethost( core::$config->nickserv->nick, $dnick, $host );
 				}
 			}
+			reset( core::$nicks );
 			// we need to check if the user is online and identified?
 		}
 		elseif ( strtolower( $mode ) == 'del' )
@@ -277,7 +278,7 @@ class os_vhost extends module
 			// update it and log it
 			
 			$lunick = strtolower( $unick );
-			foreach ( core::$nicks as $dnick => $data )
+			while ( list( $dnick, $data ) = each( core::$nicks ) )
 			{
 				if ( strtolower( $data['account'] ) != $lunick )
 					continue;
@@ -296,6 +297,7 @@ class os_vhost extends module
 					ircd::sethost( core::$config->nickserv->nick, $dnick, $user->vhost );
 				}
 			}
+			reset( core::$data );
 			// we need to check if the user is online and identified?
 		}
 		elseif ( strtolower( $mode ) == 'reject' )

@@ -126,17 +126,17 @@ foreach ( $contents as $line => $data )
 	if ( $split_data[0] == 'MDC' && $split_data[2] == 'url' )
 	{
 		$data_chan_flags[$split_data[1]]['url'] = $split_data[3];
-		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'] . 'u';
+		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'].'u';
 	}
 	if ( $split_data[0] == 'MDC' && $split_data[2] == 'private:entrymsg' )
 	{
 		$data_chan_flags[$split_data[1]]['welcome'] = $split_data[3];
-		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'] . 'w';
+		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'].'w';
 	}
 	if ( $split_data[0] == 'MDC' && $split_data[2] == 'email' )
 	{
 		$data_chan_flags[$split_data[1]]['email'] = $split_data[3];
-		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'] . 'e';
+		$data_chan_flags[$split_data[1]]['flags'] = $data_chan_flags[$split_data[1]]['flags'].'e';
 	}
 	// MDC, channel info, such as topics and settings
 	
@@ -166,11 +166,11 @@ foreach ( $contents as $line => $data )
 }
 // loop data
 
-print count( $data_users ) . "\r\n";
-print count( $data_user_flags ) . "\r\n";
-print count( $data_channels ) . "\r\n";
-print count( $data_chan_flags ) . "\r\n";
-print count( $data_chan_levels ) . "\r\n";
+print count( $data_users )."\r\n";
+print count( $data_user_flags )."\r\n";
+print count( $data_channels )."\r\n";
+print count( $data_chan_flags )."\r\n";
+print count( $data_chan_levels )."\r\n";
 
 /*mysql_close( $dblink );
 /*mysql_close( $dblink );
