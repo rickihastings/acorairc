@@ -14,19 +14,11 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class database implements driver
+class database
 {
 	
 	static public $driver;
 	// driver
-	
-	/*
-	* __construct (private)
-	* 
-	* @params
-	* void
-	*/
-	private function __construct() { }
 	
 	/*
 	* factory
@@ -34,17 +26,17 @@ class database implements driver
 	* @params
 	* $driver - mysql
 	*/
-	static public function factory( $driver )
+	static public function factory( $drivers )
 	{
-		if ( require( BASEPATH.'/core/drivers/'.$driver.'.php' ) )
+		if ( require( BASEPATH.'/core/drivers/'.$drivers.'.php' ) )
 		{
-			core::alog( 'factory(): using '.$driver.' database driver', 'BASIC' );
-            self::$driver = new $driver;
+			core::alog( 'factory(): using '.$drivers.' database driver', 'BASIC' );
+            self::$driver = new $drivers;
             // store the instance here
         }
 		else
 		{
-			core::alog( 'factory(): failed to open '.$driver.' database driver', 'BASIC' );
+			core::alog( 'factory(): failed to open '.$drivers.' database driver', 'BASIC' );
             
             core::save_logs();
             // force a log save
@@ -65,25 +57,34 @@ class database implements driver
 	/*
 	* num_rows
 	*/
-	static public function num_rows( $resource )
+	static public function num_rows( &$resource )
 	{
-		return self::$driver->num_rows( $resource );
+		if ( is_resource( $resource ) || is_array( $resource ) )
+			return self::$driver->num_rows( $resource );
+		else
+			return 0;
 	}
 	
 	/*
 	* row
 	*/
-	static public function row( $resource )
+	static public function row( &$resource )
 	{
-		return self::$driver->row( $resource );
+		if ( is_resource( $resource ) || is_array( $resource ) )
+			return self::$driver->row( $resource );
+		else
+			return false;
 	}
 	
 	/*
 	* fetch
 	*/
-	static public function fetch( $resource )
+	static public function fetch( &$resource )
 	{
-		return self::$driver->fetch( $resource );
+		if ( is_resource( $resource ) || is_array( $resource ) )
+			return self::$driver->fetch( $resource );
+		else
+			return false;
 	}
 	
 	/*

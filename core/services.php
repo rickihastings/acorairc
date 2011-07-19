@@ -106,7 +106,7 @@ class services
 			
 		$snick = ( $identified ) ? core::$nicks[$nick]['account'] : $nick;
 		$user_q = database::select( 'users', $array, array( 'display', '=', $snick ) );
-
+		
 		if ( database::num_rows( $user_q ) == 0 )
 			return false;
 		// user isnt registered || isnt identified
@@ -172,7 +172,6 @@ class services
 		// if they are registered, we check their means of contact
 	}
 	
-	
 	/*
 	* match
 	* 
@@ -204,7 +203,7 @@ class services
 		preg_match( $regex, $hostname, $r_matches );
 		// match it
 		
-		if ( count( $r_matches ) != 0 || $hostname == $mask )
+		if ( count( $r_matches ) != 0 || strcasecmp( $hostname, $mask ) == 0 )
 			return true;
 		else
 			return false;

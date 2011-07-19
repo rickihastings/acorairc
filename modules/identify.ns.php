@@ -81,7 +81,7 @@ class ns_identify extends module
 		}
 		// wrong syntax damit!
 		
-		if ( $user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) )
+		if ( ( $user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) ) !== false )
 		{
 			if ( $user->validated == 0 )
 			{

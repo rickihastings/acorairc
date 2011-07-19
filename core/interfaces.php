@@ -136,16 +136,16 @@ abstract class module
 interface driver
 {
 	
-	static public function ping();
-	static public function num_rows( $resource );
-	static public function row( $resource );
-	static public function fetch( $resource );
-	static public function quote( $string );
-	static public function optimize();
-	static public function select( $table, $what, $where = '', $order = '', $limit = '' );
-	static public function update( $table, $what, $where = '' );
-	static public function insert( $table, $what );
-	static public function delete( $table, $where = '' );
+	public function ping();
+	public function num_rows( &$resource );
+	public function row( &$resource );
+	public function fetch( &$resource );
+	public function quote( $string );
+	public function optimize();
+	public function select( $table, $what, $where = '', $order = '', $limit = '' );
+	public function update( $table, $what, $where = '' );
+	public function insert( $table, $what );
+	public function delete( $table, $where = '' );
 	// main functions
 }
 

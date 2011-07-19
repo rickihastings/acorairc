@@ -65,7 +65,7 @@ class mysql implements driver
 	* @params
 	* void
 	*/
-	static public function ping()
+	public function ping()
 	{
 		if ( !mysql_ping( self::$link ) )
 		{
@@ -87,7 +87,7 @@ class mysql implements driver
 	* @params
 	* $resource - The result to fetch
 	*/
-	static public function num_rows( $resource )
+	public function num_rows( &$resource )
 	{
 		return mysql_num_rows( $resource );
 	}
@@ -98,7 +98,7 @@ class mysql implements driver
 	* @params
 	* $resource - The row to fetch
 	*/
-	static public function row( $resource )
+	public function row( &$resource )
 	{
 		return mysql_fetch_row( $resource );
 	}
@@ -109,7 +109,7 @@ class mysql implements driver
 	* @params
 	* $resource - The result to fetch
 	*/
-	static public function fetch( $resource )
+	public function fetch( &$resource )
 	{
 		return mysql_fetch_object( $resource );
 	}
@@ -120,11 +120,9 @@ class mysql implements driver
 	* @params
 	* $string - The string to clean
 	*/
-	static public function quote( $string )
+	public function quote( $string )
 	{
-		$string = mysql_real_escape_string( $string );
-		
-		return $string;
+		return mysql_real_escape_string( $string );
 	}
 	
 	/*
@@ -133,17 +131,17 @@ class mysql implements driver
 	* @params
 	* void
 	*/
-	static public function optimize()
+	public function optimize()
 	{
-		$tablesResult = mysql_query( "SHOW TABLES FROM ".core::$config->database->name );
-		$tname = "Tables_in_".core::$config->database->name;
+		$tables_result = mysql_query( 'SHOW TABLES FROM '.core::$config->database->name );
+		$tname = 'Tables_in_'.core::$config->database->name;
 		
-		while ( $row = database::fetch( $tablesResult ) )
+		while ( $row = database::fetch( $tables_result ) )
 		{
-			$query = "OPTIMIZE TABLE `".$row->$tname."`";
+			$query = 'OPTIMIZE TABLE `'.$row->$tname.'`';
 		
 			mysql_query( $query );
-			core::alog( $query, 'DATABASE' );
+			core::alog( 'query(): '.$query, 'DATABASE' );
 			// log query
 		}
 		// loop through our tables
@@ -162,9 +160,9 @@ class mysql implements driver
 	* $order - Order as an array
 	* $limit - As an array
 	*/
-	static public function select( $table, $what, $where = '', $order = '', $limit = '' )
+	public function select( $table, $what, $where = '', $order = '', $limit = '' )
 	{
-		$query = "SELECT ";
+		$query = 'SELECT ';
 		
 		if ( is_array( $what ) )
 		{
@@ -173,8 +171,8 @@ class mysql implements driver
 			{
 				$i++;
 				
-				if ( $i == count( $what ) ) $query .= "`".$var."`";
-				else $query .= "`".$var."`, ";
+				if ( $i == count( $what ) ) $query .= '`'.$var.'`';
+				else $query .= '`'.$var."`, ";
 			}
 		}
 		elseif ( $what == '*' )
@@ -183,35 +181,35 @@ class mysql implements driver
 		}
 		// construct the what part, `max_users` etc.
 		
-		$query .= " FROM `".core::$config->database->prefix.$table."`";
+		$query .= ' FROM `'.core::$config->database->prefix.$table.'`';
 		// the table
 		
 		if ( $where != '' && is_array( $where ) )
 		{
-			$query .= " WHERE ";
+			$query .= ' WHERE ';
 			
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
-				$val = self::quote( $val );
+				$val = $this->quote( $val );
 				
 				$i++;
 				if ( $i == 1 )
 				{
-					$query .= "`".$val."`";
+					$query .= '`'.$val.'`';
 				}
 				elseif ( $i == 3 )
 				{
-					$query .= "'".$val."'";
+					$query .= '\''.$val.'\'';
 				}
 				elseif ( $i == 4 )
 				{
 					$i = 0;
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 				else
 				{
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 			}
 		}
@@ -219,29 +217,29 @@ class mysql implements driver
 		
 		if ( $order != '' && is_array( $order ) )
 		{
-			$query .= " ORDER BY ";
+			$query .= ' ORDER BY ';
 			
 			foreach ( $order as $index => $val )
 			{
-				$val = self::quote( $val );
-				$query .= "`".$index."` ".$val;
+				$val = $this->quote( $val );
+				$query .= '`'.$index.'` '.$val;
 			}
 		}
 		// order by
 		
 		if ( $limit != '' && is_array( $limit ) )
 		{
-			$query .= " LIMIT ";
+			$query .= ' LIMIT ';
 			
 			foreach ( $limit as $index => $val )
 			{
-				$val = self::quote( $val );
-				$query .= $index.", ".$val;
+				$val = $this->quote( $val );
+				$query .= $index.', '.$val;
 			}
 		}
 		// order by
 		
-		core::alog( $query, 'DATABASE' );
+		core::alog( 'query(): '.$query, 'DATABASE' );
 		// log query
 		
 		return mysql_query( $query );
@@ -255,17 +253,17 @@ class mysql implements driver
 	* $what - What to update, as an array
 	* $where - The WHERE clause
 	*/
-	static public function update( $table, $what, $where = '' )
+	public function update( $table, $what, $where = '' )
 	{
-		$query = "UPDATE `".core::$config->database->prefix.$table."` SET ";
+		$query = 'UPDATE `'.core::$config->database->prefix.$table.'` SET ';
 		// the table
 			
 		$i = 0;
 		foreach ( $what as $index => $val )
 		{
 			$i++;
-			if ( $i == count( $what ) ) $query .= "`".$index."` = '".self::quote( $val )."'";
-			else $query .= " `".$index."` = '".self::quote( $val )."', ";
+			if ( $i == count( $what ) ) $query .= '`'.$index.'` = \''.$this->quote( $val ).'\'';
+			else $query .= ' `'.$index.'` = \''.$this->quote( $val ).'\', ';
 		}
 		// the what part, SET `field` = '1'
 		
@@ -276,31 +274,31 @@ class mysql implements driver
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
-				$val = self::quote( $val );
+				$val = $this->quote( $val );
 				
 				$i++;
 				if ( $i == 1 )
 				{
-					$query .= "`".$val."`";
+					$query .= '`'.$val.'`';
 				}
 				elseif ( $i == 3 )
 				{
-					$query .= "'".$val."'";
+					$query .= '\''.$val.'\'';
 				}
 				elseif ( $i == 4 )
 				{
 					$i = 0;
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 				else
 				{
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 			}
 		}
 		// and the where part: `id` = '1'
 		
-		core::alog( $query, 'DATABASE' );
+		core::alog( 'query(): '.$query, 'DATABASE' );
 		// log query
 		
 		return mysql_query( $query );
@@ -313,9 +311,9 @@ class mysql implements driver
 	* $table - The table to insert to
 	* $what - What to insert, as an array
 	*/
-	static public function insert( $table, $what )
+	public function insert( $table, $what )
 	{
-		$query = "INSERT INTO `".core::$config->database->prefix.$table."` ";
+		$query = 'INSERT INTO `'.core::$config->database->prefix.$table.'` ';
 		// the table
 		
 		foreach ( $what as $index => $val )
@@ -329,22 +327,22 @@ class mysql implements driver
 		foreach ( $fieldarray as $value )
 		{
 			$i++;
-			if ( $i == 1 ) $query .= "(`".$value."`, ";
-			elseif ( $i == count( $fieldarray ) ) $query .= "`".$value."`)";
-			else $query .= "`".$value."`, ";
+			if ( $i == 1 ) $query .= '(`'.$value.'`, ';
+			elseif ( $i == count( $fieldarray ) ) $query .= '`'.$value.'`)';
+			else $query .= '`'.$value."`, ";
 		}
 		
 		$i = 0;
 		foreach ( $valuearray as $value )
 		{
 			$i++;
-			if ( $i == 1 ) $query .= " VALUES('".self::quote( $value )."', ";
-			elseif ( $i == count( $fieldarray ) ) $query .= "'".self::quote( $value )."')";
-			else $query .= "'".self::quote( $value )."', ";
+			if ( $i == 1 ) $query .= ' VALUES(\''.$this->quote( $value ).'\', ';
+			elseif ( $i == count( $fieldarray ) ) $query .= '\''.$this->quote( $value ).'\')';
+			else $query .= '\''.$this->quote( $value ).'\', ';
 		}
 		// what are we inserting?
 		
-		core::alog( $query, 'DATABASE' );
+		core::alog( 'query(): '.$query, 'DATABASE' );
 		// log query
 		
 		return mysql_query( $query );
@@ -357,43 +355,43 @@ class mysql implements driver
 	* $table - The table to delete from
 	* $where - The WHERE clause
 	*/
-	static public function delete( $table, $where = '' )
+	public function delete( $table, $where = '' )
 	{
-		$query = "DELETE FROM `".core::$config->database->prefix.$table."`";
+		$query = 'DELETE FROM `'.core::$config->database->prefix.$table.'`';
 		// the table
 		
 		if ( $where != '' && is_array( $where ) )
 		{
-			$query .= " WHERE ";
+			$query .= ' WHERE ';
 			
 			$i = 0;
 			foreach ( $where as $index => $val )
 			{
-				$val = self::quote( $val );
+				$val = $this->quote( $val );
 				
 				$i++;
 				if ( $i == 1 )
 				{
-					$query .= "`".$val."`";
+					$query .= '`'.$val.'`';
 				}
 				elseif ( $i == 3 )
 				{
-					$query .= "'".$val."'";
+					$query .= '\''.$val.'\'';
 				}
 				elseif ( $i == 4 )
 				{
 					$i = 0;
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 				else
 				{
-					$query .= " ".$val." ";
+					$query .= ' '.$val.' ';
 				}
 			}
 		}
 		// and the where part: `id` = '1'
 		
-		core::alog( $query, 'DATABASE' );
+		core::alog( 'query(): '.$query, 'DATABASE' );
 		// log query
 		
 		return mysql_query( $query );
