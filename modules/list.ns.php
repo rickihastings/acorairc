@@ -98,7 +98,8 @@ class ns_list extends module
 		{
 			$x++;
 			$false_nick = $user->display;
-			$x_s = $x;
+			$x_s = explode( '-', $limit );
+			$x_s = $x_s[0] + $x;
 			
 			$y_s = strlen( $x_s );
 			for ( $i_s = $y_s; $i_s < 5; $i_s++ )

@@ -207,7 +207,7 @@ class os_ignore extends module
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_EMPTY );
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_B, array( 'num' => 0 ) );
 			// empty list.
 		}
 	}

@@ -92,11 +92,16 @@ class core
 		database::factory( self::$config->database->driver );
 		self::connect();
 		self::protocol_init();
-		// setup the db.
-		// connect to the socket
-		// load the protocol class
+		// setup the db, connect to the socket,load the protocol class
 		
-		$select = database::select( 'core', array( 'max_users' ), array( 'id', '=', '1' ) );
+		$select = database::select( 'core', array( 'max_users', 'max_userstime' ) );
+		if ( database::num_rows( $select ) == 0 )
+		{
+			database::insert( 'core', array( 'max_users' => 0, 'max_userstime' => self::$network_time ) );
+			$select = database::select( 'core', array( 'max_users', 'max_userstime' ) );
+		}
+		// if there is no max users, create a row
+		
 		$max_users = database::row( $select );
 		// get the max users
 		

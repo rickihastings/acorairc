@@ -381,7 +381,6 @@ $help = (object) array(
 	'OS_MODUNLOAD_2'	=> 'Unable to unload {name}',
 	'OS_MODUNLOAD_3'	=> 'Unloaded {name} [{version}] [{extra}]',
 	// modules
-	'OS_IGNORE_EMPTY'	=> 'There are currently no ignored nicknames',
 	'OS_IGNORE_CLEARED'	=> 'Services ignore list cleared, {users} removed',
 	'OS_IGNORE_ADD'		=> '{nick} has been added to the services ignore list',
 	'OS_IGNORE_DEL'		=> '{nick} has been deleted from the services ignore list',
