@@ -331,7 +331,14 @@ class commands
 			// determine whether we need to reorder, if we do mark that we save the rest for later.
 			
 			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) || $meta['privs'] == '' )
+			{
 				services::communicate( $bot, $nick, $meta['info'] );
+			}
+			else
+			{
+				services::communicate( $bot, $nick, core::$help->CORE_UNKNOWN_HELP, array( 'command' => $command ) );
+				return false;
+			}
 		}
 		// display the main stuff
 		
