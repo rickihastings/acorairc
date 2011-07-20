@@ -29,6 +29,7 @@ class core
 	static public $debug = false;
 	static public $services_account = false;
 	static public $hide_chans = true;
+	static public $log_levels = array();
 	// our main static variables, these are all very important.
 	
 	static public $bots = array();
@@ -41,7 +42,7 @@ class core
 	// we set $uids anyway, although its only used on networks
 	// that use TS6 - UUID/SID style protocol, it's here anyway.
 	
-	static public $version = '0.4.5beta+Cymric';
+	static public $version = '0.5alpha';
 	// version
 	
 	static public $end_burst = false;
@@ -68,8 +69,24 @@ class core
 		$parser = new parser( CONFPATH.'services.conf' );
 		// get the config values.
 		
+		self::$log_levels = explode( ' ', self::$config->settings->loglevel );
 		self::$debug = ( $argv[1] == 'debug' ) ? true : false;
 		// is debug mode running? y/n
+		foreach ( self::$log_levels as $type )
+		{
+			$message = 'FILE: log/'.$type.'.log; DATE: '.date( 'd/m/Y H:i:s', time() );
+			$length = strlen( $message );
+			$divider = '';
+			for ( $i = 0; $i < $length; $i++ )
+				$divider .= '-';
+			// set up some variables
+			
+			self::$log_data[$type][] = $divider;
+			self::$log_data[$type][] = $message;
+			self::$log_data[$type][] = $divider;
+		}
+		// immediately populate log data with some values that will be written to the files first
+		// just a date/divider etc
 		
 		if ( isset( self::$config->operserv ) ) self::$service_bots[] = 'operserv';
 		if ( isset( self::$config->nickserv ) ) self::$service_bots[] = 'nickserv';
@@ -231,7 +248,7 @@ class core
 				foreach ( self::$debug_data as $line => $message )
 				{
 					if ( trim( $message ) != '' || trim( $message ) != null )
-						print "[".date( 'H:i:s', time() )."] ".$message."\r\n";
+						print "[".date( 'd/m/Y H:i:s', time() )."] ".$message."\r\n";
 					// only print if we have something to print
 						
 					unset( self::$debug_data[$line] );
@@ -498,31 +515,32 @@ class core
 	*/
 	static public function save_logs()
 	{
-		$filepath = BASEPATH.'/log/services-'.date( 'd-m-Y', self::$network_time ). '.log';
+		if ( !is_dir( BASEPATH.'/log' ) )
+			mkdir( BASEPATH.'/log' );
+		// does the log dir exist?	
 		
-		if ( file_exists( $filepath ) ) chmod( $filepath, 0777 );
-		// if the file exists, chmod it to 0777
-		
-		if ( count( self::$log_data ) > 0 )
+		foreach ( self::$log_data as $type => $messages )
 		{
-			foreach ( self::$log_data as $line => $message )
-			{
-				$filemsg = "[".date( 'H:i:s', time() )."] ".$message."\r\n";
-					
-				if ( !$fp = fopen( $filepath, 'a' ) )
-					return false;
-					
-				fwrite( $fp, $filemsg, strlen( $filemsg ) );
-				fclose( $fp );	
-				// and we ALSO send it into the logfile
-				
-				unset( self::$log_data[$line] );
-			}
-		
-		}
-		else
-		{
-			self::$log_data = array();
+			$filepath = BASEPATH.'/log/'.$type.'.log';
+			if ( file_exists( $filepath ) )
+				chmod( $filepath, 0777 );
+			else
+				touch( $filepath );
+			// do some checks
+			
+			if ( !$fp[$type] = fopen( $filepath, 'a' ) )
+				return false;
+			// STILL can't open the files :@
+			
+			$filemsg = '';
+			foreach ( $messages as $line => $message )
+				$filemsg .= $message."\n";
+			
+			fwrite( $fp[$type], $filemsg, strlen( $filemsg ) );
+			fclose( $fp[$type] );
+			// and we ALSO send it into the logfile
+			
+			unset( self::$log_data[$type] );
 		}
 	}
 	
@@ -745,16 +763,18 @@ class core
 	*/
 	static public function alog( $message, $type = 'CHAN' )
 	{
-		if ( $type != 'CHAN' && ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
+		$type = strtolower( $type );
+	
+		if ( $type != 'chan' && ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
 		{
-			if ( strcasecmp( self::$config->settings->loglevel, $type ) == 0 || self::$config->settings->loglevel == 'all' )
+			if ( in_array( $type, self::$log_levels ) || self::$config->settings->loglevel == 'all' )
 			{
 				if ( self::$debug && !isset( self::$config->conn ) )
-					print "[".date( 'H:i:s', time() )."] ".$message."\r\n";
-				elseif ( !in_array( $message, self::$debug_data ) )
+					print '['.date( 'd/m/Y H:i:s', time() ).'] '.$message."\n";
+				if ( !in_array( $message, self::$debug_data ) )
 					self::$debug_data[] = $message;
-				elseif ( !in_array( $message, self::$log_data ) )
-					self::$log_data[] = $message;
+				if ( !in_array( $message, self::$log_data ) )
+					self::$log_data[$type][] = '['.date( 'd/m/Y H:i:s', time() ).'] '.$message;
 				// if we're not connected, and in debug mode
 				// just send it out, else they wont actually see the message and
 				// it'll just end up in the log file
@@ -762,8 +782,11 @@ class core
 			}
 		}
 		// debug on?
-		elseif ( $type == 'CHAN' && isset( self::$config->settings->logchan ) && isset( modules::$list['os_global'] ) )
+		elseif ( $type == 'chan' && isset( self::$config->settings->logchan ) && isset( modules::$list['os_global'] ) )
 		{
+			if ( !in_array( $message, self::$log_data ) )
+				self::$log_data[$type][] = '['.date( 'd/m/Y H:i:s', time() ).'] '.self::$config->global->nick.'/'.self::$config->settings->logchan.': '.$message;
+			// we also log logchan stuff to file, as this can prove very useful.
 			ircd::msg( self::$config->global->nick, self::$config->settings->logchan, $message );
 			// send the message into the logchan		
 			return false;

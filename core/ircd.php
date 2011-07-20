@@ -109,7 +109,7 @@ class ircd_handle
 		{
 			if ( core::$config->settings->logconnections )
 				core::alog( 'CONNECT: '.$nick.' ('.core::$nicks[$nick]['ident'].'@'.core::$nicks[$nick]['oldhost'].' => '.core::$nicks[$nick]['host'].') ('.core::$nicks[$nick]['gecos'].') connected to the network ('.core::$nicks[$nick]['server'].')' );
-			core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'BASIC' );
+			core::alog( 'on_connect(): '.$nick.' connected to '.$server, 'MISC' );
 			core::max_users();
 			$method = 'on_connect';
 		}
@@ -162,7 +162,7 @@ class ircd_handle
 			core::alog( 'NICK: '.$nick.' ('.core::$nicks[$new_nick]['ident'].'@'.core::$nicks[$new_nick]['oldhost'].' => '.core::$nicks[$new_nick]['host'].') ('.core::$nicks[$new_nick]['gecos'].') changed nick to '.$new_nick.' ('.core::$nicks[$new_nick]['server'].')' );
 		// log
 		
-		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'BASIC' );
+		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_nick_change'] as $l => $class )
 			call_user_func( array( $class, 'on_nick_change' ), $nick, $new_nick );
@@ -204,7 +204,7 @@ class ircd_handle
 		}
 		reset( core::$chans );
 		
-		core::alog( 'on_quit(): '.$nick.' quit', 'BASIC' );
+		core::alog( 'on_quit(): '.$nick.' quit', 'MISC' );
 		
 		foreach ( modules::$event_methods['on_quit'] as $l => $class )
 			call_user_func( array( $class, 'on_quit' ), $nick, $startup );
@@ -222,7 +222,7 @@ class ircd_handle
 	{
 		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];	
 		core::$nicks[$nick]['host'] = $ircdata[2];
-		core::alog( 'on_host_change(): '.$nick.'\'s host changed to '.$host, 'BASIC' );
+		core::alog( 'on_host_change(): '.$nick.'\'s host changed to '.$host, 'MISC' );
 	}
 	
 	/*
@@ -235,7 +235,7 @@ class ircd_handle
 	static public function handle_ident_change( $nick, $ident )
 	{
 		core::$nicks[$nick]['ident'] = $ident;
-		core::alog( 'on_ident_change(): '.$nick.' changed ident to '.$ident, 'BASIC' );
+		core::alog( 'on_ident_change(): '.$nick.' changed ident to '.$ident, 'MISC' );
 	}
 	
 	/*
@@ -248,7 +248,7 @@ class ircd_handle
 	static public function handle_gecos_change( $nick, $gecos )
 	{
 		core::$nicks[$nick]['gecos'] = $gecos;
-		core::alog( 'on_gecos_change(): '.$nick.' changed gecos to '.$gecos, 'BASIC' );
+		core::alog( 'on_gecos_change(): '.$nick.' changed gecos to '.$gecos, 'MISC' );
 	}
 	
 	/*
@@ -265,7 +265,7 @@ class ircd_handle
 		mode::handle_params( $chan, $mode_array );
 		// we only send it if the mode actually has anything in it.
 	
-		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'BASIC' );
+		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_mode'] as $l => $class )
 			call_user_func( array( $class, 'on_mode' ), $nick, $chan, $modes );
@@ -282,7 +282,7 @@ class ircd_handle
 	{
 		core::$chans[$chan]['topic'] = $topic;
 		core::$chans[$chan]['topic_setter'] = $nick;
-		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'BASIC' );
+		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'MISC' );
 		
 		foreach ( modules::$event_methods['on_topic'] as $l => $class )
 			call_user_func( array( $class, 'on_topic' ), $nick, $chan, $topic );
@@ -347,7 +347,7 @@ class ircd_handle
 				core::$chans[$chan]['users'][$nick] = '';
 			// maintain the logged users array
 			
-			core::alog( 'on_join(): '.$nick.' joined '.$chan, 'BASIC' );
+			core::alog( 'on_join(): '.$nick.' joined '.$chan, 'MISC' );
 			
 			core::join_flood_check( $nick, $chan );
 			// flood check
@@ -368,7 +368,7 @@ class ircd_handle
 	{
 		unset( core::$chans[$chan]['users'][$nick] );
 		// remove the user out of the array
-		core::alog( 'on_part(): '.$nick.' left '.$chan, 'BASIC' );
+		core::alog( 'on_part(): '.$nick.' left '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_part'] as $l => $class )
 			call_user_func( array( $class, 'on_part' ), $nick, $chan );
@@ -385,7 +385,7 @@ class ircd_handle
 	{
 		unset( core::$chans[$chan]['users'][$who] );
 		// again, move them out.
-		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
+		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_kick'] as $l => $class )
 			call_user_func( array( $class, 'on_kick' ), $nick, $who, $chan );
@@ -401,7 +401,7 @@ class ircd_handle
 	static public function handle_oper_up( $nick, $type = '' )
 	{
 		core::$nicks[$nick]['ircop'] = true;
-		core::alog( 'on_oper_up(): '.$nick.' opered up to '.$type, 'BASIC' );
+		core::alog( 'on_oper_up(): '.core::get_full_hostname( $nick ).' OPER up', 'BASIC' );
 		
 		foreach ( modules::$event_methods['on_oper_up'] as $l => $class )
 			call_user_func( array( $class, 'on_oper_up' ), $nick );
@@ -592,7 +592,7 @@ class ircd_handle
 		unset( core::$uids[$uid] );
 		// we unset that, just to save memory
 		
-		core::alog( 'remove_client(): removed '.$nick, 'BASIC' );
+		core::alog( 'remove_client(): removed '.$nick, 'MISC' );
 		// debug
 	}
 	
@@ -604,7 +604,7 @@ class ircd_handle
 	*/
 	static public function wallops( $nick, $message )
 	{
-		core::alog( 'wallops(): '.$nick.' sent a wallops', 'BASIC' );
+		core::alog( 'wallops(): '.$nick.' sent a wallops', 'MISC' );
 		// debug info
 	}
 	
@@ -616,7 +616,7 @@ class ircd_handle
 	*/
 	static public function global_notice( $nick, $mask, $message )
 	{
-		core::alog( 'global_notice(): sent from '.$nick, 'BASIC' );
+		core::alog( 'global_notice(): sent from '.$nick, 'MISC' );
 		// debug info
 		
 		while ( list( $user, $data ) = each( core::$nicks ) )
@@ -647,7 +647,7 @@ class ircd_handle
 		mode::handle_params( $chan, $mode_array );
 		// we only send it if the mode actually has anything in it.
 		
-		core::alog( 'mode(): '.$nick.' set '.$mode.' on '.$chan, 'BASIC' );
+		core::alog( 'mode(): '.$nick.' set '.$mode.' on '.$chan, 'MISC' );
 		// debug info
 	}
 	
@@ -659,7 +659,7 @@ class ircd_handle
 	*/
 	static public function umode( $nick, $user, $mode )
 	{
-		core::alog( 'umode(): '.$nick.' set '.$mode.' on '.$user, 'BASIC' );
+		core::alog( 'umode(): '.$nick.' set '.$mode.' on '.$user, 'MISC' );
 		// debug info
 	}
 	
@@ -674,7 +674,7 @@ class ircd_handle
 		core::$chans[$chan]['users'][$nick] = '';
 		// add us to the channel array
 		
-		core::alog( 'join_chan(): '.$nick.' joined '.$chan, 'BASIC' );
+		core::alog( 'join_chan(): '.$nick.' joined '.$chan, 'MISC' );
 		// debug info
 	}
 	
@@ -689,7 +689,7 @@ class ircd_handle
 		unset( core::$chans[$chan]['users'][$nick] );
 		// remove us from the channel
 		
-		core::alog( 'part_chan(): '.$nick.' left '.$chan, 'BASIC' );
+		core::alog( 'part_chan(): '.$nick.' left '.$chan, 'MISC' );
 		// debug info
 	}
 	
@@ -701,7 +701,7 @@ class ircd_handle
 	*/
 	static public function topic( $nick, $chan, $topic )
 	{
-		core::alog( 'topic(): '.$nick.' set a topic for '.$chan, 'BASIC' );
+		core::alog( 'topic(): '.$nick.' set a topic for '.$chan, 'MISC' );
 		// debug info
 	}
 	
@@ -713,7 +713,7 @@ class ircd_handle
 	*/
 	static public function kick( $nick, $user, $chan, $reason = '' )
 	{				
-		core::alog( 'kick(): '.$nick.' kicked '.$user.' from '.$chan, 'BASIC' );
+		core::alog( 'kick(): '.$nick.' kicked '.$user.' from '.$chan, 'MISC' );
 		// debug info
 	}
 		
@@ -725,7 +725,7 @@ class ircd_handle
 	*/
 	static public function sethost( $from, $nick, $host )
 	{
-		core::alog( 'sethost(): '.$from.' set '.$nick.'\'s host', 'BASIC' );
+		core::alog( 'sethost(): '.$from.' set '.$nick.'\'s host', 'MISC' );
 		// debug info
 		
 		core::$nicks[$nick]['oldhost'] = core::$nicks[$nick]['host'];
@@ -740,7 +740,7 @@ class ircd_handle
 	*/
 	static public function setident( $from, $nick, $ident )
 	{
-		core::alog( 'setident(): '.$from.' set '.$nick.'\'s ident', 'BASIC' );
+		core::alog( 'setident(): '.$from.' set '.$nick.'\'s ident', 'MISC' );
 		// debug info
 			
 		core::$nicks[$nick]['ident'] = $ident;
@@ -754,7 +754,7 @@ class ircd_handle
 	*/
 	static public function svsnick( $old_nick, $new_nick, $timestamp )
 	{
-		core::alog( 'svsnick(): '.$old_nick.' changed to '.$new_nick, 'BASIC' );
+		core::alog( 'svsnick(): '.$old_nick.' changed to '.$new_nick, 'MISC' );
 		// debug info
 	}
 	
@@ -766,7 +766,7 @@ class ircd_handle
 	*/
 	static public function kill( $nick, $user, $message )
 	{
-		core::alog( 'kill(): '.$nick.' killed '.$user, 'BASIC' );
+		core::alog( 'kill(): '.$nick.' killed '.$user, 'MISC' );
 		// debug info
 	}
 	
@@ -806,7 +806,7 @@ class ircd_handle
 	*/
 	static public function push( $from, $numeric, $nick, $message )
 	{
-		core::alog( 'push(): '.$from.' pushed text to '.$nick.' on numeric '.$numeric, 'BASIC' );
+		core::alog( 'push(): '.$from.' pushed text to '.$nick.' on numeric '.$numeric, 'MISC' );
 		// debug info
 	}
 	

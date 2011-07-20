@@ -403,8 +403,6 @@ class commands
 	*/
 	static public function get_command( $hook, $nick, $command )
 	{
-		// this works better than i imagined
-		
 		if ( services::check_mask_ignore( $nick ) )
 			return false;
 		// this is basically to check if we have
@@ -419,9 +417,10 @@ class commands
 		$commands = explode( ' ', $command );
 		$num_cmds = count( $commands );
 		$commands_r = $commands;
+		$lower_cmd = strtolower( $commands[0] );
 		// some vars..
 		
-		if ( strtolower( $commands[0] ) == 'help' || $command == '' || substr( $commands[0], 0, 1 ) == '' )
+		if ( $lower_cmd == 'help' || $command == '' || substr( $lower_cmd, 0, 1 ) == '' )
 			return false;
 		// its a command we don't need to deal with, ignore it
 		
@@ -464,7 +463,29 @@ class commands
 		}
 		// reject the command attempt. output an error
 		
-		//modules::$list[$class]['class']->$function( $nick, $new_params );
+		if ( ( $lower_cmd == 'identify' || $lower_cmd == 'id' ) && count( $new_params ) == 2 && $hook == 'nickserv' )
+			$log_p = $new_params[0].' *****';
+		elseif ( ( $lower_cmd == 'identify' || $lower_cmd == 'id' ) && count( $new_params ) == 1 && $hook == 'nickserv' )
+			$log_p = '*****';
+		elseif ( $lower_cmd == 'register' && $hook == 'nickserv' )
+			$log_p = '***** '.$new_params[1];
+		elseif ( $lower_cmd == 'password' && $hook == 'nickserv' )
+			$log_p = '***** *****';
+		elseif ( $lower_cmd == 'sapass' && $hook == 'nickserv' )
+			$log_p = $new_params[0].' ***** *****';
+		elseif ( ( $lower_cmd == 'recover' || $lower_cmd == 'release' || $lower_cmd == 'ghost' ) && $hook == 'nickserv' )
+			$log_p = $new_params[0].' *****';
+		else
+			$log_p = implode( ' ', $new_params );
+		// strip passwords and stuff out
+		
+		core::alog( $bot.' '.core::$nicks[$nick]['account'].':'.core::get_full_hostname( $nick ).' :'.strtoupper( $commands_r[0] ).' '.$log_p, 'COMMANDS' );
+		// log it as COMMANDS
+		$account_cmds = array( 'register', 'flags', 'levels', 'drop', 'sadrop', 'saflags', 'password', 'sapass' );
+		if ( in_array( $lower_cmd, $account_cmds ) && core::$nicks[$nick]['identified'] )
+			core::alog( $bot.' '.core::$nicks[$nick]['account'].':'.core::get_full_hostname( $nick ).' :'.strtoupper( $commands_r[0] ).' '.$log_p, 'ACCOUNT' );
+		// log it as ACCOUNT
+		
 		call_user_func_array( array( $class, $function ), array( $nick, $new_params ) );
 		// it does! execute the callback
 	}
