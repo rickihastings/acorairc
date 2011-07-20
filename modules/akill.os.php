@@ -70,10 +70,6 @@ class os_akill extends module
 		
 		if ( $mode == 'add' )
 		{
-			$hostname = $ircdata[1];
-			$rexpire = $ircdata[2]; 
-			$reason = core::get_data_after( $ircdata, 3 );
-			
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -81,7 +77,9 @@ class os_akill extends module
 			}
 			// you have to be root to add/del an akill
 			
-			$reason = ( $reason == '' ) ? 'No reason' : $reason;
+			$hostname = $ircdata[1];
+			$rexpire = $ircdata[2]; 
+			$reason = ( core::get_data_after( $ircdata, 3 ) == '' ) ? 'No reason' : core::get_data_after( $ircdata, 3 );
 			$days = $hours = $minutes = $expire = 0;
 			// grab the reason etc
 			
@@ -111,29 +109,12 @@ class os_akill extends module
 			}
 			// loop through calculating it into seconds
 			
-			if ( trim( $hostname ) == '' || count( $parsed ) == 0 )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'AKILL' ) );
-				return false;
-			}
-			// wrong syntax
-			
-			$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
-			
 			self::_add_akill( $nick, $hostname, $expire, $reason );
 			// add the ban
-			
-			if ( $expire != 0 )
-				timer::add( array( 'os_akill', '_del_akill', array( $nick, $hostname, true ) ), $expire, 1 );
-			// add a timer to remove the ban.
 		}
 		// mode is add
 		elseif ( $mode == 'del' )
 		{
-			$hostname = $ircdata[1];
-			$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
-			// get our vars
-		
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -141,7 +122,7 @@ class os_akill extends module
 			}
 			// you have to be root to add/del an akill
 			
-			self::_del_akill( $nick, $hostname, false );
+			self::_del_akill( $nick, $ircdata[1], false );
 			// call del ip akill
 		}
 		// mode is del
@@ -195,42 +176,54 @@ class os_akill extends module
 	*/
 	static public function _add_akill( $nick, $hostname, $time, $reason )
 	{
+		if ( trim( $hostname ) == '' || count( $parsed ) == 0 )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'AKILL' ) );
+			return false;
+		}
+		// wrong syntax
+			
+		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
 		$check_record_q = database::select( 'sessions', array( 'hostmask', 'akill' ), array( 'hostmask', '=', $hostname, 'AND', 'akill', '=', 1 ) );
 		$expire = ( $time == 0 ) ? 'Never' : core::format_time( $time );
+		// set some vars
 		
-		if ( database::num_rows( $check_record_q ) == 0 )
-		{
-			database::insert( 'sessions', array( 'nick' => $nick, 'hostmask' => $hostname, 'description' => $reason, 'expire' => $time, 'time' => core::$network_time, 'akill' => 1, 'limit' => 0 ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
-			// as simple, as.
-			
-			while ( list( $unick, $data ) = each( core::$nicks ) )
-			{
-				if ( $data['ircop'] )
-					continue;
-				// skip ircops
-				
-				if ( services::match( $data['oldhost'], $mask ) )
-				{
-					ircd::kill( core::$config->operserv->nick, $unick, 'AKILLED: '.$reason );
-					core::alog( 'Auto kill matched ('.core::get_full_hostname( $unick ).'). Killed client' );
-				}
-				// search old vhost incase they've got a vee-host
-			}
-			reset( core::$nicks );
-			// loop users and autokill them. excluding ircops
-		}
-		else
+		if ( database::num_rows( $check_record_q ) != 0 )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_EXISTS, array( 'hostname' => $hostname ) );
-			// already got an exception 
+			return false;
 		}
+		// already got an exception 
+		
+		database::insert( 'sessions', array( 'nick' => $nick, 'hostmask' => $hostname, 'description' => $reason, 'expire' => $time, 'time' => core::$network_time, 'akill' => 1, 'limit' => 0 ) );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
+		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
+		// as simple, as.
+		
+		while ( list( $unick, $data ) = each( core::$nicks ) )
+		{
+			if ( $data['ircop'] )
+				continue;
+			// skip ircops
+			
+			if ( services::match( $data['oldhost'], $mask ) )
+			{
+				ircd::kill( core::$config->operserv->nick, $unick, 'AKILLED: '.$reason );
+				core::alog( 'Auto kill matched ('.core::get_full_hostname( $unick ).'). Killed client' );
+			}
+			// search old vhost incase they've got a vee-host
+		}
+		reset( core::$nicks );
+		// loop users and autokill them. excluding ircops
 		
 		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 		while ( $session = database::fetch( $query ) )
 			operserv::$session_rows[] = $session;
 		// re read the session array.
+		
+		if ( $expire != 0 )
+			timer::add( array( 'os_akill', '_del_akill', array( $nick, $hostname, true ) ), $expire, 1 );
+		// add a timer to remove the ban.
 	}
 	
 	/*
@@ -243,29 +236,28 @@ class os_akill extends module
 	*/
 	static public function _del_akill( $nick, $hostname, $expired = true )
 	{
+		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
 		$check_record_q = database::select( 'sessions', array( 'hostmask', 'akill' ), array( 'hostmask', '=', $hostname, 'AND', 'akill', '=', 1 ) );
+		// set some gear
 		
-		if ( database::num_rows( $check_record_q ) > 0 )
-		{
-			database::delete( 'sessions', array( 'hostmask', '=', $hostname ) );
-			
-			if ( $expired )
-			{
-				core::alog( core::$config->operserv->nick.': Auto kill for ('.$hostname.') expired' );
-			}
-			else
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
-				core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
-			}
-			// is it expiring or what??
-		}
-		else
+		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			if ( !$expired )
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_NOEXISTS, array( 'hostname' => $hostname ) );
+			return false;
 			// already got an exception
 		}
+		
+		database::delete( 'sessions', array( 'hostmask', '=', $hostname ) );
+		
+		if ( $expired )
+			core::alog( core::$config->operserv->nick.': Auto kill for ('.$hostname.') expired' );
+		else
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
+		}
+		// is it expiring or what??
 		
 		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 		while ( $session = database::fetch( $query ) )
@@ -282,47 +274,45 @@ class os_akill extends module
 	static public function _list_akill( $nick )
 	{
 		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'description', 'expire' ), array( 'akill', '=', 1 ) );
-		
-		if ( database::num_rows( $check_record_q ) > 0 )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
-			// t-o-l
-			
-			$x = 0;
-			while ( $session = database::fetch( $check_record_q ) )
-			{
-				$hostmask = $session->hostmask;
-				$expire = ( $session->expire == 0 ) ? 'Never' : core::format_time( $session->expire );
-				$x++;
-				
-				$num = $x;
-				$y_i = strlen( $num );
-				for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
-					$num .= ' ';
-				// tidy tidy, num
-				
-				if ( !isset( $session->hostmask[50] ) )
-				{
-					$y = strlen( $session->hostmask );
-					for ( $i = $y; $i <= 49; $i++ )
-						$hostmask .= ' ';
-				}
-				// this is just a bit of fancy fancy, so everything displays neat
-				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST, array( 'num' => $num, 'hostname' => $hostmask, 'nick' => $session->nick, 'expire' => $expire, 'desc' => $session->description ) );
-			}
-			// loop through the records
-			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => $x ) );
-		}
-		// display list
-		else
+		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => 0 ) );
+			return false;
 		}
 		// empty list. display the config record
+		
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_T );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
+		// t-o-l
+		
+		$x = 0;
+		while ( $session = database::fetch( $check_record_q ) )
+		{
+			$hostmask = $session->hostmask;
+			$expire = ( $session->expire == 0 ) ? 'Never' : core::format_time( $session->expire );
+			$x++;
+			
+			$num = $x;
+			$y_i = strlen( $num );
+			for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
+				$num .= ' ';
+			// tidy tidy, num
+			
+			if ( !isset( $session->hostmask[50] ) )
+			{
+				$y = strlen( $session->hostmask );
+				for ( $i = $y; $i <= 49; $i++ )
+					$hostmask .= ' ';
+			}
+			// this is just a bit of fancy fancy, so everything displays neat
+			
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST, array( 'num' => $num, 'hostname' => $hostmask, 'nick' => $session->nick, 'expire' => $expire, 'desc' => $session->description ) );
+		}
+		// loop through the records
+		
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => $x ) );
+		// display list
 	}
 }
 

@@ -17,7 +17,7 @@
 class os_shutdown extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -61,25 +61,21 @@ class os_shutdown extends module
 	{
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
-		
-		if ( services::oper_privs( $nick, 'root' ) )
-		{
-			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
-			{
-				ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
-			}
-			// is there a shutdown message?
-			
-			core::save_logs();
-			// save logs.
-			
-			ircd::shutdown( 'shutdown command from '.$nick, true );
-			// exit the program
-		}
-		else
+		if ( !services::oper_privs( $nick, 'root' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
 		}
+		
+		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
+			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
+		// is there a shutdown message?
+		
+		core::save_logs();
+		// save logs.
+		
+		ircd::shutdown( 'shutdown command from '.$nick, true );
+		// exit the program
 	}
 	
 	/*
@@ -94,58 +90,55 @@ class os_shutdown extends module
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
 		
-		if ( services::oper_privs( $nick, 'root' ) )
+		if ( !services::oper_privs( $nick, 'root' ) )
 		{
-			if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
-			{
-				ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
-			}
-			// is there a shutdown message?
-			
-			core::save_logs();
-			// save logs.
-			
-			ircd::shutdown( 'shutdown command from '.$nick, false );
-			// exit the server
-			
-			socket_engine::close( 'core' );
-			// close the socket first.
-			
-			if ( substr( php_uname(), 0, 7 ) != 'Windows' )
-			{
-				if ( core::$debug )
-					system( 'php '.BASEPATH.'/services.php debug' );
-				else
-					exec( 'php '.BASEPATH.'/services.php > /dev/null &' );
-				// reboot if we're running anything but windows
-				// if debug we send the output back to the screen, else we send it to /dev/null
-			}
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
+		
+		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
+			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
+		// is there a shutdown message?
+		
+		core::save_logs();
+		// save logs.
+		
+		ircd::shutdown( 'shutdown command from '.$nick, false );
+		// exit the server
+		
+		socket_engine::close( 'core' );
+		// close the socket first.
+		
+		if ( substr( php_uname(), 0, 7 ) != 'Windows' )
+		{
+			if ( core::$debug )
+				system( 'php '.BASEPATH.'/services.php debug' );
 			else
-			{
-				if ( !isset( core::$config->settings->php_dir ) || core::$config->settings->php_dir == '' )
-					define( 'PHPDIR', 'C:\php\php.exe' );
-				else
-					define( 'PHPDIR', core::$config->settings->php_dir );
-				// define where the php binary is located.
-				
-				exec( '@cd '.BASEPATH );
-				// cd to the basedir
-				
-				if ( core::$debug )
-					system( '@'.PHPDIR.' services.php debug' );
-				else
-					exec( '@'.PHPDIR.' services.php' );
-				// if we run windows we do a different method of reboot
-				// again if we debug we send it to the screen, if not.. we don't
-			}
-			
-			exit;
-			// exit the program
+				exec( 'php '.BASEPATH.'/services.php > /dev/null &' );
+			// reboot if we're running anything but windows
+			// if debug we send the output back to the screen, else we send it to /dev/null
 		}
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			if ( !isset( core::$config->settings->php_dir ) || core::$config->settings->php_dir == '' )
+				define( 'PHPDIR', 'C:\php\php.exe' );
+			else
+				define( 'PHPDIR', core::$config->settings->php_dir );
+			// define where the php binary is located.
+			
+			exec( '@cd '.BASEPATH );
+			// cd to the basedir
+			
+			if ( core::$debug )
+				system( '@'.PHPDIR.' services.php debug' );
+			else
+				exec( '@'.PHPDIR.' services.php' );
+			// if we run windows we do a different method of reboot
+			// again if we debug we send it to the screen, if not.. we don't
 		}
+		
+		exit;
+		// exit the program
 	}	
 }
 

@@ -63,6 +63,13 @@ class os_utilities extends module
 		// grab the ircdata, we only really need the server
 		// from here, and numeric.
 		
+		if ( !services::oper_privs( $nick, 'local_op' ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
+			return false;
+		}
+		// access?
+		
 		if ( trim( $server ) == '' || trim( $numeric ) == '' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'JUPE' ) );
@@ -70,13 +77,6 @@ class os_utilities extends module
 		}
 		// is the server value empty?
 		// if it is we tell them that it's the invalid syntax
-		
-		if ( !services::oper_privs( $nick, 'local_op' ) )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
-			return false;
-		}
-		// access?
 		
 		if ( $server == core::$config->server->name || isset( core::$servers[$server] ) )
 		{
@@ -114,19 +114,19 @@ class os_utilities extends module
 		$modes = core::get_data_after( $ircdata, 1 );
 		// grab the parameters: nick; channel; reason (optional)
 		
-		if ( trim( $channel ) == '' )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODE' ) );
-			return false;	
-		}
-		// are we missing channel? invalid syntax if so.
-		
 		if ( !services::oper_privs( $nick, 'local_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
 		// access?
+		
+		if ( trim( $channel ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODE' ) );
+			return false;	
+		}
+		// are we missing channel? invalid syntax if so.
 		
 		if ( !isset( core::$chans[$channel] ) )
 		{
@@ -154,19 +154,19 @@ class os_utilities extends module
 		$reason = core::get_data_after( $ircdata, 2 );
 		// grab the parameters: nick; channel; reason (optional)
 		
-		if ( trim( $unick ) == '' || trim( $channel ) == '' )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'KICK' ) );
-			return false;	
-		}
-		// are we missing nick and channel? invalid syntax if so.
-		
 		if ( !services::oper_privs( $nick, 'local_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
 		// access?
+		
+		if ( trim( $unick ) == '' || trim( $channel ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'KICK' ) );
+			return false;	
+		}
+		// are we missing nick and channel? invalid syntax if so.
 		
 		if ( trim( $reason ) == '' ) $reason = 'Kick command issued by '.$nick;
 		// if they haven't suplied a reason let's fill it in.

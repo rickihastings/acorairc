@@ -17,7 +17,7 @@
 class os_stats extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -52,11 +52,11 @@ class os_stats extends module
 	*/
 	static public function stats_command( $nick, $ircdata = array() )
 	{
-		$type = $ircdata[0];
+		$type = strtolower( $ircdata[0] );
 		// what type is it, currently valid types are
 		// UPTIME, NETWORK, SERVERS, OPERS
 		
-		if ( strtolower( $type ) == 'uptime' )
+		if ( $type == 'uptime' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_1, array( 'time' => core::format_time( core::$uptime ) ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_2, array( 'memory' => core::get_size( memory_get_usage() ), 'real' => memory_get_usage() ) );
@@ -67,7 +67,7 @@ class os_stats extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_U_7, array( 'time' => core::$burst_time.'s' ) );
 			// uptime info, etc.
 		}
-		elseif ( strtolower( $type ) == 'network' )
+		elseif ( $type == 'network' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_1, array( 'network' => core::$config->server->network_name ) );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_2, array( 'version' => core::$version ) );
@@ -76,7 +76,7 @@ class os_stats extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_N_5, array( 'chans' => count( core::$chans ) ) );
 			// network info.
 		}
-		elseif ( strtolower( $type ) == 'opers' )
+		elseif ( $type == 'opers' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_T );
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_STATS_O_D );

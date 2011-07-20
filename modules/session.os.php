@@ -56,56 +56,27 @@ class os_session extends module
 		
 		if ( $mode == 'add' )
 		{
-			$ip_address = $ircdata[1];
-			$limit = $ircdata[2];
-			$description = core::get_data_after( $ircdata, 3 );
-			// get our vars
-			
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;
 			}
-			// you have to be root to add/del an exception
+			// you have to be globop to add/del an exception
 			
-			if ( trim( $ip_address ) == '' || trim( $description ) == '' || !is_numeric( $limit ) || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-				return false;
-			}
-			// wrong syntax
-			
-			if ( $limit <= 0 )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_NOLIMIT );
-				return false;
-			}
-			// if the limit is 0 bail
-			
-			self::_add_exception( $nick, $ip_address, $limit, $description );
+			self::_add_exception( $nick, $ircdata[1], $ircdata[2], core::get_data_after( $ircdata, 3 ) );
 			// call add ip exception
 		}
 		// mode is add
 		elseif ( $mode == 'del' )
 		{
-			$ip_address = $ircdata[1];
-			// get our vars
-			
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 				return false;
 			}
-			// you have to be root to add/del an exception
+			// you have to be globop to add/del an exception
 			
-			if ( trim( $ip_address ) == '' || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-				return false;
-			}
-			// wrong syntax
-			
-			self::_del_exception( $nick, $ip_address );
+			self::_del_exception( $nick, $ircdata[1] );
 			// call del ip exception
 		}
 		// mode is del
@@ -184,8 +155,21 @@ class os_session extends module
 	*/
 	static public function _add_exception( $nick, $ip_address, $limit, $description )
 	{
-		$check_record_q = database::select( 'sessions', array( 'ip_address' ), array( 'ip_address', '=', $ip_address, 'AND', 'akill', '=', 0 ) );
+		if ( trim( $ip_address ) == '' || trim( $description ) == '' || !is_numeric( $limit ) || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
+			return false;
+		}
+		// wrong syntax
 		
+		if ( $limit <= 0 )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_NOLIMIT );
+			return false;
+		}
+		// if the limit is 0 bail
+	
+		$check_record_q = database::select( 'sessions', array( 'ip_address' ), array( 'ip_address', '=', $ip_address, 'AND', 'akill', '=', 0 ) );
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			database::insert( 'sessions', array( 'nick' => $nick, 'ip_address' => $ip_address, 'description' => $description, 'limit' => $limit, 'time' => core::$network_time, 'akill' => 0 ) );
@@ -213,9 +197,15 @@ class os_session extends module
 	* $ip_address - The ip address to del except
 	*/
 	static public function _del_exception( $nick, $ip_address )
-	{
+	{			
+		if ( trim( $ip_address ) == '' || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
+			return false;
+		}
+		// wrong syntax
+	
 		$check_record_q = database::select( 'sessions', array( 'ip_address' ), array( 'ip_address', '=', $ip_address, 'AND', 'akill', '=', 0 ) );
-		
 		if ( database::num_rows( $check_record_q ) > 0 )
 		{
 			database::delete( 'sessions', array( 'ip_address', '=', $ip_address ) );

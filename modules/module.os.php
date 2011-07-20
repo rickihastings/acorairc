@@ -60,7 +60,6 @@ class os_module extends module
 	{
 		// we don't even need to listen for any
 		// parameters, because its just a straight command
-		
 		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_TOP );
 		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_MODLIST_DLM );
 		
