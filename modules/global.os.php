@@ -85,9 +85,6 @@ class os_global extends module
 	*/
 	static public function global_command( $nick, $ircdata = array() )
 	{
-		$mask = $ircdata[0];
-		$message = core::get_data_after( $ircdata, 1 );
-		
 		if ( !services::oper_privs( $nick, 'global_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -95,6 +92,20 @@ class os_global extends module
 		}
 		// access?
 		
+		self::_global_message( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// throw to a sub command
+	}
+	
+	/*
+	* _global_message (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $mask - The mask to send the message to
+	* $message - The actual message
+	*/
+	static public function _global_message( $nick, $mask, $message )
+	{
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array ( 'help' => 'GLOBAL' ) );
@@ -107,13 +118,11 @@ class os_global extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_GLOBAL_INVALID );
 			return false;	
 		}
-		else
-		{
-			if ( strpos( $mask, '!' ) === false )
-				$mask = '*!'.$mask;
-			// prepend the *! to the mask
-		}
 		// is the mask valid?
+		
+		if ( strpos( $mask, '!' ) === false )
+			$mask = '*!'.$mask;
+		// prepend the *! to the mask
 		
 		if ( core::$config->global->nick_on_global )
 			ircd::global_notice( core::$config->global->nick, $mask, '['.$nick.'] '.$message );

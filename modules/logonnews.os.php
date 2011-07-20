@@ -17,7 +17,7 @@
 class os_logonnews extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -54,16 +54,6 @@ class os_logonnews extends module
 	{
 		if ( strtolower( $ircdata[0] ) == 'add' )
 		{
-			$title = $ircdata[1];
-			$text = core::get_data_after( $ircdata, 2 );
-			
-			if ( trim( $title ) == '' || trim( $text ) == '' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
-				// wrong syntax
-				return false;
-			}
-			
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -71,20 +61,11 @@ class os_logonnews extends module
 			}
 			// access?
 			
-			self::_add_news( $nick, $title, $text );
+			self::_add_news( $nick, $ircdata[1], core::get_data_after( $ircdata, 2 ) );
 			// add a news article
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'del' )
 		{
-			$title = $ircdata[1];
-			
-			if ( trim( $title ) == '' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
-				// wrong syntax
-				return false;
-			}
-			
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
 				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -92,7 +73,7 @@ class os_logonnews extends module
 			}
 			// access?
 			
-			self::_del_news( $nick, $title );
+			self::_del_news( $nick, $ircdata[1] );
 			// delete a news article, FROM the title.
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'list' )
@@ -140,6 +121,13 @@ class os_logonnews extends module
 	*/
 	static public function _add_news( $nick, $title, $text )
 	{
+		if ( trim( $title ) == '' || trim( $text ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
+			return false;
+		}
+		// wrong syntax
+	
 		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
 		
 		if ( database::num_rows( $check ) == 0 )
@@ -165,6 +153,13 @@ class os_logonnews extends module
 	*/
 	static public function _del_news( $nick, $title )
 	{
+		if ( trim( $title ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
+			return false;
+		}
+		// wrong syntax
+		
 		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
 		
 		if ( database::num_rows( $check ) > 0 )

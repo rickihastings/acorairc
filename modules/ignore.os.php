@@ -61,16 +61,7 @@ class os_ignore extends module
 			}
 			// you have to be root to add/del an akill
 		
-			$who = $ircdata[1];
-		
-			if ( trim( $who ) == '' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
-				return false;
-			}
-			// wrong syntax
-			
-			self::_add_user( $nick, $who );
+			self::_add_user( $nick, $ircdata[1] );
 			// $who is the user we're adding REMEMBER!
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'del' )
@@ -82,16 +73,7 @@ class os_ignore extends module
 			}
 			// you have to be root to add/del an akill
 		
-			$who = $ircdata[1];
-		
-			if ( trim( $who ) == '' )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
-				return false;
-			}
-			// wrong syntax
-			
-			self::_del_user( $nick, $who );
+			self::_del_user( $nick, $ircdata[1] );
 			// again $who is the user we're deleting.
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'list' )
@@ -121,6 +103,13 @@ class os_ignore extends module
 	*/
 	static public function _add_user( $nick, $who )
 	{
+		if ( trim( $who ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
+			return false;
+		}
+		// wrong syntax
+
 		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
 		
 		if ( services::has_privs( $who ) )
@@ -157,6 +146,13 @@ class os_ignore extends module
 	*/
 	static public function _del_user( $nick, $who )
 	{
+		if ( trim( $who ) == '' )
+		{
+			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
+			return false;
+		}
+		// wrong syntax
+			
 		if ( strpos( $who, '@' ) !== false && strpos( $who, '!' ) === false )
 			$who = '*!'.$who;
 		// we need to check if it's a hostmask thats been written properly.
