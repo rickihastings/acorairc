@@ -17,13 +17,10 @@
 class cs_topic extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
-	
+
 	/*
 	* modload (private)
 	* 
@@ -52,10 +49,20 @@ class cs_topic extends module
 	*/
 	static public function topic_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		$topic = core::get_data_after( $ircdata, 1 );
-		// get the channel.
-		
+		self::_change_topic( $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// call _change_topic
+	}
+	
+	/*
+	* _change_topic (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - Channel to change topic of
+	* $topic - New topic (uses topicmask)
+	*/
+	static public function _change_topic( $nick, $chan, $topic )
+	{
 		if ( $chan == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );
@@ -64,7 +71,7 @@ class cs_topic extends module
 		}
 		// make sure they've entered a channel
 		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
+		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
@@ -78,37 +85,34 @@ class cs_topic extends module
 		}
 		// do they have access?
 		
-		if ( $channel = services::chan_exists( $chan, array( 'channel' ) ) )
+		$topicmask = chanserv::get_flags( $chan, 't' );
+		// get the topicmask
+		
+		if ( $topicmask != null )
 		{
-			$topicmask = chanserv::get_flags( $chan, 't' );
-			// get the topicmask
+			$topic = str_replace( ' *', ' '.$new_topic, $topicmask );
+			$topic = str_replace( '\*', '*', $topic );
+						
+			ircd::topic( core::$config->chanserv->nick, $channel->channel, $topic );
+			database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
+		}
+		// is there a topic mask?
+		// if not just set a normal topic i reckon
+		else
+		{
+			$topic = trim( $topic );
 			
-			if ( $topicmask != null )
+			if ( trim( $topic ) == '' )
 			{
-				$topic = str_replace( ' *', ' '.$new_topic, $topicmask );
-				$topic = str_replace( '\*', '*', $topic );
-							
-				ircd::topic( core::$config->chanserv->nick, $channel->channel, $topic );
-				database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $channel->channel ) );
+				ircd::topic( core::$config->chanserv->nick, $chan, '' );
+				database::update( 'chans', array( 'topic' => '', 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
+				// set us an empty topic
 			}
-			// is there a topic mask?
-			// if not just set a normal topic i reckon
 			else
 			{
-				$topic = trim( $topic );
-				
-				if ( trim( $topic ) == '' )
-				{
-					ircd::topic( core::$config->chanserv->nick, $chan, '' );
-					database::update( 'chans', array( 'topic' => '', 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
-					// set us an empty topic
-				}
-				else
-				{
-					ircd::topic( core::$config->chanserv->nick, $chan, $topic );
-					database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
-					// change the topic
-				}
+				ircd::topic( core::$config->chanserv->nick, $chan, $topic );
+				database::update( 'chans', array( 'topic' => $topic, 'topic_setter' => core::$config->chanserv->nick ), array( 'channel', '=', $chan ) );
+				// change the topic
 			}
 		}
 		// we gotta get the topicmask etc

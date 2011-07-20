@@ -17,12 +17,9 @@
 class cs_list extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -52,10 +49,6 @@ class cs_list extends module
 	*/
 	static public function list_command( $nick, $ircdata = array() )
 	{
-		$term = $ircdata[0];
-		$limit = $ircdata[1];
-		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
-		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
@@ -63,6 +56,22 @@ class cs_list extends module
 		}
 		// they've gotta be identified and opered..
 		
+		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
+		self::_list_chans( $nick, $ircdata[0], $ircdata[1], $mode );
+		// call the list chans function :3
+	}
+	
+	/*
+	* _list_chans (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $term - The search term
+	* $limit - Valid limit, ie 0-10
+	* $mode - SUSPENDED etc
+	*/
+	static public function _list_chans( $nick, $term, $limit, $mode )
+	{
 		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );

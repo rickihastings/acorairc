@@ -17,12 +17,9 @@
 class cs_suspend extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -55,11 +52,6 @@ class cs_suspend extends module
 	*/
 	static public function suspend_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		$reason = core::get_data_after( $ircdata, 1 );
-		$chan_info = array();
-		// get the channel.
-		
 		if ( !services::oper_privs( $nick, 'chanserv_op' ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
@@ -67,6 +59,40 @@ class cs_suspend extends module
 		}
 		// they've gotta be identified and opered..
 		
+		self::_suspend_chan( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// send to _suspend_chan
+	}
+	
+	/*
+	* unsuspend_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function unsuspend_command( $nick, $ircdata = array() )
+	{
+		if ( !services::oper_privs( $nick, 'chanserv_op' ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+			return false;
+		}
+		// they've gotta be identified.
+		
+		self::_suspend_chan( $nick, $ircdata[0] );
+		// send to _suspend_chan
+	}
+	
+	/*
+	* _suspend_chan (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - The channel to suspend
+	* $reason - The reason to suspend it with
+	*/
+	static public function _suspend_chan( $nick, $chan, $reason )
+	{
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
@@ -111,7 +137,6 @@ class cs_suspend extends module
 		
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
 		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') SUSPENDED '.$chan.' with the reason ('.$reason.')' );
-		ircd::wallops( core::$config->chanserv->nick, $nick.' SUSPENDED '.$chan );
 		
 		if ( !empty( core::$chans[$chan]['users'] ) )
 		{
@@ -125,24 +150,14 @@ class cs_suspend extends module
 	}
 	
 	/*
-	* unsuspend_command (command)
+	* _unsuspend_chan (command)
 	* 
 	* @params
 	* $nick - The nick of the person issuing the command
-	* $ircdata - Any parameters.
+	* $chan - The channel to suspend
 	*/
-	static public function unsuspend_command( $nick, $ircdata = array() )
+	static public function _unsuspend_chan( $nick, $chan )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		// get the channel.
-		
-		if ( !services::oper_privs( $nick, 'chanserv_op' ) )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
-		}
-		// they've gotta be identified.
-		
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
@@ -151,39 +166,36 @@ class cs_suspend extends module
 		}
 		// make sure they've entered a channel
 		
-		if ( $channel = services::chan_exists( $chan, array( 'channel', 'suspended' ) ) )
-		{
-			if ( $channel->suspended == 0 )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
-				return false;	
-			}
-			// channel isn't even suspended
-			
-			$check_row = database::select( 'chans_levels', array( 'channel' ), array( 'channel', '=', $chan ) );
-			if ( database::num_rows( $check_row ) == 0 )
-			{
-				database::delete( 'chans', array( 'channel', '=', $chan ) );
-				database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
-				// the channel has no access records, drop it. this means it was a suspend on a non-registered channel
-			}
-			else
-			{
-				database::update( 'chans', array( 'suspended' => 0 ), array( 'channel', '=', $chan ) );
-				// channel has access rows which means it was pre-registered, just update it don't drop it
-			}
-		}
-		else
+		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'suspended' ) ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
 			return false;
 		}
+		// chan isn't registered...
 		
+		if ( $channel->suspended == 0 )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
+			return false;	
+		}
+		// channel isn't even suspended
+		
+		$check_row = database::select( 'chans_levels', array( 'channel' ), array( 'channel', '=', $chan ) );
+		if ( database::num_rows( $check_row ) == 0 )
+		{
+			database::delete( 'chans', array( 'channel', '=', $chan ) );
+			database::delete( 'chans_flags', array( 'channel', '=', $chan ) );
+			// the channel has no access records, drop it. this means it was a suspend on a non-registered channel
+		}
+		else
+		{
+			database::update( 'chans', array( 'suspended' => 0 ), array( 'channel', '=', $chan ) );
+			// channel has access rows which means it was pre-registered, just update it don't drop it
+		}
+
 		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
 		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$chan );
-		ircd::wallops( core::$config->chanserv->nick, $nick.' UNSUSPENDED '.$chan );
-		// oh well, was fun while it lasted eh?
-		// unsuspend it :P
+		// oh well, was fun while it lasted eh? unsuspend it :P
 	}
 	
 	/*

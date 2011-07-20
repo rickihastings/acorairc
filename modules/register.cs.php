@@ -17,14 +17,11 @@
 class cs_register extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.0.6';
 	const MOD_AUTHOR = 'Acora';
-	// module info
 	
 	static public $flags = 'FSRiktfrsqao';
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	// module info and vars
 	
 	/*
 	* modload (private)
@@ -46,7 +43,7 @@ class cs_register extends module
 	}
 	
 	/*
-	* unsuspend_command (command)
+	* register_command (command)
 	* 
 	* @params
 	* $nick - The nick of the person issuing the command
@@ -54,78 +51,85 @@ class cs_register extends module
 	*/
 	static public function register_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		$desc = core::get_data_after( $ircdata, 1 );
-		// get the channel.
-		
-		if ( $user = services::user_exists( $nick, true, array( 'display', 'id' ) ) )
-		{
-			if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' || stristr( $channel, ' ' ) )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
-				// wrong syntax
-				return false;
-			}
-			
-			if ( services::chan_exists( $chan, array( 'channel' ) ) !== false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_REGISTERED_CHAN, array( 'chan' => $chan ) );
-				return false;
-			}
-			// check if its registered?
-			
-			
-			if ( !strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_NEED_CHAN_OP, array( 'chan' => $chan ) );	
-				return false;
-			}
-			// we need to check if the user trying to register it has +o
-			// if not we tell them to GET IT!
-			
-			$chan_info = array(
-				'channel' 		=> 	$chan,
-				'timestamp' 	=> 	core::$network_time,
-				'last_timestamp'=> 	core::$network_time,
-				'topic' 		=> 	core::$chans[$chan]['topic'],
-				'topic_setter' 	=> 	core::$chans[$chan]['topic_setter'],
-			);
-			
-			$rflags = core::$config->chanserv->default_flags;
-			$rflags = str_replace( 'd', '', $rflags );
-			$rflags = str_replace( 'u', '', $rflags );
-			$rflags = str_replace( 'e', '', $rflags );
-			$rflags = str_replace( 'w', '', $rflags );
-			$rflags = str_replace( 'm', '', $rflags );
-			$rflags = str_replace( 't', '', $rflags );
-			// ignore parameter flags
-			
-			database::insert( 'chans', $chan_info );
-			database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => $user->display, 'flags' => self::$flags, 'setby' => $user->display, 'timestamp' => core::$network_time ) );
-			database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
-			// create the channel! WOOOH
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
-			core::alog( core::$config->chanserv->nick.': '.$chan.' registered by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-			// logchan
-			
-			core::alog( 'register_command(): '.$chan.' registered by '.core::get_full_hostname( $nick ).' under: '.core::$nicks[$nick]['account'], 'BASIC' );
-			// log what we need to log.
-			
-			chanserv::$chan_q[$chan] = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp',  'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
-				
-			if ( chanserv::$chan_q[$chan] !== false )
-			{
-				chanserv::_join_channel( chanserv::$chan_q[$chan] );
-				// join the channel
-			}
-			// does the channel exist?
-		}
-		else
+		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED );
 			return false;
-			// ph00s aint even registered..
 		}
+		// ph00s aint even registered..
+		
+		self::_register_chan( $nick, core::$nicks[$nick]['account'], $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// send data to _register_chan
+	}
+	
+	/*
+	* _register_chan (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - Channel to register
+	* $desc - Description
+	*/
+	static public function _register_chan( $nick, $chan, $desc )
+	{
+		if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
+			return false;
+		}
+		// wrong syntax
+		
+		if ( services::chan_exists( $chan, array( 'channel' ) ) !== false )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_REGISTERED_CHAN, array( 'chan' => $chan ) );
+			return false;
+		}
+		// check if its registered?
+		
+		if ( !strstr( core::$chans[$chan]['users'][$nick], 'o' ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_NEED_CHAN_OP, array( 'chan' => $chan ) );	
+			return false;
+		}
+		// we need to check if the user trying to register it has +o
+		// if not we tell them to GET IT!
+		
+		$chan_info = array(
+			'channel' 		=> 	$chan,
+			'timestamp' 	=> 	core::$network_time,
+			'last_timestamp'=> 	core::$network_time,
+			'topic' 		=> 	core::$chans[$chan]['topic'],
+			'topic_setter' 	=> 	core::$chans[$chan]['topic_setter'],
+		);
+		
+		$rflags = core::$config->chanserv->default_flags;
+		$rflags = str_replace( 'd', '', $rflags );
+		$rflags = str_replace( 'u', '', $rflags );
+		$rflags = str_replace( 'e', '', $rflags );
+		$rflags = str_replace( 'w', '', $rflags );
+		$rflags = str_replace( 'm', '', $rflags );
+		$rflags = str_replace( 't', '', $rflags );
+		// ignore parameter flags
+		
+		database::insert( 'chans', $chan_info );
+		database::insert( 'chans_levels', array( 'channel' => $chan, 'target' => core::$nicks[$nick]['account'], 'flags' => self::$flags, 'setby' => core::$nicks[$nick]['account'], 'timestamp' => core::$network_time ) );
+		database::insert( 'chans_flags', array( 'channel' => $chan, 'flags' => $rflags.'d', 'desc' => $desc ) );
+		// create the channel! WOOOH
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_REGISTERED, array( 'chan' => $chan ) );
+		core::alog( core::$config->chanserv->nick.': '.$chan.' registered by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+		// logchan
+		
+		core::alog( 'register_command(): '.$chan.' registered by '.core::get_full_hostname( $nick ).' under: '.core::$nicks[$nick]['account'], 'BASIC' );
+		// log what we need to log.
+		
+		chanserv::$chan_q[$chan] = services::chan_exists( $chan, array( 'channel', 'timestamp', 'last_timestamp',  'topic', 'topic_setter', 'suspended', 'suspend_reason' ) );
+			
+		if ( chanserv::$chan_q[$chan] !== false )
+		{
+			chanserv::_join_channel( chanserv::$chan_q[$chan] );
+			// join the channel
+		}
+		// does the channel exist?
 	}
 }
 
