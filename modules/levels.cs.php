@@ -17,7 +17,7 @@
 class cs_levels extends module
 {
 	
-	const MOD_VERSION = '0.0.6';
+	const MOD_VERSION = '0.0.7';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -27,9 +27,6 @@ class cs_levels extends module
 	static public $set = array();
 	static public $not_set = array();
 	static public $already_set = array();
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -102,84 +99,92 @@ class cs_levels extends module
 		}
 		// make sure the channel exists.
 		
-		if ( $target == '' && $flags == '' && $levels_result )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
-			// start of flag list
-			
-			$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp' ), array( 'channel', '=', $chan ) );
-			// get the flag records
-			
-			$x = 0;
-			while ( $flags = database::fetch( $flags_q ) )
-			{
-				$x++;
-				$false_flag = $flags->flags;
-				$modified = core::format_time( core::$network_time - $flags->timestamp );
-				$x_s = $x;
-				
-				$y_s = strlen( $x );
-				for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
-					$x_s .= ' ';
-				
-				if ( !isset( $flags->flags[15] ) )
-				{
-					$y = strlen( $flags->flags );
-					for ( $i = $y; $i <= 14; $i++ )
-						$false_flag .= ' ';
-				}
-				// this is just a bit of fancy fancy, so everything displays neat, like so:
-				// +ao  N0valyfe
-				// +v   tool
-				
-				/*if ( $flags->reason != '' )
-				{
-					$expire = ( $flags->expire == 0 ) ? 'Never' : ( ( $flags->timestamp + $flags->expire ) - core::$network_time ).' seconds';
-					$extra = '('.$flags->reason.')';
-					$expired =  ' (Expires in: '.core::format_time( $expire ).')';
-				}
-				else
-				{
-					$extra = '';
-					$expired = '';
-				}*/
-				// this could maybe be added at a later date, i'm not sure? Look into it soon - n0valyfe
-				
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
-				// show the flag
-			}
-			// loop through them
-			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_BTM, array( 'chan' => $chan ) );
-			// show other help data
-			
-			return false;
-		}
-		// no params
-		// lets show the current flags.
-		elseif ( $target == '' && $flags == '' && !$levels_result )
+		if ( !$levels_result )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
 			return false;
 		}
-		// i don't think they have access to see the channel list..
+		// i don't think they have access to see/edit the channel list..
 		
-		if ( $target == '' || $flags == '' )
+		if ( $target == '' && $flags == '' )
+			self::_list_levels_chan( $nick, $ircdata[0] );
+		else
+			self::_set_levels_chan( $nick, $ircdata[0], $ircdata[2], $ircdata[1] );
+		// call the corresponding command
+	}
+	
+	/*
+	* _list_levels_chan (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - The channel to list levels for
+	*/
+	static public function _list_levels_chan( $nick, $chan )
+	{
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
+		// start of flag list
+		
+		$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp' ), array( 'channel', '=', $chan ) );
+		// get the flag records
+		
+		$x = 0;
+		while ( $flags = database::fetch( $flags_q ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LEVELS' ) );
-			return false;
+			$x++;
+			$false_flag = $flags->flags;
+			$modified = core::format_time( core::$network_time - $flags->timestamp );
+			$x_s = $x;
+			
+			$y_s = strlen( $x );
+			for ( $i_s = $y_s; $i_s <= 5; $i_s++ )
+				$x_s .= ' ';
+			
+			if ( !isset( $flags->flags[15] ) )
+			{
+				$y = strlen( $flags->flags );
+				for ( $i = $y; $i <= 14; $i++ )
+					$false_flag .= ' ';
+			}
+			// this is just a bit of fancy fancy, so everything displays neat, like so:
+			// +ao  N0valyfe
+			// +v   tool
+			
+			/*if ( $flags->reason != '' )
+			{
+				$expire = ( $flags->expire == 0 ) ? 'Never' : ( ( $flags->timestamp + $flags->expire ) - core::$network_time ).' seconds';
+				$extra = '('.$flags->reason.')';
+				$expired =  ' (Expires in: '.core::format_time( $expire ).')';
+			}
+			else
+			{
+				$extra = '';
+				$expired = '';
+			}*/
+			// this could maybe be added at a later date, i'm not sure? Look into it soon - n0valyfe
+			
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
+			// show the flag
 		}
-		// missing params?
+		// loop through them
 		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
-			return false;
-		}
-		// make sure the channel exists.
-		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_BTM, array( 'chan' => $chan ) );
+		// show other help data
+	}
+	
+	/*
+	* _set_levels_chan (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - The channel to set levels for
+	* $target - The target to set the levels on
+	* $flags - The flags to set on the target
+	*/
+	static public function _set_levels_chan( $nick, $chan, $target, $flags )
+	{
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $pos => $flag )
 		{
@@ -227,15 +232,11 @@ class cs_levels extends module
 		// sort our flags up
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
-		{
 			self::_set_levels( $nick, $chan, $target, $flag, '+' );
-		}
 		// loop though our plus flags
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-		{
 			self::_set_levels( $nick, $chan, $target, $flag, '-' );
-		}
 		// loop through the minus flags
 		
 		if ( isset( self::$set[$target] ) )

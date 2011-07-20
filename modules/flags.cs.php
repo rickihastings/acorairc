@@ -17,7 +17,7 @@
 class cs_flags extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.0.6';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -62,13 +62,26 @@ class cs_flags extends module
 	*/
 	static public function flags_command( $nick, $ircdata = array(), $announce = false )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		$flags = $ircdata[1];
-		$param = core::get_data_after( $ircdata, 2 );
+		self::_set_flags_chan( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
+		// call _set_flags_chan
+	}
+	
+	
+	/*
+	* _set_flags_chan (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - The chan to set flags on
+	* $flags - The flags, like '+ei'
+	* $params - The params, like 'email@addr.com'
+	*/
+	static public function _set_flags_chan( $nick, $chan, $flags, $param )
+	{
 		$rparams = explode( '||', $param );
 		$levels_result = chanserv::check_levels( $nick, $chan, array( 's', 'S', 'F' ) );
-		// get the channel.
-		
+		// get the levels result.
+	
 		if ( $chan == '' || $chan[0] != '#' )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );

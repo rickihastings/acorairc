@@ -17,7 +17,7 @@
 class ns_flags extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -29,8 +29,6 @@ class ns_flags extends module
 	static public $already_set;
 	static public $not_set;
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -67,12 +65,6 @@ class ns_flags extends module
 	*/
 	static public function flags_command( $nick, $ircdata = array() )
 	{
-		$flags = $ircdata[0];
-		$full_flags = core::get_data_after( $ircdata, 0 );
-		$param = core::get_data_after( $ircdata, 1 );
-		$rparams = explode( '||', $param );
-		// get the channel.
-		
 		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
@@ -80,81 +72,8 @@ class ns_flags extends module
 		}
 		// are they identified?
 		
-		if ( $full_flags == '' )
-		{
-			$flags_q = database::select( 'users_flags', array( 'id', 'nickname', 'flags' ), array( 'nickname', '=', core::$nicks[$nick]['account'] ) );
-			$flags_q = database::fetch( $flags_q );
-			// get the flag records
-			
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST, array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags ) );
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST2, array( 'nick' => $flags_q->nickname ) );
-			return false;
-		}
-		// are no flags sent? ie they're using /ns flags, asking for the current flags.
-		
-		$flag_a = array();
-		foreach ( str_split( $flags ) as $flag )
-		{
-			if ( strpos( self::$flags, $flag ) === false )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
-				return false;
-			}
-			// flag is invalid.
-			
-			$flag_a[$flag]++;
-			// plus
-			
-			if ( $flag_a[$flag] > 1 || $flag != '-' && $flag != '+' )
-				$flag_a[$flag]--;
-			// check for dupes
-		}
-		// check if the flag is valid
-		
-		$flags = '';
-		foreach ( $flag_a as $flag => $count )
-			$flags .= $flag;
-		// reconstruct the flags
-		
-		$flag_array = mode::sort_modes( $full_flags, false );
-		// sort our flags up
-		
-		foreach ( str_split( self::$p_flags ) as $flag )
-		{
-			$param_num = strpos( $flag_array['plus'], $flag );
-			
-			if ( $param_num !== false )
-				$params[$flag] = trim( $rparams[$param_num] );
-			// we do!
-		}
-		// check if we have any paramtized flags, eg +eus
-		
-		foreach ( str_split( $flag_array['plus'] ) as $flag )
-			self::_set_flags( $nick, $nick, $flag, '+', $params );
-		
-		foreach ( str_split( $flag_array['minus'] ) as $flag )
-			self::_set_flags( $nick, $nick, $flag, '-', $params );
-		
-		if ( isset( self::$set[$nick] ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
-			unset( self::$set[$nick] );
-		}
-		// send back the target stuff..
-		
-		if ( isset( self::$already_set[$nick] ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
-			unset( self::$already_set[$nick] );
-		}
-		// send back the target stuff..
-		
-		if ( isset( self::$not_set[$nick] ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$nick], 'target' => core::$nicks[$nick]['account'] ) );
-			unset( self::$not_set[$nick] );
-		}
-		// send back the target stuff..			
+		self::_set_flags_nick( $nick, $nick, $ircdata[0], core::get_data_after( $ircdata, 0 ), core::get_data_after( $ircdata, 1 ) );
+		// call _set_flags_nick
 	}
 	
 	/*
@@ -166,21 +85,32 @@ class ns_flags extends module
 	*/
 	static public function saflags_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$flags = $ircdata[1];
-		$full_flags = core::get_data_after( $ircdata, 1 );
-		$param = core::get_data_after( $ircdata, 2 );
-		$rparams = explode( '||', $param );
-		// get the channel.
-		
-		if ( ( core::$nicks[$nick]['account'] != $unick && services::has_privs( $unick ) ) || !services::oper_privs( $nick, "nickserv_op" ) )
+		if ( ( core::$nicks[$nick]['account'] != $ircdata[0] && services::has_privs( $ircdata[0] ) ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they don't even have access to do this.
 		
+		self::_set_flags_nick( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
+		// call _set_flags_nick
+	}
+	
+	/*
+	* _set_flags_nick (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The name of the account to change flags
+	* $flags - The flags, like '+ei'
+	* $full_flags - The flags and params, like '+ei email@addr.com'
+	* $params - The params, like 'email@addr.com'
+	*/
+	static public function _set_flags_nick( $nick, $unick, $flags, $full_flags, $param )
+	{
+		$rparams = explode( '||', $param );
 		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
+		
 		if ( database::num_rows( $user ) == 0 )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
