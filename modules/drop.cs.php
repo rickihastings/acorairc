@@ -17,12 +17,11 @@
 class cs_drop extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.5';
 	const MOD_AUTHOR = 'Acora';
-	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $codes = array();
+	// module info and vars
 	
 	/*
 	* modload (private)
@@ -52,14 +51,34 @@ class cs_drop extends module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
 		$code = ( $ircdata[1] == '' ) ? '' : $ircdata[1];
-		// get the channel.
-		
-		if ( self::_drop_check( $nick, $chan ) === false )
+		self::_drop_chan( $nick,  $ircdata[0], $code );
+		// drop the channel
+	}
+	
+	/*
+	* _drop_chan (private)
+	* 
+	* @params
+	* $nick - The nickname of the person issuing the command
+	* $chan - The channel to drop
+	*/
+	static public function _drop_chan( $nick, $chan, $code )
+	{
+		if ( $chan == '' || $chan[0] != '#' )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
 			return false;
-		// do nessicary checks
+		}
+		// wrong syntax
 		
+		if ( !chanserv::_is_founder( $nick, $chan ) || !services::oper_privs( $nick, 'chanserv_op' ) )
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
+			return false;
+		}
+		// do they have access?
+	
 		if ( $channel = services::chan_exists( $chan, array( 'channel', 'suspended' ) ) )
 		{
 			if ( $channel->suspended == 1 )
@@ -69,6 +88,12 @@ class cs_drop extends module
 			}
 		}
 		// is the channel suspended?
+		else
+		{
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			return false;
+		}
+		// channel isn't even registered ffs.
 		
 		if ( trim( $code ) == '' )
 		{
@@ -78,12 +103,12 @@ class cs_drop extends module
 				$drop_code .= $characters[mt_rand( 0, strlen( $characters ) )];
 			// generate random code
 				
-			core::$nicks[$nick]['drop_code'][$chan] = $drop_code;
+			self::$codes[md5( core::$nicks[$nick]['account'].$chan )] = $drop_code;
 			
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_DROP_CODE, array( 'chan' => $chan, 'code' => $drop_code ) );
 			return false;
 		}
-		if ( trim( $code ) != '' && $code != core::$nicks[$nick]['drop_code'][$chan] )
+		if ( trim( $code ) != '' && $code != self::$codes[md5( core::$nicks[$nick]['account'].$chan )] )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CHAN_INVALID_CODE );
 			return false;
@@ -109,52 +134,12 @@ class cs_drop extends module
 		// is still there, just isnt registered, completely different things
 		
 		core::alog( core::$config->chanserv->nick.': '.$chan.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		// logchan it
-		
 		core::alog( 'drop_command(): '.$chan.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
 		// log what we need to log.
 		
+		unset( self::$codes[md5( core::$nicks[$nick]['account'].$chan )] );
 		unset( chanserv::$chan_q[$chan] );
 		// remove chanserv::$chan_q[$chan] just incase
-	}
-	
-	/*
-	* _drop_check (private)
-	* 
-	* @params
-	* $nick - The nick to check access for
-	* $chan - The channel to check.
-	*/
-	static public function _drop_check( $nick, $chan )
-	{
-		if ( $chan == '' || $chan[0] != '#' )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );
-			return false;
-			// wrong syntax
-		}
-		// make sure they've entered a channel
-		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
-			return false;
-		}
-		// make sure the channel exists.
-		
-		if ( chanserv::_is_founder( $nick, $chan ) )
-		{
-			return true;
-		}
-		elseif ( services::oper_privs( $nick, 'chanserv_op' ) )
-		{
-			ircd::wallops( core::$config->chanserv->nick, $nick.' used DROP on '.$chan );
-			return true;
-		}
-		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-		return false;
-		// do they have access?
 	}
 }
 

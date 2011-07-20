@@ -29,9 +29,6 @@ class cs_flags extends module
 	static public $not_set = array();
 	static public $already_set = array();
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
-	
 	/*
 	* modload (private)
 	* 

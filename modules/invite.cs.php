@@ -17,12 +17,9 @@
 class cs_invite extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -52,17 +49,27 @@ class cs_invite extends module
 	*/
 	static public function invite_command( $nick, $ircdata = array() )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
 		$who = ( trim( $ircdata[1] ) == '' ) ? $nick : $ircdata[1];
-		// get the channel.
-		
+		self::_invite_user( $nick, $ircdata[0], $who );
+		// call _invite_user, wheey.
+	}
+	
+	/*
+	* _invite_user (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $chan - The channel
+	* $who - Who to invite to the channel
+	*/
+	static public function _invite_user( $nick, $chan, $who )
+	{
 		if ( $chan == '' || $chan[0] != '#' || !core::search_nick( $who ) )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INVITE' ) );
 			return false;
-			// wrong syntax
 		}
-		// make sure they've entered a channel and user and they're both invalid
+		// wrong syntax
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{

@@ -17,12 +17,9 @@
 class cs_info extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -70,87 +67,86 @@ class cs_info extends module
 		}
 		// make sure the channel exists
 		
-		if ( $channel->suspended == 1 )
+		if ( $channel->suspended != 1 )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_SUSPENDED_1, array( 'chan' => $channel->channel ) );
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_SUSPENDED_2, array( 'reason' => $channel->suspend_reason ) );
+			return false;
 		}
-		else
+		
+		$founder = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan ) );
+		$founders = '';
+		
+		while ( $f_row = database::fetch( $founder ) )
 		{
-			$founder = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags' ), array( 'channel', '=', $chan ) );
-			$founders = '';
-			
-			while ( $f_row = database::fetch( $founder ) )
-			{
-				if ( strpos( $f_row->flags, 'F' ) !== false )
-					$founders .= $f_row->target.', ';
-			}
-			// get the founder(s)
-			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_2, array( 'nicks' => substr( $founders, 0, -2 ) ) );
-			
-			$desc = chanserv::get_flags( $channel->channel, 'd' );
-			if ( $desc != null )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
-			// description?
-			
-			if ( core::$chans[$chan]['topic'] != '' )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_4, array( 'topic' => core::$chans[$chan]['topic'] ) );
-			// topic
-			
-			$email = chanserv::get_flags( $channel->channel, 'e' );
-			if ( $email != null )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_5, array( 'email' => $email ) );
-			// is there an email?
-			
-			$url = chanserv::get_flags( $channel->channel, 'u' );
-			if ( $url != null )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_6, array( 'url' => $url ) );
-			// or a url?
-			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_8, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
-			
-			$modelock = chanserv::get_flags( $channel->channel, 'm' );
-			if ( $modelock != null )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_9, array( 'mode_lock' => $modelock ) );
-			// is there a mode lock?
-			
-			$entrymsg = chanserv::get_flags( $channel->channel, 'w' );
-			if ( $entrymsg != null )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_10, array( 'entrymsg' => $entrymsg ) );
-			// is there an entry msg?
-			
-			$list = '';
-			
-			if ( chanserv::check_flags( $channel->channel, array( 'T' ) ) )
-				$list .= 'Topiclock, ';
-			if ( chanserv::check_flags( $channel->channel, array( 'K' ) ) )
-				$list .= 'Keeptopic, ';
-			if ( chanserv::check_flags( $channel->channel, array( 'G' ) ) )
-				$list .= 'Guard, ';
-			if ( chanserv::check_flags( $channel->channel, array( 'S' ) ) )
-				$list .= 'Secure, ';
-			if ( chanserv::check_flags( $channel->channel, array( 'F' ) ) )
-				$list .= 'Fantasy';
-			
-			if ( substr( $list, -2, 2 ) == ', ' ) 
-				$list = substr( $list, 0 ,-2 );
-			// compile our list of options
-			
-			if ( $list != '' )
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
-			// if our list doesn't equal '', eg. empty show the info.
-				
-			if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] && core::$config->chanserv->expire != 0 )
-			{
-				$expiry_time = core::$config->chanserv->expire * 86400;
-				
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_12, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
-			}
-			// if the nick in question has staff powers, we show the expiry times.
+			if ( strpos( $f_row->flags, 'F' ) !== false )
+				$founders .= $f_row->target.', ';
 		}
+		// get the founder(s)
+		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_1, array( 'chan' => $channel->channel ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_2, array( 'nicks' => substr( $founders, 0, -2 ) ) );
+		
+		$desc = chanserv::get_flags( $channel->channel, 'd' );
+		if ( $desc != null )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_3, array( 'desc' => $desc ) );
+		// description?
+		
+		if ( core::$chans[$chan]['topic'] != '' )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_4, array( 'topic' => core::$chans[$chan]['topic'] ) );
+		// topic
+		
+		$email = chanserv::get_flags( $channel->channel, 'e' );
+		if ( $email != null )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_5, array( 'email' => $email ) );
+		// is there an email?
+		
+		$url = chanserv::get_flags( $channel->channel, 'u' );
+		if ( $url != null )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_6, array( 'url' => $url ) );
+		// or a url?
+		
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_7, array( 'time' => date( "F j, Y, g:i a", $channel->timestamp ) ) );
+		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_8, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp ) ) );
+		
+		$modelock = chanserv::get_flags( $channel->channel, 'm' );
+		if ( $modelock != null )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_9, array( 'mode_lock' => $modelock ) );
+		// is there a mode lock?
+		
+		$entrymsg = chanserv::get_flags( $channel->channel, 'w' );
+		if ( $entrymsg != null )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_10, array( 'entrymsg' => $entrymsg ) );
+		// is there an entry msg?
+		
+		$list = '';
+		
+		if ( chanserv::check_flags( $channel->channel, array( 'T' ) ) )
+			$list .= 'Topiclock, ';
+		if ( chanserv::check_flags( $channel->channel, array( 'K' ) ) )
+			$list .= 'Keeptopic, ';
+		if ( chanserv::check_flags( $channel->channel, array( 'G' ) ) )
+			$list .= 'Guard, ';
+		if ( chanserv::check_flags( $channel->channel, array( 'S' ) ) )
+			$list .= 'Secure, ';
+		if ( chanserv::check_flags( $channel->channel, array( 'F' ) ) )
+			$list .= 'Fantasy';
+		
+		if ( substr( $list, -2, 2 ) == ', ' ) 
+			$list = substr( $list, 0 ,-2 );
+		// compile our list of options
+		
+		if ( $list != '' )
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_11, array( 'options' => $list ) );
+		// if our list doesn't equal '', eg. empty show the info.
+			
+		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] && core::$config->chanserv->expire != 0 )
+		{
+			$expiry_time = core::$config->chanserv->expire * 86400;
+			
+			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INFO_12, array( 'time' => date( "F j, Y, g:i a", $channel->last_timestamp + $expiry_time ) ) );
+		}
+		// if the nick in question has staff powers, we show the expiry times.
 	}
 }
 
