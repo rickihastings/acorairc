@@ -16,12 +16,9 @@
 
 class ns_password extends module
 {
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -54,10 +51,6 @@ class ns_password extends module
 	*/
 	static public function password_command( $nick, $ircdata = array() )
 	{
-		$new_pass = $ircdata[0];
-		$conf_pass = $ircdata[1];
-		// new password.
-		
 		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
@@ -65,29 +58,8 @@ class ns_password extends module
 		}
 		// are they identified?
 		
-		if ( strtolower( $new_pass ) == strtolower( $nick ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_NICK );
-			return false;
-		}
-		// are they using a reasonable password, eg. != their nick, lol.
-		
-		if ( $new_pass != $conf_pass )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_DIFF );
-			return false;
-		}
-		// the passwords are different
-			
-		$user = services::user_exists( $nick, false, array( 'display', 'id', 'salt' ) );
-		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $user->display ) );
-		// we update the password here, with the users salt.
-		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NEW_PASSWORD, array( 'pass' => $new_pass ) );
-		// let them know
-		
-		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') changed their password' );
-		// logchan
+		self::_change_pass( $nick, $nick, $ircdata[0], $ircdata[1] );
+		// call _change_pass
 	}
 	
 	/*
@@ -99,11 +71,6 @@ class ns_password extends module
 	*/
 	static public function sapass_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$new_pass = $ircdata[1];
-		$conf_pass = $ircdata[2];
-		// new password.
-		
 		if ( ( core::$nicks[$nick]['account'] != $unick && services::has_privs( $unick ) ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
@@ -111,6 +78,21 @@ class ns_password extends module
 		}
 		// access denied.
 		
+		self::_change_pass( $nick, $ircdata[0], $ircdata[1], $ircdata[2] );
+		// call _change_pass
+	}
+	
+	/*
+	* _change_pass (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The account to change password for
+	* $new_pass - The new password
+	* $conf_pass - The confirmed password
+	*/
+	static public function _change_pass( $nick, $unick, $new_pass, $conf_pass )
+	{
 		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		if ( database::num_rows( $user ) == 0 )
 		{

@@ -17,12 +17,9 @@
 class ns_request extends module
 {
 	
-	const MOD_VERSION = '0.0.1';
+	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -52,8 +49,6 @@ class ns_request extends module
 	*/
 	static public function request_command( $nick, $ircdata = array() )
 	{
-		$host = $ircdata[0];
-		
 		if ( !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
@@ -61,6 +56,19 @@ class ns_request extends module
 		}
 		// are they identified?
 		
+		self::_request_vhost( $nick, $ircdata[0] );
+		// call _request_vhost
+	}
+	
+	/*
+	* _request_vhost (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $host - The vhost to request
+	*/
+	public function _request_vhost( $nick, $host )
+	{
 		if ( trim( $host ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REQUEST' ) );
@@ -75,23 +83,14 @@ class ns_request extends module
 			$ident = $new_host[0];
 			$host = $new_host[1];
 		}
-		elseif ( substr_count( $host, '@' ) > 1 )
+		elseif ( substr_count( $host, '@' ) > 1 || services::valid_host( $host ) === false )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_HOSTNAME );
 			return false;
 		}
 		else
-		{
 			$realhost = $host;
-		}
 		// check if there is a @
-		
-		if ( services::valid_host( $host ) === false )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_HOSTNAME );
-			return false;
-		}
-		// is the hostname valid?
 		
 		$query = database::select( 'vhost_request', array( 'id', 'nickname' ), array( 'nickname', '=', core::$nicks[$nick]['account'] ) );
 		if ( database::num_rows( $query ) > 0 )
@@ -108,4 +107,4 @@ class ns_request extends module
 	}
 }
 
-//EOF;
+// EOF;

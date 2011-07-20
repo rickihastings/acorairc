@@ -17,12 +17,9 @@
 class ns_list extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -52,10 +49,6 @@ class ns_list extends module
 	*/
 	static public function list_command( $nick, $ircdata = array() )
 	{
-		$term = $ircdata[0];
-		$limit = $ircdata[1];
-		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
-		
 		if ( !core::$nicks[$nick]['ircop'] || !core::$nicks[$nick]['identified'] )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
@@ -63,14 +56,23 @@ class ns_list extends module
 		}
 		// they've gotta be identified and opered..
 		
-		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
-			return false;
-		}
-		// invalid syntax
-		
-		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
+		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
+		self::_list_nicks( $nick, $ircdata[0], $ircdata[1], $mode );
+		// call _list_nicks
+	}
+	
+	/*
+	* _list_nicks (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $term - The term to search by
+	* $limit - The limit, ie 0-10
+	* $mode - extra modes, ie SUSPENDED
+	*/
+	static public function _list_nicks( $nick, $term, $limit, $mode )
+	{
+		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || ( isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) ) || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
 			return false;
@@ -119,9 +121,7 @@ class ns_list extends module
 				$info = '['.$hostmask[1].']';
 			}
 			else
-			{
 				$info = '[*@*] ['.$user->suspend_reason.']';
-			}
 			
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LIST_ROW, array( 'num' => $x_s, 'nick' => $false_nick, 'info' => $info ) );
 		}

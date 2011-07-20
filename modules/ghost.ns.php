@@ -17,12 +17,9 @@
 class ns_ghost extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -56,6 +53,19 @@ class ns_ghost extends module
 		$password = $ircdata[1];
 		// get the parameters.
 		
+		
+	}
+	
+	/*
+	* _ghost_nick (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The account to ghost
+	* $password - The password of the account
+	*/
+	static public function _ghost_nick( $nick, $unick, $password )
+	{
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );
@@ -67,34 +77,32 @@ class ns_ghost extends module
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
 			return false;
-			// nickname isn't in use
 		}
+		// nickname isn't in use
 		
-		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
+		if ( $nick == $unick )
 		{
-			if ( $nick == $unick )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_GHOST_SELF );
-				return false;
-			}
-			// you can't ghost yourself.. waste of time, and clearly useless.
-			
-			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
-			{
-				ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
-				core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
-			}
-			else
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-				// password isn't correct
-			}
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_GHOST_SELF );
+			return false;
 		}
-		else
+		// you can't ghost yourself.. waste of time, and clearly useless.
+		
+		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
-			// doesn't even exist..
+		}
+		// doesn't even exist..
+		
+		if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, 'nickserv_op' ) )
+		{
+			ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
+			core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
+		}
+		else
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
+			// password isn't correct
 		}
 	}
 }

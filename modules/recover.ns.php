@@ -17,7 +17,7 @@
 class ns_recover extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -25,9 +25,6 @@ class ns_recover extends module
 	static public $held_nicks = array();
 	static public $introduce = array();
 	// some variables
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -62,64 +59,8 @@ class ns_recover extends module
 	*/
 	static public function recover_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$password = $ircdata[1];
-		// get the parameters.
-		
-		if ( trim( $unick ) == '' || trim( $password ) == '' )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
-			return false;
-		}
-		// invalid syntax
-		
-		if ( !core::search_nick( $unick ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
-			return false;
-			// nickname isn't in use
-		}
-		$unick = $unicks[$unick]['nick'];
-		
-		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
-		{
-			if ( $nick == $unick )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_RECOVER_SELF );
-				return false;
-			}
-			// you can't ghost yourself.. waste of time, and clearly useless.
-		
-			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
-			{
-				$random_nick = 'Unknown'.rand( 10000, 99999 );
-				// generate a random nick
-				
-				ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
-				// force the nick change, ONLY, we set a timer to introduce the
-				// enforcer client, in the next iteration of the main loop
-				// to make sure the ircd class can preserve all information
-				// about the target, and not have it overwritten with introduce_client()
-				
-				core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
-				// introduce a client, logchan everything etc.
-				
-				timer::add( array( 'ns_recover', 'introduce_callback', array( $unick ) ), 1, 1 );
-				// set it into the array which we check, in the next second
-			}
-			else
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-				// password isn't correct
-			}
-		}
-		else
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
-			// doesn't even exist..
-		}
+		self::_recover_nick( $nick, $ircdata[0], $ircdata[1] );
+		// call _recover_nick
 	}
 	
 	/*
@@ -131,10 +72,82 @@ class ns_recover extends module
 	*/
 	static public function release_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$password = $ircdata[1];
-		// get the parameters.
+		self::_release_nick( $nick, $ircdata[0], $ircdata[1] );
+		// call _release_nick
+	}
+	
+	/*
+	* _recover_nick (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The nickname of the account to recover
+	* $password - The password of that account
+	*/
+	public function _recover_nick( $nick, $unick, $password )
+	{
+		if ( trim( $unick ) == '' || trim( $password ) == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
+			return false;
+		}
+		// invalid syntax
 		
+		if ( !core::search_nick( $unick ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
+			return false;
+		}
+		// nickname isn't in use
+		
+		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			return false;
+		}
+		// doesn't even exist..
+		
+		if ( $nick == $unick )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_RECOVER_SELF );
+			return false;
+		}
+		// you can't ghost yourself.. waste of time, and clearly useless.
+	
+		if ( $user->pass != sha1( $password.$user->salt ) || !services::oper_privs( $nick, 'nickserv_op' ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
+			return false;
+		}
+		// password isn't correct
+	
+		$random_nick = 'Unknown'.rand( 10000, 99999 );
+		// generate a random nick
+		
+		ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
+		// force the nick change, ONLY, we set a timer to introduce the
+		// enforcer client, in the next iteration of the main loop
+		// to make sure the ircd class can preserve all information
+		// about the target, and not have it overwritten with introduce_client()
+		
+		core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
+		// introduce a client, logchan everything etc.
+		
+		timer::add( array( 'ns_recover', 'introduce_callback', array( $unick ) ), 1, 1 );
+		// set it into the array which we check, in the next second
+	}
+	
+	/*
+	* _release_nick (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The nickname of the account to release
+	* $password - The password of that account
+	*/
+	public function _release_nick( $nick, $unick, $password )
+	{
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
@@ -142,38 +155,35 @@ class ns_recover extends module
 		}
 		// invalid syntax
 
-		if ( $user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
-		{
-			if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, "nickserv_op" ) )
-			{
-				if ( !isset( self::$held_nicks[$unick] ) )
-				{
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
-					return false;
-					// nickname isnt locked.
-				}
-				
-				ircd::remove_client( $unick, 'RELEASED by '.$nick );
-				core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-				timer::remove( array( 'ns_recover', 'remove_callback', array( $unick ) ) );
-				// if they are, remove client, respectively
-				// unsetting data and removing them.
-				
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
-				// tell the user their nick has been released (Y)
-			}
-			else
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-				// password isn't correct
-			}
-		}
-		else
+		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
 			return false;
-			// doesn't even exist..
 		}
+		// doesn't even exist..
+		
+		if ( $user->pass != sha1( $password.$user->salt ) || !services::oper_privs( $nick, 'nickserv_op' ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
+			return false;
+		}
+		// password isn't correct
+			
+		if ( !isset( self::$held_nicks[$unick] ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
+			return false;
+		}
+		// nickname isnt locked.
+		
+		ircd::remove_client( $unick, 'RELEASED by '.$nick );
+		core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+		timer::remove( array( 'ns_recover', 'remove_callback', array( $unick ) ) );
+		// if they are, remove client, respectively
+		// unsetting data and removing them.
+		
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
+		// tell the user their nick has been released (Y)
 	}
 	
 	/*

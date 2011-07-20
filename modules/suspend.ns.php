@@ -17,12 +17,9 @@
 class ns_suspend extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.0.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -55,18 +52,47 @@ class ns_suspend extends module
 	*/
 	static public function suspend_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$reason = core::get_data_after( $ircdata, 1 );
-		$user_info = array();
-		// get the nick etc.
-		
-		if ( !services::oper_privs( $nick, "nickserv_op" ) )
+		if ( !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
 			return false;
 		}
 		// they've gotta be identified and opered..
 		
+		self::_unsuspend_nick( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// call _unsuspend_nick
+	}
+	
+	/*
+	* unsuspend_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function unsuspend_command( $nick, $ircdata = array() )
+	{
+		if ( !services::oper_privs( $nick, 'nickserv_op' ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
+			return false;
+		}
+		// they've gotta be identified and opered..
+		
+		self::_unsuspend_nick( $nick, $ircdata[0] );
+		// call _unsuspend_nick
+	}
+
+	/*
+	* _suspend_nick (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The nickname of the account to suspend
+	* $reason - The reason to suspend this user
+	*/
+	public function _suspend_nick( $nick, $unick, $reason )
+	{
 		if ( trim( $unick ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
@@ -135,24 +161,14 @@ class ns_suspend extends module
 	}
 	
 	/*
-	* unsuspend_command (command)
+	* _unsuspend_nick (private)
 	* 
 	* @params
 	* $nick - The nick of the person issuing the command
-	* $ircdata - Any parameters.
+	* $unick - The nickname of the account to unsuspend
 	*/
-	static public function unsuspend_command( $nick, $ircdata = array() )
+	public function _unsuspend_nick( $nick, $unick )
 	{
-		$unick = $ircdata[0];
-		// get the nick etc.
-		
-		if ( !services::oper_privs( $nick, "nickserv_op" ) )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
-			return false;
-		}
-		// they've gotta be identified and opered..
-		
 		if ( trim( $unick ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
@@ -160,33 +176,30 @@ class ns_suspend extends module
 		}
 		// make sure unick isnt empty!
 		
-		if ( $user = services::user_exists( $unick, false, array( 'display', 'suspended', 'real_user' ) ) )
-		{
-			if ( $user->suspended == 0 )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
-				return false;
-			}
-			// nick isn't suspended
-			
-			database::update( 'users', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'display', '=', $unick ) );
-			
-			if ( $user->real_user == 0 )
-				database::delete( 'users', array( 'display', '=', $unick ) );
-			// nick wasen't registered by a real person, drop it
-		}
-		else
+		if ( !$user = services::user_exists( $unick, false, array( 'display', 'suspended', 'real_user' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
 			return false;
 		}
 		// nick isn't even registered.
 		
+		if ( $user->suspended == 0 )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
+			return false;
+		}
+		// nick isn't suspended
+		
+		database::update( 'users', array( 'suspended' => 0, 'suspend_reason' => null ), array( 'display', '=', $unick ) );
+		
+		if ( $user->real_user == 0 )
+			database::delete( 'users', array( 'display', '=', $unick ) );
+		// nick wasen't registered by a real person, drop it
+		
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
 		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$unick );
 		ircd::wallops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
-		// oh well, was fun while it lasted eh?
-		// unsuspend it :P
+		// oh well, was fun while it lasted eh?cunsuspend it :P
 	}
 	
 	/*
