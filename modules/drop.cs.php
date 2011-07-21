@@ -63,7 +63,7 @@ class cs_drop extends module
 		$return_data = self::_drop_chan( true, $nick, $ircdata[0], $ircdata[1] );
 		// drop the channel
 		
-		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}

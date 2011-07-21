@@ -359,6 +359,8 @@ $help = (object) array(
 	'NS_CANT_GHOST_SELF'	=>	'You can\'t ghost yourself',
 	'NS_CANT_RECOVER_SELF'	=>	'You can\'t recover yourself',
 	'NS_NO_HOLD'			=>	'Services doesn\'t have a hold on {nick}',
+	'NS_GHOSTED'			=>	'{nick} has been ghosted',
+	
 	'NS_REACHED_LIMIT'		=>	'You are not allowed to be logged into the same account more than {limit} times',
 	'NS_NO_MULTIPLE_SESS'	=>	'You are not allowed to be logged into the same account multiple times',
 	'NS_ALREADY_IDENTIFIED'	=>	'You are already logged in',

@@ -17,9 +17,18 @@
 class ns_ghost extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NOT_IN_USE'		=> 2,
+		'CANT_GHOST_SELF'	=> 3,
+		'NICK_UNREGISTERED'	=> 4,
+		'INVALID_PASSWORD'	=> 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +39,7 @@ class ns_ghost extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_ghost', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_ghost', 'help', nickserv::$help->NS_HELP_GHOST_1, true );
@@ -49,60 +59,73 @@ class ns_ghost extends module
 	*/
 	static public function ghost_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[0];
-		$password = $ircdata[1];
-		// get the parameters.
+		$return_data = self::_ghost_nick( true, $nick, $ircdata[0], $ircdata[1] );
+		// call _ghost_nick
 		
-		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _ghost_nick (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $unick - The account to ghost
 	* $password - The password of the account
 	*/
-	static public function _ghost_nick( $nick, $unick, $password )
+	static public function _ghost_nick( $internal, $nick, $unick, $password )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
 		if ( !isset( core::$nicks[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_IN_USE;
+			return $return_data;
 		}
 		// nickname isn't in use
 		
 		if ( $nick == $unick )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_GHOST_SELF );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_CANT_GHOST_SELF );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CANT_GHOST_SELF;
+			return $return_data;
 		}
 		// you can't ghost yourself.. waste of time, and clearly useless.
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// doesn't even exist..
 		
 		if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
-			core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
+			if ( $internal ) core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
+			
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_GHOSTED, array( 'nick' => $unick ) );
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-			// password isn't correct
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
+			return $return_data;
 		}
 	}
 }

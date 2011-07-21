@@ -65,7 +65,7 @@ class ns_drop extends module
 		$return_data = self::_drop_nick( true, $nick, $ircdata[0], $ircdata[1], false );
 		// call _drop_nick
 		
-		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
@@ -82,7 +82,7 @@ class ns_drop extends module
 		$return_data = self::_drop_nick( true, $nick, $ircdata[0], '', true );
 		// call _drop_nick
 		
-		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
