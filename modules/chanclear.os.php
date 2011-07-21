@@ -17,12 +17,17 @@
 class os_chanclear extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'CHAN_INVALID'		=> 2,
+		'AKILL_NO_EXIST'	=> 3,
+		'AKILL_LIST_EMPTY' 	=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +38,7 @@ class os_chanclear extends module
 	public function modload()
 	{
 		modules::init_module( 'os_chanclear', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, true, 'global_op' );
@@ -57,33 +63,43 @@ class os_chanclear extends module
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
+		// dont have access
 			
-		self::_chan_clear( $nick, strtoupper( $ircdata[0] ), core::get_chan( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
+		$return_data = self::_chan_clear( true, $nick, strtoupper( $ircdata[0] ), core::get_chan( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
 		// send to a subfunction
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _chan_clear (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $mode - Mode, such as BAN, KILL, KICK
 	* $chan - The channel
 	* $reason - The reason to use
 	*/
-	static public function _chan_clear( $nick, $mode, $chan, $reason = '' )
+	static public function _chan_clear( $internal, $nick, $mode, $chan, $reason = '' )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'BAN' ) ) || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
-			return false;
-			// wrong syntax
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
+		// wrong syntax
 		
 		if ( !isset( core::$chans[$chan] ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_CHAN_INVALID, array( 'chan' => $chan ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_CHAN_INVALID, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_INVALID;
+			return $return_data;
 		}
 		// check if the channel is in use..
 		
@@ -91,7 +107,7 @@ class os_chanclear extends module
 		{
 			if ( core::$nicks[$user]['ircop'] )
 			{
-				core::alog( core::$config->operserv->nick.': CHANCLEAR: Ignoring IRC Operator ('.$user.')' );
+				if ( $internal ) core::alog( core::$config->operserv->nick.': CHANCLEAR: Ignoring IRC Operator ('.$user.')' );
 				continue;
 			}
 			// ignore irc operator, infact, logchan it too
@@ -103,16 +119,16 @@ class os_chanclear extends module
 				// kick and +b them
 			}
 			elseif ( $mode == 'KILL' )
-			{
 				ircd::kill( core::$config->operserv->nick, $user, 'CHANKILL by '.$nick.' ('.$reason.')' );
-			}
 			elseif ( $mode == 'BAN' )
-			{
 				ircd::global_ban( core::$config->operserv->nick, core::$nicks[$user], 10800, 'CHANKILL by '.$nick.' ('.$reason.')' );
-			}
 			// remove all other users.
 		}
 		// loop through the people in the channel
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 }
 

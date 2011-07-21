@@ -17,9 +17,18 @@
 class ns_drop extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'ACCESS_DENIED'		=> 2,
+		'NICK_SUSPENDED'	=> 3,
+		'NICK_UNREGISTERED' => 4,
+		'INVALID_PASSWORD'	=> 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +39,7 @@ class ns_drop extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1, true );
@@ -52,8 +62,12 @@ class ns_drop extends module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		self::_drop_nick( $nick, $ircdata[0], $ircdata[1], false );
+		$return_data = self::_drop_nick( true, $nick, $ircdata[0], $ircdata[1], false );
 		// call _drop_nick
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 
 	/*
@@ -65,46 +79,57 @@ class ns_drop extends module
 	*/
 	static public function sadrop_command( $nick, $ircdata = array() )
 	{
-		self::_drop_nick( $nick, $ircdata[0], '', true );
+		$return_data = self::_drop_nick( true, $nick, $ircdata[0], '', true );
 		// call _drop_nick
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _drop_nick (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $unick - The account of the nick to drop
 	* $password - The account password
 	* $sadrop - If this is set to true, we don't need a $password (however, privilages are still checked)
 	*/
-	static public function _drop_nick( $nick, $unick, $password, $sadrop = false )
+	static public function _drop_nick( $internal, $nick, $unick, $password, $sadrop = false )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $unick ) == '' || ( !$sadrop && trim( $password ) == '' ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => ( ( $sadrop ) ? 'SADROP' : 'DROP' ) ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => ( ( $sadrop ) ? 'SADROP' : 'DROP' ) ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
 		if ( $sadrop && ( ( core::$nicks[$nick]['account'] != $unick && services::has_privs( $unick ) ) || !services::oper_privs( $nick, 'nickserv_op' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// access denied
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'id', 'display', 'pass', 'salt', 'suspended' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// doesn't even exist..
 		
 		if ( $user->suspended == 1 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_SUSPENDED;
+			return $return_data;
 		}
 		// are they suspended?
 		
@@ -117,10 +142,11 @@ class ns_drop extends module
 			database::delete( 'chans_levels', array( 'target', '=', $user->display ) );
 			// also delete this users channel access.
 			
-			core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-			// logchan it
-			
-			core::alog( 'drop_command(): '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
+			if ( $internal )
+			{
+				core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+				core::alog( 'drop_command(): '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
+			}
 			// log what we need to log.
 			
 			if ( isset( core::$nicks[$user->display] ) )
@@ -131,13 +157,15 @@ class ns_drop extends module
 			core::$nicks[$user->display]['account'] = '';
 			// set identified to false
 			
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );
-			// let the nick know the account has been dropped.
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NICK_DROPPED, array( 'nick' => $user->display ) );
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-			// password isn't correct
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
+			return $return_data;
 		}
 	}
 }

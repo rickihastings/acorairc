@@ -211,7 +211,7 @@ class os_akill extends module
 		if ( database::num_rows( $check_record_q ) != 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_EXISTS, array( 'hostname' => $hostname ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->AKILL_EXISTS;
+			$return_data[CMD_FAILCODE] = self::$return_codes->AKILL_EXISTS;
 			return $return_data;
 		}
 		// already got an exception 
@@ -273,7 +273,7 @@ class os_akill extends module
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			$return_data[CMD_RESPONSE][] = ( $expired ) ? '' : services::parse( operserv::$help->OS_AKILL_NOEXISTS, array( 'hostname' => $hostname ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->AKILL_NO_EXIST;
+			$return_data[CMD_FAILCODE] = self::$return_codes->AKILL_NO_EXIST;
 			return $return_data;
 		}
 		// already got an exception
