@@ -17,12 +17,9 @@
 class ns_identify extends module
 {
 	
-	const MOD_VERSION = '0.0.7';
+	const MOD_VERSION = '0.0.8';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -59,9 +56,6 @@ class ns_identify extends module
 	*/
 	static public function identify_command( $nick, $ircdata = array() )
 	{
-		$allow_multiple_sessions = ( isset( core::$config->nickserv->allow_multiple_sessions ) ) ? core::$config->nickserv->allow_multiple_sessions : true;
-		$session_limit = ( isset( core::$config->nickserv->session_limit ) ) ? core::$config->nickserv->session_limit : 2;
-		
 		if ( count( $ircdata ) == 1 )
 		{
 			$account = $nick;
@@ -74,156 +68,15 @@ class ns_identify extends module
 		}
 		// determine how many params we have
 		
-		if ( trim( $account ) == '' || trim( $password ) == '' )
+		if ( core::$nicks[$nick]['identified'] )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_IDENTIFIED );
 			return false;
 		}
-		// wrong syntax damit!
+		// already identified
 		
-		if ( ( $user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) ) !== false )
-		{
-			if ( $user->validated == 0 )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
-				return false;
-			}
-			elseif ( core::$nicks[$nick]['identified'] )
-			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_IDENTIFIED );
-				return false;
-			}
-			else
-			{
-				if ( $user->pass == sha1( $password.$user->salt ) )
-				{
-					$sessions = 0;
-					while ( list( $n, $d ) = each( core::$nicks ) )
-					{
-						if ( $d['account'] == $account )
-							$sessions++;
-						if ( $allow_multiple_sessions && $sessions == $session_limit )
-							break;
-					}
-					reset( core::$nicks );
-					// check how many sessions we're in, if any
-					
-					if ( $allow_multiple_sessions && $sessions == $session_limit )
-					{
-						services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REACHED_LIMIT, array( 'limit' => $session_limit ) );
-						return false;
-					}
-					if ( $sessions >= 1 && !$allow_multiple_sessions )
-					{
-						services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_MULTIPLE_SESS );
-						return false;
-					}
-					// if we're in more than the limit specified in the config, bail!
-				
-					timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
-					// remove the secured timer. if there is one
-					
-					ircd::on_user_login( $nick, $account );
-					core::$nicks[$nick]['account'] = $account;
-					core::$nicks[$nick]['identified'] = true;
-					core::$nicks[$nick]['failed_attempts'] = 0;
-					// registered mode
-					
-					database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
-					// right, standard identify crap
-					core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
-					// logchan
-					
-					if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) && nickserv::check_flags( $nick, array( 'H' ) ) )
-					{
-						if ( substr_count( $user->vhost, '@' ) == 1 )
-						{
-							$new_host = explode( '@', $user->vhost );
-							$ident = $new_host[0];
-							$host = $new_host[1];
-							
-							ircd::setident( core::$config->nickserv->nick, $nick, $ident );
-							ircd::sethost( core::$config->nickserv->nick, $nick, $host );
-						}
-						else
-						{
-							ircd::sethost( core::$config->nickserv->nick, $nick, $user->vhost );
-						}
-					}
-					// first thing we do, check if they have a vhost, if they do, apply it.
-					
-					$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $account ) );
-					
-					if ( database::num_rows( $failed_attempts ) > 0 )
-					{
-						services::communicate( core::$config->nickserv->nick, $nick, ''.database::num_rows( $failed_attempts ).' failed login(s) since last login.' );
-					
-						while ( $row = database::fetch( $failed_attempts ) )
-						{
-							services::communicate( core::$config->nickserv->nick, $nick, 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
-						}
-						// loop through the failed attempts messaging them to the user
-						database::delete( 'failed_attempts', array( 'nick', '=', $account ) );
-						// clear them now that they've been seen
-					}
-					// we got any failed attempts? HUMM
-					
-					$hostname = core::get_full_hostname( $nick );
-					// generate a hostname.
-					
-					if ( core::$config->settings->mode_on_id && isset( modules::$list['cs_levels'] ) )
-					{
-						while ( list( $chan, $cdata ) = each( core::$chans ) )
-						{
-							if ( !isset( core::$chans[$chan]['users'][$nick] ) )
-								continue;
-						
-							if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
-								return false;
-							// if the channel doesn't exist we return false, to save us the hassle of wasting
-							// resources on this stuff below.
-						
-							if ( $nick == core::$config->chanserv->nick )
-								continue;
-							// skip us :D
-							
-							$hostname = core::get_full_hostname( $nick );
-							// get the hostname ready.
-							
-							cs_levels::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, true );
-							// on_create event
-						}
-						reset( core::$chans );
-						// loop through channels, check if they are in any
-					}
-					// check if mode_on_id is set, also cs_access is enabled, and lets do a remote access gain :D
-				}
-				else
-				{
-					services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-					core::alog( core::$config->nickserv->nick.': Invalid password from ('.core::get_full_hostname( $nick ).') for '.$account );
-					// some logging stuff
-					
-					database::insert( 'failed_attempts', array( 'nick' => $account, 'mask' => core::get_full_hostname( $nick ), 'time' => core::$network_time ) );
-					core::$nicks[$nick]['failed_attempts']++;
-					// ooh, we have something to log :)
-					
-					if ( core::$nicks[$nick]['failed_attempts'] == 5 )
-						ircd::kill( core::$config->nickserv->nick, $nick, 'Maxmium FAILED login attempts reached.' );
-					// have they reached the failed attempts limit? we gonna fucking KILL mwhaha
-				}
-				// invalid password? HAX!!
-			}
-			// are they already identifed?
-		}
-		else
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $nick ) );
-			return false;
-			// doesn't even exist..
-		}
-		// right now we need to check if the user exists, and password matches
+		self::_identify_user( $nick, $account, $password );
+		// call _logout_user
 	}
 	
 	/*
@@ -235,27 +88,188 @@ class ns_identify extends module
 	*/
 	static public function logout_command( $nick, $ircdata = array() )
 	{
-		$account_name = core::$nicks[$nick]['account'];
-		
-		if ( core::$nicks[$nick]['identified'] )
+		if ( !core::$nicks[$nick]['identified'] )
 		{
-			// here we set unregistered mode
-			database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
-			// unidentify them
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
-			// let them know
-			core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-			// and log it.
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
+			return false;
+		}
+		// not even identified
+		
+		self::_logout_user( $nick, core::$nicks[$nick]['account'] );
+		// call _logout_user
+	}
+	
+	/*
+	* _identify_user (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $unick - The account to identify to
+	* $password - The password for that account
+	*/
+	static public function _identify_user( $nick, $account, $password )
+	{
+		$allow_multiple_sessions = ( isset( core::$config->nickserv->allow_multiple_sessions ) ) ? core::$config->nickserv->allow_multiple_sessions : true;
+		$session_limit = ( isset( core::$config->nickserv->session_limit ) ) ? core::$config->nickserv->session_limit : 2;
+		
+		if ( trim( $account ) == '' || trim( $password ) == '' )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
+			return false;
+		}
+		// wrong syntax damit!
+		
+		if ( !$user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $nick ) );
+			return false;
+		}
+		// doesn't even exist..
+		
+		if ( $user->validated == 0 )
+		{
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
+			return false;
+		}
+		// user hasen't validated
+		
+		if ( $user->pass == sha1( $password.$user->salt ) )
+		{
+			$sessions = 0;
+			while ( list( $n, $d ) = each( core::$nicks ) )
+			{
+				if ( $d['account'] == $account )
+					$sessions++;
+				if ( $allow_multiple_sessions && $sessions == $session_limit )
+					break;
+			}
+			reset( core::$nicks );
+			// check how many sessions we're in, if any
 			
-			ircd::on_user_logout( $nick );
-			core::$nicks[$nick]['account'] = '';
-			core::$nicks[$nick]['identified'] = false;
+			if ( $allow_multiple_sessions && $sessions == $session_limit )
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REACHED_LIMIT, array( 'limit' => $session_limit ) );
+				return false;
+			}
+			if ( $sessions >= 1 && !$allow_multiple_sessions )
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_MULTIPLE_SESS );
+				return false;
+			}
+			// if we're in more than the limit specified in the config, bail!
+		
+			timer::remove( array( 'ns_identify', 'secured_callback', array( $nick ) ) );
+			// remove the secured timer. if there is one
+			
+			ircd::on_user_login( $nick, $account );
+			core::$nicks[$nick]['account'] = $account;
+			core::$nicks[$nick]['identified'] = true;
+			core::$nicks[$nick]['failed_attempts'] = 0;
+			// registered mode
+			
+			database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
+			// right, standard identify crap
+			core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
+			// logchan
+			
+			if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) && nickserv::check_flags( $nick, array( 'H' ) ) )
+			{
+				if ( substr_count( $user->vhost, '@' ) == 1 )
+				{
+					$new_host = explode( '@', $user->vhost );
+					$ident = $new_host[0];
+					$host = $new_host[1];
+					
+					ircd::setident( core::$config->nickserv->nick, $nick, $ident );
+					ircd::sethost( core::$config->nickserv->nick, $nick, $host );
+				}
+				else
+					ircd::sethost( core::$config->nickserv->nick, $nick, $user->vhost );
+			}
+			// first thing we do, check if they have a vhost, if they do, apply it.
+			
+			$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $account ) );
+			
+			if ( database::num_rows( $failed_attempts ) > 0 )
+			{
+				services::communicate( core::$config->nickserv->nick, $nick, ''.database::num_rows( $failed_attempts ).' failed login(s) since last login.' );
+			
+				while ( $row = database::fetch( $failed_attempts ) )
+					services::communicate( core::$config->nickserv->nick, $nick, 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
+				// loop through the failed attempts messaging them to the user
+				database::delete( 'failed_attempts', array( 'nick', '=', $account ) );
+				// clear them now that they've been seen
+			}
+			// we got any failed attempts? HUMM
+			
+			$hostname = core::get_full_hostname( $nick );
+			// generate a hostname.
+			
+			if ( core::$config->settings->mode_on_id && isset( modules::$list['cs_levels'] ) )
+			{
+				while ( list( $chan, $cdata ) = each( core::$chans ) )
+				{
+					if ( !isset( core::$chans[$chan]['users'][$nick] ) )
+						continue;
+				
+					if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
+						return false;
+					// if the channel doesn't exist we return false, to save us the hassle of wasting
+					// resources on this stuff below.
+				
+					if ( $nick == core::$config->chanserv->nick )
+						continue;
+					// skip us :D
+					
+					$hostname = core::get_full_hostname( $nick );
+					// get the hostname ready.
+					
+					cs_levels::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, true );
+					// on_create event
+				}
+				reset( core::$chans );
+				// loop through channels, check if they are in any
+			}
+			// check if mode_on_id is set, also cs_access is enabled, and lets do a remote access gain :D
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
-			// not even identified
+			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
+			core::alog( core::$config->nickserv->nick.': Invalid password from ('.core::get_full_hostname( $nick ).') for '.$account );
+			// some logging stuff
+			
+			database::insert( 'failed_attempts', array( 'nick' => $account, 'mask' => core::get_full_hostname( $nick ), 'time' => core::$network_time ) );
+			core::$nicks[$nick]['failed_attempts']++;
+			// ooh, we have something to log :)
+			
+			if ( core::$nicks[$nick]['failed_attempts'] == 5 )
+				ircd::kill( core::$config->nickserv->nick, $nick, 'Maxmium FAILED login attempts reached.' );
+			// have they reached the failed attempts limit? we gonna fucking KILL mwhaha
 		}
+		// invalid password? HAX!!
+	}
+	
+	/*
+	* _logout_user (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $account - The account to logout of
+	*/
+	static public function _logout_user( $nick, $account )
+	{
+		// here we set unregistered mode
+		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+		// unidentify them
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
+		// let them know
+		core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.core::get_full_hostname( $nick ).') ('.$account.')' );
+		// and log it.
+		
+		ircd::on_user_logout( $nick );
+		core::$nicks[$nick]['account'] = '';
+		core::$nicks[$nick]['identified'] = false;
 	}
 	
 	/*

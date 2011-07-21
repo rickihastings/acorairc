@@ -17,12 +17,9 @@
 class ns_register extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -61,9 +58,33 @@ class ns_register extends module
 	*/
 	static public function register_command( $nick, $ircdata = array() )
 	{
-		$password = $ircdata[0];
-		$email = $ircdata[1];
-		
+		self::_register_user( $nick, $ircdata[0], $ircdata[1] );
+		// call _register_user
+	}
+	
+	/*
+	* confirm_command (command)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $ircdata - Any parameters.
+	*/
+	static public function confirm_command( $nick, $ircdata = array() )
+	{
+		self::_confirm_user( $nick, $ircdata[0] );
+		// call _confirm_user
+	}
+	
+	/*
+	* _register_user (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	* $password - The password to use
+	* $email - The email addr to use
+	*/
+	static public function _register_user( $nick, $password, $email )
+	{
 		if ( trim( $password ) == '' || trim( $email ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
@@ -85,13 +106,12 @@ class ns_register extends module
 		}
 		// is the email valid?
 		
-		if ( $user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
+		if ( core::$nicks[$nick]['identified'] || $user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_REGISTERED );
 			return false;
 		}
-		// are we registered?
-		// apprently not, let's move on!
+		// are we registered? apprently not, let's move on!
 		
 		$check_e = database::select( 'users_flags', array( 'email' ), array( 'email', '=', $email ) );
 		
@@ -103,12 +123,12 @@ class ns_register extends module
 		// check if the email is in use.
 		
 		$salt = '';
-		
 		for ( $i = 0; $i < 8; $i++ )
 		{
 			$possible = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 			$salt .= substr( $possible, rand( 0, strlen( $possible ) - 1 ), 1 );
 		}
+		// generate a salt AND VINEGAR!
 		
 		$user_info = array(
 			'display'		=>	$nick,
@@ -131,7 +151,7 @@ class ns_register extends module
 		database::insert( 'users_flags', array( 'nickname' => $nick, 'flags' => $flags.'e', 'email' => $email ) );
 		// insert it into the database.
 		
-		if ( core::$config->nickserv->force_validation === true )
+		if ( core::$config->nickserv->force_validation )
 		{
 			$validation_code = mt_rand();
 			
@@ -175,16 +195,14 @@ You will then be able to identify with the password you chose by typing
 	}
 	
 	/*
-	* confirm_command (command)
+	* _confirm_user (private)
 	* 
 	* @params
 	* $nick - The nick of the person issuing the command
-	* $ircdata - Any parameters.
+	* $code - The confirm code
 	*/
-	static public function confirm_command( $nick, $ircdata = array() )
+	static public function _confirm_user( $nick, $code )
 	{
-		$code = $ircdata[0];
-		
 		if ( trim( $code ) == '' )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );
@@ -204,22 +222,21 @@ You will then be able to identify with the password you chose by typing
 		if ( database::num_rows( $code_array ) == 0 )
 		{
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSCODE );
+			return false;
 		}
-		else
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_VALIDATED );
-			// let them know.
-			
-			database::update( 'users', array( 'validated' => 1 ), array( 'id', '=', $user->id ) );
-			// user is now validated.
-			
-			database::delete( 'validation_codes', array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
-			// delete the code now that we've validated them
-			
-			core::alog( core::$config->nickserv->nick.': '.$nick.' activated' );
-			// logchan
-		}
-		// no passcode found
+		// invalid passcode
+		
+		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_VALIDATED );
+		// let them know.
+		
+		database::update( 'users', array( 'validated' => 1 ), array( 'id', '=', $user->id ) );
+		// user is now validated.
+		
+		database::delete( 'validation_codes', array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
+		// delete the code now that we've validated them
+		
+		core::alog( core::$config->nickserv->nick.': '.$nick.' activated' );
+		// logchan
 	}
 }
 

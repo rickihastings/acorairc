@@ -17,12 +17,9 @@
 class os_rehash extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.0.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -59,6 +56,18 @@ class os_rehash extends module
 		}
 		// access?
 	
+		self::_rehash_config( $nick );
+		// call _rehash_config
+	}
+	
+	/*
+	* _rehash_config (private)
+	* 
+	* @params
+	* $nick - The nick of the person issuing the command
+	*/
+	static public function _rehash_config( $nick )
+	{
 		$parser = new parser( CONFPATH.'services.conf' );
 		// load the parser
 		
@@ -111,7 +120,7 @@ class os_rehash extends module
 					if ( !modules::$list[$name]['class'] = new $name() )
 					{
 						core::alog( 'load_module(): unable to start: '.$name.' (boot error)', 'BASIC' );
-						return false;
+						continue;
 					}
 				}
 				
@@ -136,7 +145,7 @@ class os_rehash extends module
 		
 		core::alog( 'rehash_command(): sucessful rehash', 'BASIC' );
 		// log what we need to log.
-	}	
+	}
 }
 
 // EOF;
