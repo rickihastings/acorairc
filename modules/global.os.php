@@ -17,12 +17,15 @@
 class os_global extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'INVALID_GLOBAL'	=> 2,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -32,13 +35,14 @@ class os_global extends module
 	*/
 	public function modload()
 	{
+		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		self::$return_codes = (object) self::$return_codes;
+		// these are standard in module constructors
+	
 		if ( isset( core::$config->global ) )
 			ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
 		// i decided to change global from a core feature into a module based feature
 		// seen as though global won't do anything really without this module it's going here
-		
-		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
-		// these are standard in module constructors
 		
 		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, true, 'global_op' );
 		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, false, 'global_op' );
@@ -92,31 +96,40 @@ class os_global extends module
 		}
 		// access?
 		
-		self::_global_message( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$return_data = self::_global_message( true, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// throw to a sub command
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _global_message (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $mask - The mask to send the message to
 	* $message - The actual message
 	*/
-	static public function _global_message( $nick, $mask, $message )
+	static public function _global_message( $internal, $nick, $mask, $message )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array ( 'help' => 'GLOBAL' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array ( 'help' => 'GLOBAL' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are they sending a message?
 		
 		if ( strpos( $mask, '@' ) === false )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_GLOBAL_INVALID );
-			return false;	
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_GLOBAL_INVALID );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_GLOBAL;
+			return $return_data;	
 		}
 		// is the mask valid?
 		
@@ -130,8 +143,9 @@ class os_global extends module
 			ircd::global_notice( core::$config->global->nick, $mask, $message );
 		// send the message!!
 		
-		ircd::wallops( core::$config->operserv->nick, $nick.' just used GLOBAL command.' );
-		// we globop the command being used.
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*

@@ -17,9 +17,21 @@
 class ns_identify extends module
 {
 	
-	const MOD_VERSION = '0.0.8';
+	const MOD_VERSION = '0.1.8';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'NOT_VALIDATED'		=> 3,
+		'NO_MULTIPLE_SESS' 	=> 4,
+		'REACHED_LIMIT'		=> 5,
+		'INVALID_PASSWORD'	=> 6,
+		'NOT_IDENTIFIED'	=> 7,
+		'ALREADY_IDENTIFIED'=> 8,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +42,7 @@ class ns_identify extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_identify', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1, true );
@@ -68,15 +81,12 @@ class ns_identify extends module
 		}
 		// determine how many params we have
 		
-		if ( core::$nicks[$nick]['identified'] )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_IDENTIFIED );
-			return false;
-		}
-		// already identified
-		
-		self::_identify_user( $nick, $account, $password );
+		$return_data = self::_identify_user( $nick, $account, $password );
 		// call _logout_user
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -87,16 +97,13 @@ class ns_identify extends module
 	* $ircdata - Any parameters.
 	*/
 	static public function logout_command( $nick, $ircdata = array() )
-	{
-		if ( !core::$nicks[$nick]['identified'] )
-		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IDENTIFIED );
-			return false;
-		}
-		// not even identified
-		
-		self::_logout_user( $nick, core::$nicks[$nick]['account'] );
+	{	
+		$return_data = self::_logout_user( $nick, core::$nicks[$nick]['account'] );
 		// call _logout_user
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -109,27 +116,39 @@ class ns_identify extends module
 	*/
 	static public function _identify_user( $nick, $account, $password )
 	{
+		$return_data = module::$return_data;
 		$allow_multiple_sessions = ( isset( core::$config->nickserv->allow_multiple_sessions ) ) ? core::$config->nickserv->allow_multiple_sessions : true;
 		$session_limit = ( isset( core::$config->nickserv->session_limit ) ) ? core::$config->nickserv->session_limit : 2;
 		
+		if ( core::$nicks[$nick]['identified'] )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ALREADY_IDENTIFIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ALREADY_IDENTIFIED;
+			return $return_data;
+		}
+		// not even identified
+		
 		if ( trim( $account ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'IDENTIFY' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax damit!
 		
 		if ( !$user = services::user_exists( $account, false, array( 'display', 'pass', 'validated', 'salt', 'vhost' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $nick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $account ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// doesn't even exist..
 		
 		if ( $user->validated == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_AWAITING_VALIDATION );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_VALIDATED;
+			return $return_data;
 		}
 		// user hasen't validated
 		
@@ -148,13 +167,15 @@ class ns_identify extends module
 			
 			if ( $allow_multiple_sessions && $sessions == $session_limit )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REACHED_LIMIT, array( 'limit' => $session_limit ) );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_REACHED_LIMIT, array( 'limit' => $session_limit ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->REACHED_LIMIT;
+				return $return_data;
 			}
 			if ( $sessions >= 1 && !$allow_multiple_sessions )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_MULTIPLE_SESS );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NO_MULTIPLE_SESS );
+				$return_data[CMD_FAILCODE] = self::$return_codes->NO_MULTIPLE_SESS;
+				return $return_data;
 			}
 			// if we're in more than the limit specified in the config, bail!
 		
@@ -168,8 +189,8 @@ class ns_identify extends module
 			// registered mode
 			
 			database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_IDENTIFIED );
 			// right, standard identify crap
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_IDENTIFIED );
 			core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
 			// logchan
 			
@@ -190,13 +211,12 @@ class ns_identify extends module
 			// first thing we do, check if they have a vhost, if they do, apply it.
 			
 			$failed_attempts = database::select( 'failed_attempts', array( 'nick', 'mask', 'time' ), array( 'nick', '=', $account ) );
-			
 			if ( database::num_rows( $failed_attempts ) > 0 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, ''.database::num_rows( $failed_attempts ).' failed login(s) since last login.' );
+				$return_data[CMD_RESPONSE][] = services::parse( ''.database::num_rows( $failed_attempts ).' failed login(s) since last login.' );
 			
 				while ( $row = database::fetch( $failed_attempts ) )
-					services::communicate( core::$config->nickserv->nick, $nick, 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
+					$return_data[CMD_RESPONSE][] = services::parse( 'Failed login from: '.$row->mask.' on '.date( "F j, Y, g:i a", $row->time ).'' );
 				// loop through the failed attempts messaging them to the user
 				database::delete( 'failed_attempts', array( 'nick', '=', $account ) );
 				// clear them now that they've been seen
@@ -232,10 +252,16 @@ class ns_identify extends module
 				// loop through channels, check if they are in any
 			}
 			// check if mode_on_id is set, also cs_access is enabled, and lets do a remote access gain :D
+			
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
+			// return the data back
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
+			
 			core::alog( core::$config->nickserv->nick.': Invalid password from ('.core::get_full_hostname( $nick ).') for '.$account );
 			// some logging stuff
 			
@@ -246,6 +272,9 @@ class ns_identify extends module
 			if ( core::$nicks[$nick]['failed_attempts'] == 5 )
 				ircd::kill( core::$config->nickserv->nick, $nick, 'Maxmium FAILED login attempts reached.' );
 			// have they reached the failed attempts limit? we gonna fucking KILL mwhaha
+			
+			return $return_data;
+			// return the data back
 		}
 		// invalid password? HAX!!
 	}
@@ -259,17 +288,29 @@ class ns_identify extends module
 	*/
 	static public function _logout_user( $nick, $account )
 	{
-		// here we set unregistered mode
+		$return_data = module::$return_data;
+	
+		if ( !core::$nicks[$nick]['identified'] )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NOT_IDENTIFIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_IDENTIFIED;
+			return $return_data;
+		}
+		// not even identified
+		
 		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
 		// unidentify them
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_LOGGED_OUT );
-		// let them know
 		core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.core::get_full_hostname( $nick ).') ('.$account.')' );
 		// and log it.
 		
 		ircd::on_user_logout( $nick );
 		core::$nicks[$nick]['account'] = '';
 		core::$nicks[$nick]['identified'] = false;
+		
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_LOGGED_OUT );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
