@@ -73,7 +73,7 @@ class os_ignore extends module
 			$return_data = self::_add_user( $input, $nick, $ircdata[1] );
 			// $who is the user we're adding REMEMBER!
 			
-			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
 			return $return_data[CMD_SUCCESS];
 			// respond and return
 		}
@@ -89,7 +89,7 @@ class os_ignore extends module
 			$return_data = self::_del_user( $input, $nick, $ircdata[1] );
 			// again $who is the user we're deleting.
 			
-			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
 			return $return_data[CMD_SUCCESS];
 			// respond and return
 		}
@@ -98,7 +98,7 @@ class os_ignore extends module
 			$return_data = self::_list_users( $input );
 			// basic shiz, no checking, no parameter command
 			
-			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
 			return $return_data[CMD_SUCCESS];
 			// respond and return
 		}
@@ -107,7 +107,7 @@ class os_ignore extends module
 			$return_data = self::_clear_users( $input );
 			// again no params, straight cmd
 			
-			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
 			return $return_data[CMD_SUCCESS];
 			// respond and return
 		}
