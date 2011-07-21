@@ -59,7 +59,8 @@ class ns_ghost extends module
 	*/
 	static public function ghost_command( $nick, $ircdata = array() )
 	{
-		$return_data = self::_ghost_nick( true, $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_ghost_nick( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _ghost_nick
 		
 		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -71,12 +72,12 @@ class ns_ghost extends module
 	* _ghost_nick (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The account to ghost
 	* $password - The password of the account
 	*/
-	static public function _ghost_nick( $internal, $nick, $unick, $password )
+	static public function _ghost_nick( $input, $nick, $unick, $password )
 	{
 		$return_data = module::$return_data;
 		
@@ -115,7 +116,7 @@ class ns_ghost extends module
 		if ( $user->pass == sha1( $password.$user->salt ) || services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			ircd::kill( core::$config->nickserv->nick, $unick, 'GHOST command used by '.core::get_full_hostname( $nick ) );
-			if ( $internal ) core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.core::get_full_hostname( $nick ).')' );
+			core::alog( core::$config->nickserv->nick.': GHOST command used on '.$unick.' by ('.$input['hostname'].')' );
 			
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_GHOSTED, array( 'nick' => $unick ) );
 			$return_data[CMD_SUCCESS] = true;

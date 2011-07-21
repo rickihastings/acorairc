@@ -60,7 +60,8 @@ class cs_drop extends module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		$return_data = self::_drop_chan( true, $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_drop_chan( $input, $nick, $ircdata[0], $ircdata[1] );
 		// drop the channel
 		
 		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -72,12 +73,12 @@ class cs_drop extends module
 	* _drop_chan (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nickname of the person issuing the command
 	* $chan - The channel to drop
 	* $code - The code
 	*/
-	static public function _drop_chan( $internal, $nick, $chan, $code )
+	static public function _drop_chan( $input, $nick, $chan, $code )
 	{
 		$return_data = module::$return_data;
 	
@@ -150,13 +151,9 @@ class cs_drop extends module
 		// remember we DON'T unset the channel record, because the channel
 		// is still there, just isnt registered, completely different things
 		
-		if ( $internal )
-		{
-			core::alog( core::$config->chanserv->nick.': '.$chan.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-			core::alog( 'drop_command(): '.$chan.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
-			// log what we need to log.
-		}
-		// only throw to logchan if the command is internal
+		core::alog( core::$config->chanserv->nick.': '.$chan.' has been dropped by ('.$input['hostname'].') ('.$input['account'].')' );
+		core::alog( 'drop_command(): '.$chan.' has been dropped by '.$input['hostname'], 'BASIC' );
+		// log what we need to log.
 		
 		unset( self::$codes[md5( core::$nicks[$nick]['account'].$chan )] );
 		unset( chanserv::$chan_q[$chan] );

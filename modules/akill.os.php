@@ -73,6 +73,7 @@ class os_akill extends module
 	static public function akill_command( $nick, $ircdata = array() )
 	{
 		$mode = strtolower( $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
 		
 		if ( $mode == 'add' )
 		{
@@ -84,7 +85,7 @@ class os_akill extends module
 			// you have to be root to add/del an akill
 			
 			$reason = ( core::get_data_after( $ircdata, 3 ) == '' ) ? 'No reason' : core::get_data_after( $ircdata, 3 );
-			$return_data = self::_add_akill( true, $nick, $ircdata[1], $ircdata[2], $reason );
+			$return_data = self::_add_akill( $input, $nick, $ircdata[1], $ircdata[2], $reason );
 			// add the ban and get the response from add_akill
 			
 			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -101,7 +102,7 @@ class os_akill extends module
 			}
 			// you have to be root to add/del an akill
 			
-			$return_data = self::_del_akill( true, $nick, $ircdata[1], false );
+			$return_data = self::_del_akill( $input, $nick, $ircdata[1], false );
 			// call del akill
 			
 			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -111,7 +112,7 @@ class os_akill extends module
 		// mode is del
 		elseif ( $mode == 'list' )
 		{
-			$return_data = self::_list_akill( true );
+			$return_data = self::_list_akill( $input );
 			// call list akill
 			
 			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -156,13 +157,13 @@ class os_akill extends module
 	* _add_akill (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $hostname - The hostname to akill
 	* $time - time
 	* $description - Description
 	*/
-	static public function _add_akill( $internal, $nick, $hostname, $rexpire, $reason )
+	static public function _add_akill( $input, $nick, $hostname, $rexpire, $reason )
 	{
 		$return_data = module::$return_data;
 	
@@ -218,8 +219,7 @@ class os_akill extends module
 		
 		database::insert( 'sessions', array( 'nick' => $nick, 'hostmask' => $hostname, 'description' => $reason, 'expire' => $time, 'time' => core::$network_time, 'akill' => 1, 'limit' => 0 ) );
 		
-		if ( $internal )
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
 		// as simple, as.
 		
 		while ( list( $unick, $data ) = each( core::$nicks ) )
@@ -257,12 +257,12 @@ class os_akill extends module
 	* _del_akill (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $hostname - The host to del except
 	* $expired - true
 	*/
-	static public function _del_akill( $internal, $nick, $hostname, $expired = true )
+	static public function _del_akill( $input, $nick, $hostname, $expired = true )
 	{
 		$return_data = module::$return_data;
 		
@@ -280,12 +280,11 @@ class os_akill extends module
 		
 		database::delete( 'sessions', array( 'hostmask', '=', $hostname ) );
 		
-		if ( $internal && $expired )
+		if ( $input['internal'] && $expired )
 			core::alog( core::$config->operserv->nick.': Auto kill for ('.$hostname.') expired' );
 		else
 		{
-			if ( $internal )
-				core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
+			core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') removed the auto kill for ('.$hostname.')' );
 		
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
 			$return_data[CMD_SUCCESS] = true;
@@ -305,9 +304,9 @@ class os_akill extends module
 	* _list_akill (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	*/
-	static public function _list_akill( $internal )
+	static public function _list_akill( $input )
 	{
 		$return_data = module::$return_data;
 	

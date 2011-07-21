@@ -96,7 +96,8 @@ class os_global extends module
 		}
 		// access?
 		
-		$return_data = self::_global_message( true, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_global_message( $input, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// throw to a sub command
 		
 		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -108,12 +109,12 @@ class os_global extends module
 	* _global_message (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $mask - The mask to send the message to
 	* $message - The actual message
 	*/
-	static public function _global_message( $internal, $nick, $mask, $message )
+	static public function _global_message( $input, $nick, $mask, $message )
 	{
 		$return_data = module::$return_data;
 	

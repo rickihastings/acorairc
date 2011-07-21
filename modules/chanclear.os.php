@@ -64,8 +64,9 @@ class os_chanclear extends module
 			return false;
 		}
 		// dont have access
-			
-		$return_data = self::_chan_clear( true, $nick, strtoupper( $ircdata[0] ), core::get_chan( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
+		
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_chan_clear( $input, $nick, strtoupper( $ircdata[0] ), core::get_chan( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
 		// send to a subfunction
 		
 		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -77,13 +78,13 @@ class os_chanclear extends module
 	* _chan_clear (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $mode - Mode, such as BAN, KILL, KICK
 	* $chan - The channel
 	* $reason - The reason to use
 	*/
-	static public function _chan_clear( $internal, $nick, $mode, $chan, $reason = '' )
+	static public function _chan_clear( $input, $nick, $mode, $chan, $reason = '' )
 	{
 		$return_data = module::$return_data;
 	
@@ -107,7 +108,7 @@ class os_chanclear extends module
 		{
 			if ( core::$nicks[$user]['ircop'] )
 			{
-				if ( $internal ) core::alog( core::$config->operserv->nick.': CHANCLEAR: Ignoring IRC Operator ('.$user.')' );
+				core::alog( core::$config->operserv->nick.': CHANCLEAR: Ignoring IRC Operator ('.$user.')' );
 				continue;
 			}
 			// ignore irc operator, infact, logchan it too

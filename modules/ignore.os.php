@@ -17,12 +17,18 @@
 class os_ignore extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'ACCESS_DENIED'		=> 2,
+		'IGNORE_EXISTS'		=> 3,
+		'IGNORE_NONE'		=> 4,
+		'IGNORE_LIST_EMPTY' => 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +39,7 @@ class os_ignore extends module
 	public function modload()
 	{
 		modules::init_module( 'os_ignore', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, true );
@@ -52,6 +59,8 @@ class os_ignore extends module
 	*/
 	static public function ignore_command( $nick, $ircdata = array() )
 	{
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+	
 		if ( strtolower( $ircdata[0] ) == 'add' )
 		{
 			if ( !services::oper_privs( $nick, 'global_op' ) )
@@ -61,8 +70,12 @@ class os_ignore extends module
 			}
 			// you have to be root to add/del an akill
 		
-			self::_add_user( $nick, $ircdata[1] );
+			$return_data = self::_add_user( $input, $nick, $ircdata[1] );
 			// $who is the user we're adding REMEMBER!
+			
+			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'del' )
 		{
@@ -73,18 +86,30 @@ class os_ignore extends module
 			}
 			// you have to be root to add/del an akill
 		
-			self::_del_user( $nick, $ircdata[1] );
+			$return_data = self::_del_user( $input, $nick, $ircdata[1] );
 			// again $who is the user we're deleting.
+			
+			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'list' )
 		{
-			self::_list_users( $nick );
+			$return_data = self::_list_users( $input );
 			// basic shiz, no checking, no parameter command
+			
+			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( strtolower( $ircdata[0] ) == 'clear' )
 		{
-			self::_clear_users( $nick );
+			$return_data = self::_clear_users( $input );
 			// again no params, straight cmd
+			
+			services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		else
 		{
@@ -98,58 +123,69 @@ class os_ignore extends module
 	* _add_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick commandeeer
 	* $who - The nick to add
 	*/
-	static public function _add_user( $nick, $who )
+	static public function _add_user( $input, $nick, $who )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $who ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 
-		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
-		
 		if ( services::has_privs( $who ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// cant ignore someone with privs, regardless of what privs you have.
 			
-		if ( database::num_rows( $check_nick_q ) == 0 )
+		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
+		if ( database::num_rows( $check_nick_q ) != 0 )
 		{
-			if ( strpos( $who, '@' ) !== false && strpos( $who, '!' ) === false )
-				$who = '*!'.$who;
-			// we need to check if it's a hostmask thats been written properly.
-			
-			database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time, 'temp' => '0' ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added ('.$who.') to services ignore list' );
-			// as simple, as.
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_EXISTS, array( 'nick' => $who ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->IGNORE_EXISTS;
+			return $return_data;
 		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_EXISTS, array( 'nick' => $who ) );
-			// already being ignored? :O NEVER!
-		}
+		
+		if ( strpos( $who, '@' ) !== false && strpos( $who, '!' ) === false )
+			$who = '*!'.$who;
+		// we need to check if it's a hostmask thats been written properly.
+		
+		database::insert( 'ignored_users', array( 'who' => $who, 'time' => core::$network_time, 'temp' => '0' ) );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') added ('.$who.') to services ignore list' );
+		// as simple, as.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _del_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick commandeeer
 	* $who - The nick to del
 	*/
-	static public function _del_user( $nick, $who )
+	static public function _del_user( $input, $nick, $who )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $who ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 			
@@ -158,81 +194,96 @@ class os_ignore extends module
 		// we need to check if it's a hostmask thats been written properly.
 		
 		$check_nick_q = database::select( 'ignored_users', array( 'who' ), array( 'who', '=', $who ) );
-			
-		if ( database::num_rows( $check_nick_q ) > 0 )
+		if ( database::num_rows( $check_nick_q ) == 0 )
 		{
-			database::delete( 'ignored_users', array( 'who', '=', $who ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') deleted ('.$who.') from the services ignore list' );
-			// as simple, as.
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_NONE );
+			$return_data[CMD_FAILCODE] = self::$return_codes->IGNORE_NONE;
+			return $return_data;
 		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_NONE );
-			// empty list.
-		}
+		// doesn't exist
+		
+		database::delete( 'ignored_users', array( 'who', '=', $who ) );
+		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') deleted ('.$who.') from the services ignore list' );
+		// as simple, as.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _list_users (private)
 	* 
 	* @params
-	* $nick - The nick commandeeer
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	*/
-	static public function _list_users( $nick )
+	static public function _list_users( $input )
 	{
+		$return_data = module::$return_data;
 		$check_nick_q = database::select( 'ignored_users', array( 'who', 'time' ) );
 		
-		if ( database::num_rows( $check_nick_q ) > 0 )
+		if ( database::num_rows( $check_nick_q ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_D );
-			// t-o-l
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST_B, array( 'num' => 0 ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->IGNORE_LIST_EMPTY;
+			return $return_data;
+		}
+		// empty list.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST_T );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST_D );
+		// t-o-l
+		
+		$x = 0;
+		while ( $ignored = database::fetch( $check_nick_q ) )
+		{
+			$x++;
+			$false_nick = $ignored->who;
 			
-			$x = 0;
-			while ( $ignored = database::fetch( $check_nick_q ) )
+			$num = $x;
+			$y_i = strlen( $num );
+				for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
+					$num .= ' ';
+			
+			if ( !isset( $ignored->who[50] ) )
 			{
-				$x++;
-				$false_nick = $ignored->who;
-				
-				$num = $x;
-				$y_i = strlen( $num );
-					for ( $i_i = $y_i; $i_i <= 5; $i_i++ )
-						$num .= ' ';
-				
-				if ( !isset( $ignored->who[50] ) )
-				{
-					$y = strlen( $ignored->who );
-					for ( $i = $y; $i <= 49; $i++ )
-						$false_nick .= ' ';
-				}
-				// this is just a bit of fancy fancy, so everything displays neat
-				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST, array( 'num' => $num, 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
+				$y = strlen( $ignored->who );
+				for ( $i = $y; $i <= 49; $i++ )
+					$false_nick .= ' ';
 			}
-			// loop through the records
+			// this is just a bit of fancy fancy, so everything displays neat
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_D );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_B, array( 'num' => $x ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST, array( 'num' => $num, 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
+			$return_data[CMD_DATA][] = array( 'nick' => $false_nick, 'time' => $ignored->time );
 		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_LIST_B, array( 'num' => 0 ) );
-			// empty list.
-		}
+		// loop through the records
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST_D );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST_B, array( 'num' => $x ) );
+		// display list
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _clear_users (private)
 	* 
 	* @params
-	* $nick - The nick commandeeer
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	*/
-	static public function _clear_users( $nick )
+	static public function _clear_users( $input )
 	{
+		$nicks_q = database::select( 'ignored_users', array( 'who', 'time' ) );
 		database::delete( 'ignored_users' );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_CLEARED, array( 'users' => database::num_rows( $nicks_q ) ) );
-		// list cleared.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_CLEARED, array( 'users' => database::num_rows( $nicks_q ) ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 }
 // EOF;

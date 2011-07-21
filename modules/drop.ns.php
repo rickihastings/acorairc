@@ -62,7 +62,8 @@ class ns_drop extends module
 	*/
 	static public function drop_command( $nick, $ircdata = array() )
 	{
-		$return_data = self::_drop_nick( true, $nick, $ircdata[0], $ircdata[1], false );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_drop_nick( $input, $nick, $ircdata[0], $ircdata[1], false );
 		// call _drop_nick
 		
 		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -79,7 +80,8 @@ class ns_drop extends module
 	*/
 	static public function sadrop_command( $nick, $ircdata = array() )
 	{
-		$return_data = self::_drop_nick( true, $nick, $ircdata[0], '', true );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_drop_nick( $input, $nick, $ircdata[0], '', true );
 		// call _drop_nick
 		
 		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -91,13 +93,13 @@ class ns_drop extends module
 	* _drop_nick (private)
 	* 
 	* @params
-	* $internal - Should ALWAYS be true when calling from a command or likewise
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The account of the nick to drop
 	* $password - The account password
 	* $sadrop - If this is set to true, we don't need a $password (however, privilages are still checked)
 	*/
-	static public function _drop_nick( $internal, $nick, $unick, $password, $sadrop = false )
+	static public function _drop_nick( $input, $nick, $unick, $password, $sadrop = false )
 	{
 		$return_data = module::$return_data;
 	
@@ -142,12 +144,8 @@ class ns_drop extends module
 			database::delete( 'chans_levels', array( 'target', '=', $user->display ) );
 			// also delete this users channel access.
 			
-			if ( $internal )
-			{
-				core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-				core::alog( 'drop_command(): '.$user->display.' has been dropped by '.core::get_full_hostname( $nick ), 'BASIC' );
-			}
-			// log what we need to log.
+			core::alog( core::$config->nickserv->nick.': '.$user->display.' has been dropped by ('.$input['hostname'].') ('.$input['account'].')' );
+			core::alog( 'drop_command(): '.$user->display.' has been dropped by '.$input['hostname'], 'BASIC' );
 			
 			if ( isset( core::$nicks[$user->display] ) )
 				ircd::on_user_logout( $nick->display );

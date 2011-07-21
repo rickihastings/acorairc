@@ -81,7 +81,8 @@ class ns_identify extends module
 		}
 		// determine how many params we have
 		
-		$return_data = self::_identify_user( $nick, $account, $password );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_identify_user( $input, $nick, $account, $password );
 		// call _logout_user
 		
 		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
@@ -98,10 +99,11 @@ class ns_identify extends module
 	*/
 	static public function logout_command( $nick, $ircdata = array() )
 	{	
-		$return_data = self::_logout_user( $nick, core::$nicks[$nick]['account'] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );		
+		$return_data = self::_logout_user( $input, $nick );
 		// call _logout_user
 		
-		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
@@ -110,11 +112,12 @@ class ns_identify extends module
 	* _identify_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The account to identify to
 	* $password - The password for that account
 	*/
-	static public function _identify_user( $nick, $account, $password )
+	static public function _identify_user( $input, $nick, $account, $password )
 	{
 		$return_data = module::$return_data;
 		$allow_multiple_sessions = ( isset( core::$config->nickserv->allow_multiple_sessions ) ) ? core::$config->nickserv->allow_multiple_sessions : true;
@@ -188,10 +191,10 @@ class ns_identify extends module
 			core::$nicks[$nick]['failed_attempts'] = 0;
 			// registered mode
 			
-			database::update( 'users', array( 'last_hostmask' => core::get_full_hostname( $nick ), 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
+			database::update( 'users', array( 'last_hostmask' => $input['hostname'], 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
 			// right, standard identify crap
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_IDENTIFIED );
-			core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') identified for '.$account );
+			core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') identified for '.$account );
 			// logchan
 			
 			if ( $user->vhost != '' && isset( modules::$list['os_vhost'] ) && nickserv::check_flags( $nick, array( 'H' ) ) )
@@ -262,10 +265,10 @@ class ns_identify extends module
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
 			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
 			
-			core::alog( core::$config->nickserv->nick.': Invalid password from ('.core::get_full_hostname( $nick ).') for '.$account );
+			core::alog( core::$config->nickserv->nick.': Invalid password from ('.$input['hostname'].') for '.$account );
 			// some logging stuff
 			
-			database::insert( 'failed_attempts', array( 'nick' => $account, 'mask' => core::get_full_hostname( $nick ), 'time' => core::$network_time ) );
+			database::insert( 'failed_attempts', array( 'nick' => $account, 'mask' => $input['hostname'], 'time' => core::$network_time ) );
 			core::$nicks[$nick]['failed_attempts']++;
 			// ooh, we have something to log :)
 			
@@ -283,10 +286,10 @@ class ns_identify extends module
 	* _logout_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
-	* $account - The account to logout of
 	*/
-	static public function _logout_user( $nick, $account )
+	static public function _logout_user( $input, $nick )
 	{
 		$return_data = module::$return_data;
 	
@@ -298,9 +301,9 @@ class ns_identify extends module
 		}
 		// not even identified
 		
-		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $nick ) );
+		database::update( 'users', array( 'last_timestamp' => core::$network_time, 'identified' => 0 ), array( 'display', '=', $input['account'] ) );
 		// unidentify them
-		core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.core::get_full_hostname( $nick ).') ('.$account.')' );
+		core::alog( core::$config->nickserv->nick.': '.$nick.' logged out of ('.$input['hostname'].') ('.$input['account'].')' );
 		// and log it.
 		
 		ircd::on_user_logout( $nick );
