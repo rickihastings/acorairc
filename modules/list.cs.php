@@ -17,9 +17,15 @@
 class cs_list extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'LIST_EMPTY'		=> 2,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +36,7 @@ class cs_list extends module
 	public function modload()
 	{
 		modules::init_module( 'cs_list', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_list', 'help', chanserv::$help->CS_HELP_LIST_1, true, 'chanserv_op' );
@@ -57,32 +64,34 @@ class cs_list extends module
 		// they've gotta be identified and opered..
 		
 		$mode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
-		self::_list_chans( $nick, $ircdata[0], $ircdata[1], $mode );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_list_chans( $input, $nick, $ircdata[0], $ircdata[1], $mode );
 		// call the list chans function :3
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _list_chans (command)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $term - The search term
 	* $limit - Valid limit, ie 0-10
 	* $mode - SUSPENDED etc
 	*/
-	static public function _list_chans( $nick, $term, $limit, $mode )
+	static public function _list_chans( $input, $nick, $term, $limit, $mode )
 	{
-		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) )
+		$return_data = module::$return_data;
+	
+		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
-			return false;
-		}
-		// invalid syntax
-		
-		if ( !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
-		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
@@ -93,13 +102,14 @@ class cs_list extends module
 		
 		if ( database::num_rows( $chans ) == 0 )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_BOTTOM, array( 'num' => 0, 'total' => $total ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->LIST_EMPTY;
+			return $return_data;
 		}
 		// no channels?
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_TOP );
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_DLM );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_TOP );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_DLM );
 		// top of the list
 		
 		$x = 0;
@@ -122,18 +132,23 @@ class cs_list extends module
 			}
 			// this is just a bit of fancy fancy, so everything displays neat
 			
-			if ( $channel->suspended == 0 )
-				$info = '['.chanserv::get_flags( $channel->channel, 'd' ).']';
-			else
-				$info = '['.$channel->suspend_reason.']';
+			$desc = chanserv::get_flags( $channel->channel, 'd' );
+			if ( $channel->suspended == 0 ) $info = $desc;
+			else $info = $channel->suspend_reason;
 			// suspend reason, or description?
 			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_ROW, array( 'num' => $x_s, 'chan' => $false_chan, 'info' => $info ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_ROW, array( 'num' => $x_s, 'chan' => $false_chan, 'info' => '['.$info.']' ) );
+			$return_data[CMD_DATA][] = array( 'chan' => $channel->channel, 'desc' => $desc, 'suspended' => $channel->suspended, 'suspend_reason' => $channel->suspend_reason );
 		}
 		// loop through the channels
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_DLM );
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $chans ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_DLM );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LIST_BOTTOM, array( 'num' => ( database::num_rows( $chans ) == 0 ) ? 0 : database::num_rows( $chans ), 'total' => $total ) );
+		// setup the responses
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 
 	/*

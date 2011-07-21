@@ -101,7 +101,7 @@ class ns_request extends module
 		// check if there is already a pending request
 		
 		database::insert( 'vhost_request', array( 'vhost' => $host, 'nickname' => core::$nicks[$nick]['account'], 'hostname' => core::get_full_hostname( $nick ), 'timestamp' => core::$network_time ) );
-		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') has requested a vhost ('.$host.')' );
+		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') has requested a vhost ('.$host.')' );
 		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REQUESTED_HOST );
 		// update it and log it
 	}

@@ -85,7 +85,7 @@ class ns_identify extends module
 		$return_data = self::_identify_user( $input, $nick, $account, $password );
 		// call _logout_user
 		
-		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}

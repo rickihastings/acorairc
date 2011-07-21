@@ -20,9 +20,6 @@ class cs_help extends module
 	const MOD_VERSION = '0.0.2';
 	const MOD_AUTHOR = 'Acora';
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
-	
 	/*
 	* modload (private)
 	* 

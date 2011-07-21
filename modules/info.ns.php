@@ -56,6 +56,7 @@ class ns_info extends module
 	*/
 	static public function info_command( $nick, $ircdata = array() )
 	{
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
 		$return_data = self::_nick_info( $input, $nick, $ircdata[0] );
 		// $who is the user we're adding REMEMBER!
 		

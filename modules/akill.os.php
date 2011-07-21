@@ -345,7 +345,7 @@ class os_akill extends module
 			// this is just a bit of fancy fancy, so everything displays neat
 			
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST, array( 'num' => $num, 'hostname' => $hostmask, 'nick' => $session->nick, 'expire' => $expire, 'desc' => $session->description ) );
-			$return_data[CMD_DATA][] = array( 'hostname' => $hostmask, 'added_by' => $session->nick, 'expire' => $expire, 'reason' => $session->description );
+			$return_data[CMD_DATA][] = array( 'hostname' => $session->hostmask, 'added_by' => $session->nick, 'expire' => $expire, 'reason' => $session->description );
 		}
 		// loop through the records
 		

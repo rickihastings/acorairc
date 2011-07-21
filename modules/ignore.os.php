@@ -256,7 +256,7 @@ class os_ignore extends module
 			// this is just a bit of fancy fancy, so everything displays neat
 			
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_LIST, array( 'num' => $num, 'nick' => $false_nick, 'time' => date( "F j, Y, g:i a", $ignored->time ) ) );
-			$return_data[CMD_DATA][] = array( 'nick' => $false_nick, 'time' => $ignored->time );
+			$return_data[CMD_DATA][] = array( 'nick' => $ignored->who, 'time' => $ignored->time );
 		}
 		// loop through the records
 		
