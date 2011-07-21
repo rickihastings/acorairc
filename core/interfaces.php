@@ -15,6 +15,16 @@
 */
 
 /*
+* constants
+*
+* all defined constants are below
+*/
+define( 'CMD_SUCCESS', 'SUCCESS' );
+define( 'CMD_FAILCODE', 'FAILCODE' );
+define( 'CMD_RESPONSE', 'RESPONSE' );
+define( 'CMD_DATA', 'DATA' );
+
+/*
 * protocol (interface)
 *
 * this provides a standard for protocol modules.
@@ -123,6 +133,14 @@ abstract class service
 */
 abstract class module
 {
+	
+	static public $return_data = array(
+		CMD_SUCCESS		=> false,
+		CMD_FAILCODE	=> null,
+		CMD_RESPONSE	=> array(),
+		CMD_DATA		=> array(),
+	);
+	// setup our return data
 	
 	abstract public function modload();
 	// main functions

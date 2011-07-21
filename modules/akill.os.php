@@ -17,12 +17,17 @@
 class os_akill extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'AKILL_EXISTS'		=> 2,
+		'AKILL_NO_EXIST'	=> 3,
+		'AKILL_LIST_EMPTY' 	=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +38,7 @@ class os_akill extends module
 	public function modload()
 	{
 		modules::init_module( 'os_akill', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_akill', 'help', operserv::$help->OS_HELP_AKILL_1, true );
@@ -77,40 +83,13 @@ class os_akill extends module
 			}
 			// you have to be root to add/del an akill
 			
-			$hostname = $ircdata[1];
-			$rexpire = $ircdata[2]; 
 			$reason = ( core::get_data_after( $ircdata, 3 ) == '' ) ? 'No reason' : core::get_data_after( $ircdata, 3 );
-			$days = $hours = $minutes = $expire = 0;
-			// grab the reason etc
+			$return_data = self::_add_akill( true, $nick, $ircdata[1], $ircdata[2], $reason );
+			// add the ban and get the response from add_akill
 			
-			$parsed = preg_split( '/(d|h|m)/', $rexpire, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
-			// format %%d%%h%%m to a timestamp
-			
-			$fi_ = 0;
-			foreach ( $parsed as $i_ => $p_ )
-			{
-				$fi_++;
-				if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'd' )
-				{
-					$days = ( $p_ * 86400 );
-					$expire = $expire + $days;
-				}
-				if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'h' )
-				{
-					$hours = ( $p_ * 3600 );
-					$expire = $expire + $hours;
-				}
-				if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'm' )
-				{
-					$minutes = ( $p_ * 60 );
-					$expire = $expire + $minutes;
-				}
-				// days hours and mins converted to seconds
-			}
-			// loop through calculating it into seconds
-			
-			self::_add_akill( $nick, $hostname, $expire, $reason );
-			// add the ban
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is add
 		elseif ( $mode == 'del' )
@@ -122,14 +101,22 @@ class os_akill extends module
 			}
 			// you have to be root to add/del an akill
 			
-			self::_del_akill( $nick, $ircdata[1], false );
-			// call del ip akill
+			$return_data = self::_del_akill( true, $nick, $ircdata[1], false );
+			// call del akill
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is del
 		elseif ( $mode == 'list' )
 		{
-			self::_list_akill( $nick );
+			$return_data = self::_list_akill( true );
 			// call list akill
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is list
 		else
@@ -169,17 +156,50 @@ class os_akill extends module
 	* _add_akill (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $hostname - The hostname to akill
 	* $time - time
 	* $description - Description
 	*/
-	static public function _add_akill( $nick, $hostname, $time, $reason )
+	static public function _add_akill( $internal, $nick, $hostname, $rexpire, $reason )
 	{
+		$return_data = module::$return_data;
+	
+		$days = $hours = $minutes = $expire = 0;
+		// grab the reason etc
+		
+		$parsed = preg_split( '/(d|h|m)/', $rexpire, -1, PREG_SPLIT_NO_EMPTY | PREG_SPLIT_DELIM_CAPTURE );
+		// format %%d%%h%%m to a timestamp
+		
+		$fi_ = 0;
+		foreach ( $parsed as $i_ => $p_ )
+		{
+			$fi_++;
+			if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'd' )
+			{
+				$days = ( $p_ * 86400 );
+				$time = $time + $days;
+			}
+			if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'h' )
+			{
+				$hours = ( $p_ * 3600 );
+				$time = $time + $hours;
+			}
+			if ( isset( $parsed[$fi_] ) && $parsed[$fi_] == 'm' )
+			{
+				$minutes = ( $p_ * 60 );
+				$time = $time + $minutes;
+			}
+			// days hours and mins converted to seconds
+		}
+		// loop through calculating it into seconds
+	
 		if ( trim( $hostname ) == '' || count( $parsed ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'AKILL' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'AKILL' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 			
@@ -190,14 +210,16 @@ class os_akill extends module
 		
 		if ( database::num_rows( $check_record_q ) != 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_EXISTS, array( 'hostname' => $hostname ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_EXISTS, array( 'hostname' => $hostname ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->AKILL_EXISTS;
+			return $return_data;
 		}
 		// already got an exception 
 		
 		database::insert( 'sessions', array( 'nick' => $nick, 'hostmask' => $hostname, 'description' => $reason, 'expire' => $time, 'time' => core::$network_time, 'akill' => 1, 'limit' => 0 ) );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
-		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
+		
+		if ( $internal )
+			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
 		// as simple, as.
 		
 		while ( list( $unick, $data ) = each( core::$nicks ) )
@@ -221,41 +243,52 @@ class os_akill extends module
 			operserv::$session_rows[] = $session;
 		// re read the session array.
 		
-		if ( $expire != 0 )
-			timer::add( array( 'os_akill', '_del_akill', array( $nick, $hostname, true ) ), $expire, 1 );
+		if ( $time != 0 )
+			timer::add( array( 'os_akill', '_del_akill', array( $nick, $hostname, true ) ), $time, 1 );
 		// add a timer to remove the ban.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _del_akill (private)
 	* 
 	* @params
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	* $nick - The nick of the person issuing the command
 	* $hostname - The host to del except
 	* $expired - true
 	*/
-	static public function _del_akill( $nick, $hostname, $expired = true )
+	static public function _del_akill( $internal, $nick, $hostname, $expired = true )
 	{
+		$return_data = module::$return_data;
+		
 		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
 		$check_record_q = database::select( 'sessions', array( 'hostmask', 'akill' ), array( 'hostmask', '=', $hostname, 'AND', 'akill', '=', 1 ) );
 		// set some gear
 		
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
-			if ( !$expired )
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_NOEXISTS, array( 'hostname' => $hostname ) );
-			return false;
-			// already got an exception
+			$return_data[CMD_RESPONSE][] = ( $expired ) ? '' : services::parse( operserv::$help->OS_AKILL_NOEXISTS, array( 'hostname' => $hostname ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->AKILL_NO_EXIST;
+			return $return_data;
 		}
+		// already got an exception
 		
 		database::delete( 'sessions', array( 'hostmask', '=', $hostname ) );
 		
-		if ( $expired )
+		if ( $internal && $expired )
 			core::alog( core::$config->operserv->nick.': Auto kill for ('.$hostname.') expired' );
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
+			if ( $internal )
+				core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the auto kill for ('.$hostname.')' );
+		
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_DEL, array( 'hostname' => $hostname ) );
+			$return_data[CMD_SUCCESS] = true;
 		}
 		// is it expiring or what??
 		
@@ -263,26 +296,32 @@ class os_akill extends module
 		while ( $session = database::fetch( $query ) )
 			operserv::$session_rows[] = $session;
 		// re read the session array.
+		
+		return $return_data;
+		// return data back
 	}
 	
 	/*
 	* _list_akill (private)
 	* 
 	* @params
-	* $nick - The nick of the person issuing the command
+	* $internal - Should ALWAYS be true when calling from a command or likewise
 	*/
-	static public function _list_akill( $nick )
+	static public function _list_akill( $internal )
 	{
+		$return_data = module::$return_data;
+	
 		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'description', 'expire' ), array( 'akill', '=', 1 ) );
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => 0 ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_B, array( 'num' => 0 ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->AKILL_LIST_EMPTY;
+			return $return_data;
 		}
 		// empty list. display the config record
 		
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_T );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_T );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_D );
 		// t-o-l
 		
 		$x = 0;
@@ -306,13 +345,18 @@ class os_akill extends module
 			}
 			// this is just a bit of fancy fancy, so everything displays neat
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST, array( 'num' => $num, 'hostname' => $hostmask, 'nick' => $session->nick, 'expire' => $expire, 'desc' => $session->description ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST, array( 'num' => $num, 'hostname' => $hostmask, 'nick' => $session->nick, 'expire' => $expire, 'desc' => $session->description ) );
+			$return_data[CMD_DATA][] = array( 'hostname' => $hostmask, 'added_by' => $session->nick, 'expire' => $expire, 'reason' => $session->description );
 		}
 		// loop through the records
 		
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_D );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_AKILL_LIST_B, array( 'num' => $x ) );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_D );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_B, array( 'num' => $x ) );
 		// display list
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return shiz
 	}
 }
 

@@ -16,9 +16,6 @@
 class services
 {
 	
-	public function __construct() { }
-	// __construct, makes everyone happy.
-	
 	/*
 	* oper_privs
 	*
@@ -136,18 +133,16 @@ class services
 		
 		return $row;
 		// if it is registered return the object.
-	}	
-		
+	}
+	
 	/*
-	* communicate
+	* parse
 	* 
 	* @params
-	* $from - The bot to send from, should be a valid nick
-	* $to - The nick to send the result to
 	* $template - The template to use
 	* $data - The data to use (optional)
 	*/
-	static public function communicate( $from, $to, $template, $data = '' )
+	static public function parse( $template, $data = '' )
 	{
 		$ntemplate = $template;
 		
@@ -165,11 +160,45 @@ class services
 		// IF there is a $data defined, we do some replacing
 		// otherwise leave it alone
 		
-		if ( core::$nicks[$to]['identified'] && nickserv::check_flags( core::$nicks[$to]['account'], array( 'P' ) ) )
-			ircd::msg( $from, $to, $ntemplate );
-		else
-			ircd::notice( $from, $to, $ntemplate );
-		// if they are registered, we check their means of contact
+		return $ntemplate;
+	}
+	
+	/*
+	* respond
+	* 
+	* @params
+	* $from - The bot to send from, should be a valid nick
+	* $to - The nick to send the result to
+	* $messages - An array of messages
+	*/
+	static public function respond( $from, $to, $messages )
+	{
+		$msg_flag = nickserv::check_flags( core::$nicks[$to]['account'], array( 'P' ) );
+	
+		foreach ( $messages as $line => $message )
+		{
+			if ( core::$nicks[$to]['identified'] && $msg_flag )
+				ircd::msg( $from, $to, $message );
+			else
+				ircd::notice( $from, $to, $message );
+			// if they are registered, we check their means of contact
+		}
+		// loop $messages
+	}
+		
+	/*
+	* communicate
+	* 
+	* @params
+	* $from - The bot to send from, should be a valid nick
+	* $to - The nick to send the result to
+	* $template - The template to use
+	* $data - The data to use (optional)
+	*/
+	static public function communicate( $from, $to, $template, $data = '' )
+	{
+		$message[] = self::parse( $template, $data );
+		self::respond( $from, $to, $message );
 	}
 	
 	/*
