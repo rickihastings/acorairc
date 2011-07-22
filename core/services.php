@@ -80,7 +80,8 @@ class services
 			if ( strtolower( $data->opers ) == strtolower( $nick ) )
 			{
 				unset( $data->opers );
-				return implode( ':', $data );
+				$imploded = (array) $data;
+				return implode( ':', $imploded );
 			}
 			// no privs here.
 		}

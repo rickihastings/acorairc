@@ -17,12 +17,9 @@
 class os_shutdown extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 	
 	/*
 	* modload (private)
@@ -59,23 +56,18 @@ class os_shutdown extends module
 	*/
 	static public function shutdown_command( $nick, $ircdata = array() )
 	{
-		// we don't even need to listen for any
-		// parameters, because its just a straight command
 		if ( !services::oper_privs( $nick, 'root' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
 		
-		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
-			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
-		// is there a shutdown message?
+		$return_data = self::_shutdown( $input );
+		// call list exception
 		
-		core::save_logs();
-		// save logs.
-		
-		ircd::shutdown( 'shutdown command from '.$nick, true );
-		// exit the program
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -87,14 +79,29 @@ class os_shutdown extends module
 	*/
 	static public function restart_command( $nick, $ircdata = array() )
 	{
-		// we don't even need to listen for any
-		// parameters, because its just a straight command
-		
 		if ( !services::oper_privs( $nick, 'root' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
 			return false;
 		}
+		
+		$return_data = self::_restart( $input );
+		// call list exception
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
+	}
+	
+	/*
+	* _shutdown (private)
+	* 
+	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
+	*/
+	static public function _shutdown( $input )
+	{
+		$return_data = module::$return_data;
 		
 		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
@@ -103,7 +110,31 @@ class os_shutdown extends module
 		core::save_logs();
 		// save logs.
 		
-		ircd::shutdown( 'shutdown command from '.$nick, false );
+		ircd::shutdown( 'shutdown command from '.$input['hostname'], true );
+		// exit the program
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back & log
+	}
+	
+	/*
+	* _restart (private)
+	* 
+	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
+	*/
+	static public function _restart( $input )
+	{
+		$return_data = module::$return_data;
+		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
+			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
+		// is there a shutdown message?
+		
+		core::save_logs();
+		// save logs.
+		
+		ircd::shutdown( 'shutdown command from '.$input['hostname'], false );
 		// exit the server
 		
 		socket_engine::close( 'core' );
@@ -137,9 +168,10 @@ class os_shutdown extends module
 			// again if we debug we send it to the screen, if not.. we don't
 		}
 		
-		exit;
-		// exit the program
-	}	
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back & log
+	}
 }
 
 // EOF;

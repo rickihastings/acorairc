@@ -17,12 +17,17 @@
 class os_session extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'SESSION_EXISTS'	=> 2,
+		'SESSION_NO_EXIST'	=> 3,
+		'SESSION_LIST_EMPTY'=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +38,7 @@ class os_session extends module
 	public function modload()
 	{
 		modules::init_module( 'os_session', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_session', 'help', operserv::$help->OS_HELP_SESSION_1, true );
@@ -53,6 +59,7 @@ class os_session extends module
 	static public function session_command( $nick, $ircdata = array() )
 	{
 		$mode = strtolower( $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
 		
 		if ( $mode == 'add' )
 		{
@@ -63,8 +70,12 @@ class os_session extends module
 			}
 			// you have to be globop to add/del an exception
 			
-			self::_add_exception( $nick, $ircdata[1], $ircdata[2], core::get_data_after( $ircdata, 3 ) );
+			$return_data = self::_add_exception( $input, $nick, $ircdata[1], $ircdata[2], core::get_data_after( $ircdata, 3 ) );
 			// call add ip exception
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is add
 		elseif ( $mode == 'del' )
@@ -76,14 +87,22 @@ class os_session extends module
 			}
 			// you have to be globop to add/del an exception
 			
-			self::_del_exception( $nick, $ircdata[1] );
+			$return_data = self::_del_exception( $input, $nick, $ircdata[1] );
 			// call del ip exception
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is del
 		elseif ( $mode == 'list' )
 		{
-			self::_list_exception( $nick );
+			$return_data = self::_list_exception( $input );
 			// call list exception
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		// mode is list
 		else
@@ -148,97 +167,118 @@ class os_session extends module
 	* _add_exception (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $ip_address - The ip address to add except
 	* $limit - New limit
 	* $description - Description
 	*/
-	static public function _add_exception( $nick, $ip_address, $limit, $description )
+	static public function _add_exception( $input, $nick, $ip_address, $limit, $description )
 	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $ip_address ) == '' || trim( $description ) == '' || !is_numeric( $limit ) || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 		
 		if ( $limit <= 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_NOLIMIT );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_NOLIMIT );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_LIMIT;
+			return $return_data;
 		}
 		// if the limit is 0 bail
 	
 		$check_record_q = database::select( 'sessions', array( 'ip_address' ), array( 'ip_address', '=', $ip_address, 'AND', 'akill', '=', 0 ) );
-		if ( database::num_rows( $check_record_q ) == 0 )
+		if ( database::num_rows( $check_record_q ) > 0 )
 		{
-			database::insert( 'sessions', array( 'nick' => $nick, 'ip_address' => $ip_address, 'description' => $description, 'limit' => $limit, 'time' => core::$network_time, 'akill' => 0 ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_ADD, array( 'ip_addr' => $ip_address, 'limit' => $limit ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added an exception limit for ('.$ip_address.') at ('.$limit.')' );
-			// as simple, as.
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_EXISTS, array( 'ip_addr' => $ip_address ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->SESSION_EXISTS;
+			return $return_data;
 		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_EXISTS, array( 'ip_addr' => $ip_address ) );
-			// already got an exception 
-		}
+		// a session exists
 		
+		database::insert( 'sessions', array( 'nick' => $nick, 'ip_address' => $ip_address, 'description' => $description, 'limit' => $limit, 'time' => core::$network_time, 'akill' => 0 ) );
+		// update session
+	
 		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 		while ( $session = database::fetch( $query ) )
 			operserv::$session_rows[] = $session;
 		// re read the session array.
+		
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') added an exception limit for ('.$ip_address.') at ('.$limit.')' );
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_ADD, array( 'ip_addr' => $ip_address, 'limit' => $limit ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back & log
 	}
 	
 	/*
 	* _del_exception (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $ip_address - The ip address to del except
 	*/
-	static public function _del_exception( $nick, $ip_address )
-	{			
+	static public function _del_exception( $input, $nick, $ip_address )
+	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $ip_address ) == '' || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 	
 		$check_record_q = database::select( 'sessions', array( 'ip_address' ), array( 'ip_address', '=', $ip_address, 'AND', 'akill', '=', 0 ) );
-		if ( database::num_rows( $check_record_q ) > 0 )
+		if ( database::num_rows( $check_record_q ) == 0 )
 		{
-			database::delete( 'sessions', array( 'ip_address', '=', $ip_address ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_DEL, array( 'ip_addr' => $ip_address ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') removed the exception limit for ('.$ip_address.')' );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_NOEXISTS, array( 'ip_addr' => $ip_address ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->SESSION_NO_EXIST;
+			return $return_data;
 		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_NOEXISTS, array( 'ip_addr' => $ip_address ) );
-			// already got an exception
-		}
+		// no exception can be found, let's go!
+		
+		database::delete( 'sessions', array( 'ip_address', '=', $ip_address ) );
+		// delete the session
 		
 		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 		while ( $session = database::fetch( $query ) )
 			operserv::$session_rows[] = $session;
 		// re read the session array.
+		
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') removed the exception limit for ('.$ip_address.')' );
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_DEL, array( 'ip_addr' => $ip_address ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back & log it
 	}
 	
 	/*
 	* _list_exception (private)
 	* 
 	* @params
-	* $nick - The nick of the person issuing the command
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	*/
-	static public function _list_exception( $nick )
+	static public function _list_exception( $input )
 	{
+		$return_data = module::$return_data;
 		$check_record_q = database::select( 'sessions', array( 'nick', 'ip_address', 'description', 'limit' ), array( 'akill', '=', 0 ) );
 		$session_limit = ( !isset( core::$config->operserv->connection_limit ) || core::$config->operserv->connection_limit <= 0 ) ? 5 : core::$config->operserv->connection_limit;
 		
 		if ( database::num_rows( $check_record_q ) > 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_T );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_D );
 			// t-o-l
 			
 			$limit = $session_limit;
@@ -247,7 +287,8 @@ class os_session extends module
 				$limit .= ' ';
 			// tidy tidy, limit
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST1, array( 'limit' => $limit ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST1, array( 'limit' => $limit ) );
+			$return_data[CMD_DATA][] = array( 'ip_addr' => '*', 'limit' => $limit );
 			// add * limit
 			
 			$x = 1;
@@ -276,18 +317,19 @@ class os_session extends module
 					$limit .= ' ';
 				// tidy tidy, limit
 				
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST, array( 'num' => $num, 'ip_addr' => $ip_address, 'limit' => $limit, 'nick' => $session->nick, 'desc' => $session->description ) );
+				$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST, array( 'num' => $num, 'ip_addr' => $ip_address, 'limit' => $limit, 'nick' => $session->nick, 'desc' => $session->description ) );
+				$return_data[CMD_DATA][] = array( 'ip_addr' => $ip_address, 'limit' => $limit, 'nick' => $session->nick, 'desc' => $session->description );
 			}
 			// loop through the records
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_B, array( 'num' => $x ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_D );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_B, array( 'num' => $x ) );
 		}
 		// display list
 		else
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_T );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_T );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_D );
 			// t-o-l
 			
 			$limit = $session_limit;
@@ -296,13 +338,17 @@ class os_session extends module
 				$limit .= ' ';
 			// tidy tidy, limit
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST1, array( 'limit' => $limit ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST1, array( 'limit' => $limit ) );
 			// add * limit
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_D );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_EXCP_LIST_B, array( 'num' => 1 ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_D );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_LIST_B, array( 'num' => 1 ) );
 		}
 		// empty list. display the config record
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back & log it
 	}
 }
 
