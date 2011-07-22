@@ -17,9 +17,17 @@
 class cs_suspend extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'CHAN_UNREGISTERED'	=> 2,
+		'ALREADY_SUSPENDED'	=> 3,
+		'NOT_SUSPENDED'		=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +38,7 @@ class cs_suspend extends module
 	public function modload()
 	{
 		modules::init_module( 'cs_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_suspend', 'help', chanserv::$help->CS_HELP_SUSPEND_1, true, 'chanserv_op' );
@@ -59,8 +68,13 @@ class cs_suspend extends module
 		}
 		// they've gotta be identified and opered..
 		
-		self::_suspend_chan( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_suspend_chan( $input, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// send to _suspend_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -79,25 +93,33 @@ class cs_suspend extends module
 		}
 		// they've gotta be identified.
 		
-		self::_suspend_chan( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_unsuspend_chan( $input, $nick, $ircdata[0] );
 		// send to _suspend_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _suspend_chan (command)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to suspend
 	* $reason - The reason to suspend it with
 	*/
-	static public function _suspend_chan( $nick, $chan, $reason )
+	static public function _suspend_chan( $input, $nick, $chan, $reason )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
-			return false;
-			// wrong syntax
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// make sure they've entered a channel
 		
@@ -108,15 +130,13 @@ class cs_suspend extends module
 		{
 			if ( $channel->suspended == 1 )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_2, array( 'chan' => $chan ) );
-				return false;
-				// channel is already suspended lol
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SUSPEND_2, array( 'chan' => $chan ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ALREADY_SUSPENDED;
+				return $return_data;
 			}
-			else
-			{
-				database::update( 'chans', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'channel', '=', $channel->channel ) );
-				// channel isn't suspended, but it IS registered
-			}
+			
+			database::update( 'chans', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'channel', '=', $channel->channel ) );
+			// channel isn't suspended, but it IS registered
 		}
 		else
 		{
@@ -135,48 +155,53 @@ class cs_suspend extends module
 			// just drop it as well, this way nobody actually gets the founder status.
 		}
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
-		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') SUSPENDED '.$chan.' with the reason ('.$reason.')' );
-		
-		if ( !empty( core::$chans[$chan]['users'] ) )
+		foreach ( core::$chans[$chan]['users'] as $user => $boolean )
 		{
-			foreach ( core::$chans[$chan]['users'] as $user => $boolean )
-			{
-				if ( !core::$nicks[$nick]['ircop'] )
-					ircd::kick( core::$config->chanserv->nick, $user, $chan, $reason );
-			}
+			if ( !core::$nicks[$nick]['ircop'] )
+				ircd::kick( core::$config->chanserv->nick, $user, $chan, $reason );
 		}
 		// any users in the channel? KICK EM!! RAWR
+		
+		core::alog( core::$config->chanserv->nick.': ('.$input['hostname'].') ('.$input['account'].') SUSPENDED '.$chan.' with the reason ('.$reason.')' );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SUSPEND_3, array( 'chan' => $chan, 'reason' => $reason ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _unsuspend_chan (command)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to suspend
 	*/
-	static public function _unsuspend_chan( $nick, $chan )
+	static public function _unsuspend_chan( $input, $nick, $chan )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
-			return false;
-			// wrong syntax
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// make sure they've entered a channel
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel', 'suspended' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_UNREGISTERED;
+			return $return_data;
 		}
 		// chan isn't registered...
 		
 		if ( $channel->suspended == 0 )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
-			return false;	
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SUSPEND_4, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_SUSPENDED;
+			return $return_data;
 		}
 		// channel isn't even suspended
 		
@@ -193,9 +218,11 @@ class cs_suspend extends module
 			// channel has access rows which means it was pre-registered, just update it don't drop it
 		}
 
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
-		core::alog( core::$config->chanserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$chan );
-		// oh well, was fun while it lasted eh? unsuspend it :P
+		core::alog( core::$config->chanserv->nick.': ('.$input['hostname'].') ('.$input['account'].') UNSUSPENDED '.$chan );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SUSPEND_5, array( 'chan' => $chan ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*

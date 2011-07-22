@@ -146,7 +146,7 @@ class os_logonnews extends module
 		if ( trim( $title ) == '' || trim( $text ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// wrong syntax
@@ -185,7 +185,7 @@ class os_logonnews extends module
 		if ( trim( $title ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// wrong syntax

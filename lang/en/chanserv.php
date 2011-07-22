@@ -576,9 +576,9 @@ $help = (object) array(
 	// info
 	'CS_SUSPEND_1'			=>	'{chan} is currently suspended',
 	'CS_SUSPEND_2'			=>	'{chan} is already suspended',
-	'CS_SUSPEND_3'			=>	'{chan} suspended with the reason: {reason}',
+	'CS_SUSPEND_3'			=>	'Suspended {chan} with the reason: {reason}',
 	'CS_SUSPEND_4'			=>	'{chan} isn\'t suspended',
-	'CS_SUSPEND_5'			=>	'{chan} unsuspended',	
+	'CS_SUSPEND_5'			=>	'Unsuspended {chan}',	
 	// suspend
 	'CS_LIST_TOP'			=>	'Entry  Channel           Description',
 	'CS_LIST_DLM'			=>	'-----  ----------------  -----------',

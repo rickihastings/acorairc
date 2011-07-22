@@ -180,7 +180,7 @@ class os_session extends module
 		if ( trim( $ip_address ) == '' || trim( $description ) == '' || !is_numeric( $limit ) || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// wrong syntax
@@ -188,7 +188,7 @@ class os_session extends module
 		if ( $limit <= 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_NOLIMIT );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_LIMIT;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_LIMIT;
 			return $return_data;
 		}
 		// if the limit is 0 bail
@@ -197,7 +197,7 @@ class os_session extends module
 		if ( database::num_rows( $check_record_q ) > 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_EXISTS, array( 'ip_addr' => $ip_address ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->SESSION_EXISTS;
+			$return_data[CMD_FAILCODE] = self::$return_codes->SESSION_EXISTS;
 			return $return_data;
 		}
 		// a session exists
@@ -233,7 +233,7 @@ class os_session extends module
 		if ( trim( $ip_address ) == '' || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// wrong syntax
@@ -242,7 +242,7 @@ class os_session extends module
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_EXCP_NOEXISTS, array( 'ip_addr' => $ip_address ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->SESSION_NO_EXIST;
+			$return_data[CMD_FAILCODE] = self::$return_codes->SESSION_NO_EXIST;
 			return $return_data;
 		}
 		// no exception can be found, let's go!

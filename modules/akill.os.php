@@ -199,7 +199,7 @@ class os_akill extends module
 		if ( trim( $hostname ) == '' || count( $parsed ) == 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'AKILL' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// wrong syntax

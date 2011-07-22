@@ -163,7 +163,7 @@ class mode
 					if ( strpos( $mode, '+' ) !== false )
 						$modes['params'][$param]['plus'] .= str_replace( '+', '', $mode );
 					elseif ( strpos( $mode, '-' ) !== false )
-						$modes['params'][$param]['minus'] .=  str_replace( '-', '', $mode );
+						$modes['params'][$param]['minus'] .= str_replace( '-', '', $mode );
 					// put the mode in the correct array
 				}
 				// check there is a mode set with it

@@ -182,7 +182,7 @@ class ns_recover extends module
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return $return_data;
 		}
 		// invalid syntax
@@ -190,7 +190,7 @@ class ns_recover extends module
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->NICK_UNREGISTERED;
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
 			return $return_data;
 		}
 		// doesn't even exist..
@@ -198,7 +198,7 @@ class ns_recover extends module
 		if ( $user->pass != sha1( $password.$user->salt ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_PASSWORD;
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
 			return $return_data;
 		}
 		// password isn't correct
@@ -206,7 +206,7 @@ class ns_recover extends module
 		if ( !isset( self::$held_nicks[$unick] ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
-			$return_data[CMD_FAILCODE] =  self::$return_codes->NO_HOLD;
+			$return_data[CMD_FAILCODE] = self::$return_codes->NO_HOLD;
 			return $return_data;
 		}
 		// nickname isnt locked.
