@@ -17,12 +17,17 @@
 class os_logonnews extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NEWS_EXISTS'		=> 2,
+		'NEWS_NO_EXIST'		=> 3,
+		'NEWS_LIST_EMPTY'	=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +38,7 @@ class os_logonnews extends module
 	public function modload()
 	{
 		modules::init_module( 'os_logonnews', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_logonnews', 'help', operserv::$help->OS_HELP_LOGONNEWS_1, true, 'global_op' );
@@ -52,7 +58,10 @@ class os_logonnews extends module
 	*/
 	static public function logonnews_command( $nick, $ircdata = array() )
 	{
-		if ( strtolower( $ircdata[0] ) == 'add' )
+		$mode = strtolower( $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		
+		if ( $mode == 'add' )
 		{
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
@@ -61,10 +70,14 @@ class os_logonnews extends module
 			}
 			// access?
 			
-			self::_add_news( $nick, $ircdata[1], core::get_data_after( $ircdata, 2 ) );
+			$return_data = self::_add_news( $input, $nick, $ircdata[1], core::get_data_after( $ircdata, 2 ) );
 			// add a news article
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
-		elseif ( strtolower( $ircdata[0] ) == 'del' )
+		elseif ( $mode == 'del' )
 		{
 			if ( !services::oper_privs( $nick, 'global_op' ) )
 			{
@@ -73,13 +86,21 @@ class os_logonnews extends module
 			}
 			// access?
 			
-			self::_del_news( $nick, $ircdata[1] );
+			$return_data = self::_del_news( $input, $nick, $ircdata[1] );
 			// delete a news article, FROM the title.
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
-		elseif ( strtolower( $ircdata[0] ) == 'list' )
+		elseif ( $mode == 'list' )
 		{
-			self::_list_news( $nick );
+			$return_data = self::_list_news( $input );
 			// list the news
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		else
 		{
@@ -94,8 +115,6 @@ class os_logonnews extends module
 	*/
 	static public function on_connect( $connect_data )
 	{
-		$nick = $connect_data['nick'];
-		
 		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ), array( 0 => 3 ) );
 		// get our news
 		
@@ -103,8 +122,8 @@ class os_logonnews extends module
 		{
 			while ( $news = database::fetch( $get_news ) )
 			{
-				services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-				services::communicate( core::$config->global->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+				services::communicate( core::$config->global->nick, $connect_data['nick'], operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+				services::communicate( core::$config->global->nick, $connect_data['nick'], operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
 			}
 			// loop through the news
 		}
@@ -115,92 +134,112 @@ class os_logonnews extends module
 	* _add_news (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick commandeeer
 	* $title - Article title
 	* $text - Actual message
 	*/
-	static public function _add_news( $nick, $title, $text )
+	static public function _add_news( $input, $nick, $title, $text )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $title ) == '' || trim( $text ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 	
 		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
+		if ( database::num_rows( $check ) != 0 )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGONNEWS_EXISTS );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NEWS_EXISTS;
+			return $return_data;
+		}
+		// One already exists
 		
-		if ( database::num_rows( $check ) == 0 )
-		{
-			database::insert( 'logon_news', array( 'nick' => $nick, 'time' => core::$network_time, 'title' => $title, 'message' => $text ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_ADD );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') added a logon news message entitled ('.$title.')' );
-			// as simple, as.
-		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_EXISTS );
-		}
-		// let's check if an article with a similar title exists.
+		database::insert( 'logon_news', array( 'nick' => $nick, 'time' => core::$network_time, 'title' => $title, 'message' => $text ) );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') added a logon news message entitled ('.$title.')' );
+		// as simple, as.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGONNEWS_ADD );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _del_news (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick commandeeer
 	* $title - Article title
 	*/
-	static public function _del_news( $nick, $title )
+	static public function _del_news( $input, $nick, $title )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $title ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONEWS' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 		
 		$check = database::select( 'logon_news', array( 'title' ), array( 'title', '=', $title ) );
-		
-		if ( database::num_rows( $check ) > 0 )
+		if ( database::num_rows( $check ) == 0 )
 		{
-			database::delete( 'logon_news', array( 'title', '=', $title ) );
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') deleted ('.$title.') from logonnews' );
-			// as simple, as.
-		}
-		else
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_NONE );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGONNEWS_NONE );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NEWS_NO_EXIST;
+			return $return_data;
 		}
 		// let's check if we can find what they are lookin phowar
+		
+		database::delete( 'logon_news', array( 'title', '=', $title ) );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') deleted ('.$title.') from logonnews' );
+		// as simple, as.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGONNEWS_DEL, array( 'title' => $title ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _list_news (private)
 	* 
 	* @params
-	* $nick - The nick commandeeer
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	*/
-	static public function _list_news( $nick )
+	static public function _list_news( $input )
 	{
+		$return_data = module::$return_data;
 		$get_news = database::select( 'logon_news', array( 'nick', 'title', 'message', 'time' ), '', array( 'time' => 'DESC' ) );
 		// get our news
 			
-		if ( database::num_rows( $get_news ) > 0 )
+		if ( database::num_rows( $get_news ) == 0 )
 		{
-			while ( $news = database::fetch( $get_news ) )
-			{
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-				services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
-			}
-			// loop through the news
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGONNEWS_EMPTY );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NEWS_EMPTY;
+			return $return_data;
 		}
-		else
+		// no news pill
+		
+		while ( $news = database::fetch( $get_news ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_LOGONNEWS_EMPTY );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+			$return_data[CMD_DATA][] = array( 'title' => $news->title, 'user' => $news->nick, 'timestamp' => $news->time, 'message' => $news->message );
 		}
-		// there is news! epic
+		// loop through the news
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return shiz
 	}
 }
 

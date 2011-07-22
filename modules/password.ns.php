@@ -16,9 +16,18 @@
 
 class ns_password extends module
 {
-	const MOD_VERSION = '0.0.3';
+
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'BAD_PASSWORD'		=> 3,
+		'BAD_MATCH'			=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -29,6 +38,7 @@ class ns_password extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_password', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_password', 'help', nickserv::$help->NS_HELP_PASSWORD_1, true );
@@ -58,8 +68,13 @@ class ns_password extends module
 		}
 		// are they identified?
 		
-		self::_change_pass( $nick, $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'], 'command' => 'PASSWORD' );
+		$return_data = self::_change_pass( $input, $nick, $nick, $ircdata[0], $ircdata[1] );
 		// call _change_pass
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -78,8 +93,13 @@ class ns_password extends module
 		}
 		// access denied.
 		
-		self::_change_pass( $nick, $ircdata[0], $ircdata[1], $ircdata[2] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'], 'command' => 'SAPASS' );
+		$return_data = self::_change_pass( $input, $nick, $ircdata[0], $ircdata[1], $ircdata[2] );
 		// call _change_pass
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -93,37 +113,51 @@ class ns_password extends module
 	*/
 	static public function _change_pass( $nick, $unick, $new_pass, $conf_pass )
 	{
+		$return_data = module::$return_data;
+		
+		if ( trim( $unick ) == '' || trim( $new_pass ) == '' || trim( $conf_pass ) == '' )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->INVALID_INVALID_SYNTAX_RE, array( 'help' => $input['command'] ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
+		}
+		// invalid syntax
+	
 		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		if ( database::num_rows( $user ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// look for the user
 		
 		if ( strtolower( $new_pass ) == strtolower( $unick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_NICK_U );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_PASSWORD_NICK_U );
+			$return_data[CMD_FAILCODE] = self::$return_codes->BAD_PASSWORD;
+			return $return_data;
 		}
 		// are they using a reasonable password, eg. != their nick, lol.
 		
 		if ( $new_pass != $conf_pass )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_DIFF );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_PASSWORD_DIFF );
+			$return_data[CMD_FAILCODE] = self::$return_codes->BAD_MATCH;
+			return $return_data;
 		}
 		// the passwords are different
 		
 		$user = database::fetch( $user );
 		database::update( 'users', array( 'pass' => sha1( $new_pass.$user->salt ) ), array( 'display', '=', $unick ) );
 		// we update the password here, with the users salt.
-		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NEW_PASSWORD_U, array( 'nick' => $unick, 'pass' => $new_pass ) );
-		// let them know
-		
-		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') changed the password for '.$unick );
+		core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') ('.$input['account'].') changed the password for '.$unick );
 		// logchan
+		
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NEW_PASSWORD_U, array( 'nick' => $unick, 'pass' => $new_pass ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return shiz
 	}
 }
 
