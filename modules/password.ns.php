@@ -106,12 +106,13 @@ class ns_password extends module
 	* _change_pass (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The account to change password for
 	* $new_pass - The new password
 	* $conf_pass - The confirmed password
 	*/
-	static public function _change_pass( $nick, $unick, $new_pass, $conf_pass )
+	static public function _change_pass( $input, $nick, $unick, $new_pass, $conf_pass )
 	{
 		$return_data = module::$return_data;
 		

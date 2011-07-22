@@ -17,14 +17,23 @@
 class ns_recover extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	static public $expiry_time = 0;
+	static public $expiry_time = 60;
 	static public $held_nicks = array();
 	static public $introduce = array();
 	// some variables
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'NOT_IN_USE'		=> 3,
+		'CANT_RECOVER_SELF' => 4,
+		'NO_HOLD'			=> 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -35,6 +44,7 @@ class ns_recover extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_recover', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1, true );
@@ -46,8 +56,6 @@ class ns_recover extends module
 		nickserv::add_command( 'recover', 'ns_recover', 'recover_command' );
 		nickserv::add_command( 'release', 'ns_recover', 'release_command' );
 		// add the commands
-		
-		self::$expiry_time = 60;
 	}
 	
 	/*
@@ -59,8 +67,13 @@ class ns_recover extends module
 	*/
 	static public function recover_command( $nick, $ircdata = array() )
 	{
-		self::_recover_nick( $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_recover_nick( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _recover_nick
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -72,52 +85,65 @@ class ns_recover extends module
 	*/
 	static public function release_command( $nick, $ircdata = array() )
 	{
-		self::_release_nick( $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_release_nick( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _release_nick
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _recover_nick (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The nickname of the account to recover
 	* $password - The password of that account
 	*/
-	public function _recover_nick( $nick, $unick, $password )
+	public function _recover_nick( $input, $nick, $unick, $password )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RECOVER' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
 		if ( !core::search_nick( $unick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NOT_IN_USE, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_IN_USE;
+			return $return_data;
 		}
 		// nickname isn't in use
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// doesn't even exist..
 		
 		if ( $nick == $unick )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_CANT_RECOVER_SELF );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_CANT_RECOVER_SELF );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CANT_RECOVER_SELF;
+			return $return_data;
 		}
 		// you can't ghost yourself.. waste of time, and clearly useless.
 	
 		if ( $user->pass != sha1( $password.$user->salt ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSWORD;
+			return $return_data;
 		}
 		// password isn't correct
 	
@@ -130,60 +156,70 @@ class ns_recover extends module
 		// to make sure the ircd class can preserve all information
 		// about the target, and not have it overwritten with introduce_client()
 		
-		core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
-		// introduce a client, logchan everything etc.
-		
+		core::alog( core::$config->nickserv->nick.': RECOVER command used on '.$unick.' by ('.$input['hostname'].') ('.$input['account'].')' );
 		timer::add( array( 'ns_recover', 'introduce_callback', array( $unick ) ), 1, 1 );
 		// set it into the array which we check, in the next second
+		
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NICK_RECOVERED, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
 	* _release_nick (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The nickname of the account to release
 	* $password - The password of that account
 	*/
-	public function _release_nick( $nick, $unick, $password )
+	public function _release_nick( $input, $nick, $unick, $password )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'RELEASE' ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'pass', 'salt' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// doesn't even exist..
 		
 		if ( $user->pass != sha1( $password.$user->salt ) || !services::oper_privs( $nick, 'nickserv_op' ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSWORD );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSWORD );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->INVALID_PASSWORD;
+			return $return_data;
 		}
 		// password isn't correct
 			
 		if ( !isset( self::$held_nicks[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NO_HOLD, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] =  self::$return_codes->NO_HOLD;
+			return $return_data;
 		}
 		// nickname isnt locked.
 		
 		ircd::remove_client( $unick, 'RELEASED by '.$nick );
-		core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
+		core::alog( core::$config->nickserv->nick.': RELEASE command on '.$unick.' used by ('.$input['hostname'].') ('.$input['account'].')' );
 		timer::remove( array( 'ns_recover', 'remove_callback', array( $unick ) ) );
-		// if they are, remove client, respectively
-		// unsetting data and removing them.
+		// if they are, remove client, respectively unsetting data and removing them.
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
-		// tell the user their nick has been released (Y)
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NICK_RELEASED, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return the data back
 	}
 	
 	/*
