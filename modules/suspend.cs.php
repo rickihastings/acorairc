@@ -134,6 +134,7 @@ class cs_suspend extends module
 				$return_data[CMD_FAILCODE] = self::$return_codes->ALREADY_SUSPENDED;
 				return $return_data;
 			}
+			// channel is already suspended
 			
 			database::update( 'chans', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'channel', '=', $channel->channel ) );
 			// channel isn't suspended, but it IS registered

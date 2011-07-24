@@ -17,9 +17,17 @@
 class ns_suspend extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'ALREADY_SUSPENDED'	=> 3,
+		'NOT_SUSPENDED'		=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +38,7 @@ class ns_suspend extends module
 	public function modload()
 	{
 		modules::init_module( 'ns_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true, 'nickserv_op' );
@@ -59,8 +68,13 @@ class ns_suspend extends module
 		}
 		// they've gotta be identified and opered..
 		
-		self::_unsuspend_nick( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_unsuspend_nick( $input, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// call _unsuspend_nick
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -79,33 +93,43 @@ class ns_suspend extends module
 		}
 		// they've gotta be identified and opered..
 		
-		self::_unsuspend_nick( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_unsuspend_nick( $input, $nick, $ircdata[0] );
 		// call _unsuspend_nick
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 
 	/*
 	* _suspend_nick (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The nickname of the account to suspend
 	* $reason - The reason to suspend this user
 	*/
-	public function _suspend_nick( $nick, $unick, $reason )
+	public function _suspend_nick( $input, $nick, $unick, $reason )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// make sure unick isnt empty!
 		
 		if ( services::has_privs( $unick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
-		// is a non-root trying to drop a root?
+		// is a user trying to suspend a privs user?
 		
 		if ( trim( $reason ) == '' ) $reason = 'No reason';
 		// is there a reason? if not we set it to 'No Reason'
@@ -114,15 +138,14 @@ class ns_suspend extends module
 		{
 			if ( $user->suspended == 1 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_2, array( 'nick' => $unick ) );
-				return false;
-				// channel is already suspended lol
+				$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_2, array( 'nick' => $unick ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ALREADY_SUSPENDED;
+				return $return_data;
 			}
-			else
-			{
-				database::update( 'users', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'display', '=', $user->display ) );
-				// channel isn't suspended, but it IS registered
-			}
+			// nickname is already suspended lol
+			
+			database::update( 'users', array( 'suspended' => 1, 'suspend_reason' => $reason ), array( 'display', '=', $user->display ) );
+			// channel isn't suspended, but it IS registered
 		}
 		else
 		{
@@ -140,10 +163,6 @@ class ns_suspend extends module
 			// insert it into the database.
 		}
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
-		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') SUSPENDED '.$unick.' with the reason ('.$reason.')' );
-		ircd::wallops( core::$config->nickserv->nick, $nick.' SUSPENDED '.$unick );
-		
 		$unicks = array_change_key_case( core::$nicks, CASE_LOWER );
 		if ( isset( $unicks[strtolower( $unick )] ) )
 		{
@@ -158,35 +177,47 @@ class ns_suspend extends module
 			ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
 		}
 		// is the nick in use? we need to force change it.
+		
+		core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') ('.$input['account'].') SUSPENDED '.$unick.' with the reason ('.$reason.')' );
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_3, array( 'nick' => $unick, 'reason' => $reason ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _unsuspend_nick (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The nickname of the account to unsuspend
 	*/
-	public function _unsuspend_nick( $nick, $unick )
+	public function _unsuspend_nick( $input, $nick, $unick )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// make sure unick isnt empty!
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'suspended', 'real_user' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// nick isn't even registered.
 		
 		if ( $user->suspended == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_4, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NOT_SUSPENDED;
+			return $return_data;
 		}
 		// nick isn't suspended
 		
@@ -196,10 +227,11 @@ class ns_suspend extends module
 			database::delete( 'users', array( 'display', '=', $unick ) );
 		// nick wasen't registered by a real person, drop it
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
-		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') UNSUSPENDED '.$unick );
-		ircd::wallops( core::$config->nickserv->nick, $nick.' UNSUSPENDED '.$unick );
-		// oh well, was fun while it lasted eh?cunsuspend it :P
+		core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') ('.$input['account'].') UNSUSPENDED '.$unick );
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_SUSPEND_5, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
