@@ -17,9 +17,16 @@
 class cs_topic extends module
 {
 	
-	const MOD_VERSION = '0.0.4';
+	const MOD_VERSION = '0.1.4';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'CHAN_UNREGISTERED'	=> 2,
+		'ACCESS_DENIED'		=> 3,
+	);
+	// return codes
 
 	/*
 	* modload (private)
@@ -27,9 +34,10 @@ class cs_topic extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'cs_topic', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1, true );
@@ -49,39 +57,49 @@ class cs_topic extends module
 	*/
 	static public function topic_command( $nick, $ircdata = array() )
 	{
-		self::_change_topic( $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_change_topic( $input, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// call _change_topic
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _change_topic (command)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - Channel to change topic of
 	* $topic - New topic (uses topicmask)
 	*/
-	static public function _change_topic( $nick, $chan, $topic )
+	static public function _change_topic( $input, $nick, $chan, $topic )
 	{
+		$return_data = module::$return_data;
+	
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );
-			return false;
-			// wrong syntax
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// make sure they've entered a channel
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_UNREGISTERED;
+			return $return_data;
 		}
 		// make sure the channel exists.
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 't', 'S', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -116,6 +134,10 @@ class cs_topic extends module
 			}
 		}
 		// we gotta get the topicmask etc
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*

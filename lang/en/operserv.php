@@ -339,6 +339,8 @@ $help = (object) array(
 	'OS_COMMAND_LIMIT_2'	=>	'{message}, you will be ignored for 2 minutes',
 	'OS_ISNT_REGISTERED'	=>	'{nick} isn\'t registered',
 	'OS_INVALID_HOSTNAME'	=>	'Invalid characters in hostname',
+	'OS_JUPE_1'				=>	'{server} is already on the network',
+	'OS_JUPE_2'				=>	'{server} has been juped',
 	// standard messages
 	'OS_VHOST_SET'		=> 'vHost for {nick} set to {host}',
 	'OS_VHOST_DELETED'	=> 'vHost for {nick} deleted',

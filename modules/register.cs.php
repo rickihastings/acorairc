@@ -38,7 +38,7 @@ class cs_register extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'cs_register', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;

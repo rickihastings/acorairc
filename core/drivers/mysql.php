@@ -14,7 +14,7 @@
 * copyright notice and this permission notice appear in all copies.
 */
 
-class mysql implements driver
+class mysql_driver implements driver
 {
 
 	const MOD_VERSION = '0.0.5';

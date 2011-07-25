@@ -34,7 +34,7 @@ class cs_levels extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'cs_levels', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors

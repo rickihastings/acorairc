@@ -30,7 +30,7 @@ class os_utilities extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'os_utilities', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
@@ -58,11 +58,6 @@ class os_utilities extends module
 	*/
 	static public function jupe_command( $nick, $ircdata = array() )
 	{
-		$server = $ircdata[0];
-		$numeric = $ircdata[1];
-		// grab the ircdata, we only really need the server
-		// from here, and numeric.
-		
 		if ( !services::oper_privs( $nick, 'local_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -70,35 +65,13 @@ class os_utilities extends module
 		}
 		// access?
 		
-		if ( trim( $server ) == '' || trim( $numeric ) == '' )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'JUPE' ) );
-			return false;	
-		}
-		// is the server value empty?
-		// if it is we tell them that it's the invalid syntax
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_jupe_server( $input, $nick, $ircdata[0], $ircdata[1] );
+		// call _unsuspend_nick
 		
-		if ( $server == core::$config->server->name || isset( core::$servers[$server] ) )
-		{
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') tried to jupe ('.$server.')' );
-			core::alog( 'jupe_command(): WARNING '.$nick.' tried to jupe '.$server, 'BASIC' );
-			// log what we need to log.
-		}
-		// wtf, someone tried to jupe an existing server
-		else
-		{
-			ircd::$jupes[$server] = $server;
-			core::$servers[$server] = $server;
-			// add it to the jupes & servers array
-			
-			ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick, $numeric );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') juped ('.$server.')' );
-			ircd::wallops( core::$config->operserv->nick, $nick.' juped '.$server );
-			
-			core::alog( 'jupe_command(): '.$server.' juped', 'BASIC' );
-			// log what we need to log.
-		}
-		// ok, so we're ready to go, jupe it
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -110,10 +83,6 @@ class os_utilities extends module
 	*/
 	static public function mode_command( $nick, $ircdata = array() )
 	{
-		$channel = core::get_chan( $ircdata, 0 );
-		$modes = core::get_data_after( $ircdata, 1 );
-		// grab the parameters: nick; channel; reason (optional)
-		
 		if ( !services::oper_privs( $nick, 'local_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -121,23 +90,13 @@ class os_utilities extends module
 		}
 		// access?
 		
-		if ( trim( $channel ) == '' )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODE' ) );
-			return false;	
-		}
-		// are we missing channel? invalid syntax if so.
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_mode( $input, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		// call _unsuspend_nick
 		
-		if ( !isset( core::$chans[$channel] ) )
-		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_CHAN_INVALID, array( 'chan' => $channel ) );
-			return false;
-		}
-		// does the channel exist?
-		
-		mode::set( core::$config->operserv->nick, $channel, $modes );
-		ircd::wallops( core::$config->operserv->nick, $nick.' used MODE '.$modes.' on '.$channel );
-		// set the mode, globops it.
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -149,11 +108,6 @@ class os_utilities extends module
 	*/
 	static public function kick_command( $nick, $ircdata = array() )
 	{
-		$unick = $ircdata[1];
-		$channel = $ircdata[0];
-		$reason = core::get_data_after( $ircdata, 2 );
-		// grab the parameters: nick; channel; reason (optional)
-		
 		if ( !services::oper_privs( $nick, 'local_op' ) )
 		{
 			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ACCESS_DENIED );
@@ -161,10 +115,120 @@ class os_utilities extends module
 		}
 		// access?
 		
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_kick( $input, $nick, $ircdata[1], $ircdata[0], core::get_data_after( $ircdata, 2 ) );
+		// call _unsuspend_nick
+		
+		services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
+	}
+	
+	/*
+	* _jupe_server (private)
+	* 
+	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
+	* $nick - The nick of the person issuing the command
+	* $server - the server name to jupe
+	* $numeric - the server numeric
+	*/
+	public function _jupe_server( $input, $nick, $server, $numeric )
+	{
+		$return_data = module::$return_data;
+	
+		if ( trim( $server ) == '' || trim( $numeric ) == '' )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'JUPE' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
+		}
+		// is the server value empty?
+		// if it is we tell them that it's the invalid syntax
+		
+		if ( $server == core::$config->server->name || isset( core::$servers[$server] ) )
+		{
+			core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') tried to jupe ('.$server.')' );
+			core::alog( 'jupe_command(): WARNING '.$nick.' tried to jupe '.$server, 'BASIC' );
+			// log what we need to log.
+			
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_JUPE_1, array( 'server' => $server ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->SERVER_EXISTS;
+			return $return_data;
+		}
+		// wtf, someone tried to jupe an existing server
+		
+		ircd::$jupes[$server] = $server;
+		core::$servers[$server] = $server;
+		// add it to the jupes & servers array
+		
+		ircd::init_server( $server, core::$config->conn->password, 'Juped by '.$nick, $numeric );
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') juped ('.$server.')' );
+		core::alog( 'jupe_command(): '.$server.' juped', 'BASIC' );
+		// log what we need to log.
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_JUPE_2, array( 'server' => $server ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
+	}
+	
+	/*
+	* _mode (private)
+	* 
+	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
+	* $nick - The nick of the person issuing the command
+	* $channel - The channel to set modes on
+	* $modes - The modes to set, should be a string.
+	*/
+	public function _mode( $input, $nick, $channel, $modes )
+	{
+		$return_data = module::$return_data;
+	
+		if ( trim( $channel ) == '' )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODE' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
+		}
+		// are we missing channel? invalid syntax if so.
+		
+		if ( !isset( core::$chans[$channel] ) )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_CHAN_INVALID, array( 'chan' => $channel ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_INVALID;
+			return $return_data;
+		}
+		// does the channel exist?
+		
+		mode::set( core::$config->operserv->nick, $channel, $modes );
+		// set the mode, globops it.
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
+	}
+	
+	/*
+	* _kick (private)
+	* 
+	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
+	* $nick - The nick of the person issuing the command
+	* $unick - The user to kick
+	* $channel - The channel to kick the user from
+	* $reason - The reason to use
+	*/
+	public function _kick( $input, $nick, $unick, $channel, $reason )
+	{
+		$return_data = module::$return_data;
+	
 		if ( trim( $unick ) == '' || trim( $channel ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'KICK' ) );
-			return false;	
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'KICK' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are we missing nick and channel? invalid syntax if so.
 		
@@ -176,11 +240,15 @@ class os_utilities extends module
 		{
 			$unick = $user['nick'];
 			ircd::kick( core::$config->operserv->nick, $unick, $channel, $reason );
-			core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') used KICK to remove ('.$unick.') from ('.$channel.')' );
+			core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') used KICK to remove ('.$unick.') from ('.$channel.')' );
 		}
 		// now we check 3 things, if the user exists, if the channel exists
 		// and if the user is even in that channel, if they arn't we just leave it
-	}	
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
+	}
 }
 
 // EOF;

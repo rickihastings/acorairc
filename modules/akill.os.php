@@ -35,7 +35,7 @@ class os_akill extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'os_akill', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;

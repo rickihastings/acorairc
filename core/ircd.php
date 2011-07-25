@@ -82,7 +82,10 @@ class ircd_handle
 		// yey for this, saves us massive intensive cpu raeps
 		// on large networks, uses a little more memory but baah!
 		
-		core::$ips[$ip_addr] += 1;
+		if ( !isset( core::$ips[$ip_addr] ) )
+			core::$ips[$ip_addr] = 0;
+		else
+			core::$ips[$ip_addr]++;
 		// add an ip_address array
 		
 		core::$nicks[$nick] = array(
@@ -870,7 +873,10 @@ class ircd_handle
 	{
 		$uuid = str_replace( ':', '', $ircdata[$number] );
 		
-		return core::$uids[$uuid];
+		if ( isset( core::$uids[$uuid] ) )
+			return core::$uids[$uuid];
+		else
+			return $ircdata[$number];
 		// we always display the uid nick here, ALWAYS
 		// therefore when we need the uid, we'll change the
 		// nick to a uid.	

@@ -434,24 +434,21 @@ class core
 	*/
 	static public function check_services()
 	{
-		if ( self::$services_account === false )
+		if ( !self::$services_account )
 		{
-			self::alog( 'ERROR: service accounts is required, startup halted.', 'BASIC' );
+			self::alog( 'ERROR: service accounts is required, startup halted', 'BASIC' );
 			// log it
 			
 			self::save_logs();
 			// save logs.
 			
-			ircd::shutdown( 'ERROR: service accounts is required, startup halted.', true );
+			ircd::shutdown( 'ERROR: service accounts is required, startup halted', true );
 			// exit
 		}
 		// services account isn't found, quit out letting them know.
 		
-		if ( self::$hide_chans === false )
-		{
-			self::alog( 'WARNING: +I is either not loaded or not available, this is NOT advised.' );
-			// alog, don't exit, not needed.
-		}
+		if ( !self::$hide_chans )
+			self::alog( 'WARNING: +I is either not loaded or not available, this is NOT advised' );
 		// let the dude know that we don't have a module that hides chans +I
 	}
 	
@@ -466,16 +463,17 @@ class core
 	*/
 	static public function core_error( $severity, $message, $filepath, $line )
 	{
-		if ( ( $severity & error_reporting() ) == $severity )
-		{
-			self::save_logs();
-			// save logs.
-				
-			self::alog( 'error: '.trim( $message ).' on line '.$line.' in '.$filepath, 'BASIC' );#
-					
+		if ( ( error_reporting() & $severity ) != $severity )
+			return;
+		// this error code is not included in error_reporting
+		
+		self::alog( 'error: '.trim( $message ).' on line '.$line.' in '.$filepath, 'BASIC' );
+		self::save_logs();
+		// save logs.
+		
+		if ( $severity != E_WARNING && $severity != E_NOTICE )
 			ircd::shutdown( 'ERROR: '.$message, true );
-			// exit the program	
-		}
+		// exit the program	
 		
 		return true;
 		// don't execute php internal error handler
@@ -730,6 +728,7 @@ class core
 			
 			if ( $run )
 			{
+				self::$config->conn = new stdClass;
 				self::$config->conn->password = $info->password;
 				self::$config->conn->server = $info->server;
 				self::$config->conn->port = $info->port;

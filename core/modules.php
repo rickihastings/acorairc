@@ -32,12 +32,9 @@ class modules
 		'on_kick',
 		'on_oper_up',
 		'on_msg',
-		'on_rehash',
+		'on_rehash'
 	);
-	// setup the core module list
-	
-	public function __construct() { }
-	// make everyone happy xD
+	// setup the core module list and event handlers
 	
 	/*
 	* init_module
@@ -89,8 +86,9 @@ class modules
 	* @params
 	* $module_name - the name of the module
 	* $module_file - the filename of the module
+	* $reload - false or true
 	*/
-	static public function load_module( $module_name, $module_file )
+	static public function load_module( $module_name, $module_file, $reload = false )
 	{
 		if ( !file_exists( BASEPATH.'/modules/'.$module_file ) )
 		{
@@ -98,15 +96,29 @@ class modules
 			return false;
 		}
 		// check if the module actually exists
+		
+		if ( $reload && ( extension_loaded( 'runkit' ) && !runkit_import( BASEPATH.'/modules/'.$module_file, RUNKIT_IMPORT_OVERRIDE | RUNKIT_IMPORT_CLASSES ) ) )
+		{
+			core::alog( 'load_module(): unable to load: '.$module_name.' (error loading)', 'BASIC' );
+			return false;
+		}
+		// class is already loaded, reload it
 	
-		if ( !require( BASEPATH.'/modules/'.$module_file ) )
+		if ( !$reload && ( !include( BASEPATH.'/modules/'.$module_file ) ) )
 		{
 			core::alog( 'load_module(): unable to load: '.$module_name.' (error loading)', 'BASIC' );
 			return false;
 		}
 		// module (exists?) but can't be loaded
 		
-		self::$list[$module_name]['class'] = $module_name;
+		if ( !class_exists( $module_name ) )
+		{
+			core::alog( 'load_module(): unable to load: '.$module_name.' (boot error)', 'BASIC' );
+			return false;
+		}
+		// class doesn't exist
+		
+		self::$list[$module_name]['class'] = new $module_name();
 		call_user_func( array( $module_name, 'modload' ) );
 		// onload handler.
 	}

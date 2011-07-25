@@ -26,7 +26,7 @@ class ns_help extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'ns_help', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'static' );
 		// these are standard in module constructors

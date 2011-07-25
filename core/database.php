@@ -30,14 +30,14 @@ class database
 	{
 		if ( require( BASEPATH.'/core/drivers/'.$drivers.'.php' ) )
 		{
-			core::alog( 'factory(): using '.$drivers.' database driver', 'BASIC' );
-            self::$driver = new $drivers;
+			core::alog( 'factory(): using '.$drivers.'_driver database driver', 'BASIC' );
+			$driver_class = $drivers.'_driver';
+            self::$driver = new $driver_class;
             // store the instance here
         }
 		else
 		{
 			core::alog( 'factory(): failed to open '.$drivers.' database driver', 'BASIC' );
-            
             core::save_logs();
             // force a log save
         }

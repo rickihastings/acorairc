@@ -20,8 +20,8 @@ define( 'BASEPATH', dirname(__FILE__) );
 define( 'CONFPATH', BASEPATH.'/conf/' );
 
 // Check to see if the version of PHP meets the minimum requirement
-if ( version_compare( '5.0.0', PHP_VERSION, '>' ) )
-    exit( 'Fatal Error: PHP 5.0.0+ is required, current version: '.PHP_VERSION );
+if ( version_compare( '5.1.0', PHP_VERSION, '>' ) )
+    exit( 'Fatal Error: PHP 5.1.0+ is required, current version: '.PHP_VERSION );
 
 // make sure we have access to PHP CLI
 if ( ( substr( php_sapi_name(), 0, 3 ) != 'cli' ) )
@@ -34,11 +34,15 @@ ini_set( 'max_input_time', '0' );
 set_time_limit( 0 );
 ignore_user_abort( true );
 
+// set the default time and date
+date_default_timezone_set( 'GMT' );
+
 // memory limit.
-ini_set( 'memory_limit', '128M' );
+ini_set( 'memory_limit', '64M' );
 
 // set error reporting to all
-error_reporting( E_ALL ^ ( E_NOTICE | E_WARNING ) );
+ini_set( 'display_errors', 'off' );
+error_reporting( E_ALL );
 
 // include all the core system file
 require( BASEPATH.'/core/core.php' );

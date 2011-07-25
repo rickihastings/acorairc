@@ -142,7 +142,7 @@ abstract class module
 	);
 	// setup our return data
 	
-	abstract public function modload();
+	abstract static public function modload();
 	// main functions
 }
 

@@ -90,7 +90,7 @@ class socket_engine
 	{
 		if ( !isset( self::$sockets[$identifier] ) )
 		{
-			core::alog( 'close(): '.$identifier.' doesn\'t seem to exist' );
+			core::alog( 'close(): '.$identifier.' doesn\'t seem to exist', 'BASIC' );
 			return false;
 		}
 		// $identifier doesn't even exist..
@@ -101,7 +101,7 @@ class socket_engine
 		
 		unset( self::$sockets[$identifier] );
 		
-		core::alog( 'close(): sucessfully closed socket \''.$identifier.'\'' );
+		core::alog( 'close(): sucessfully closed socket \''.$identifier.'\'', 'BASIC' );
 	}
 	
 	/*

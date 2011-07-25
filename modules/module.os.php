@@ -37,7 +37,7 @@ class os_module extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'os_module', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
@@ -158,31 +158,8 @@ class os_module extends module
 		}
 		// module exists
 	
-		if ( !class_exists( $module ) )
-		{
-			if ( !file_exists( BASEPATH.'/modules/'.$file ) )
-			{
-				$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
-				$return_data[CMD_FAILCODE] = self::$return_codes->FILE_NO_EXIST;
-				return $return_data;
-			}
-			// file doesnt exist
-		
-			modules::load_module( $name, $file, true );
-			// load the module 
-		}
-		else
-		{
-			if ( !modules::$list[$module]['class'] = new $module() )
-			{
-				core::alog( 'modload_command(): unable to load module '.$module.' (boot error)', 'BASIC' );
-				$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_MODLOAD_1, array( 'name' => $module ) );
-				$return_data[CMD_FAILCODE] = self::$return_codes->BOOT_ERROR;
-				return $return_data;
-			}
-			// module failed to start
-		}
-		// load the module, if the class don't exist, include it
+		modules::load_module( $module, $file, true );
+		// load the module 
 		
 		modules::$list[$module]['class']->modload();
 		// onload handler.

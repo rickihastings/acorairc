@@ -26,7 +26,7 @@ class cs_help extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'cs_help', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'static' );
 		// these are standard in module constructors

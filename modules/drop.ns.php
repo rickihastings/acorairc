@@ -36,7 +36,7 @@ class ns_drop extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'ns_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
@@ -44,7 +44,7 @@ class ns_drop extends module
 		
 		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1, true );
 		nickserv::add_help( 'ns_drop', 'help drop', nickserv::$help->NS_HELP_DROP_ALL );
-		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_FDROP_1, true, 'nickserv_op' );
+		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_SADROP_1, true, 'nickserv_op' );
 		nickserv::add_help( 'ns_drop', 'help sadrop', nickserv::$help->NS_HELP_SADROP_ALL, false, 'nickserv_op' );
 		// add the help
 		

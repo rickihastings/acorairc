@@ -33,7 +33,7 @@ class os_global extends module
 	* @params
 	* void
 	*/
-	public function modload()
+	static public function modload()
 	{
 		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
@@ -73,7 +73,7 @@ class os_global extends module
 	* @params
 	* void
 	*/
-	public function modunload()
+	static public function modunload()
 	{
 		if ( isset( core::$config->global->nick ) || core::$config->global->nick != null )
 			ircd::remove_client( core::$config->global->nick, 'module unloaded' );

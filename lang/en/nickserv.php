@@ -270,11 +270,11 @@ $help = (object) array(
 	),
 	// DROP
 	
-	'NS_HELP_FDROP_ALL' 	=> array(
+	'NS_HELP_SADROP_ALL' => array(
 		'=---- {nickserv} Help ----=',
-		'Syntax: FDROP nickname',
+		'Syntax: SADROP nickname',
 		' ',
-		'FDROP forces the dropping of a registered account, the',
+		'SADROP forces the dropping of a registered account, the',
 		'command is limited to Services Operators with "nickserv_op"',
 		'priviledge.',
 		' ',
@@ -282,7 +282,7 @@ $help = (object) array(
 		'channel access under that nickname.',
 		'=---- End of {nickserv} Help ----=',
 	),
-	// DROP
+	// SADROP
 	
 	'NS_HELP_SUSPEND_ALL'	=> array(
 		'=---- {nickserv} Help ----=',
