@@ -17,12 +17,16 @@
 class os_utilities extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'SERVER_EXISTS'		=> 2,
+		'CHAN_INVALID'		=> 3,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +37,7 @@ class os_utilities extends module
 	static public function modload()
 	{
 		modules::init_module( 'os_utilities', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_utilities', 'help', operserv::$help->OS_HELP_JUPE_1, true, 'local_op' );

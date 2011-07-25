@@ -41,8 +41,8 @@ date_default_timezone_set( 'GMT' );
 ini_set( 'memory_limit', '64M' );
 
 // set error reporting to all
-ini_set( 'display_errors', 'off' );
-error_reporting( E_ALL );
+//ini_set( 'display_errors', 'off' );
+error_reporting( E_ALL ^ E_NOTICE );
 
 // include all the core system file
 require( BASEPATH.'/core/core.php' );

@@ -313,6 +313,7 @@ class mysql_driver implements driver
 	*/
 	public function insert( $table, $what )
 	{
+		$fieldarray = $valuearray = array();
 		$query = 'INSERT INTO `'.core::$config->database->prefix.$table.'` ';
 		// the table
 		

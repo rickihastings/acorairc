@@ -17,12 +17,18 @@
 class os_vhost extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'INVALID_HOSTNAME'	=> 3,
+		'NO_VHOST'			=> 4,
+		'NO_VHOST_REQUEST'	=> 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -33,6 +39,7 @@ class os_vhost extends module
 	static public function modload()
 	{
 		modules::init_module( 'os_vhost', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, true, 'local_op' );
@@ -42,7 +49,6 @@ class os_vhost extends module
 		operserv::add_command( 'vhost', 'os_vhost', 'vhost_command' );
 		// add the vhost command
 	}
-
 
 	/*
 	* vhost_command (command)
@@ -54,6 +60,7 @@ class os_vhost extends module
 	static public function vhost_command( $nick, $ircdata = array() )
 	{
 		$mode = strtolower( $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
 		
 		if ( $mode == 'set' )
 		{
@@ -64,8 +71,12 @@ class os_vhost extends module
 			}
 			// access?
 			
-			self::_add_vhost( $nick, $ircdata[2], $ircdata[1] );
+			$return_data = self::_add_vhost( $input, $nick, $ircdata[2], $ircdata[1] );
 			// send to a subfunction
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( $mode == 'del' )
 		{
@@ -76,14 +87,22 @@ class os_vhost extends module
 			}
 			// access?
 			
-			self::_del_vhost( $nick, $ircdata[1] );
+			$return_data = self::_del_vhost( $input, $nick, $ircdata[1] );
 			// send to a subfunction
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( $mode == 'list' )
 		{
 			$nmode = ( isset( $ircdata[2] ) ) ? strtolower( $ircdata[2] ) : '';
-			self::_list_vhost( $nick, $ircdata[1], $nmode );
+			$return_data = self::_list_vhost( $input, $nick, $ircdata[1], $nmode );
 			// send to a subfunction
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( strtolower( $mode ) == 'approve' )
 		{
@@ -94,8 +113,12 @@ class os_vhost extends module
 			}
 			// access?
 			
-			self::_approve_vhost( $nick, $ircdata[1] );
+			$return_data = self::_approve_vhost( $input, $nick, $ircdata[1] );
 			// send to a subfunction
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		elseif ( strtolower( $mode ) == 'reject' )
 		{
@@ -106,8 +129,12 @@ class os_vhost extends module
 			}
 			// access?
 			
-			self::_reject_vhost( $nick, $ircdata[1] );
+			$return_data = self::_reject_vhost( $input, $nick, $ircdata[1] );
 			// send to a subfunction
+			
+			services::respond( core::$config->operserv->nick, $nick, $return_data[CMD_RESPONSE] );
+			return $return_data[CMD_SUCCESS];
+			// respond and return
 		}
 		else
 		{
@@ -121,23 +148,28 @@ class os_vhost extends module
 	* _add_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $host - The requested hostname
 	* $unick - The nickname thats requesting the vhost
 	*/
-	static public function _add_vhost( $nick, $host, $unick )
+	static public function _add_vhost( $input, $nick, $host, $unick )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are we missing nick? invalid syntax if so.
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'vhost' ) ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// is the nick registered?
 		
@@ -150,16 +182,16 @@ class os_vhost extends module
 		}
 		elseif ( substr_count( $host, '@' ) > 1 || services::valid_host( $host ) === false )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_HOSTNAME );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_HOSTNAME );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_HOSTNAME;
+			return $return_data;
 		}
 		else
 			$realhost = $host;
 		// check if there is a @
 		
 		database::update( 'users', array( 'vhost' => $realhost ), array( 'display', '=', $user->display ) );
-		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') set to ('.$realhost.') by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
+		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') set to ('.$realhost.') by ('.$input['hostname'].') ('.$input['account'].')' );
 		// update it and log it
 		
 		$lunick = strtolower( $unick );
@@ -181,58 +213,77 @@ class os_vhost extends module
 		}
 		reset( core::$nicks );
 		// we need to check if the user is online and identified?
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_SET, array( 'nick' => $unick, 'host' => $realhost ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _del_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The owner of the vhost
 	*/
-	static public function _del_vhost( $nick, $unick )
+	static public function _del_vhost( $input, $nick, $unick )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are we missing nick? invalid syntax if so.
 		
 		if ( !$user = services::user_exists( $unick, false, array( 'display', 'id', 'vhost' ) ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// is the nick registered?
 		
 		if ( $user->vhost == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_NO_VHOST, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_NO_VHOST, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NO_VHOST;
+			return $return_data;
 		}
 		// is there a vhost?!
 					
 		database::update( 'users', array( 'vhost' => '' ), array( 'display', '=', $user->display ) );
-		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') deleted by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_DELETED, array( 'nick' => $unick ) );
+		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') deleted by ('.$input['hostname'].') ('.$input['account'].')' );
 		// update and logchan
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_DELETED, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _list_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $limit - vhost limit
 	* $mode - mode, either like, approved or something
 	*/
-	static public function _list_vhost( $nick, $limit, $nmode )
+	static public function _list_vhost( $input, $nick, $limit, $nmode )
 	{
-		if ( trim( $limit ) == '' || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) || isset( $mode ) && ( !in_array( $nmode, array( '', 'pending' ) ) ) )
+		$return_data = module::$return_data;
+		
+		if ( trim( $limit ) == '' || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) || isset( $nmode ) && ( !in_array( $nmode, array( '', 'pending' ) ) ) )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
@@ -249,7 +300,7 @@ class os_vhost extends module
 		$max = $s_limit[1];
 		// split up the limit and stuff ^_^
 		
-		if ( $mode == '' )
+		if ( $nmode == '' )
 			$users_q = database::select( 'users', array( 'display', 'vhost' ), array( 'vhost', '!=', '' ), '', array( $offset => $max ) );
 		else
 			$users_q = database::select( 'vhost_request', array( 'nickname', 'vhost' ), '', '', array( $offset => $max ) );
@@ -257,20 +308,21 @@ class os_vhost extends module
 		
 		if ( database::num_rows( $users_q ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_B, array( 'num' => database::num_rows( $users_q ), 'total' => $total ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_B, array( 'num' => database::num_rows( $users_q ), 'total' => $total ) );
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
 		}
 		// no vhosts
 		
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_T );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_D );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_T );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_D );
 		// list top.
 		
 		$x = 0;
 		while ( $users = database::fetch( $users_q ) )
 		{
 			$x++;
-			$false_nick = ( $mode == '' ) ? $users->display : $users->nickname;
+			$false_nick = ( $nmode == '' ) ? $users->display : $users->nickname;
 			$num = explode( '-', $limit );
 			$num = $num[0] + $x;
 			
@@ -286,45 +338,53 @@ class os_vhost extends module
 			}
 			// this is just a bit of fancy fancy, so everything displays neat
 			
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_R, array( 'num' => $num, 'nick' => $false_nick, 'info' => $users->vhost ) );
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_R, array( 'num' => $num, 'nick' => $false_nick, 'info' => $users->vhost ) );
+			$return_data[CMD_DATA][] = array( 'nick' => ( $nmode == '' ) ? $users->display : $users->nickname, 'vhost' => $users->vhost );
 		}
 		// loop through em, show the vhosts
 		
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_D );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_LIST_B, array( 'num' => ( database::num_rows( $users_q ) == 0 ) ? 0 : database::num_rows( $users_q ), 'total' => $total ) );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_D );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_LIST_B, array( 'num' => ( database::num_rows( $users_q ) == 0 ) ? 0 : database::num_rows( $users_q ), 'total' => $total ) );
 		// end of list.
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _approve_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The owner of the vhost to approve
 	*/
-	static public function _approve_vhost( $nick, $unick )
+	static public function _approve_vhost( $input, $nick, $unick )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are we missing nick? invalid syntax if so.
 		
 		$users_q = database::select( 'vhost_request', array( 'nickname', 'vhost' ), array( 'nickname', '=', $unick ) );
-		
 		if ( database::num_rows( $users_q ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_NO_REQ, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_NO_REQ, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NO_VHOST_REQUEST;
+			return $return_data;
 		}
 		// no request?
 		
 		$user = database::fetch( $users_q );
 		database::delete( 'vhost_request', array( 'nickname', '=', $user->nickname ) );
 		database::update( 'users', array( 'vhost' => $user->vhost ), array( 'display', '=', $user->nickname ) );
-		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') approved ('.$user->vhost.') by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_APPROVE, array( 'nick' => $unick ) );
+		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') approved ('.$user->vhost.') by ('.$input['hostname'].') ('.$input['account'].')' );
 		// update it and log it
 		
 		$lunick = strtolower( $unick );
@@ -343,44 +403,55 @@ class os_vhost extends module
 				ircd::sethost( core::$config->nickserv->nick, $dnick, $split[1] );
 			}
 			else
-			{
 				ircd::sethost( core::$config->nickserv->nick, $dnick, $user->vhost );
-			}
 		}
-		reset( core::$data );
+		reset( core::$nicks );
 		// we need to check if the user is online and identified?
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_APPROVE, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 	
 	/*
 	* _reject_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The owner of the vhost to reject
 	*/
-	static public function _reject_vhost( $nick, $unick )
+	static public function _reject_vhost( $input, $nick, $unick )
 	{
+		$return_data = module::$return_data;
+		
 		if ( trim( $unick ) == '' )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// are we missing nick? invalid syntax if so.
 		
 		$users_q = database::select( 'vhost_request', array( 'nickname', 'vhost' ), array( 'nickname', '=', $unick ) );
-		
 		if ( database::num_rows( $users_q ) == 0 )
 		{
-			services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_NO_REQ, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_NO_REQ, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NO_VHOST_REQUEST;
+			return $return_data;
 		}
 		// no request?
 		
 		$user = database::fetch( $users_q );
 		database::delete( 'vhost_request', array( 'nickname', '=', $user->nickname ) );
-		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') rejected ('.$user->vhost.') by ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].')' );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_VHOST_REJECTED, array( 'nick' => $unick ) );
+		core::alog( core::$config->operserv->nick.': vHost for ('.$unick.') rejected ('.$user->vhost.') by ('.$input['hostname'].') ('.$input['account'].')' );
 		// update it and log it
+		
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_VHOST_REJECTED, array( 'nick' => $unick ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// log this and return.
 	}
 }
 
