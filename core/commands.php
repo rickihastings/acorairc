@@ -23,10 +23,8 @@ class commands
 	static public $unordered_help = array();
 	static public $prefix = array();
 	static public $suffix = array();
+	static public $account_cmds = array( 'register', 'flags', 'levels', 'drop', 'sadrop', 'saflags', 'password', 'sapass' );
 	// setup our static variables etc.
-	
-	public function __construct() {}
-	// __construct, makes everyone happy.
 		
 	/*
 	* ctcp
@@ -466,30 +464,30 @@ class commands
 		// reject the command attempt. output an error
 		
 		if ( ( $lower_cmd == 'identify' || $lower_cmd == 'id' ) && count( $new_params ) == 2 && $hook == 'nickserv' )
-			$log_p = $new_params[0].' *****';
+			$log_p = $new_params[0].' '.str_replace( $new_params[1], '(blocked)', $new_params[1] );
 		elseif ( ( $lower_cmd == 'identify' || $lower_cmd == 'id' ) && count( $new_params ) == 1 && $hook == 'nickserv' )
-			$log_p = '*****';
+			$log_p = str_replace( $new_params[1], '(blocked)', $new_params[1] );
 		elseif ( $lower_cmd == 'register' && $hook == 'nickserv' )
-			$log_p = '***** '.$new_params[1];
+			$log_p = str_replace( $new_params[0], '(blocked)', $new_params[0] ).' '.$new_params[1];
 		elseif ( $lower_cmd == 'password' && $hook == 'nickserv' )
-			$log_p = '***** *****';
+			$log_p = str_replace( $new_params[0], '(blocked)', $new_params[0] ).' '.str_replace( $new_params[1], '(blocked)', $new_params[1] );
 		elseif ( $lower_cmd == 'sapass' && $hook == 'nickserv' )
-			$log_p = $new_params[0].' ***** *****';
+			$log_p = $new_params[0].' '.str_replace( $new_params[1], '(blocked)', $new_params[1] ).' '.str_replace( $new_params[2], '(blocked)', $new_params[2] );
 		elseif ( ( $lower_cmd == 'recover' || $lower_cmd == 'release' || $lower_cmd == 'ghost' ) && $hook == 'nickserv' )
-			$log_p = $new_params[0].' *****';
+			$log_p = $new_params[0].' '.str_replace( $new_params[1], '(blocked)', $new_params[1] );
 		else
 			$log_p = implode( ' ', $new_params );
 		// strip passwords and stuff out
 		
 		core::alog( $bot.' '.core::$nicks[$nick]['account'].':'.core::get_full_hostname( $nick ).' :'.strtoupper( $commands_r[0] ).' '.$log_p, 'COMMANDS' );
 		// log it as COMMANDS
-		$account_cmds = array( 'register', 'flags', 'levels', 'drop', 'sadrop', 'saflags', 'password', 'sapass' );
-		if ( in_array( $lower_cmd, $account_cmds ) && core::$nicks[$nick]['identified'] )
+		
+		$return = call_user_func_array( array( $class, $function ), array( $nick, $new_params ) );
+		// it does! execute the callback
+		
+		if ( in_array( $lower_cmd, self::$account_cmds ) && core::$nicks[$nick]['identified'] && $return )
 			core::alog( $bot.' '.core::$nicks[$nick]['account'].':'.core::get_full_hostname( $nick ).' :'.strtoupper( $commands_r[0] ).' '.$log_p, 'ACCOUNT' );
 		// log it as ACCOUNT
-		
-		call_user_func_array( array( $class, $function ), array( $nick, $new_params ) );
-		// it does! execute the callback
 	}
 }
 
