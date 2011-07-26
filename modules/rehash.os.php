@@ -17,7 +17,7 @@
 class os_rehash extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -56,8 +56,12 @@ class os_rehash extends module
 		}
 		// access?
 	
-		self::_rehash_config( $nick );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_rehash_config( $input, $nick );
 		// call _rehash_config
+		
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -68,6 +72,7 @@ class os_rehash extends module
 	*/
 	static public function _rehash_config( $nick )
 	{
+		$return_data = module::$return_data;
 		$parser = new parser( CONFPATH.'services.conf' );
 		// load the parser
 		
@@ -92,7 +97,6 @@ class os_rehash extends module
 				// if the module has an unload method, call it now before we destroy the class.
 				
 				core::alog( core::$config->operserv->nick.': REHASH unloaded module ('.$name.') ('.modules::$list[$name]['version'].') ('.modules::$list[$name]['author'].'/'.modules::$list[$name]['type'].'/'.modules::$list[$name]['extra'].')' );
-				ircd::wallops( core::$config->operserv->nick, 'unloaded module '.$name );
 				// unset the module
 				
 				unset( modules::$list[$name] );
@@ -125,7 +129,6 @@ class os_rehash extends module
 				}
 				
 				core::alog( core::$config->operserv->nick.': REHASH loaded module ('.$name.') ('.modules::$list[$name]['version'].') ('.modules::$list[$name]['author'].'/'.modules::$list[$name]['type'].'/'.modules::$list[$name]['extra'].')' );
-				ircd::wallops( core::$config->operserv->nick, 'loaded module '.$name );
 				// load it up
 					
 				core::alog( 'rehash_command(): '.$name.' loaded from rehash', 'BASIC' );
@@ -140,11 +143,12 @@ class os_rehash extends module
 		
 		modules::on_rehash();
 		
-		core::alog( core::$config->operserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') Successfully performed a REHASH' );
-		ircd::wallops( core::$config->operserv->nick, $nick.' performed a REHASH' );
-		
+		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') Successfully performed a REHASH' );
 		core::alog( 'rehash_command(): sucessful rehash', 'BASIC' );
 		// log what we need to log.
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
 	}
 }
 

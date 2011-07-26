@@ -83,7 +83,7 @@ class ns_flags extends module
 		// call _set_flags_nick
 		
 		print_r( $return_data );
-		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
@@ -108,7 +108,7 @@ class ns_flags extends module
 		$return_data = self::_set_flags_nick( $input, $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
 		// call _set_flags_nick
 		
-		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
@@ -126,6 +126,7 @@ class ns_flags extends module
 	*/
 	static public function _set_flags_nick( $input, $nick, $unick, $flags, $full_flags, $param )
 	{
+		$return_data = module::$return_data;
 		$rparams = explode( '||', $param );
 		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		

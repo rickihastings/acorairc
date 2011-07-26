@@ -17,9 +17,20 @@
 class ns_register extends module
 {
 	
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'BAD_PASSWORD'		=> 2,
+		'INVALID_EMAIL'		=> 3,
+		'ALREADY_REGISTERED'=> 4,
+		'EMAIL_IN_USE'		=> 5,
+		'NICK_UNREGISTERED'	=> 6,
+		'INVALID_PASSCODE'	=> 7,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +41,7 @@ class ns_register extends module
 	static public function modload()
 	{
 		modules::init_module( 'ns_register', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_register', 'help', nickserv::$help->NS_HELP_REGISTER_1, true );
@@ -58,8 +70,13 @@ class ns_register extends module
 	*/
 	static public function register_command( $nick, $ircdata = array() )
 	{
-		self::_register_user( $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_register_user( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _register_user
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -71,54 +88,64 @@ class ns_register extends module
 	*/
 	static public function confirm_command( $nick, $ircdata = array() )
 	{
-		self::_confirm_user( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_confirm_user( $input, $nick, $ircdata[0] );
 		// call _confirm_user
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _register_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $password - The password to use
 	* $email - The email addr to use
 	*/
-	static public function _register_user( $nick, $password, $email )
+	static public function _register_user( $input, $nick, $password, $email )
 	{
 		if ( trim( $password ) == '' || trim( $email ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 		
 		if ( strtolower( $password ) == strtolower( $nick ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PASSWORD_NICK );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_PASSWORD_NICK );
+			$return_data[CMD_FAILCODE] = self::$return_codes->BAD_PASSWORD;
+			return $return_data;
 		}
 		// are they using a reasonable password, eg. != their nick, lol.
 		
 		if ( services::valid_email( $email ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_EMAIL );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_EMAIL );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_EMAIL;
+			return $return_data;
 		}
 		// is the email valid?
 		
 		if ( core::$nicks[$nick]['identified'] || $user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ALREADY_REGISTERED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ALREADY_REGISTERED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ALREADY_REGISTERED;
+			return $return_data;
 		}
 		// are we registered? apprently not, let's move on!
 		
 		$check_e = database::select( 'users_flags', array( 'email' ), array( 'email', '=', $email ) );
-		
 		if ( database::num_rows( $check_e ) > 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_EMAIL_IN_USE );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_EMAIL_IN_USE );
+			$return_data[CMD_FAILCODE] = self::$return_codes->EMAIL_IN_USE;
+			return $return_data;
 		}
 		// check if the email is in use.
 		
@@ -134,7 +161,7 @@ class ns_register extends module
 			'display'		=>	$nick,
 			'pass'			=>	sha1( $password.$salt ),
 			'salt'			=>	$salt,
-			'last_hostmask' =>	core::get_full_hostname( $nick ),
+			'last_hostmask' =>	$input['hostname'],
 			'last_timestamp'=>	core::$network_time,
 			'timestamp'		=>	core::$network_time,
 			'validated'		=>	( core::$config->nickserv->force_validation === true ) ? 0 : 1,
@@ -155,7 +182,7 @@ class ns_register extends module
 		{
 			$validation_code = mt_rand();
 			
-			core::alog( core::$config->nickserv->nick.': '.$nick.' requested by ('.core::get_full_hostname( $nick ).')' );
+			core::alog( core::$config->nickserv->nick.': '.$nick.' requested by ('.$input['hostname'].')' );
 			// logchan
 			database::insert( 'validation_codes', array( 'nick' => $nick, 'code' => $validation_code ) );
 			// insert the random code to the database
@@ -181,52 +208,59 @@ You will then be able to identify with the password you chose by typing
 			@mail( $to, $subject, $message, $headers );
 			// let's send the email
 			
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_REQUESTED, array( 'email' => $email ) );
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NICK_REQUESTED, array( 'email' => $email ) );
 		}
 		else
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_REGISTERED );
-			core::alog( core::$config->nickserv->nick.': '.$nick.' registered by ('.core::get_full_hostname( $nick ).')' );
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NICK_REGISTERED );
+			core::alog( core::$config->nickserv->nick.': '.$nick.' registered by ('.$input['hostname'].')' );
 			// logchan
 			
-			core::alog( 'register_command(): '.$nick.' registered by '.core::get_full_hostname( $nick ), 'BASIC' );
+			core::alog( 'register_command(): '.$nick.' registered by '.$input['hostname'], 'BASIC' );
 			// log what we need to log.
 		}
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data
 	}
 	
 	/*
 	* _confirm_user (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $code - The confirm code
 	*/
-	static public function _confirm_user( $nick, $code )
+	static public function _confirm_user( $input, $nick, $code )
 	{
 		if ( trim( $code ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// wrong syntax
 		
 		if ( !$user = services::user_exists( $nick, false, array( 'display', 'id' ) ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_UNREGISTERED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_UNREGISTERED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// unregistered
 		
 		$code_array = database::select( 'validation_codes', array( 'nick', 'code' ), array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
-		
 		if ( database::num_rows( $code_array ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_PASSCODE );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_PASSCODE );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_PASSCODE;
+			return $return_data;
 		}
 		// invalid passcode
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_VALIDATED );
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_VALIDATED );
 		// let them know.
 		
 		database::update( 'users', array( 'validated' => 1 ), array( 'id', '=', $user->id ) );
@@ -235,8 +269,12 @@ You will then be able to identify with the password you chose by typing
 		database::delete( 'validation_codes', array( 'nick', '=', $nick, 'AND', 'code', '=', $code ) );
 		// delete the code now that we've validated them
 		
-		core::alog( core::$config->nickserv->nick.': '.$nick.' activated' );
+		core::alog( core::$config->nickserv->nick.': '.$nick.' activated by ('.$input['hostname'].')' );
 		// logchan
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data
 	}
 }
 
