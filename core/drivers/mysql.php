@@ -79,7 +79,6 @@ class mysql_driver implements driver
 			// can we select the database?
 		}
 	}
-
 	
 	/*
 	* num_rows
@@ -170,15 +169,12 @@ class mysql_driver implements driver
 			foreach ( $what as $var )
 			{
 				$i++;
-				
 				if ( $i == count( $what ) ) $query .= '`'.$var.'`';
 				else $query .= '`'.$var."`, ";
 			}
 		}
 		elseif ( $what == '*' )
-		{
 			$query .= '*';
-		}
 		// construct the what part, `max_users` etc.
 		
 		$query .= ' FROM `'.core::$config->database->prefix.$table.'`';
@@ -195,22 +191,14 @@ class mysql_driver implements driver
 				
 				$i++;
 				if ( $i == 1 )
-				{
 					$query .= '`'.$val.'`';
-				}
 				elseif ( $i == 3 )
-				{
 					$query .= '\''.$val.'\'';
-				}
-				elseif ( $i == 4 )
-				{
+				elseif ( $i == 4 ) {
 					$i = 0;
 					$query .= ' '.$val.' ';
-				}
-				else
-				{
+				} else
 					$query .= ' '.$val.' ';
-				}
 			}
 		}
 		// and the where part: `id` = '1'
@@ -278,22 +266,14 @@ class mysql_driver implements driver
 				
 				$i++;
 				if ( $i == 1 )
-				{
 					$query .= '`'.$val.'`';
-				}
 				elseif ( $i == 3 )
-				{
 					$query .= '\''.$val.'\'';
-				}
-				elseif ( $i == 4 )
-				{
+				elseif ( $i == 4 ) {
 					$i = 0;
 					$query .= ' '.$val.' ';
-				}
-				else
-				{
+				} else
 					$query .= ' '.$val.' ';
-				}
 			}
 		}
 		// and the where part: `id` = '1'
@@ -372,22 +352,14 @@ class mysql_driver implements driver
 				
 				$i++;
 				if ( $i == 1 )
-				{
 					$query .= '`'.$val.'`';
-				}
 				elseif ( $i == 3 )
-				{
 					$query .= '\''.$val.'\'';
-				}
-				elseif ( $i == 4 )
-				{
+				elseif ( $i == 4 ) {
 					$i = 0;
 					$query .= ' '.$val.' ';
-				}
-				else
-				{
+				} else
 					$query .= ' '.$val.' ';
-				}
 			}
 		}
 		// and the where part: `id` = '1'

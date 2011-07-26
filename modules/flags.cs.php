@@ -79,7 +79,6 @@ class cs_flags extends module
 		// respond and return
 	}
 	
-	
 	/*
 	* _set_flags_chan (private)
 	* 
@@ -121,7 +120,7 @@ class cs_flags extends module
 			
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_LIST, array( 'chan' => $chan, 'flags' => $flags_q->flags ) );
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_LIST2, array( 'chan' => $chan ) );
-			$return_data[CMD_DATA][] = array( 'chan' => $chan, 'flags' => $flags_q->flags );
+			$return_data[CMD_DATA] = array( 'chan' => $chan, 'flags' => $flags_q->flags );
 			$return_data[CMD_SUCCESS] = true;
 			return $return_data;
 			// return some banter back
@@ -195,7 +194,7 @@ class cs_flags extends module
 		if ( isset( self::$set[$chan] ) )
 		{
 			$response .= services::parse( chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );
-			$response .= ( isset( self::$already_set[$chan] ) || isset( self::$not_set[$chan] ) ) ? ', ' : '';
+			$response .= ( isset( self::$already_set[$chan] ) || isset( self::$not_set[$chan] ) || isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
 			$return_data[CMD_DATA]['set'] = self::$set[$chan];
 			unset( self::$set[$chan] );
 		}
@@ -204,7 +203,7 @@ class cs_flags extends module
 		if ( isset( self::$already_set[$chan] ) )
 		{
 			$response .= services::parse( chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
-			$response .= ( isset( self::$not_set[$chan] ) ) ? ', ' : '';
+			$response .= ( isset( self::$not_set[$chan] ) || isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
 			$return_data[CMD_DATA]['already_set'] = self::$already_set[$chan];
 			unset( self::$already_set[$chan] );
 		}
@@ -213,10 +212,18 @@ class cs_flags extends module
 		if ( isset( self::$not_set[$chan] ) )
 		{
 			$response .= services::parse( chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
+			$response .= ( isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
 			$return_data[CMD_DATA]['not_set'] = self::$not_set[$chan];
 			unset( self::$not_set[$chan] );
 		}
 		// send back the target stuff..
+		
+		if ( isset( $return_data['FALSE_RESPONSE'] ) )
+		{
+			$response .= $return_data['FALSE_RESPONSE'];
+			unset( $return_data['FALSE_RESPONSE'] );
+		}
+		// do we have any additional responses?
 		
 		$return_data[CMD_RESPONSE][] = $response;
 		$return_data[CMD_DATA]['chan'] = $chan;
@@ -571,7 +578,7 @@ class cs_flags extends module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
 		{
-			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
+			$return_data['FALSE_RESPONSE'][] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
 		}
 		// are they issuing a flag, that HAS to have a parameter?
@@ -595,14 +602,14 @@ class cs_flags extends module
 		{
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
-				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
+				$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the email invalid?
 			
 			if ( $r_flag == 't' && strpos( $param, '*' ) === false )
 			{
-				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
+				$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the topicmask invalid?
@@ -613,7 +620,7 @@ class cs_flags extends module
 				
 				if ( strstr( $mode_string[0], 'r' ) || strstr( $mode_string[0], 'q' ) || strstr( $mode_string[0], 'a' ) || strstr( $mode_string[0], 'o' ) || strstr( $mode_string[0], 'h' ) || strstr( $mode_string[0], 'v' ) || strstr( $mode_string[0], 'b' ) )
 				{
-					$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
+					$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
 					return false;
 				}
 			}

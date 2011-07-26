@@ -17,7 +17,7 @@
 class ns_flags extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -28,7 +28,12 @@ class ns_flags extends module
 	static public $set;
 	static public $already_set;
 	static public $not_set;
-	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'INVALID_FLAG'		=> 3,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -39,6 +44,7 @@ class ns_flags extends module
 	static public function modload()
 	{
 		modules::init_module( 'ns_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1, true );
@@ -72,8 +78,14 @@ class ns_flags extends module
 		}
 		// are they identified?
 		
-		self::_set_flags_nick( $nick, $nick, $ircdata[0], core::get_data_after( $ircdata, 0 ), core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'], 'command' => 'FLAGS' );
+		$return_data = self::_set_flags_nick( $input, $nick, $nick, $ircdata[0], core::get_data_after( $ircdata, 0 ), core::get_data_after( $ircdata, 1 ) );
 		// call _set_flags_nick
+		
+		print_r( $return_data );
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -92,29 +104,44 @@ class ns_flags extends module
 		}
 		// they don't even have access to do this.
 		
-		self::_set_flags_nick( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'], 'command' => 'SAFLAGS' );
+		$return_data = self::_set_flags_nick( $input, $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 1 ), core::get_data_after( $ircdata, 2 ) );
 		// call _set_flags_nick
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _set_flags_nick (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $unick - The name of the account to change flags
 	* $flags - The flags, like '+ei'
 	* $full_flags - The flags and params, like '+ei email@addr.com'
 	* $params - The params, like 'email@addr.com'
 	*/
-	static public function _set_flags_nick( $nick, $unick, $flags, $full_flags, $param )
+	static public function _set_flags_nick( $input, $nick, $unick, $flags, $full_flags, $param )
 	{
 		$rparams = explode( '||', $param );
 		$user = database::select( 'users', array( 'display', 'id', 'salt' ), array( 'display', '=', $unick ) );
 		
+		if ( $unick == '' )
+		{
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => $input['command'] ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
+		}
+		// wrong syntax
+		
 		if ( database::num_rows( $user ) == 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_ISNT_REGISTERED, array( 'nick' => $unick ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+			return $return_data;
 		}
 		// look for the user
 		
@@ -124,9 +151,11 @@ class ns_flags extends module
 			$flags_q = database::fetch( $flags_q );
 			// get the flag records
 			
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST, array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags ) );
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_LIST2, array( 'nick' => $flags_q->nickname ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_FLAGS_LIST, array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags ) );
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_FLAGS_LIST2, array( 'nick' => $flags_q->nickname ) );
+			$return_data[CMD_DATA] = array( 'nick' => $flags_q->nickname, 'flags' => $flags_q->flags );
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
 		}
 		// are no flags sent? ie they're using /ns flags, asking for the current flags.
 		
@@ -135,8 +164,9 @@ class ns_flags extends module
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_FLAG;
+				return $return_data;
 			}
 			// flag is invalid.
 			
@@ -157,57 +187,79 @@ class ns_flags extends module
 		$flag_array = mode::sort_modes( $full_flags, false );
 		// sort our flags up
 		
-		foreach ( str_split( self::$p_flags ) as $flag )
+		$param_num = 0;
+		foreach ( str_split( $flags ) as $flag )
 		{
-			$param_num = strpos( $flag_array['plus'], $flag );
+			if ( strpos( self::$p_flags, $flag ) === false )
+				continue;
+			// not a parameter-ized flag
 			
-			if ( $param_num !== false )
-				$params[$flag] = trim( $rparams[$param_num] );
+			$params[$flag] = trim( $rparams[$param_num] );
+			$param_num++;
 			// we do!
 		}
 		// check if we have any paramtized flags, eg +me
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
-			self::_set_flags( $nick, $unick, $flag, '+', $params );
+			self::_set_flags( $nick, $unick, $flag, '+', $params, $return_data );
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-			self::_set_flags( $nick, $unick, $flag, '-', $params );
+			self::_set_flags( $nick, $unick, $flag, '-', $params, $return_data );
 		
 		if ( isset( self::$set[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$unick], 'target' => $unick ) );
+			$response .= services::parse( nickserv::$help->NS_FLAGS_SET, array( 'flag' => self::$set[$unick], 'target' => $unick ) );
+			$response .= ( isset( self::$already_set[$unick] ) || isset( self::$not_set[$unick] ) || isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['set'] = self::$set[$unick];
 			unset( self::$set[$unick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$already_set[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$unick], 'target' => $unick ) );
+			$response .= services::parse( nickserv::$help->NS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$unick], 'target' => $unick ) );
+			$response .= ( isset( self::$not_set[$unick] ) || isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['already_set'] = self::$already_set[$unick];
 			unset( self::$already_set[$unick] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$unick] ) )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$unick], 'target' => $unick ) );
+			$response .= services::parse( nickserv::$help->NS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$unick], 'target' => $unick ) );
+			$response .= ( isset( $return_data['FALSE_RESPONSE'] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['not_set'] = self::$not_set[$chan];
 			unset( self::$not_set[$unick] );
 		}
-		// send back the target stuff..	
+		// send back the target stuff..
+		
+		if ( isset( $return_data['FALSE_RESPONSE'] ) )
+		{
+			$response .= $return_data['FALSE_RESPONSE'];
+			unset( $return_data['FALSE_RESPONSE'] );
+		}
+		// do we have any additional responses?
+		
+		$return_data[CMD_RESPONSE][] = $response;
+		$return_data[CMD_DATA]['nick'] = $unick;
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data
 	}
 	
 	/*
 	* _set_flags
 	* 
-	* $nick, $unick, $mode, $params
+	* $nick, $unick, $mode, $params, &$return_data
 	*/
-	public function _set_flags( $nick, $unick, $flag, $mode, $params )
+	public function _set_flags( $nick, $unick, $flag, $mode, $params, &$return_data )
 	{
 		// paramtized flags (lowercase) ones come first
 	
 		// ----------- e ----------- //
 		if ( $flag == 'e' )
 		{
-			self::set_flag( $nick, $unick, $mode.'e', $params['e'] );
+			self::set_flag( $nick, $unick, $mode.'e', $params['e'], $return_data );
 			// e the target in question
 		}
 		// ----------- e ----------- //
@@ -215,7 +267,7 @@ class ns_flags extends module
 		// ----------- u ----------- //
 		elseif ( $flag == 'u' )
 		{
-			self::set_flag( $nick, $unick, $mode.'u', $params['u'] );
+			self::set_flag( $nick, $unick, $mode.'u', $params['u'], $return_data );
 			// u the target in question
 		}
 		// ----------- u ----------- //
@@ -223,7 +275,7 @@ class ns_flags extends module
 		// ----------- s ----------- //
 		elseif ( $flag == 's' )
 		{
-			self::set_flag( $nick, $unick, $mode.'s', $params['s'] );
+			self::set_flag( $nick, $unick, $mode.'s', $params['s'], $return_data );
 			// s the target in question
 		}
 		// ----------- s ----------- //
@@ -233,7 +285,7 @@ class ns_flags extends module
 		// ----------- S ----------- //
 		elseif ( $flag == 'S' )
 		{
-			self::set_flag( $nick, $unick, $mode.'S', '' );
+			self::set_flag( $nick, $unick, $mode.'S', '', $return_data );
 			// S the target in question
 		}
 		// ----------- S ----------- //
@@ -241,7 +293,7 @@ class ns_flags extends module
 		// ----------- P ----------- //
 		elseif ( $flag == 'P' )
 		{
-			self::set_flag( $nick, $unick, $mode.'P', '' );
+			self::set_flag( $nick, $unick, $mode.'P', '', $return_data );
 			// P the target in question
 		}
 		// ----------- P ----------- //
@@ -249,7 +301,7 @@ class ns_flags extends module
 		// ----------- H ----------- //
 		elseif ( $flag == 'H' )
 		{
-			self::set_flag( $nick, $unick, $mode.'H', '' );
+			self::set_flag( $nick, $unick, $mode.'H', '', $return_data );
 			// H the target in question
 		}
 		// ----------- H ----------- //
@@ -263,8 +315,9 @@ class ns_flags extends module
 	* $target - who to set the flag on.
 	* $flag - flag
 	* $param - optional flag parameter.
+	* &$return_data - a valid array from module::$return_data
 	*/
-	static public function set_flag( $nick, $target, $flag, $param )
+	static public function set_flag( $nick, $target, $flag, $param, &$return_data )
 	{
 		$mode = $flag[0];
 		$r_flag = $flag[1];
@@ -272,7 +325,7 @@ class ns_flags extends module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
+			$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
 		}
 		// are they issuing a flag, that HAS to have a parameter?
@@ -288,7 +341,7 @@ class ns_flags extends module
 		
 		if ( $r_flag == 'e' && $mode == '-' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_CANT_UNSET, array( 'flag' => $flag ) );
+			$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_FLAGS_CANT_UNSET, array( 'flag' => $flag ) );
 			return false;
 		}
 		// we're not allowed to let +e be unset
@@ -299,21 +352,21 @@ class ns_flags extends module
 			
 			if ( $r_flag == 'e' && database::num_rows( $check_e ) > 0 )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_EMAIL_IN_USE );
+				$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_EMAIL_IN_USE );
 				return false;
 			}
 			// check if the email is in use.
 			
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
+				$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the email invalid?
 			
 			if ( $r_flag == 's' && ( $param < 5 || $param > core::$config->nickserv->secure_time ) )
 			{
-				services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_FLAGS_INVALID_S, array( 'flag' => $flag, 'limit' => core::$config->nickserv->secure_time ) );
+				$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_FLAGS_INVALID_S, array( 'flag' => $flag, 'limit' => core::$config->nickserv->secure_time ) );
 				return false;
 			}
 			// is secure time valid?
