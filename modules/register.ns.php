@@ -74,7 +74,7 @@ class ns_register extends module
 		$return_data = self::_register_user( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _register_user
 		
-		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}
@@ -92,7 +92,7 @@ class ns_register extends module
 		$return_data = self::_confirm_user( $input, $nick, $ircdata[0] );
 		// call _confirm_user
 		
-		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
 	}

@@ -17,9 +17,16 @@
 class ns_request extends module
 {
 	
-	const MOD_VERSION = '0.0.2';
+	const MOD_VERSION = '0.1.2';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'INVALID_HOSTNAME'	=> 2,
+		'PENDING_REQUEST'	=> 3,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -30,6 +37,7 @@ class ns_request extends module
 	static public function modload()
 	{
 		modules::init_module( 'ns_request', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_request', 'help', nickserv::$help->NS_HELP_REQUEST_1, true );
@@ -56,23 +64,30 @@ class ns_request extends module
 		}
 		// are they identified?
 		
-		self::_request_vhost( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_request_vhost( $input, $nick, $ircdata[0] );
 		// call _request_vhost
+		
+		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _request_vhost (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $host - The vhost to request
 	*/
-	public function _request_vhost( $nick, $host )
+	public function _request_vhost( $input, $nick, $host )
 	{
 		if ( trim( $host ) == '' )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REQUEST' ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REQUEST' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
 		// invalid syntax
 		
@@ -85,25 +100,31 @@ class ns_request extends module
 		}
 		elseif ( substr_count( $host, '@' ) > 1 || services::valid_host( $host ) === false )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_INVALID_HOSTNAME );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_HOSTNAME );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_HOSTNAME;
+			return $return_data;
 		}
 		else
 			$realhost = $host;
 		// check if there is a @
 		
-		$query = database::select( 'vhost_request', array( 'id', 'nickname' ), array( 'nickname', '=', core::$nicks[$nick]['account'] ) );
+		$query = database::select( 'vhost_request', array( 'id', 'nickname' ), array( 'nickname', '=', $input['account'] ) );
 		if ( database::num_rows( $query ) > 0 )
 		{
-			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_PENDING_REQUEST );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_PENDING_REQUEST );
+			$return_data[CMD_FAILCODE] = self::$return_codes->PENDING_REQUEST;
+			return $return_data;
 		}
 		// check if there is already a pending request
 		
-		database::insert( 'vhost_request', array( 'vhost' => $host, 'nickname' => core::$nicks[$nick]['account'], 'hostname' => core::get_full_hostname( $nick ), 'timestamp' => core::$network_time ) );
-		core::alog( core::$config->nickserv->nick.': ('.core::get_full_hostname( $nick ).') ('.core::$nicks[$nick]['account'].') has requested a vhost ('.$host.')' );
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_REQUESTED_HOST );
+		database::insert( 'vhost_request', array( 'vhost' => $host, 'nickname' => core::$nicks[$nick]['account'], 'hostname' => $input['hostname'], 'timestamp' => core::$network_time ) );
+		core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') ('.$input['account'].') has requested a vhost ('.$host.')' );
 		// update it and log it
+		
+		$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_REQUESTED_HOST );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data back
 	}
 }
 
