@@ -28,6 +28,13 @@ class cs_flags extends module
 	static public $set = array();
 	static public $not_set = array();
 	static public $already_set = array();
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'CHAN_UNREGISTERED'	=> 2,
+		'ACCESS_DENIED'		=> 3,
+		'INVALID_FLAG'		=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -38,6 +45,7 @@ class cs_flags extends module
 	static public function modload()
 	{
 		modules::init_module( 'cs_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
@@ -62,8 +70,13 @@ class cs_flags extends module
 	*/
 	static public function flags_command( $nick, $ircdata = array(), $announce = false )
 	{
-		self::_set_flags_chan( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_set_flags_chan( $input, $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
 		// call _set_flags_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	
@@ -71,29 +84,32 @@ class cs_flags extends module
 	* _set_flags_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The chan to set flags on
 	* $flags - The flags, like '+ei'
 	* $params - The params, like 'email@addr.com'
 	*/
-	static public function _set_flags_chan( $nick, $chan, $flags, $param )
+	static public function _set_flags_chan( $input, $nick, $chan, $flags, $param )
 	{
+		$return_data = module::$return_data;
 		$rparams = explode( '||', $param );
 		$levels_result = chanserv::check_levels( $nick, $chan, array( 's', 'S', 'F' ) );
 		// get the levels result.
 	
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
-			return false;
-			// wrong syntax
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'FLAGS' ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
+			return $return_data;
 		}
-		// make sure they've entered a channel
+		// wrong syntax
 		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
+		if ( !services::chan_exists( $chan, array( 'channel' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_UNREGISTERED;
+			return $return_data;
 		}
 		// make sure the channel exists.
 		
@@ -103,14 +119,18 @@ class cs_flags extends module
 			$flags_q = database::fetch( $flags_q );
 			// get the flag records
 			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_LIST, array( 'chan' => $chan, 'flags' => $flags_q->flags ) );
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_LIST2, array( 'chan' => $chan ) );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_LIST, array( 'chan' => $chan, 'flags' => $flags_q->flags ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_LIST2, array( 'chan' => $chan ) );
+			$return_data[CMD_DATA][] = array( 'chan' => $chan, 'flags' => $flags_q->flags );
+			$return_data[CMD_SUCCESS] = true;
+			return $return_data;
+			// return some banter back
 		}
 		elseif ( $target == '' && $flags == '' && !$levels_result )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// i don't think they have access to see the channel flags..
 		// missing params?
@@ -120,8 +140,9 @@ class cs_flags extends module
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_FLAG;
+				return $return_data;
 			}
 			// flag is invalid.
 			
@@ -142,70 +163,79 @@ class cs_flags extends module
 		$flag_array = mode::sort_modes( $flags, false );
 		// sort our flags up
 		
-		foreach ( str_split( self::$p_flags ) as $flag )
+		$param_num = 0;
+		foreach ( str_split( $flags ) as $flag )
 		{
-			$param_num = strpos( $flag_array['plus'], $flag );
+			if ( strpos( self::$p_flags, $flag ) === false )
+				continue;
+			// not a parameter-ized flag
 			
-			if ( $param_num !== false )
-				$params[$flag] = trim( $rparams[$param_num] );
+			$params[$flag] = trim( $rparams[$param_num] );
+			$param_num++;
 			// we do!
 		}
 		// check if we have any paramtized flags, eg +mw
 		
-		foreach ( str_split( $flag_array['plus'] ) as $flag )
+		if ( !$levels_result )
 		{
-			// paramtized flags (lowercase) ones come first
-			self::_set_flags( $nick, $chan, $flag, '+', $params );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
+		// they dont even have access
+		
+		foreach ( str_split( $flag_array['plus'] ) as $flag )
+			self::_set_flags( $nick, $chan, $flag, '+', $params, $return_data );
 		// loop through the flags being set, and do what we need to do with them.
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-		{
-			// paramtized flags (lowercase) ones come first
-			self::_set_flags( $nick, $chan, $flag, '-', $params );
-		}
+			self::_set_flags( $nick, $chan, $flag, '-', $params, $return_data );
 		// loop through the flags being unset, and do what we need to do with them.
 		
 		if ( isset( self::$set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );	
+			$response .= services::parse( chanserv::$help->CS_FLAGS_SET, array( 'flag' => self::$set[$chan], 'chan' => $chan ) );
+			$response .= ( isset( self::$already_set[$chan] ) || isset( self::$not_set[$chan] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['set'] = self::$set[$chan];
 			unset( self::$set[$chan] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$already_set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
+			$response .= services::parse( chanserv::$help->CS_FLAGS_ALREADY_SET, array( 'flag' => self::$already_set[$chan], 'chan' => $chan ) );
+			$response .= ( isset( self::$not_set[$chan] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['already_set'] = self::$already_set[$chan];
 			unset( self::$already_set[$chan] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$chan] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
+			$response .= services::parse( chanserv::$help->CS_FLAGS_NOT_SET, array( 'flag' => self::$not_set[$chan], 'chan' => $chan ) );
+			$return_data[CMD_DATA]['not_set'] = self::$not_set[$chan];
 			unset( self::$not_set[$chan] );
 		}
 		// send back the target stuff..
+		
+		$return_data[CMD_RESPONSE][] = $response;
+		$return_data[CMD_DATA]['chan'] = $chan;
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data
 	}
 	
 	/*
 	* _set_flags
 	* 
-	* $nick, $chan, $mode, $params
+	* $nick, $chan, $mode, $params, &$return_data
 	*/
-	public function _set_flags( $nick, $chan, $flag, $mode, $params )
+	public function _set_flags( $nick, $chan, $flag, $mode, $params, &$return_data )
 	{	
 		// ----------- d ----------- //
 		if ( $flag == 'd' )
-		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'d', $params['d'] );
+		{		
+			self::set_flag( $nick, $chan, $mode.'d', $params['d'], $return_data );
 			// d the target in question
 		}
 		// ----------- d ----------- //
@@ -213,14 +243,7 @@ class cs_flags extends module
 		// ----------- u ----------- //
 		elseif ( $flag == 'u' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'u', $params['u'] );
+			self::set_flag( $nick, $chan, $mode.'u', $params['u'], $return_data );
 			// u the target in question
 		}
 		// ----------- u ----------- //
@@ -228,14 +251,7 @@ class cs_flags extends module
 		// ----------- e ----------- //
 		elseif ( $flag == 'e' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'e', $params['e'] );
+			self::set_flag( $nick, $chan, $mode.'e', $params['e'], $return_data );
 			// e the target in question
 		}
 		// ----------- e ----------- //
@@ -243,14 +259,7 @@ class cs_flags extends module
 		// ----------- w ----------- //
 		elseif ( $flag == 'w' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'w', $params['w'] );
+			self::set_flag( $nick, $chan, $mode.'w', $params['w'], $return_data );
 			// -w the target in question
 		}
 		// ----------- w ----------- //
@@ -258,14 +267,7 @@ class cs_flags extends module
 		// ----------- m ----------- //
 		elseif ( $flag == 'm' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'m', $params['m'] );
+			self::set_flag( $nick, $chan, $mode.'m', $params['m'], $return_data );
 			// -m the target in question
 		}
 		// ----------- m ----------- //
@@ -273,14 +275,7 @@ class cs_flags extends module
 		// ----------- t ----------- //
 		elseif ( $flag == 't' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'t', $params['t'] );
+			self::set_flag( $nick, $chan, $mode.'t', $params['t'], $return_data );
 			// t the target in question
 		}
 		// ----------- t ----------- //
@@ -290,14 +285,7 @@ class cs_flags extends module
 		// ----------- S ----------- //
 		elseif ( $flag == 'S' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'S', '' );
+			self::set_flag( $nick, $chan, $mode.'S', '', $return_data );
 			// S the target in question
 		}
 		// ----------- S ----------- //
@@ -305,14 +293,7 @@ class cs_flags extends module
 		// ----------- F ----------- //
 		elseif ( $flag == 'F' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'F', '' );
+			self::set_flag( $nick, $chan, $mode.'F', '', $return_data );
 			// F the target in question
 		}
 		// ----------- F ----------- //
@@ -320,14 +301,7 @@ class cs_flags extends module
 		// ----------- G ----------- //
 		elseif ( $flag == 'G' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			$return = self::set_flag( $nick, $chan, $mode.'G', '' );
+			$return = self::set_flag( $nick, $chan, $mode.'G', '', $return_data );
 			if ( $return !== false && $mode == '-' )
 			{
 				ircd::part_chan( core::$config->chanserv->nick, $chan );
@@ -353,14 +327,7 @@ class cs_flags extends module
 		// ----------- T ----------- //
 		elseif ( $flag == 'T' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'T', '' );
+			self::set_flag( $nick, $chan, $mode.'T', '', $return_data );
 			// T the target in question
 		}
 		// ----------- T ----------- //
@@ -368,14 +335,7 @@ class cs_flags extends module
 		// ----------- K ----------- //
 		elseif ( $flag == 'K' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'K', '' );
+			self::set_flag( $nick, $chan, $mode.'K', '', $return_data );
 			// K the target in question
 		}
 		// ----------- K ----------- //
@@ -383,24 +343,11 @@ class cs_flags extends module
 		// ----------- L ----------- //
 		elseif ( $flag == 'L' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			self::set_flag( $nick, $chan, $mode.'L', '' );
+			self::set_flag( $nick, $chan, $mode.'L', '', $return_data );
 			if ( $return !== false && $mode == '-' )
-			{
 				mode::set( core::$config->chanserv->nick, $chan, '-l' );
-				// -l the channel
-			}
 			elseif ( $return !== false && $mode == '+' )
-			{
 				self::increase_limit( $chan );
-				// execute it directly.
-			}
 			// L the target in question
 		}
 		// ----------- L ----------- //
@@ -408,14 +355,7 @@ class cs_flags extends module
 		// ----------- -I ----------- //
 		elseif ( $flag == 'I' )
 		{
-			if ( $levels_result === false )
-			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
-			}
-			// do they have access to alter this?
-			
-			$return = self::set_flag( $nick, $chan, $mode.'I', '' );
+			$return = self::set_flag( $nick, $chan, $mode.'I', '', $return_data );
 			if ( $return !== false && $mode == '+' )
 			{
 				foreach ( core::$chans[$chan]['users'] as $unick => $mode )
@@ -621,8 +561,9 @@ class cs_flags extends module
 	* $chan - channel
 	* $flag - flag
 	* $param - optional flag parameter.
+	* &$return_data - a valid array from module::$return_data
 	*/
-	static public function set_flag( $nick, $chan, $flag, $param )
+	static public function set_flag( $nick, $chan, $flag, $param, &$return_data )
 	{
 		$mode = $flag[0];
 		$r_flag = $flag[1];
@@ -630,7 +571,7 @@ class cs_flags extends module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
 		}
 		// are they issuing a flag, that HAS to have a parameter?
@@ -654,14 +595,14 @@ class cs_flags extends module
 		{
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_E, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the email invalid?
 			
 			if ( $r_flag == 't' && strpos( $param, '*' ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_T, array( 'flag' => $flag ) );
 				return false;
 			}
 			// is the topicmask invalid?
@@ -672,7 +613,7 @@ class cs_flags extends module
 				
 				if ( strstr( $mode_string[0], 'r' ) || strstr( $mode_string[0], 'q' ) || strstr( $mode_string[0], 'a' ) || strstr( $mode_string[0], 'o' ) || strstr( $mode_string[0], 'h' ) || strstr( $mode_string[0], 'v' ) || strstr( $mode_string[0], 'b' ) )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
+					$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_INVALID_M, array( 'flag' => $flag ) );
 					return false;
 				}
 			}
@@ -696,15 +637,11 @@ class cs_flags extends module
 				$new_chan_flags = str_replace( $r_flag, '', $chan_flag->flags );
 				
 				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
-				{
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
-					// update the row with the new flags.
-				}
+				// update the row with the new flags.
 				else
-				{
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
-					// update the row with the new flags.
-				}
+				// update the row with the new flags.
 				
 				self::$set[$chan] .= $r_flag;
 				// some magic :O

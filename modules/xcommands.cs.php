@@ -17,11 +17,17 @@
 class cs_xcommands extends module
 {
 	
-	const MOD_VERSION = '0.0.5';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	
-	public function __construct() {}
-	// __construct, makes everyone happy.
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'NICK_UNREGISTERED'	=> 2,
+		'INVALID_HOSTNAME'	=> 3,
+		'NO_VHOST'			=> 4,
+		'NO_VHOST_REQUEST'	=> 5,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -32,6 +38,7 @@ class cs_xcommands extends module
 	static public function modload()
 	{
 		modules::init_module( 'cs_xcommands', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help_fix( 'cs_xcommands', 'prefix', 'help commands', chanserv::$help->CS_XCOMMANDS_PREFIX );
@@ -155,8 +162,13 @@ class cs_xcommands extends module
 	*/
 	static public function clear_command( $nick, $ircdata = array() )
 	{
-		self::_clear_chan( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_clear_chan( $input, $nick, $ircdata[0] );
 		// call _clear_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -168,8 +180,13 @@ class cs_xcommands extends module
 	*/
 	static public function sync_command( $nick, $ircdata = array() )
 	{
-		self::_sync_chan( $nick, $ircdata[0] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_sync_chan( $input, $nick, $ircdata[0] );
 		// call _sync_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -181,8 +198,13 @@ class cs_xcommands extends module
 	*/
 	static public function mode_command( $nick, $ircdata = array() )
 	{
-		self::_mode_chan( $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_mode_chan( $input, $nick, $ircdata[0], core::get_data_after( $ircdata, 1 ) );
 		// call _mode_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -194,8 +216,13 @@ class cs_xcommands extends module
 	*/
 	static public function owner_command( $nick, $ircdata = array() )
 	{
-		self::_owner_chan( $nick, $ircdata[0], '+', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_owner_chan( $input, $nick, $ircdata[0], '+', $ircdata[1] );
 		// call _owner_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -207,8 +234,13 @@ class cs_xcommands extends module
 	*/
 	static public function deowner_command( $nick, $ircdata = array() )
 	{
-		self::_owner_chan( $nick, $ircdata[0], '-', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_owner_chan( $input, $nick, $ircdata[0], '-', $ircdata[1] );
 		// call _owner_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 		
 	/*
@@ -220,8 +252,13 @@ class cs_xcommands extends module
 	*/
 	static public function protect_command( $nick, $ircdata = array() )
 	{
-		self::_protect_chan( $nick, $ircdata[0], '+', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_protect_chan( $input, $nick, $ircdata[0], '+', $ircdata[1] );
 		// call _protect_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -233,8 +270,13 @@ class cs_xcommands extends module
 	*/
 	static public function deprotect_command( $nick, $ircdata = array() )
 	{
-		self::_protect_chan( $nick, $ircdata[0], '-', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_protect_chan( $input, $nick, $ircdata[0], '-', $ircdata[1] );
 		// call _protect_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -246,8 +288,13 @@ class cs_xcommands extends module
 	*/
 	static public function op_command( $nick, $ircdata = array() )
 	{
-		self::_op_chan( $nick, $ircdata[0], '+', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_op_chan( $input, $nick, $ircdata[0], '+', $ircdata[1] );
 		// call _op_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -259,8 +306,13 @@ class cs_xcommands extends module
 	*/
 	static public function deop_command( $nick, $ircdata = array() )
 	{
-		self::_op_chan( $nick, $ircdata[0], '-', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_op_chan( $input, $nick, $ircdata[0], '-', $ircdata[1] );
 		// call _op_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -272,8 +324,13 @@ class cs_xcommands extends module
 	*/
 	static public function halfop_command( $nick, $ircdata = array() )
 	{
-		self::_halfop_chan( $nick, $ircdata[0], '+', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_halfop_chan( $input, $nick, $ircdata[0], '+', $ircdata[1] );
 		// call _halfop_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -285,8 +342,13 @@ class cs_xcommands extends module
 	*/
 	static public function dehalfop_command( $nick, $ircdata = array() )
 	{
-		self::_halfop_chan( $nick, $ircdata[0], '-', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_halfop_chan( $input, $nick, $ircdata[0], '-', $ircdata[1] );
 		// call _halfop_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -298,8 +360,13 @@ class cs_xcommands extends module
 	*/
 	static public function voice_command( $nick, $ircdata = array() )
 	{
-		self::_voice_chan( $nick, $ircdata[0], '+', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_voice_chan( $input, $nick, $ircdata[0], '+', $ircdata[1] );
 		// call _voice_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -311,8 +378,13 @@ class cs_xcommands extends module
 	*/
 	static public function devoice_command( $nick, $ircdata = array() )
 	{
-		self::_voice_chan( $nick, $ircdata[0], '-', $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_voice_chan( $input, $nick, $ircdata[0], '-', $ircdata[1] );
 		// call _voice_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -324,8 +396,13 @@ class cs_xcommands extends module
 	*/
 	static public function kick_command( $nick, $ircdata = array() )
 	{
-		self::_kick_chan( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_kick_chan( $input, $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
 		// call _kick_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -337,8 +414,13 @@ class cs_xcommands extends module
 	*/
 	static public function kickban_command( $nick, $ircdata = array() )
 	{
-		self::_kickban_chan( $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_kickban_chan( $input, $nick, $ircdata[0], $ircdata[1], core::get_data_after( $ircdata, 2 ) );
 		// call _kickban_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -350,8 +432,13 @@ class cs_xcommands extends module
 	*/
 	static public function ban_command( $nick, $ircdata = array() )
 	{
-		self::_ban_chan( $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_ban_chan( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _ban_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -363,8 +450,13 @@ class cs_xcommands extends module
 	*/
 	static public function unban_command( $nick, $ircdata = array() )
 	{
-		self::_unban_chan( $nick, $ircdata[0], $ircdata[1] );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
+		$return_data = self::_unban_chan( $input, $nick, $ircdata[0], $ircdata[1] );
 		// call _unban_chan
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
@@ -374,20 +466,22 @@ class cs_xcommands extends module
 	* $nick - nick of who issues the command
 	* $chan - check the chan entered is valid, and stuff
 	* $help - should be the name of the command, in caps
+	* &$return_data - a valid module::$return_data array
 	*/
-	static public function _check_channel( $nick, $chan, $help )
+	static public function _check_channel( $nick, $chan, $help, &$return_data )
 	{
 		if ( $chan == '' || $chan[0] != '#' )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => $help ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => $help ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_SYNTAX;
 			return false;
-			// wrong syntax
 		}
 		// make sure they've entered a channel
 		
 		if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
+			$return_data[CMD_FAILCODE] = self::$return_codes->CHAN_UNREGISTERED;
 			return false;
 		}
 		// make sure the channel exists.
@@ -399,19 +493,23 @@ class cs_xcommands extends module
 	* _clear_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	*/
-	static public function _clear_chan( $nick, $chan )
+	static public function _clear_chan( $input, $nick, $chan )
 	{
-		if ( !self::check_channel( $nick, $chan, 'CLEAR' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'CLEAR', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'R', 'S', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -431,26 +529,33 @@ class cs_xcommands extends module
 			mode::set( core::$config->chanserv->nick, $chan, '+'.ircd::$default_c_modes );
 		// reset default modes
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_CLEAR_CHAN, array( 'chan' => $chan ) );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_CLEAR_CHAN, array( 'chan' => $chan ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _sync_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	*/
-	static public function _sync_chan( $nick, $chan )
+	static public function _sync_chan( $input, $nick, $chan )
 	{
-		if ( !$channel = self::check_channel( $nick, $chan, 'SYNC' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !$channel = self::_check_channel( $nick, $chan, 'SYNC', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -458,27 +563,34 @@ class cs_xcommands extends module
 		// execute on_create, cause we just treat it as that
 		// this is kinda a shortcut, but well worth it.
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_SYNC_CHAN, array( 'chan' => $chan ) );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_SYNC_CHAN, array( 'chan' => $chan ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _mode_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode_queue - Modes to set
 	*/
-	static public function _mode_chan( $nick, $chan, $mode_queue )
+	static public function _mode_chan( $input, $nick, $chan, $mode_queue )
 	{
-		if ( !self::check_channel( $nick, $chan, 'MODE' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'MODE', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'S', 'F' ) ) === false )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -498,30 +610,37 @@ class cs_xcommands extends module
 			mode::set( core::$config->chanserv->nick, $chan, $mode_queue );
 			// mode has parameters so set the whole mode string
 		}
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _owner_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode - +/-
 	* $unick - The nickname to use
 	*/
-	static public function _owner_chan( $nick, $chan, $mode, $unick )
+	static public function _owner_chan( $input, $nick, $chan, $mode, $unick )
 	{
+		$return_data = module::$return_data;
 		if ( $mode == '+' ) $type = 'OWNER';
 		else $type = 'DEOWNER';
 		
-		if ( !self::check_channel( $nick, $chan, $type ) )
-			return false;
+		if ( !self::_check_channel( $nick, $chan, $type, $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -532,30 +651,37 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, $mode.'q '.$nick );
 		// set modes
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _protect_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode - +/-
 	* $unick - The nickname to use
 	*/
-	static public function _protect_chan( $nick, $chan, $mode, $unick )
+	static public function _protect_chan( $input, $nick, $chan, $mode, $unick )
 	{
+		$return_data = module::$return_data;
 		if ( $mode == '+' ) $type = 'PROTECT';
 		else $type = 'DEPROTECT';
 		
-		if ( !self::check_channel( $nick, $chan, $type ) )
-			return false;
+		if ( !self::_check_channel( $nick, $chan, $type, $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -566,30 +692,37 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, $mode.'a '.$nick );
 		// set modes
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _op_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode - +/-
 	* $unick - The nickname to use
 	*/
-	static public function _op_chan( $nick, $chan, $mode, $unick )
+	static public function _op_chan( $input, $nick, $chan, $mode, $unick )
 	{
+		$return_data = module::$return_data;
 		if ( $mode == '+' ) $type = 'OP';
 		else $type = 'DEOP';
 		
-		if ( !self::check_channel( $nick, $chan, $type ) )
-			return false;
+		if ( !self::_check_channel( $nick, $chan, $type, $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -600,30 +733,37 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, $mode.'o '.$nick );
 		// set modes
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _halfop_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode - +/-
 	* $unick - The nickname to use
 	*/
-	static public function _halfop_chan( $nick, $chan, $mode, $unick )
+	static public function _halfop_chan( $input, $nick, $chan, $mode, $unick )
 	{
+		$return_data = module::$return_data;
 		if ( $mode == '+' ) $type = 'HALFOP';
 		else $type = 'DEHALFOP';
 		
-		if ( !self::check_channel( $nick, $chan, $type ) )
-			return false;
+		if ( !self::_check_channel( $nick, $chan, $type, $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -634,30 +774,37 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, $mode.'h '.$nick );
 		// set modes
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _voice_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $mode - +/-
 	* $unick - The nickname to use
 	*/
-	static public function _voice_chan( $nick, $chan, $mode, $unick )
+	static public function _voice_chan( $input, $nick, $chan, $mode, $unick )
 	{
+		$return_data = module::$return_data;
 		if ( $mode == '+' ) $type = 'VOICE';
 		else $type = 'DEVOICE';
 		
-		if ( !self::check_channel( $nick, $chan, $type ) )
-			return false;
+		if ( !self::_check_channel( $nick, $chan, $type, $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -668,98 +815,112 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, $mode.'v '.$nick );
 		// set modes
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _kick_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $unick - The nickname to use
 	*/
-	static public function _kick_chan( $nick, $chan, $who, $reason )
+	static public function _kick_chan( $input, $nick, $chan, $who, $reason )
 	{
-		if ( !self::check_channel( $nick, $chan, 'KICK' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'KICK', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
-		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) )
+		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) && !chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
-		
-		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
-			return false;
 		// you can't k/b anyone with either +S or +F, others can be k/bed though.	
 		
 		if ( $user = core::search_nick( $who ) )
 		{
-			$who = $user['nick'];
-			ircd::kick( core::$config->chanserv->nick, $who, $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
+			ircd::kick( core::$config->chanserv->nick, $user['nick'], $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
+			$return_data[CMD_SUCCESS] = true;
 		}
 		// kick them with the reason
+		
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _kickban_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $unick - The nickname to use
 	*/
-	static public function _kickban_chan( $nick, $chan, $who, $reason )
+	static public function _kickban_chan( $input, $nick, $chan, $who, $reason )
 	{
-		if ( !self::check_channel( $nick, $chan, 'KICKBAN' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'KICKBAN', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
-		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) )
+		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) && !chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
-		
-		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
-			return false;
-		// you can't k/b anyone with either +S or +F, others can be k/bed though.	
+		// you can't k/b anyone with either +S or +F, others can be k/bed though.
 		
 		if ( $user = core::search_nick( $who ) )
 		{
 			mode::set( core::$config->chanserv->nick, $chan, '+b *@'.$user['host'] );			
 			ircd::kick( core::$config->chanserv->nick, $user['nick'], $chan, '('.$nick.') '.( $reason != '' ) ? $reason : 'No reason' );
 			// kick them with the reason
+			$return_data[CMD_SUCCESS] = true;
 		}
 		// we check if the user exists.
+		
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _ban_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $unick - The nickname to use
 	*/
-	static public function _ban_chan( $nick, $chan, $who )
+	static public function _ban_chan( $input, $nick, $chan, $who )
 	{
-		if ( !self::check_channel( $nick, $chan, 'BAN' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'BAN', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
-		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) )
+		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) && !chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
-		
-		if ( chanserv::check_levels( $who, $channel->channel, array( 'S', 'F' ) ) )
-			return false;
 		// you can't k/b anyone with either +S or +F, others can be k/bed though.
 		
 		if ( strpos( $who, '@' ) === false && $user = core::search_nick( $who ) )
@@ -767,26 +928,34 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, '+b '.$who );
 		// +b
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 	
 	/*
 	* _unban_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to use
 	* $unick - The nickname to use
 	*/
-	static public function _unban_chan( $nick, $chan, $who )
+	static public function _unban_chan( $input, $nick, $chan, $who )
 	{
-		if ( !self::check_channel( $nick, $chan, 'UNBAN' ) )
-			return false;
+		$return_data = module::$return_data;
+		
+		if ( !self::_check_channel( $nick, $chan, 'UNBAN', $return_data ) )
+			return $return_data;
 		// check if the channel exists and stuff
 		
 		if ( !chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-			return false;
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+			$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+			return $return_data;
 		}
 		// do they have access?
 		
@@ -795,6 +964,10 @@ class cs_xcommands extends module
 		else
 			mode::set( core::$config->chanserv->nick, $chan, '-b '.$who );
 		// -b
+		
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return back
 	}
 }
 

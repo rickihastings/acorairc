@@ -42,7 +42,7 @@ class core
 	// we set $uids anyway, although its only used on networks
 	// that use TS6 - UUID/SID style protocol, it's here anyway.
 	
-	static public $version = '0.5alpha';
+	static public $version = '0.6.0beta';
 	// version
 	
 	static public $end_burst = false;
