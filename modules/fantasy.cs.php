@@ -72,7 +72,8 @@ class cs_fantasy extends module
 			// compile a help array
 			
 			foreach ( $help as $line )
-				services::communicate( core::$config->chanserv->nick, $nick, $line, array( 'p' => core::$config->chanserv->fantasy_prefix ) );	
+				$response[] = services::parse( $line, array( 'p' => core::$config->chanserv->fantasy_prefix ) );
+			services::respond( core::$config->chanserv->nick, $nick, $response );	
 		}
 		// !help command (without queries)
 		

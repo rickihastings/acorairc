@@ -578,7 +578,7 @@ class cs_flags extends module
 		
 		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
 		{
-			$return_data['FALSE_RESPONSE'][] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
+			$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
 		}
 		// are they issuing a flag, that HAS to have a parameter?

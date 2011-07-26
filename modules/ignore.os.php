@@ -203,11 +203,10 @@ class os_ignore extends module
 		// doesn't exist
 		
 		database::delete( 'ignored_users', array( 'who', '=', $who ) );
-		services::communicate( core::$config->operserv->nick, $nick, operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
 		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') deleted ('.$who.') from the services ignore list' );
 		// as simple, as.
 		
-		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_ADD, array( 'nick' => $who ) );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_IGNORE_DEL, array( 'nick' => $who ) );
 		$return_data[CMD_SUCCESS] = true;
 		return $return_data;
 		// return the data back

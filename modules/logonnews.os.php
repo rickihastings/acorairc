@@ -122,10 +122,12 @@ class os_logonnews extends module
 		{
 			while ( $news = database::fetch( $get_news ) )
 			{
-				services::communicate( core::$config->global->nick, $connect_data['nick'], operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
-				services::communicate( core::$config->global->nick, $connect_data['nick'], operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
+				$response[] = services::parse( operserv::$help->OS_LOGON_NEWS_1, array( 'title' => $news->title, 'user' => $news->nick, 'date' => date( "F j, Y, g:i a", $news->time ) ) );
+				$response[] = services::parse( operserv::$help->OS_LOGON_NEWS_2, array( 'message' => $news->message ) );
 			}
 			// loop through the news
+			
+			services::respond( core::$config->global->nick, $connect_data['nick'], $response );
 		}
 		// there is news! epic
 	}

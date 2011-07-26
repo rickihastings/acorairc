@@ -313,7 +313,7 @@ class commands
 			foreach ( self::$prefix[$hook][$command] as $line => $meta_data )
 			{
 				$meta = unserialize( $meta_data );
-				services::communicate( $bot, $nick, $meta['info'] );
+				$response[] = services::parse( $meta['info'] );
 			}
 		}
 		// is there a prefix?
@@ -332,7 +332,7 @@ class commands
 			
 			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) || $meta['privs'] == '' )
 			{
-				services::communicate( $bot, $nick, $meta['info'] );
+				$response[] = services::parse( $meta['info'] );
 			}
 			else
 			{
@@ -348,7 +348,7 @@ class commands
 		{
 			$privs = $reordered_privs[$line];
 			if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
-				services::communicate( $bot, $nick, $info );
+				$response[] = services::parse( $info );
 		}
 		// seems the stuff is reordered
 		
@@ -357,11 +357,13 @@ class commands
 			foreach ( self::$suffix[$hook][$command] as $line => $meta_data )
 			{
 				$meta = unserialize( $meta_data );
-				
-				services::communicate( $bot, $nick, $meta['info'] );
+				$response[] = services::parse( $meta['info'] );
 			}
 		}
 		// is there a suffix?
+		
+		services::respond( $bot, $nick, $response );
+		// respond
 	}
 	
 	/*

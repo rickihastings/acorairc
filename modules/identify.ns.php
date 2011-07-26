@@ -226,9 +226,6 @@ class ns_identify extends module
 			}
 			// we got any failed attempts? HUMM
 			
-			$hostname = core::get_full_hostname( $nick );
-			// generate a hostname.
-			
 			if ( core::$config->settings->mode_on_id && isset( modules::$list['cs_levels'] ) )
 			{
 				while ( list( $chan, $cdata ) = each( core::$chans ) )
@@ -244,9 +241,6 @@ class ns_identify extends module
 					if ( $nick == core::$config->chanserv->nick )
 						continue;
 					// skip us :D
-					
-					$hostname = core::get_full_hostname( $nick );
-					// get the hostname ready.
 					
 					cs_levels::on_create( array( $nick => core::$chans[$chan]['users'][$nick] ), $channel, true );
 					// on_create event
@@ -355,7 +349,7 @@ class ns_identify extends module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			return false;
 		}
-		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && core::get_full_hostname( $nick ) == $user->last_hostmask )
+		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && $input['hostname'] == $user->last_hostmask )
 		{
 			ircd::on_user_login( $nick, $user->display );
 			core::$nicks[$nick]['account'] = $user->display;
@@ -455,7 +449,8 @@ class ns_identify extends module
 		if ( is_array( nickserv::$help->NS_REGISTERED_NICK ) )
 		{
 			foreach ( nickserv::$help->NS_REGISTERED_NICK as $line )
-				services::communicate( core::$config->nickserv->nick, $nick, $line );
+				$response[] = services::parse( $line );
+			services::parse( core::$config->nickserv->nick, $nick, $response );
 		}
 		else
 		{

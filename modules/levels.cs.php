@@ -17,7 +17,7 @@
 class cs_levels extends module
 {
 	
-	const MOD_VERSION = '0.0.7';
+	const MOD_VERSION = '0.1.7';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -27,6 +27,13 @@ class cs_levels extends module
 	static public $set = array();
 	static public $not_set = array();
 	static public $already_set = array();
+	static public $return_codes = array(
+		'INVALID_SYNTAX'	=> 1,
+		'CHAN_UNREGISTERED'	=> 2,
+		'ACCESS_DENIED'		=> 3,
+		'INVALID_FLAG'		=> 4,
+	);
+	// return codes
 	
 	/*
 	* modload (private)
@@ -37,6 +44,7 @@ class cs_levels extends module
 	static public function modload()
 	{
 		modules::init_module( 'cs_levels', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1, true );
@@ -86,13 +94,11 @@ class cs_levels extends module
 	*/
 	static public function levels_command( $nick, $ircdata = array(), $announce = false )
 	{
-		$chan = core::get_chan( $ircdata, 0 );
-		$target = $ircdata[2];
-		$flags = $ircdata[1];
-		$levels_result = chanserv::check_levels( $nick, $chan, array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'S', 'F' ) );
+		$levels_result = chanserv::check_levels( $nick, $ircdata[0], array( 'v', 'h', 'o', 'a', 'q', 'r', 'f', 'S', 'F' ) );
+		$input = array( 'internal' => true, 'hostname' => core::get_full_hostname( $nick ), 'account' => core::$nicks[$nick]['account'] );
 		// get the channel.
 		
-		if ( services::chan_exists( $chan, array( 'channel' ) ) === false )
+		if ( services::chan_exists( $ircdata[0], array( 'channel' ) ) === false )
 		{
 			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_CHAN, array( 'chan' => $chan ) );
 			return false;
@@ -106,24 +112,30 @@ class cs_levels extends module
 		}
 		// i don't think they have access to see/edit the channel list..
 		
-		if ( $target == '' && $flags == '' )
-			self::_list_levels_chan( $nick, $ircdata[0] );
+		if ( $ircdata[2] == '' && $ircdata[1] == '' )
+			$return_data = self::_list_levels_chan( $input, $nick, $ircdata[0] );
 		else
-			self::_set_levels_chan( $nick, $ircdata[0], $ircdata[2], $ircdata[1] );
+			$return_data = self::_set_levels_chan( $input, $nick, $ircdata[0], $ircdata[2], $ircdata[1] );
 		// call the corresponding command
+		
+		services::respond( core::$config->chanserv->nick, $nick, $return_data[CMD_RESPONSE] );
+		return $return_data[CMD_SUCCESS];
+		// respond and return
 	}
 	
 	/*
 	* _list_levels_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to list levels for
 	*/
-	static public function _list_levels_chan( $nick, $chan )
+	static public function _list_levels_chan( $input, $nick, $chan )
 	{
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
+		$return_data = module::$return_data;
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_LIST_TOP, array( 'chan' => $chan ) );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_LIST_DLM );
 		// start of flag list
 		
 		$flags_q = database::select( 'chans_levels', array( 'id', 'channel', 'target', 'flags', 'reason', 'timestamp' ), array( 'channel', '=', $chan ) );
@@ -164,13 +176,16 @@ class cs_levels extends module
 			}*/
 			// this could maybe be added at a later date, i'm not sure? Look into it soon - n0valyfe
 			
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
+			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_LIST, array( 'num' => $x_s, 'target' => $flags->target, 'flags' => '+'.$false_flag, 'modified' => $modified ) );
+			$return_data[CMD_DATA][] = array( 'target' => $flags->target, 'flags' => $flags->flags, 'modified' => $modified );
 			// show the flag
 		}
 		// loop through them
 		
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_DLM );
-		services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_LIST_BTM, array( 'chan' => $chan ) );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_LIST_DLM );
+		$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_LIST_BTM, array( 'chan' => $chan ) );
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
 		// show other help data
 	}
 	
@@ -178,20 +193,23 @@ class cs_levels extends module
 	* _set_levels_chan (private)
 	* 
 	* @params
+	* $input - Should be internal => true, hostname => *!*@*, account => accountName
 	* $nick - The nick of the person issuing the command
 	* $chan - The channel to set levels for
 	* $target - The target to set the levels on
 	* $flags - The flags to set on the target
 	*/
-	static public function _set_levels_chan( $nick, $chan, $target, $flags )
+	static public function _set_levels_chan( $input, $nick, $chan, $target, $flags )
 	{
+		$return_data = module::$return_data;
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $pos => $flag )
 		{
 			if ( strpos( self::$flags, $flag ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_UNKNOWN, array( 'flag' => $flag ) );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_LEVELS_UNKNOWN, array( 'flag' => $flag ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_FLAG;
+				return $return_data;
 			}
 			// flag is invalid.
 			
@@ -208,8 +226,9 @@ class cs_levels extends module
 		{
 			if ( !$user = services::user_exists( $target, false, array( 'id', 'display' ) ) )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_UNREGISTERED_NICK, array( 'nick' => $target ) );
+				$return_data[CMD_FAILCODE] = self::$return_codes->NICK_UNREGISTERED;
+				return $return_data;
 			}
 			// they aint even identified..
 			// were dealing with a nickname, check if it is registered
@@ -232,54 +251,74 @@ class cs_levels extends module
 		// sort our flags up
 		
 		foreach ( str_split( $flag_array['plus'] ) as $flag )
-			self::_set_levels( $nick, $chan, $target, $flag, '+' );
+		{
+			self::_set_levels( $nick, $chan, $target, $flag, '+', $return_data );
+			if ( isset( $return_data[CMD_FAILCODE] ) )
+				return $return_data;
+		}
 		// loop though our plus flags
 		
 		foreach ( str_split( $flag_array['minus'] ) as $flag )
-			self::_set_levels( $nick, $chan, $target, $flag, '-' );
+		{
+			self::_set_levels( $nick, $chan, $target, $flag, '-', $return_data );
+			if ( isset( $return_data[CMD_FAILCODE] ) )
+				return $return_data;
+		}
 		// loop through the minus flags
 		
 		if ( isset( self::$set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );	
-			// who do we notice?
+			$response .= services::parse( chanserv::$help->CS_LEVELS_SET, array( 'target' => $target, 'flag' => self::$set[$target], 'chan' => $chan ) );
+			$response .= ( isset( self::$already_set[$target] ) || isset( self::$not_set[$target] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['set'] = self::$set[$target];			
 			unset( self::$set[$target] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$already_set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => self::$already_set[$target], 'chan' => $chan ) );
+			$response .= services::parse( chanserv::$help->CS_LEVELS_ALREADY_SET, array( 'target' => $target, 'flag' => self::$already_set[$target], 'chan' => $chan ) );
+			$response .= ( isset( self::$not_set[$target] ) ) ? ', ' : '';
+			$return_data[CMD_DATA]['already_set'] = self::$already_set[$target];
 			unset( self::$already_set[$target] );
 		}
 		// send back the target stuff..
 		
 		if ( isset( self::$not_set[$target] ) )
 		{
-			services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => self::$not_set[$target], 'chan' => $chan ) );
+			$response .= services::parse( chanserv::$help->CS_LEVELS_NOT_SET, array( 'target' => $target, 'flag' => self::$not_set[$target], 'chan' => $chan ) );
+			$return_data[CMD_DATA]['not_set'] = self::$not_set[$target];
 			unset( self::$not_set[$target] );
 		}
 		// send back the target stuff..
+		
+		$return_data[CMD_RESPONSE][] = $response;
+		$return_data[CMD_DATA]['target'] = $target;
+		$return_data[CMD_DATA]['chan'] = $chan;
+		$return_data[CMD_SUCCESS] = true;
+		return $return_data;
+		// return data
 	}
 	
 	/*
 	* _set_levels
 	* 
-	* $nick, $unick, $mode, $params
+	* $nick, $unick, $mode, $params, &$return_data
 	*/
-	public function _set_levels( $nick, $chan, $target, $flag, $mode )
+	public function _set_levels( $nick, $chan, $target, $flag, $mode, &$return_data )
 	{
 		// ----------- k ----------- //
 		if ( $flag == 'k' )
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'k' );
+			self::set_flag( $nick, $chan, $target, $mode.'k', $return_data );
 			// k the target in question
 		}
 		// ----------- k ----------- //
@@ -289,12 +328,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'v' );
+			self::set_flag( $nick, $chan, $target, $mode.'v', $return_data );
 			// v the target in question
 		}
 		// ----------- v ----------- //
@@ -304,12 +344,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'o', 'a', 'q', 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'h' );
+			self::set_flag( $nick, $chan, $target, $mode.'h', $return_data );
 			// h the target in question
 		}
 		// ----------- h ----------- //
@@ -319,12 +360,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'a', 'q', 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'o' );
+			self::set_flag( $nick, $chan, $target, $mode.'o', $return_data );
 			// o the target in question
 		}
 		// ----------- o ----------- //
@@ -334,12 +376,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'q', 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'a' );
+			self::set_flag( $nick, $chan, $target, $mode.'a', $return_data );
 			// a the target in question
 		}
 		// ----------- a ----------- //
@@ -349,12 +392,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'f', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'q' );
+			self::set_flag( $nick, $chan, $target, $mode.'q', $return_data );
 			// q the target in question
 		}
 		// ----------- q ----------- //
@@ -364,12 +408,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'s' );
+			self::set_flag( $nick, $chan, $target, $mode.'s', $return_data );
 			// s the target in question
 		}
 		// ----------- s ----------- //
@@ -379,12 +424,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'r' );
+			self::set_flag( $nick, $chan, $target, $mode.'r', $return_data );
 			// r the target in question
 		}
 		// ----------- r ----------- //
@@ -394,12 +440,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'f' );
+			self::set_flag( $nick, $chan, $target, $mode.'f', $return_data );
 			// f the target in question
 		}
 		// ----------- f ----------- //
@@ -409,12 +456,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'t' );
+			self::set_flag( $nick, $chan, $target, $mode.'t', $return_data );
 			// t the target in question
 		}
 		// ----------- t ----------- //
@@ -424,12 +472,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'i' );
+			self::set_flag( $nick, $chan, $target, $mode.'i', $return_data );
 			// i the target in question
 		}
 		// ----------- i ----------- //
@@ -439,12 +488,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'R' );
+			self::set_flag( $nick, $chan, $target, $mode.'R', $return_data );
 			// R the target in question
 		}
 		// ----------- R ----------- //
@@ -454,12 +504,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'S' );
+			self::set_flag( $nick, $chan, $target, $mode.'S', $return_data );
 			// S the target in question
 		}
 		// ----------- S ----------- //
@@ -469,12 +520,13 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
-			self::set_flag( $nick, $chan, $target, $mode.'F' );
+			self::set_flag( $nick, $chan, $target, $mode.'F', $return_data );
 			// F the target in question
 		}
 		// ----------- F ----------- //
@@ -484,8 +536,9 @@ class cs_levels extends module
 		{
 			if ( chanserv::check_levels( $nick, $chan, array( 'r', 'S', 'F' ) ) === false )
 			{
-				services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_ACCESS_DENIED );
-				return false;
+				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_ACCESS_DENIED );
+				$return_data[CMD_FAILCODE] = self::$return_codes->ACCESS_DENIED;
+				return $return_data;
 			}
 			// do they have access to alter this?
 			
@@ -528,9 +581,9 @@ class cs_levels extends module
 			}
 			
 			if ( $mode == '-' )
-				$return = self::set_flag( $nick, $chan, $target, $mode.'b' );
+				$return = self::set_flag( $nick, $chan, $target, $mode.'b', $return_data );
 			else
-				$return = self::set_flag( $nick, $chan, $target, $mode.'b', $reason, $expire );
+				$return = self::set_flag( $nick, $chan, $target, $mode.'b', $return_data, $reason, $expire );
 			// determine whether we need to send reasons and expire?
 			
 			if ( $return !== false && $mode == '-' )
@@ -779,10 +832,11 @@ class cs_levels extends module
 	* $chan - channel in question
 	* $target - target in question
 	* $flag - +v, +V, -V etc.
+	* &$return_data - a valid array from module::$return_data
 	* $param - optional
 	* $timestamp - optional
 	*/
-	static public function set_flag( $nick, $chan, $target, $flag, $param = '', $timestamp = 0 )
+	static public function set_flag( $nick, $chan, $target, $flag, &$return_data, $param = '', $timestamp = 0 )
 	{	
 		$mode = $flag[0];
 		$r_flag = $flag[1];
@@ -796,7 +850,7 @@ class cs_levels extends module
 			{		
 				if ( core::$nicks[$nick]['account'] == $target && $r_flag == 'F' )
 				{
-					services::communicate( core::$config->chanserv->nick, $nick, chanserv::$help->CS_LEVELS_BAD_FLAG, array( 'flag' => $flag ) );
+					$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_LEVELS_BAD_FLAG, array( 'flag' => $flag ) );
 					return false;
 				}
 				// someone is trying to de-founder themselves?

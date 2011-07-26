@@ -172,8 +172,9 @@ class ns_suspend extends module
 			core::$nicks[$unick]['account'] = '';
 			$random_nick = 'Unknown'.rand( 10000, 99999 );
 			
-			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
-			services::communicate( core::$config->nickserv->nick, $unick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+			$response[] = services::parse( nickserv::$help->NS_SUSPEND_1, array( 'nick' => $unick ) );
+			$response[] = services::parse( nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+			services::respond( core::$config->nickserv->nick, $unick, $response );
 			ircd::svsnick( $unick, $random_nick, core::$nicks[$unick]['timestamp'] );
 		}
 		// is the nick in use? we need to force change it.
@@ -262,8 +263,9 @@ class ns_suspend extends module
 			
 		$random_nick = 'Unknown'.rand( 10000, 99999 );
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+		$response[] = services::parse( nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+		$response[] = services::parse( nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+		services::respond( core::$config->nickserv->nick, $nick, $response );
 		ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
 		// check if the nick is suspended etc.
 	}
@@ -283,8 +285,9 @@ class ns_suspend extends module
 		
 		$random_nick = 'Unknown'.rand( 10000, 99999 );
 		
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
-		services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+		$response[] = services::parse( nickserv::$help->NS_SUSPEND_1, array( 'nick' => $user->display ) );
+		$response[] = services::parse( nickserv::$help->NS_NICK_CHANGE, array( 'nick' => $random_nick ) );
+		services::respond( core::$config->nickserv->nick, $nick, $response );
 		ircd::svsnick( $nick, $random_nick, core::$nicks[$nick]['timestamp'] );
 		// change nick
 	}
