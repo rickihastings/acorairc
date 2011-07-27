@@ -144,7 +144,6 @@ class os_logonnews extends module
 	static public function _add_news( $input, $nick, $title, $text )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $title ) == '' || trim( $text ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );
@@ -183,7 +182,6 @@ class os_logonnews extends module
 	static public function _del_news( $input, $nick, $title )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $title ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'LOGONNEWS' ) );

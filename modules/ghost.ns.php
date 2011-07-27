@@ -80,7 +80,6 @@ class ns_ghost extends module
 	static public function _ghost_nick( $input, $nick, $unick, $password )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' || trim( $password ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'GHOST' ) );

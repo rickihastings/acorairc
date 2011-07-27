@@ -108,6 +108,7 @@ class ns_register extends module
 	*/
 	static public function _register_user( $input, $nick, $password, $email )
 	{
+		$return_data = module::$return_data;
 		if ( trim( $password ) == '' || trim( $email ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );
@@ -235,6 +236,7 @@ You will then be able to identify with the password you chose by typing
 	*/
 	static public function _confirm_user( $input, $nick, $code )
 	{
+		$return_data = module::$return_data;
 		if ( trim( $code ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'CONFIRM' ) );

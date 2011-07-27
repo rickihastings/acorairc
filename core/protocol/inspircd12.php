@@ -799,22 +799,34 @@ class ircd implements protocol
 	*
 	* @params
 	* $nick - who to send it from
-	* $user - user record from core::$nicks
+	* $mask - mask
 	* $duration - the duration
 	* $message - message to use
 	*/
-	static public function global_ban( $nick, $user, $duration, $message )
+	static public function global_ban( $nick, $mask, $duration, $message )
 	{
 		if ( $user['ircop'] )
 			return false;
 		// if ircop ignore
 	
 		$rduration = ( $duration * 60 );
-		$mask = '*@'.$user['ip_address'];
 		// set some vars
 	
 		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask.' '.$nick.' '.core::$network_time.' '.$rduration.' :'.$message );
 		ircd_handle::global_ban( $nick, $mask, $duration, $message );
+		// send the cmd then handle it internally
+	}
+	
+	/*
+	* global_unban
+	*
+	* @params
+	* $nick - nick
+	* $mask - *@* hostmask
+	*/
+	static public function global_unban( $nick, $mask )
+	{
+		self::send( ':'.core::$config->server->name.' ADDLINE G '.$mask );
 		// send the cmd then handle it internally
 	}
 	

@@ -78,7 +78,6 @@ class cs_topic extends module
 	static public function _change_topic( $input, $nick, $chan, $topic )
 	{
 		$return_data = module::$return_data;
-	
 		if ( $chan == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'TOPIC' ) );

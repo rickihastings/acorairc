@@ -191,7 +191,7 @@ class ns_identify extends module
 			core::$nicks[$nick]['failed_attempts'] = 0;
 			// registered mode
 			
-			database::update( 'users', array( 'last_hostmask' => $input['hostname'], 'last_timestamp' => 0, 'identified' => 1 ), array( 'display', '=', $account ) );
+			database::update( 'users', array( 'last_hostmask' => $input['hostname'], 'last_timestamp' => core::$network_time, 'identified' => 1 ), array( 'display', '=', $account ) );
 			// right, standard identify crap
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_IDENTIFIED );
 			core::alog( core::$config->nickserv->nick.': ('.$input['hostname'].') identified for '.$account );
@@ -286,7 +286,6 @@ class ns_identify extends module
 	static public function _logout_user( $input, $nick )
 	{
 		$return_data = module::$return_data;
-	
 		if ( !core::$nicks[$nick]['identified'] )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_NOT_IDENTIFIED );
@@ -349,7 +348,7 @@ class ns_identify extends module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			return false;
 		}
-		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && $input['hostname'] == $user->last_hostmask )
+		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && core::get_full_hostname( $nick ) == $user->last_hostmask )
 		{
 			ircd::on_user_login( $nick, $user->display );
 			core::$nicks[$nick]['account'] = $user->display;

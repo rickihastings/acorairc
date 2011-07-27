@@ -176,7 +176,6 @@ class os_session extends module
 	static public function _add_exception( $input, $nick, $ip_address, $limit, $description )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $ip_address ) == '' || trim( $description ) == '' || !is_numeric( $limit ) || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );
@@ -229,7 +228,6 @@ class os_session extends module
 	static public function _del_exception( $input, $nick, $ip_address )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $ip_address ) == '' || !filter_var( $ip_address, FILTER_VALIDATE_IP ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'SESSION' ) );

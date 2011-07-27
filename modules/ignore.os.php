@@ -130,7 +130,6 @@ class os_ignore extends module
 	static public function _add_user( $input, $nick, $who )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $who ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
@@ -180,7 +179,6 @@ class os_ignore extends module
 	static public function _del_user( $input, $nick, $who )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $who ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'IGNORE' ) );
@@ -276,6 +274,7 @@ class os_ignore extends module
 	*/
 	static public function _clear_users( $input )
 	{
+		$return_data = module::$return_data;
 		$nicks_q = database::select( 'ignored_users', array( 'who', 'time' ) );
 		database::delete( 'ignored_users' );
 		

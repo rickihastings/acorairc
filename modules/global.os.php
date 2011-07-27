@@ -117,7 +117,6 @@ class os_global extends module
 	static public function _global_message( $input, $nick, $mask, $message )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $mask ) == '' || trim( $message ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array ( 'help' => 'GLOBAL' ) );

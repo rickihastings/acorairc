@@ -76,7 +76,6 @@ class cs_info extends module
 	static public function _chan_info( $input, $nick, $chan )
 	{
 		$return_data = module::$return_data;
-		
 		if ( $chan == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );

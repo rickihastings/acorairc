@@ -114,7 +114,6 @@ class cs_suspend extends module
 	static public function _suspend_chan( $input, $nick, $chan, $reason )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'SUSPEND' ) );
@@ -181,7 +180,6 @@ class cs_suspend extends module
 	static public function _unsuspend_chan( $input, $nick, $chan )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $chan ) == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'UNSUSPEND' ) );

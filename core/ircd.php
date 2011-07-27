@@ -777,9 +777,9 @@ class ircd_handle
 	* global_ban
 	*
 	* @params
-	* $nick, $user, $duration, $message
+	* $nick, $mask, $duration, $message
 	*/
-	static public function global_ban( $nick, $user, $duration, $message )
+	static public function global_ban( $nick, $mask, $duration, $message )
 	{
 		core::alog( 'global_ban(): '.$nick.' set a global ban on '.$mask.' for '.$duration.' minutes', 'BASIC' );
 		// debug info

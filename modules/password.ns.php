@@ -115,7 +115,6 @@ class ns_password extends module
 	static public function _change_pass( $input, $nick, $unick, $new_pass, $conf_pass )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' || trim( $new_pass ) == '' || trim( $conf_pass ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->INVALID_INVALID_SYNTAX_RE, array( 'help' => $input['command'] ) );

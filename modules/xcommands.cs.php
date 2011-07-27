@@ -500,7 +500,6 @@ class cs_xcommands extends module
 	static public function _clear_chan( $input, $nick, $chan )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'CLEAR', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -546,7 +545,6 @@ class cs_xcommands extends module
 	static public function _sync_chan( $input, $nick, $chan )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !$channel = self::_check_channel( $nick, $chan, 'SYNC', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -581,7 +579,6 @@ class cs_xcommands extends module
 	static public function _mode_chan( $input, $nick, $chan, $mode_queue )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'MODE', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -833,7 +830,6 @@ class cs_xcommands extends module
 	static public function _kick_chan( $input, $nick, $chan, $who, $reason )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'KICK', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -870,7 +866,6 @@ class cs_xcommands extends module
 	static public function _kickban_chan( $input, $nick, $chan, $who, $reason )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'KICKBAN', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -909,7 +904,6 @@ class cs_xcommands extends module
 	static public function _ban_chan( $input, $nick, $chan, $who )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'BAN', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff
@@ -946,7 +940,6 @@ class cs_xcommands extends module
 	static public function _unban_chan( $input, $nick, $chan, $who )
 	{
 		$return_data = module::$return_data;
-		
 		if ( !self::_check_channel( $nick, $chan, 'UNBAN', $return_data ) )
 			return $return_data;
 		// check if the channel exists and stuff

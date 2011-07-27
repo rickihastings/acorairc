@@ -156,7 +156,6 @@ class os_vhost extends module
 	static public function _add_vhost( $input, $nick, $host, $unick )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
@@ -231,7 +230,6 @@ class os_vhost extends module
 	static public function _del_vhost( $input, $nick, $unick )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
@@ -278,7 +276,6 @@ class os_vhost extends module
 	static public function _list_vhost( $input, $nick, $limit, $nmode )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $limit ) == '' || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) || isset( $nmode ) && ( !in_array( $nmode, array( '', 'pending' ) ) ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
@@ -363,7 +360,6 @@ class os_vhost extends module
 	static public function _approve_vhost( $input, $nick, $unick )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );
@@ -425,7 +421,6 @@ class os_vhost extends module
 	static public function _reject_vhost( $input, $nick, $unick )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'VHOST' ) );

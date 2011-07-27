@@ -81,7 +81,6 @@ class cs_drop extends module
 	static public function _drop_chan( $input, $nick, $chan, $code )
 	{
 		$return_data = module::$return_data;
-	
 		if ( $chan == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'DROP' ) );

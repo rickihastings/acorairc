@@ -17,7 +17,7 @@
 class os_akill extends module
 {
 	
-	const MOD_VERSION = '0.1.4';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -49,16 +49,15 @@ class os_akill extends module
 		// add the command
 		
 		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'expire', 'time' ), array( 'akill', '=', 1 ) );
-		
 		if ( database::num_rows( $check_record_q ) == 0 )
 			return;
-		
 		while ( $session = database::fetch( $check_record_q ) )
 		{
 			if ( $session->expire == 0 )
 				continue;
 			$expire = ( $session->time + $session->expire ) - core::$network_time;
-			timer::add( array( 'os_akill', '_del_akill', array( $session->nick, $session->hostmask, true ) ), $expire, 1 );
+			ircd::global_ban( core::$config->operserv->nick, $session->hostmask, $expire, 'AKILL ('.$session->reason.')' );
+			timer::add( array( 'os_akill', '_del_akill', array( array( 'internal' => true ), $session->nick, $session->hostmask, true ) ), $expire, 1 );
 		}
 		// get akill sessions and re-add a timer
 	}
@@ -129,31 +128,6 @@ class os_akill extends module
 	}
 	
 	/*
-	* on_connect (event hook)
-	*/
-	static public function on_connect( $connect_data )
-	{
-		if ( empty( operserv::$session_rows ) )
-			return false;
-		// determine match if there is no session exceptions
-		
-		$nick = $connect_data['nick'];
-		
-		foreach ( operserv::$session_rows as $i => $sessions )
-		{
-			if ( services::match( $connect_data['host'], $sessions->hostmask ) )
-				continue;
-			// no akill found, check next one.
-			
-			ircd::kill( core::$config->operserv->nick, $nick, 'AKILLED: '.$sessions->description );
-			// they're banned for some reason.
-			break;
-			// we've found an akill, let's do some KILLING!
-		}
-		// check the sessions database
-	}
-	
-	/*
 	* _add_akill (private)
 	* 
 	* @params
@@ -166,7 +140,6 @@ class os_akill extends module
 	static public function _add_akill( $input, $nick, $hostname, $rexpire, $reason )
 	{
 		$return_data = module::$return_data;
-	
 		$days = $hours = $minutes = $expire = 0;
 		// grab the reason etc
 		
@@ -174,6 +147,7 @@ class os_akill extends module
 		// format %%d%%h%%m to a timestamp
 		
 		$fi_ = 0;
+		$time = 0;
 		foreach ( $parsed as $i_ => $p_ )
 		{
 			$fi_++;
@@ -204,7 +178,7 @@ class os_akill extends module
 		}
 		// wrong syntax
 			
-		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
+		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*@'.$hostname : $hostname;
 		$check_record_q = database::select( 'sessions', array( 'hostmask', 'akill' ), array( 'hostmask', '=', $hostname, 'AND', 'akill', '=', 1 ) );
 		$expire = ( $time == 0 ) ? 'Never' : core::format_time( $time );
 		// set some vars
@@ -222,30 +196,12 @@ class os_akill extends module
 		core::alog( core::$config->operserv->nick.': ('.$input['hostname'].') ('.$input['account'].') added an auto kill for ('.$hostname.') to expire in ('.$expire.')' );
 		// as simple, as.
 		
-		while ( list( $unick, $data ) = each( core::$nicks ) )
-		{
-			if ( $data['ircop'] )
-				continue;
-			// skip ircops
-			
-			if ( services::match( $data['oldhost'], $mask ) )
-			{
-				ircd::kill( core::$config->operserv->nick, $unick, 'AKILLED: '.$reason );
-				core::alog( 'Auto kill matched ('.core::get_full_hostname( $unick ).'). Killed client' );
-			}
-			// search old vhost incase they've got a vee-host
-		}
-		reset( core::$nicks );
-		// loop users and autokill them. excluding ircops
-		
-		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
-		while ( $session = database::fetch( $query ) )
-			operserv::$session_rows[] = $session;
-		// re read the session array.
-		
 		if ( $time != 0 )
-			timer::add( array( 'os_akill', '_del_akill', array( $nick, $hostname, true ) ), $time, 1 );
+			timer::add( array( 'os_akill', '_del_akill', array( array( 'internal' => true ), $nick, $hostname, true ) ), $time, 1 );
 		// add a timer to remove the ban.
+		
+		ircd::global_ban( core::$config->operserv->nick, $hostname, $time, 'AKILL ('.$reason.')' );
+		// just add it as a kline, this saves us gallons of resources, tbh
 		
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_ADD, array( 'hostname' => $hostname, 'expire' => $expire ) );
 		$return_data[CMD_SUCCESS] = true;
@@ -265,8 +221,7 @@ class os_akill extends module
 	static public function _del_akill( $input, $nick, $hostname, $expired = true )
 	{
 		$return_data = module::$return_data;
-		
-		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*!*@'.$hostname : $hostname;
+		$hostname = ( strpos( $hostname, '@' ) === false ) ? '*@'.$hostname : $hostname;
 		$check_record_q = database::select( 'sessions', array( 'hostmask', 'akill' ), array( 'hostmask', '=', $hostname, 'AND', 'akill', '=', 1 ) );
 		// set some gear
 		
@@ -278,6 +233,8 @@ class os_akill extends module
 		}
 		// already got an exception
 		
+		ircd::global_unban( core::$config->operserv->nick, $hostname );
+		// unban
 		database::delete( 'sessions', array( 'hostmask', '=', $hostname ) );
 		
 		if ( $input['internal'] && $expired )
@@ -290,11 +247,6 @@ class os_akill extends module
 			$return_data[CMD_SUCCESS] = true;
 		}
 		// is it expiring or what??
-		
-		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
-		while ( $session = database::fetch( $query ) )
-			operserv::$session_rows[] = $session;
-		// re read the session array.
 		
 		return $return_data;
 		// return data back
@@ -309,8 +261,7 @@ class os_akill extends module
 	static public function _list_akill( $input )
 	{
 		$return_data = module::$return_data;
-	
-		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'description', 'expire' ), array( 'akill', '=', 1 ) );
+		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'description', 'time', 'expire' ), array( 'akill', '=', 1 ) );
 		if ( database::num_rows( $check_record_q ) == 0 )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_AKILL_LIST_B, array( 'num' => 0 ) );
@@ -327,7 +278,7 @@ class os_akill extends module
 		while ( $session = database::fetch( $check_record_q ) )
 		{
 			$hostmask = $session->hostmask;
-			$expire = ( $session->expire == 0 ) ? 'Never' : core::format_time( $session->expire );
+			$expire = ( $session->expire == 0 ) ? 'Never' : core::format_time( ( $session->time + $session->expire ) - core::$network_time );
 			$x++;
 			
 			$num = $x;

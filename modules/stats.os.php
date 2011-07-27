@@ -99,7 +99,6 @@ class os_stats extends module
 	static public function _stats_uptime( $input )
 	{
 		$return_data = module::$return_data;
-	
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_U_1, array( 'time' => core::format_time( core::$uptime ) ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_U_2, array( 'memory' => core::get_size( memory_get_usage() ), 'real' => memory_get_usage() ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_U_3, array( 'memory' => core::get_size( core::$incoming ), 'real' => core::$incoming ) );
@@ -126,7 +125,6 @@ class os_stats extends module
 	static public function _stats_network( $input )
 	{
 		$return_data = module::$return_data;
-		
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_1, array( 'network' => core::$config->server->network_name ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_2, array( 'version' => core::$version ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_3, array( 'users' => core::$max_users ) );
@@ -151,7 +149,6 @@ class os_stats extends module
 	static public function _stats_opers( $input )
 	{
 		$return_data = module::$return_data;
-		
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_O_T );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_O_D );
 		

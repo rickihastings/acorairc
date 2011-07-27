@@ -81,7 +81,6 @@ class cs_invite extends module
 	static public function _invite_user( $input, $nick, $chan, $who )
 	{
 		$return_data = module::$return_data;
-		
 		if ( $chan == '' || $chan[0] != '#' || !core::search_nick( $who ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'INVITE' ) );

@@ -141,7 +141,6 @@ class os_module extends module
 	static public function _load_module( $input, $nick, $file, $module )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $module ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODLOAD' ) );
@@ -184,7 +183,6 @@ class os_module extends module
 	static public function _unload_module( $input, $nick, $module )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $module ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'MODUNLOAD' ) );

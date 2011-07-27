@@ -86,7 +86,6 @@ class ns_list extends module
 	static public function _list_nicks( $input, $nick, $term, $limit, $mode )
 	{
 		$return_data = module::$return_data;
-	
 		if ( ( trim( $term ) == '' || trim( $limit ) == '' ) || ( isset( $mode ) && ( !in_array( $mode, array( '', 'suspended' ) ) ) ) || !preg_match( '/([0-9]+)\-([0-9]+)/i', $limit ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'LIST' ) );

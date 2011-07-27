@@ -102,7 +102,6 @@ class ns_drop extends module
 	static public function _drop_nick( $input, $nick, $unick, $password, $sadrop = false )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $unick ) == '' || ( !$sadrop && trim( $password ) == '' ) )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => ( ( $sadrop ) ? 'SADROP' : 'DROP' ) ) );

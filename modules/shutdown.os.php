@@ -102,7 +102,6 @@ class os_shutdown extends module
 	static public function _shutdown( $input )
 	{
 		$return_data = module::$return_data;
-		
 		if ( isset( core::$config->settings->shutdown_message ) || core::$config->settings->shutdown_message != null )
 			ircd::global_notice( core::$config->global->nick, '*!*@*', core::$config->settings->shutdown_message );
 		// is there a shutdown message?

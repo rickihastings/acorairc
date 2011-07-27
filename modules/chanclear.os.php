@@ -87,7 +87,6 @@ class os_chanclear extends module
 	static public function _chan_clear( $input, $nick, $mode, $chan, $reason = '' )
 	{
 		$return_data = module::$return_data;
-	
 		if ( trim( $chan ) == '' || trim( $reason ) == '' || !in_array( $mode, array( 'KICK', 'KILL', 'BAN' ) ) || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_INVALID_SYNTAX_RE, array( 'help' => 'CHANCLEAR' ) );
@@ -122,7 +121,7 @@ class os_chanclear extends module
 			elseif ( $mode == 'KILL' )
 				ircd::kill( core::$config->operserv->nick, $user, 'CHANKILL by '.$nick.' ('.$reason.')' );
 			elseif ( $mode == 'BAN' )
-				ircd::global_ban( core::$config->operserv->nick, core::$nicks[$user], 10800, 'CHANKILL by '.$nick.' ('.$reason.')' );
+				ircd::global_ban( core::$config->operserv->nick, '*@'.core::$nicks[$user]['oldhost'], 604800, 'CHANKILL by '.$nick.' ('.$reason.')' );
 			// remove all other users.
 		}
 		// loop through the people in the channel

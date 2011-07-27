@@ -89,7 +89,6 @@ class cs_register extends module
 	static public function _register_chan( $input, $nick, $chan, $desc )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $desc ) == '' || $chan == '' || $chan[0] != '#' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_INVALID_SYNTAX_RE, array( 'help' => 'REGISTER' ) );

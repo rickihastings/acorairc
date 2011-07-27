@@ -76,7 +76,6 @@ class ns_info extends module
 	static public function _nick_info( $input, $nick, $unick )
 	{
 		$return_data = module::$return_data;
-		
 		if ( trim( $unick ) == '' )
 		{
 			$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_INVALID_SYNTAX_RE, array( 'help' => 'INFO' ) );

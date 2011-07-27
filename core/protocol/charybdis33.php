@@ -770,24 +770,40 @@ class ircd implements protocol
 	*
 	* @params
 	* $nick - who to send it from
-	* $user - user record from core::$nicks
+	* $mask - *@* hostmask
 	* $duration - the duration
 	* $message - message to use
 	*/
-	static public function global_ban( $nick, $user, $duration, $message )
+	static public function global_ban( $nick, $mask, $duration, $message )
 	{
 		if ( $user['ircop'] )
 			return false;
 		// if ircop ignore
 	
-		$unick = ircd_handle::get_uid( $nick );
-		$mask = $user['oldhost'];
+		$unick = self::get_uid( $nick );
+		$mask = explode( '@', $mask );
 		// set some vars
 		
-		self::send( ':'.$unick.' ENCAP * KLINE '.$duration.' * '.$mask.' :'.$message );
-		ircd_handle::global_ban( $nick, $mask, $duration, $message );
+		self::send( ':'.$unick.' ENCAP * KLINE '.$duration.' '.$mask[0].' '.$mask[1].' :'.$message );
+		ircd_handle::global_ban( $nick, $mask[0].'@'.$mask[1], $duration, $message );
 		// send the cmd then handle it internally
-		// note we only send a kline
+	}
+	
+	/*
+	* global_unban
+	*
+	* @params
+	* $nick - nick
+	* $mask - *@* hostmask
+	*/
+	static public function global_unban( $nick, $mask )
+	{
+		$unick = self::get_uid( $nick );
+		$mask = explode( '@', $mask );
+		// set some vars
+		
+		self::send( ':'.$unick.' ENCAP * UNKLINE '.$mask[0].' '.$mask[1] );
+		// send the cmd then handle it internally
 	}
 	
 	/*
