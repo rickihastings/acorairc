@@ -312,10 +312,10 @@ class ns_identify extends module
 	/*
 	* on_burst_connect (event hook)
 	*/
-	static public function on_burst_connect( $connect_data )
+	/*static public function on_burst_connect( $connect_data )
 	{
 		self::on_connect( $connect_data );
-	}
+	}*/
 	
 	/*
 	* on_connect (event hook)

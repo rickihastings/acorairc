@@ -149,11 +149,19 @@ class os_global extends module
 	}
 	
 	/*
+	* on_burst_connect (event hook)
+	*/
+	static public function on_burst_connect( $connect_data )
+	{
+		self::on_connect( $connect_data );
+	}
+	
+	/*
 	* on_connect (event hook)
 	*/
 	static public function on_connect( $connect_data )
 	{
-		if ( core::$config->settings->loglevel == 'server' || core::$config->settings->loglevel == 'all' )
+		if ( in_array( 'server', core::$log_levels ) || core::$config->settings->loglevel == 'all' )
 		{
 			$nick = $connect_data['nick'];
 			// get nick

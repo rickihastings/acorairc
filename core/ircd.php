@@ -16,14 +16,6 @@
 
 class ircd_handle
 {
-
-	/*
-	* __construct
-	*
-	* @params
-	* void
-	*/
-	public function __construct() { }
 	
 	/*
 	* handle_on_server
@@ -82,10 +74,7 @@ class ircd_handle
 		// yey for this, saves us massive intensive cpu raeps
 		// on large networks, uses a little more memory but baah!
 		
-		if ( !isset( core::$ips[$ip_addr] ) )
-			core::$ips[$ip_addr] = 0;
-		else
-			core::$ips[$ip_addr]++;
+		core::$ips[$ip_addr] += 1;
 		// add an ip_address array
 		
 		core::$nicks[$nick] = array(
