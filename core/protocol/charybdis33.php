@@ -17,7 +17,7 @@
 class ircd implements protocol
 {
 
-	const MOD_VERSION = '0.0.3';
+	const MOD_VERSION = '0.1.3';
 	const MOD_AUTHOR = 'Acora';
 	// module info.
 
@@ -71,275 +71,35 @@ class ircd implements protocol
 		modules::init_module( 'charybdis33', self::MOD_VERSION, self::MOD_AUTHOR, 'protocol', 'static' );
 		self::$sid = core::$config->server->numeric;
 		// these are standard in module constructors
-	}
-	
-	/*
-	* handle_on_server
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_on_server( $ircdata )
-	{
-		if ( $ircdata[0] == 'PASS' )
-			self::$last_sid = substr( $ircdata[4], 1 );
-		elseif ( $ircdata[0] == 'SERVER' )
-			ircd_handle::handle_on_server( $ircdata[1], self::$last_sid, self::$sid );
-		elseif ( $ircdata[1] == 'SID' )
-			ircd_handle::handle_on_server( $ircdata[2], $ircdata[4], self::$sid );
-	}
-	
-	/*
-	* handle_on_squit
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_on_squit( $ircdata )
-	{
-		ircd_handle::handle_on_squit( $ircdata[1] );
-	}
-	
-	/*
-	* handle_on_connect
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_on_connect( $ircdata, $startup = false )
-	{
-		$nick = $ircdata[2];
-		$server = ircd_handle::get_server( $ircdata, 0 );
-		$gecos = core::get_data_after( $ircdata, 12 );
-		$gecos = explode( ':', $gecos );
-		$gecos = $gecos[1];
-		// get nick, server, gecos
 		
-		if ( $gecos[0] == ':' ) $gecos = substr( $gecos, 1 );
-		if ( $server[0] == ':' ) $server = substr( $server, 1 );
-		// strip :
-		
-		ircd_handle::handle_on_connect( $nick, $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $ircdata[8], $server, $ircdata[4], $ircdata[5], $startup );
+		ircd_handle::add_command( 'NOTICE', 'on_notice' );
+		ircd_handle::add_command( 'CAPAB', 'on_capab' );
+		ircd_handle::add_command( 'SVINFO', 'on_start_burst' );
+		ircd_handle::add_command( 'PING', 'on_ping' );
+		ircd_handle::add_command( 'VERSION', 'send_version' );
+		ircd_handle::add_command( 'PASS', 'on_server' );
+		ircd_handle::add_command( 'SERVER', 'on_server' );
+		ircd_handle::add_command( 'SID', 'on_server' );
+		ircd_handle::add_command( 'SQUIT', 'on_squit' );
+		ircd_handle::add_command( 'EUID', 'on_connect' );
+		ircd_handle::add_command( 'QUIT', 'on_quit' );
+		ircd_handle::add_command( 'CHGHOST', 'on_fhost' );
+		ircd_handle::add_command( 'SJOIN', 'on_chan_create' );
+		ircd_handle::add_command( 'JOIN', 'on_join' );
+		ircd_handle::add_command( 'PART', 'on_part' );
+		ircd_handle::add_command( 'BMASK', 'on_mode' );
+		ircd_handle::add_command( 'TMODE', 'on_mode' );
+		ircd_handle::add_command( 'KICK', 'on_kick' );
+		ircd_handle::add_command( 'TB', 'on_topic' );
+		ircd_handle::add_command( 'TOPIC', 'on_topic' );
+		ircd_handle::add_command( 'MODE', 'on_umode' );
+		ircd_handle::add_command( 'PRIVMSG', 'on_msg' );
+		ircd_handle::add_command( 'NICK', 'on_nick_change' );
+		ircd_handle::add_command( 'SIGNON', 'on_gecos_change' );
+		ircd_handle::add_command( 'ERROR', 'on_error' );
+		// add all our commands :3 new fancy command handler, saves code and helps me
+		// keep these modules clean-er
 	}
-	
-	/*
-	* handle_nick_change
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_nick_change( $ircdata, $startup = false )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		$new_nick = $ircdata[2];
-		$timestamp = substr( $ircdata[3], 1 );
-		// strip :
-	
-		ircd_handle::handle_nick_change( $nick, $new_nick, $timestamp, $startup );
-	}
-	
-		
-	/*
-	* handle_quit
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_quit( $ircdata, $startup = false )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		// strip :
-		
-		ircd_handle::handle_quit( $nick, $startup );
-	}
-	
-	/*
-	* handle_host_change
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_host_change( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		ircd_handle::handle_host_change( $nick, $ircdata[2] );
-	}
-	
-	/*
-	* handle_ident_change
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_ident_change( $ircdata )
-	{
-		// n/a for charybdis
-	}
-	
-	/*
-	* handle_gecos_change
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_gecos_change( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		$gecos = substr( core::get_data_after( $ircdata, 2 ), 1 );
-	
-		ircd_handle::handle_gecos_change( $nick, $gecos );
-	}
-	
-	/*
-	* handle_mode
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_mode( $ircdata )
-	{
-		$nick = core::get_nick( $ircdata, 0 );
-		$nick = ( $nick == '' ) ? ircd_handle::get_server( $ircdata, 0 ) : $nick;
-		$chan = core::get_chan( $ircdata, 3 );
-		// get the channel!
-	
-		if ( $ircdata[1] == 'BMASK' )
-		{
-			$params = ( count( $ircdata ) - 5 );
-	
-			$mode_queue = '+';
-			for ( $i = 0; $i < $params; $i++ )
-				$mode_queue .= $ircdata[4];
-			
-			$mode_queue .= ' '.substr( core::get_data_after( $ircdata, 5 ), 1 );
-			// setup a string eh!
-		}
-		else
-		{
-			$mode_queue = core::get_data_after( $ircdata, 4 );
-		}
-		// handle BMASK else just handle the mode.
-	
-		ircd_handle::handle_mode( $nick, $chan, $mode_queue );
-	}
-	
-	/*
-	* handle_topic
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_topic( $ircdata )
-	{
-		$chan = core::get_chan( $ircdata, 2 );
-	
-		if ( $ircdata[1] == 'TB' )
-		{
-			$nick = explode( '!', $ircdata[4] );
-			$nick = $nick[0];
-			// get the nick
-			$topic = trim( substr( core::get_data_after( $ircdata, 5 ), 1 ) );
-			// grab the topic
-		}
-		else if ( $ircdata[1] == 'TOPIC' )
-		{
-			$nick = ircd_handle::get_nick( $ircdata, 0 );
-			$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
-			// grab the topic
-		}
-	
-		ircd_handle::handle_topic( $chan, $topic, $nick );
-	}
-	
-	/*
-	* handle_channel_create
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_channel_create( $ircdata )
-	{
-		$chans = explode( ',', $ircdata[3] );
-		$chan = $chans[0];
-		// parse the chans sending an array, although we shouldn't actually get these in an FJOIN, do it to be safe.
-		
-		$nusers_str = implode( ' ', $ircdata );
-		$nusers_str = explode( ':', $nusers_str );
-		// right here we need to find out where the thing is, because
-		// of the way 1.2 handles FJOINs
-		$users = core::get_data_after( $nusers_str, 2 );
-		$users = explode( ' ', $users );
-		
-		$nusers = ircd_handle::parse_users( $chan, $users );
-		
-		$mode_queue = core::get_data_after( $ircdata, 4 );
-		$mode_queue = explode( ':', $mode_queue );
-		$mode_queue = trim( $mode_queue[0] );
-		// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
-	
-		ircd_handle::handle_channel_create( $chan, $nusers, $ircdata[2], $mode_queue );
-	}
-	
-	/*
-	* handle_join
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_join( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		$chans = explode( ',', $ircdata[3] );
-	
-		ircd_handle::handle_join( $chans, $nick );
-	}
-
-	/*
-	* handle_part
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_part( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		$chan = core::get_chan( $ircdata, 2 );
-	
-		ircd_handle::handle_part( $chan, $nick );
-	}
-	
-	/*
-	* handle_kick
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_kick( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		$chan = core::get_chan( $ircdata, 2 );
-		$who = ircd_handle::get_nick( $ircdata, 3 );
-	
-		ircd_handle::handle_kick( $nick, $chan, $who );
-	}
-	
-	/*
-	* handle_oper_up
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function handle_oper_up( $ircdata )
-	{
-		$nick = ircd_handle::get_nick( $ircdata, 0 );
-		ircd_handle::handle_oper_up( $nick );
-	}
-
-	/*
-	* ircd functions
-	*
-	* our functions like core::kick, grabbed from the ircd protocol class.
-	*/
 	
 	/*
 	* send_burst
@@ -361,52 +121,6 @@ class ircd implements protocol
 	static public function send_squit( $server )
 	{
 		self::send( ':'.$server.' SQUIT :SQUIT' );
-	}
-
-	/*
-	* ping
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function ping( $ircdata )
-	{
-		if ( self::on_ping( $ircdata ) )
-		{
-			ircd_handle::ping( $ircdata[1] );
-			
-			ircd_handle::send( ':'.self::$sid.' PONG '.$ircdata[1] );
-			return true;
-        }
-		// ping pong.
-		
-		return false;
-	}
-	
-	/*
-	* get_information
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function get_information( $ircdata )
-	{
-		if ( isset( $ircdata[0] ) && $ircdata[0] == 'CAPAB' )
-		{
-			ircd_handle::parse_ircd_modules( true, true, true, true, false );
-			ircd_handle::parse_ircd_modes( self::$max_params, self::$prefix_data, self::$mode_data, false );
-			// we just immediately send true into all the module parses because charybdis doesnt have options to disable CHGHOST etc.
-			// parse some data out of CAPABILITIES and send it into parse_ircd_modes
-			
-			self::$owner = false; 
-			self::$restrict_modes .= 'q';
-			self::$modes_params .= 'q';
-			self::$modes .= 'q';
-			// charybdis never has owner, and +q means something different here
-		}
-		// only trigger when the capab capabilities is coming through
-		
-		return true;
 	}
 	
 	/*
@@ -780,7 +494,7 @@ class ircd implements protocol
 			return false;
 		// if ircop ignore
 	
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		$mask = explode( '@', $mask );
 		// set some vars
 		
@@ -798,7 +512,7 @@ class ircd implements protocol
 	*/
 	static public function global_unban( $nick, $mask )
 	{
-		$unick = self::get_uid( $nick );
+		$unick = ircd_handle::get_uid( $nick );
 		$mask = explode( '@', $mask );
 		// set some vars
 		
@@ -840,18 +554,6 @@ class ircd implements protocol
 		self::send( ':'.self::$sid.' '.$numeric.' '.$unick.' :'.$message );
 		ircd_handle::push( $from, $numeric, $nick, $message );
 		// send the cmd then handle it internally
-	}
-	
-	/*
-	* end_burst
-	*
-	* @params
-	* void
-	*/
-	static public function end_burst( $ircdata )
-	{
-		if ( !core::$end_burst )
-			self::ping( $ircdata );
 	}
 	
 	/*
@@ -902,50 +604,25 @@ class ircd implements protocol
 		$uid = ircd_handle::get_uid( $nick );
 		self::send( ':'.self::$sid.' ENCAP * SU '.$uid. ' :' );	
 	}
-
+	
 	/*
-	* on_capab_start
+	* on_capab
 	*
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_capab_start( $ircdata )
+	static public function on_capab( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && isset( $ircdata[4] ) && $ircdata[1] == 'NOTICE' && core::get_data_after( $ircdata, 4 ) == self::$trick_capab_start )
-			return true;
+		ircd_handle::parse_ircd_modules( true, true, true, true, false );
+		ircd_handle::parse_ircd_modes( self::$max_params, self::$prefix_data, self::$mode_data, false );
+		// we just immediately send true into all the module parses because charybdis doesnt have options to disable CHGHOST etc.
+		// parse some data out of CAPABILITIES and send it into parse_ircd_modes
 		
-		return false;
-	}
-
-	/*
-	* on_capab_end
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function on_capab_end( $ircdata )
-	{
-		if ( isset( $ircdata[1] ) && isset( $ircdata[4] ) && $ircdata[1] == 'NOTICE' && core::get_data_after( $ircdata, 4 ) == self::$trick_capab_end )
-			return true;
-		
-		return false;
-	}
-
-	/*
-	* on_timeset
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function on_timeset( $ircdata )
-	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'TIME' )
-		{
-			ircd_handle::on_timeset( $ircdata[2] );
-			return true;
-		}
-		
-		return false;
+		self::$owner = false; 
+		self::$restrict_modes .= 'q';
+		self::$modes_params .= 'q';
+		self::$modes .= 'q';
+		// charybdis never has owner, and +q means something different here
 	}
 	
 	/*
@@ -956,24 +633,12 @@ class ircd implements protocol
 	*/
 	static public function on_start_burst( $ircdata )
 	{
-		if ( isset( $ircdata[0] ) && $ircdata[0] == 'SVINFO' )
-			return true;
+		core::$end_burst = false;
+		core::$burst_time = microtime( true );
+		// how long did the burst take?
 		
-		return false;
-	}
-	
-	/*
-	* on_end_burst
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function on_end_burst( $ircdata )
-	{
-		if ( !core::$end_burst && isset( $ircdata[0] ) && $ircdata[0] == 'PING' )
-			return true;
-		
-		return false;
+		core::post_boot_server();
+		// post boot
 	}
 	
 	/*
@@ -984,18 +649,12 @@ class ircd implements protocol
 	*/
 	static public function on_server( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'VERSION' )
-			self::send_version( $ircdata );
-		// handle version
-	
-		if ( isset( $ircdata[1] ) && ( $ircdata[0] == 'PASS' || $ircdata[0] == 'SERVER' || $ircdata[1] == 'SID' ) )
-		{
-			ircd::handle_on_server( $ircdata );
-			return true;
-		}
-		// handle new servers
-		
-		return false;
+		if ( $ircdata[0] == 'PASS' )
+			self::$last_sid = substr( $ircdata[4], 1 );
+		elseif ( $ircdata[0] == 'SERVER' )
+			ircd_handle::handle_on_server( $ircdata[1], self::$last_sid, self::$sid );
+		elseif ( $ircdata[1] == 'SID' )
+			ircd_handle::handle_on_server( $ircdata[2], $ircdata[4], self::$sid );
 	}
 	
 	/*
@@ -1006,13 +665,8 @@ class ircd implements protocol
 	*/
 	static public function on_squit( $ircdata )
 	{
-		if ( isset( $ircdata[0] ) && $ircdata[0] == 'SQUIT' )
-		{
-			ircd::handle_on_squit( $ircdata );
-			return true;
-		}
-		
-		return false;
+		ircd_handle::handle_on_squit( $ircdata[1] );
+		// handle squit
 	}
 	
 	/*
@@ -1023,10 +677,22 @@ class ircd implements protocol
 	*/
 	static public function on_ping( $ircdata )
 	{
-		if ( isset( $ircdata[0] ) && $ircdata[0] == 'PING' )
-			return true;
+		if ( !core::$end_burst )
+		{
+			core::$burst_time = round( microtime( true ) - core::$burst_time, 4 );
+			if ( core::$burst_time[0] == '-' ) substr( core::$burst_time, 1 );
+			// nasty hack to get rid of minus values.. they are sometimes displayed
+			// i don't know why.. maybe on clock shifts..
+			// how long did the burst take?
+			
+			core::$end_burst = true;
+			core::save_logs();
+			// force a log change and stuff
+		}
 		
-		return false;
+		ircd_handle::ping( $ircdata[1] );
+		ircd_handle::send( ':'.self::$sid.' PONG '.$ircdata[1] );
+		// handle ping and stuff
 	}
 	
 	/*
@@ -1035,16 +701,19 @@ class ircd implements protocol
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_connect( $ircdata, $startup = false )
+	static public function on_connect( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'EUID' )
-		{
-			ircd::handle_on_connect( $ircdata, $startup );
-			return true;
-		}
-		// return true when the $ircdata finds a (remote)connect.
+		$server = ircd_handle::get_server( $ircdata, 0 );
+		$gecos = core::get_data_after( $ircdata, 12 );
+		$gecos = explode( ':', $gecos );
+		$gecos = $gecos[1];
+		// get nick, server, gecos
 		
-		return false;
+		if ( $gecos[0] == ':' ) $gecos = substr( $gecos, 1 );
+		if ( $server[0] == ':' ) $server = substr( $server, 1 );
+		// strip :
+		
+		ircd_handle::handle_on_connect( $ircdata[2], $ircdata[9], $ircdata[6], $ircdata[7], $ircdata[7], $gecos, $ircdata[8], $server, $ircdata[4], $ircdata[5], !core::$end_burst );
 	}
 	
 	/*
@@ -1053,16 +722,9 @@ class ircd implements protocol
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_quit( $ircdata, $startup = false )
+	static public function on_quit( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'QUIT' )
-		{
-			ircd::handle_quit( $ircdata, $startup );
-			return true;
-		}
-		// return true when the $ircdata finds a quit.
-		
-		return false;
+		ircd_handle::handle_quit( ircd_handle::get_nick( $ircdata, 0 ), !core::$end_burst );
 	}
 	
 	/*
@@ -1073,14 +735,7 @@ class ircd implements protocol
 	*/
 	static public function on_fhost( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'CHGHOST' )
-		{
-			ircd::handle_host_change( $ircdata );
-			return true;
-		}
-		// return true when the $ircdata finds a host change
-		
-		return false;
+		ircd_handle::handle_host_change( ircd_handle::get_nick( $ircdata, 0 ), $ircdata[2] );
 	}
 	
 	/*
@@ -1091,14 +746,25 @@ class ircd implements protocol
 	*/
 	static public function on_chan_create( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'SJOIN' )
-		{
-			ircd::handle_channel_create( $ircdata );
-			return true;
-		}
-		// return true when any channel is created, because $chan isnt set.
+		$chans = explode( ',', $ircdata[3] );
+		$chan = $chans[0];
+		// parse the chans sending an array, although we shouldn't actually get these in an FJOIN, do it to be safe.
 		
-		return false;
+		$nusers_str = implode( ' ', $ircdata );
+		$nusers_str = explode( ':', $nusers_str );
+		// right here we need to find out where the thing is, because
+		// of the way 1.2 handles FJOINs
+		$users = core::get_data_after( $nusers_str, 2 );
+		$users = explode( ' ', $users );
+		
+		$nusers = ircd_handle::parse_users( $chan, $users );
+		
+		$mode_queue = core::get_data_after( $ircdata, 4 );
+		$mode_queue = explode( ':', $mode_queue );
+		$mode_queue = trim( $mode_queue[0] );
+		// get the mode queue from ircdata and explode via :, which is n_users stuff, which we don't want!
+	
+		ircd_handle::handle_channel_create( $chan, $nusers, $ircdata[2], $mode_queue );
 	}
 	
 	/*
@@ -1109,14 +775,9 @@ class ircd implements protocol
 	*/
 	static public function on_join( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'JOIN' )
-		{
-			ircd::handle_join( $ircdata );
-			return true;
-		}
-		// return true when any channel is joined, because $chan isnt set.
-		
-		return false;
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$chans = explode( ',', $ircdata[3] );
+		ircd_handle::handle_join( $chans, $nick );
 	}
 	
 	/*
@@ -1127,14 +788,9 @@ class ircd implements protocol
 	*/
 	static public function on_part( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'PART' )
-		{
-			ircd::handle_part( $ircdata );
-			return true;
-		}
-		// return true when any channel is parted, because $chan isnt set.
-		
-		return false;
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 2 );
+		ircd_handle::handle_part( $chan, $nick );
 	}
 	
 	/*
@@ -1145,13 +801,29 @@ class ircd implements protocol
 	*/
 	static public function on_mode( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'BMASK' || $ircdata[1] == 'TMODE' ) )
+		$nick = core::get_nick( $ircdata, 0 );
+		$nick = ( $nick == '' ) ? ircd_handle::get_server( $ircdata, 0 ) : $nick;
+		$chan = core::get_chan( $ircdata, 3 );
+		// get the channel!
+	
+		if ( $ircdata[1] == 'BMASK' )
 		{
-			ircd::handle_mode( $ircdata );
-			return true;
+			$params = ( count( $ircdata ) - 5 );
+	
+			$mode_queue = '+';
+			for ( $i = 0; $i < $params; $i++ )
+				$mode_queue .= $ircdata[4];
+			
+			$mode_queue .= ' '.substr( core::get_data_after( $ircdata, 5 ), 1 );
+			// setup a string eh!
 		}
-		
-		return false;
+		else
+		{
+			$mode_queue = core::get_data_after( $ircdata, 4 );
+		}
+		// handle BMASK else just handle the mode.
+	
+		ircd_handle::handle_mode( $nick, $chan, $mode_queue );
 	}
 	
 	/*
@@ -1162,14 +834,10 @@ class ircd implements protocol
 	*/
 	static public function on_kick( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'KICK' )
-		{
-			ircd::handle_kick( $ircdata );
-			return true;
-		}
-		// return true when anyone is kicked from any channel, because $chan isnt set.
-		
-		return false;
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$chan = core::get_chan( $ircdata, 2 );
+		$who = ircd_handle::get_nick( $ircdata, 3 );
+		ircd_handle::handle_kick( $nick, $chan, $who );
 	}
 	
 	/*
@@ -1180,31 +848,40 @@ class ircd implements protocol
 	*/
 	static public function on_topic( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && ( $ircdata[1] == 'TOPIC' || $ircdata[1] == 'TB' ) )
+		$chan = core::get_chan( $ircdata, 2 );
+	
+		if ( $ircdata[1] == 'TB' )
 		{
-			ircd::handle_topic( $ircdata );	
-			return true;
+			$nick = explode( '!', $ircdata[4] );
+			$nick = $nick[0];
+			// get the nick
+			$topic = trim( substr( core::get_data_after( $ircdata, 5 ), 1 ) );
+			// grab the topic
 		}
-		
-		return false;
+		else if ( $ircdata[1] == 'TOPIC' )
+		{
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
+			$topic = trim( substr( core::get_data_after( $ircdata, 3 ), 1 ) );
+			// grab the topic
+		}
+	
+		ircd_handle::handle_topic( $chan, $topic, $nick );
 	}
 	
 	/*
-	* on_oper_up
+	* on_umode
 	*
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_oper_up( $ircdata )
+	static public function on_umode( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'MODE' && ( substr( $ircdata[3], 1, 1 ) == '+' && strpos( $ircdata[3], 'o' ) !== false ) )
+		if ( ( substr( $ircdata[3], 1, 1 ) == '+' && strpos( $ircdata[3], 'o' ) !== false ) )
 		{
-			ircd::handle_oper_up( $ircdata );
-			return true;
+			$nick = ircd_handle::get_nick( $ircdata, 0 );
+			ircd_handle::handle_oper_up( $nick );
 		}
-		// return true when a oper up is matched, and not an oper warning x]
-		
-		return false;
+		// mark people gaining +o as oper
 	}
 	
 	/*
@@ -1212,7 +889,6 @@ class ircd implements protocol
 	*
 	* @params
 	* $ircdata - ..
-	* $where - optional
 	*/
 	static public function on_msg( $ircdata )
 	{
@@ -1224,13 +900,7 @@ class ircd implements protocol
 		else
 			$target = core::get_chan( $ircdata, 2 );
 		
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'PRIVMSG' )
-		{
-			ircd_handle::handle_msg( $nick, $target, $msg );
-			return true;
-		}
-		
-		return false;
+		ircd_handle::handle_msg( $nick, $target, $msg );
 	}
 	
 	/*
@@ -1242,11 +912,20 @@ class ircd implements protocol
 	*/
 	static public function on_notice( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NOTICE' )
-			return true;
-		// return true on any notice
+		if ( isset( $ircdata[4] ) && core::get_data_after( $ircdata, 4 ) == self::$trick_capab_start )
+			core::$capab_start = true;
+		// we've recieved what we want to, set a few important vars.
+	
+		if ( isset( $ircdata[4] ) && core::get_data_after( $ircdata, 4 ) == self::$trick_capab_end )
+		{
+			core::$capab_start = false;	
+			core::boot_server();
+		}
+		// introduce server and mark capab_start as false
 		
-		return false;
+		// we need to respectivly wait for capab end
+		// before we're suppost to boot everything
+		// we also set the flag to false cause capab has ended.
 	}
 	
 	/*
@@ -1255,34 +934,13 @@ class ircd implements protocol
 	* @params
 	* $ircdata - ..
 	*/
-	static public function on_nick_change( $ircdata, $startup = false )
+	static public function on_nick_change( $ircdata )
 	{
-		if ( isset( $ircdata[1] ) && $ircdata[1] == 'NICK' && count( $ircdata ) == 4 )
-		{
-			ircd::handle_nick_change( $ircdata, $startup );
-			return true;
-		}
-		// return true on any nick change.
-		
-		return false;
-	}
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$timestamp = substr( $ircdata[3], 1 );
+		// strip :
 	
-	/*
-	* on_ident_change
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function on_ident_change( $ircdata )
-	{
-		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
-		{
-			ircd::handle_ident_change( $ircdata );
-			return true;
-		}
-		// return true on setident.
-		
-		return false;
+		ircd_handle::handle_nick_change( $nick, $ircdata[2], $timestamp, !core::$end_burst );
 	}
 	
 	/*
@@ -1293,60 +951,23 @@ class ircd implements protocol
 	*/
 	static public function on_gecos_change( $ircdata )
 	{
-		if ( count( $ircdata ) == 7 && $ircdata[1] == 'SIGNON' || count( $ircdata ) == 9 && $ircdata[3] == 'SIGNON' )
-		{
-			ircd::handle_gecos_change( $ircdata );
-			return true;
-		}
-		// return true on fname.
-		
-		return false;
+		$nick = ircd_handle::get_nick( $ircdata, 0 );
+		$gecos = substr( core::get_data_after( $ircdata, 2 ), 1 );
+	
+		ircd_handle::handle_gecos_change( $nick, $gecos );
 	}
 	
 	/*
-	* get_server
-	*
-	* @params
-	* $ircdata - ..
-	* $number - ..
-	*/
-	static public function get_server( $ircdata, $number )
-	{
-		return ircd_handle::get_server( $ircdata, $number );
-	}
-	
-	/*
-	* get_nick
-	*
-	* @params
-	* $ircdata - ..
-	* $number - ..
-	*/
-	static public function get_nick( $ircdata, $number )
-	{
-		return ircd_handle::get_nick( $ircdata, $number );	
-	}
-	
-	/*
-	* get_uid
-	*
-	* @params
-	* $nick - should be a valid nickname
-	*/
-	static public function get_uid( $nick )
-	{
-		return ircd_handle::get_uid( $nick );
-	}
-	
-	/*
-	* parse_users
+	* on_error
 	*
 	* @params
 	* $ircdata - ..
 	*/
-	static public function parse_users( $chan, $ircdata, $number )
+	static public function on_error( $ircdata )
 	{
-		return ircd_handle::parse_users( $chan, $ircdata, $number );
+		core::alog( 'ERROR: '.core::get_data_after( $ircdata, 1 ), 'BASIC' );
+		core::save_logs();
+		self::shutdown( 'ERROR', true );
 	}
 }
 // EOF;

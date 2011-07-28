@@ -185,62 +185,18 @@ class core
 					self::alog( 'recv(): '.$raw, 'SERVER' );
 				// log SERVER
 				
-				if ( ircd::on_capab_start( $ircdata ) )
-					self::$capab_start = true;
-				// if capab has started we set a true flag, just like
-				// we do with burst
-				
-				if ( ircd::on_capab_end( $ircdata ) )
-				{
-					self::$capab_start = false;
-					
-					$this->boot_server();
-					// introduce server etc
-				}
-				// we need to respectivly wait for capab end
-				// before we're suppost to boot everything
-				// we also set the flag to false cause capab has ended.
-				
-				ircd::get_information( $ircdata );
-				// modes and stuff we check for here.
-				
-				if ( ircd::on_start_burst( $ircdata ) )
-				{
-					self::$end_burst = false;
-					
-					if ( strstr( self::$config->server->ircd, 'inspircd' ) )
-						self::$network_time = $ircdata[2];
-					
-					self::$burst_time = microtime( true );
-					// how long did the burst take?
-					
-					$this->post_boot_server();
-					// post boot
-				}
-				// if we recieve a start burst, we also adopt the time given to us
-				
-				if ( ircd::on_end_burst( $ircdata ) )
-				{
-					self::$burst_time = round( microtime( true ) - self::$burst_time, 4 );
-					if ( self::$burst_time[0] == '-' ) substr( self::$burst_time, 1 );
-					// nasty hack to get rid of minus values.. they are sometimes displayed
-					// i don't know why.. maybe on clock shifts..
-					// how long did the burst take?
-					
-					ircd::end_burst( $ircdata );
-					self::$end_burst = true;
-				
-					self::save_logs();
-				}
-				// here we check if we're recieving an endburst
-				
 				self::$incoming = self::$incoming + strlen( $raw );
 				// log our incoming bandwidth
 				
 				unset( $tinybuffer[$l] );
-				if ( $this->process( $ircdata, !self::$end_burst ) )
-					continue;
-				// process normal incoming data
+				
+				if ( isset( ircd_handle::$commands[$ircdata[1]] ) )
+					$method = ircd_handle::$commands[$ircdata[1]];
+				elseif ( isset( ircd_handle::$commands[$ircdata[0]] ) )
+					$method = ircd_handle::$commands[$ircdata[0]];
+				
+				ircd::$method( $ircdata );
+				// call the event handler
 			}
 			
 			if ( self::$debug && count( self::$debug_data ) > 0 )
@@ -256,9 +212,7 @@ class core
 				}
 			}
 			elseif ( self::$debug && count( self::$debug_data ) == 0 )
-			{
 				self::$debug_data = array();
-			}
 			// here we output debug data, if there is any.
 			
 			usleep( 15000 );
@@ -270,121 +224,12 @@ class core
 	}
 	
 	/*
-	* process (private)
-	*
-	* @params
-	* $ircdata - ..
-	* $startup - boolean to indicate if we're booting or not.
-	*/
-	public function process( $ircdata, $startup = false )
-	{
-		if ( self::$end_burst && ircd::ping( $ircdata ) )
-			return true;
-		// pingpong my name is tingtong
-		
-		if ( self::log_changes( $ircdata, $startup ) )
-			return true;
-		// log peoples hostnames, used for bans etc.
-		
-		if ( ircd::on_notice( $ircdata ) )
-			return true;
-		// ignore notices
-		
-		if ( ircd::on_msg( $ircdata ) )
-			return true;
-		// look for msgs
-		
-		if ( commands::motd( $ircdata ) )
-			return true;
-		// reply to motd
-		
-		if ( $ircdata[0] == 'ERROR' )
-		{
-			self::alog( 'ERROR: '.self::get_data_after( $ircdata, 1 ), 'BASIC' );
-			self::save_logs();
-			ircd::shutdown( 'ERROR', true );
-		}
-		// act upon ERROR messages.
-	}
-	
-	/*
-	* log_changes
-	*
-	* @params
-	* $ircdata - ..
-	*/
-	static public function log_changes( $ircdata, $startup = false )
-	{
-		if ( ircd::on_connect( $ircdata, $startup ) )
-			return true;
-		// log shit on connect, basically the users host etc.
-		
-		if ( ircd::on_chan_create( $ircdata ) )
-			return true;
-		// on channel create
-		
-		if ( ircd::on_server( $ircdata ) )
-			return true;
-		// let's us keep track of the linked servers
-		
-		if ( ircd::on_squit( $ircdata ) )
-			return true;
-		// let's us keep track of the linked servers
-		
-		if ( ircd::on_nick_change( $ircdata, $startup ) )
-			return true;
-		// on nick change, make sure the variable changes too.
-		
-		if ( ircd::on_quit( $ircdata, $startup ) )
-			return true;
-		// on quit.
-		
-		if ( !$startup && ircd::on_fhost( $ircdata ) )
-			return true;
-		// on hostname change.
-		
-		if ( !$startup && ircd::on_ident_change( $ircdata ) )
-			return true;
-		// on ident change
-		
-		if ( !$startup && ircd::on_gecos_change( $ircdata ) )
-			return true;
-		// on realname (gecos) change
-		
-		if ( ircd::on_mode( $ircdata ) )
-			return true;
-		// on mode
-		
-		if ( ircd::on_topic( $ircdata ) )
-			return true;	
-		// on topic
-		
-		if ( ircd::on_join( $ircdata ) )
-			return true;
-		// on join
-		
-		if ( ircd::on_part( $ircdata ) )
-			return true;
-		// and on part.
-		
-		if ( ircd::on_kick( $ircdata ) )
-			return true;
-		// and on kick.
-		
-		if ( ircd::on_oper_up( $ircdata ) )
-			return true;
-		// on oper ups
-		
-		return false;
-	}
-	
-	/*
 	* boot_server (private)
 	*
 	* @params
 	* void
 	*/
-	public function boot_server()
+	static public function boot_server()
 	{
 		if ( !self::$booted )
 		{
@@ -401,7 +246,7 @@ class core
 	* @params
 	* void
 	*/
-	public function post_boot_server()
+	static public function post_boot_server()
 	{
 		if ( self::$capab_start && !self::$end_burst )
 			ircd::send_version( array() );

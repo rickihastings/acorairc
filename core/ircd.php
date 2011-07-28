@@ -17,6 +17,21 @@
 class ircd_handle
 {
 	
+	static public $commands = array();
+	
+	/*
+	* handle_on_server
+	*
+	* @params
+	* $server - server name
+	* $sid - server sid (n/a in some circumstances, no biggie)
+	* $our_sid - also n/a in some circumstances
+	*/
+	static public function add_command( $command, $method )
+	{
+		self::$commands[$command] = $method;
+	}
+	
 	/*
 	* handle_on_server
 	*
@@ -108,7 +123,7 @@ class ircd_handle
 		// log and stuff
 		
 		foreach ( modules::$event_methods[$method] as $l => $class )
-			call_user_func( array( $class, $method ), core::$nicks[$nick] );
+			$class::$method( core::$nicks[$nick] );
 		// call the event method
 	}
 	
@@ -157,7 +172,7 @@ class ircd_handle
 		core::alog( 'on_nick_change(): '.$nick.' changed nick to '.$new_nick, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_nick_change'] as $l => $class )
-			call_user_func( array( $class, 'on_nick_change' ), $nick, $new_nick );
+			$class::on_nick_change( $nick, $new_nick );
 		// call the event method
 	}
 	
@@ -199,7 +214,7 @@ class ircd_handle
 		core::alog( 'on_quit(): '.$nick.' quit', 'MISC' );
 		
 		foreach ( modules::$event_methods['on_quit'] as $l => $class )
-			call_user_func( array( $class, 'on_quit' ), $nick, $startup );
+			$class::on_quit( $nick, $startup );
 		// call the event method
 	}
 	
@@ -260,7 +275,7 @@ class ircd_handle
 		core::alog( 'on_mode(): '.$nick.' set '.$mode_queue.' on '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_mode'] as $l => $class )
-			call_user_func( array( $class, 'on_mode' ), $nick, $chan, $modes );
+			$class::on_mode( $nick, $chan, $modes );
 		// call the event method
 	}
 	
@@ -277,7 +292,7 @@ class ircd_handle
 		core::alog( 'on_ftopic(): topic for '.$chan.' changed', 'MISC' );
 		
 		foreach ( modules::$event_methods['on_topic'] as $l => $class )
-			call_user_func( array( $class, 'on_topic' ), $nick, $chan, $topic );
+			$class::on_topic( $nick, $chan, $topic );
 		// call the event method
 	}
 	
@@ -318,7 +333,7 @@ class ircd_handle
 		// when users join channels
 		
 		foreach ( modules::$event_methods['on_chan_create'] as $l => $class )
-			call_user_func( array( $class, 'on_chan_create' ), $chan );
+			$class::on_chan_create( $chan );
 		// call the event method
 	}
 	
@@ -345,7 +360,7 @@ class ircd_handle
 			// flood check
 			
 			foreach ( modules::$event_methods['on_join'] as $l => $class )
-				call_user_func( array( $class, 'on_join' ), $nick, $chan );
+				$class::on_join( $nick, $chan );
 			// call the event method
 		}
 	}
@@ -363,7 +378,7 @@ class ircd_handle
 		core::alog( 'on_part(): '.$nick.' left '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_part'] as $l => $class )
-			call_user_func( array( $class, 'on_part' ), $nick, $chan );
+			$class::on_part( $nick, $chan );
 		// call the event method
 	}
 	
@@ -380,7 +395,7 @@ class ircd_handle
 		core::alog( 'on_kick(): '.$nick.' kicked '.$user.' from '.$chan, 'MISC' );
 		
 		foreach ( modules::$event_methods['on_kick'] as $l => $class )
-			call_user_func( array( $class, 'on_kick' ), $nick, $who, $chan );
+			$class::on_kick( $nick, $who, $chan );
 		// call the event method
 	}
 	
@@ -396,7 +411,7 @@ class ircd_handle
 		core::alog( 'on_oper_up(): '.core::get_full_hostname( $nick ).' OPER up', 'BASIC' );
 		
 		foreach ( modules::$event_methods['on_oper_up'] as $l => $class )
-			call_user_func( array( $class, 'on_oper_up' ), $nick );
+			$class::on_oper_up( $nick );
 		// call the event method
 	}
 	
@@ -409,19 +424,13 @@ class ircd_handle
 	static public function handle_msg( $nick, $target, $msg )
 	{
 		foreach ( modules::$event_methods['on_msg'] as $l => $class )
-			call_user_func( array( $class, 'on_msg' ), $nick, $target, $msg );
+			$class::on_msg( $nick, $target, $msg );
 		// call the event method
 	
 		commands::ctcp( $nick, $target, $msg );
 		core::flood_check( $nick, $target, $msg );
 		// commands and flood checking!
 	}
-
-	/*
-	* ircd functions
-	*
-	* our functions like core::kick, grabbed from the ircd protocol class.
-	*/
 
 	/*
 	* ping

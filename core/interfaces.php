@@ -32,25 +32,9 @@ define( 'CMD_DATA', 'DATA' );
 interface protocol
 {
 	
-	static public function handle_on_server( $ircdata );
-	static public function handle_on_squit( $ircdata );
-	static public function handle_on_connect( $ircdata, $startup = false );
-	static public function handle_nick_change( $ircdata, $startup = false );
-	static public function handle_quit( $ircdata, $startup = false );
-	static public function handle_host_change( $ircdata );
-	static public function handle_mode( $ircdata );
-	static public function handle_topic( $ircdata );
-	static public function handle_channel_create( $ircdata );
-	static public function handle_join( $ircdata );
-	static public function handle_part( $ircdata );
-	static public function handle_kick( $ircdata );
-	static public function handle_oper_up( $ircdata );
-	// handle events
-	
 	static public function send_burst( $server );
 	static public function send_squit( $server );
-	static public function ping( $ircdata );
-	static public function get_information( $ircdata );
+	//static public function ping( $ircdata );
 	static public function init_server( $name, $pass, $desc, $numeric );
 	static public function send_version( $ircdata );
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false );
@@ -73,41 +57,29 @@ interface protocol
 	static public function global_ban( $nick, $user, $duration, $message );
 	static public function shutdown( $message, $terminate = false );
 	static public function push( $from, $numeric, $nick, $message );
-	static public function end_burst( $ircdata );
 	static public function send( $command );
 	static public function set_registered_mode( $nick, $channel );
 	// ircd functions
 	
-	static public function on_capab_start( $ircdata );
-	static public function on_capab_end( $ircdata );
-	static public function on_timeset( $ircdata );
+	static public function on_capab( $ircdata );
 	static public function on_start_burst( $ircdata );
-	static public function on_end_burst( $ircdata );
 	static public function on_server( $ircdata );
 	static public function on_squit( $ircdata );
 	static public function on_ping( $ircdata );
-	static public function on_connect( $ircdata, $startup = false );
-	static public function on_quit( $ircdata, $startup = false );
-	static public function on_fhost( $ircdata );
+	static public function on_connect( $ircdata );
+	static public function on_quit( $ircdata );
 	static public function on_chan_create( $ircdata );
 	static public function on_join( $ircdata );
 	static public function on_part( $ircdata );
 	static public function on_mode( $ircdata );
 	static public function on_kick( $ircdata );
 	static public function on_topic( $ircdata );
-	static public function on_oper_up( $ircdata );
+	static public function on_umode( $ircdata );
 	static public function on_msg( $ircdata );
 	static public function on_notice( $ircdata );
-	static public function on_nick_change( $ircdata, $startup = false );
-	static public function on_ident_change( $ircdata );
-	static public function on_gecos_change( $ircdata );
+	static public function on_nick_change( $ircdata );
+	static public function on_error( $ircdata );
 	// core events
-	
-	static public function get_server( $ircdata, $number );
-	static public function get_nick( $ircdata, $number );
-	static public function get_uid( $nick );
-	static public function parse_users( $chan, $ircdata, $number );
-	// additional functions
 }
 
 /*

@@ -312,10 +312,10 @@ class ns_identify extends module
 	/*
 	* on_burst_connect (event hook)
 	*/
-	/*static public function on_burst_connect( $connect_data )
+	static public function on_burst_connect( $connect_data )
 	{
 		self::on_connect( $connect_data );
-	}*/
+	}
 	
 	/*
 	* on_connect (event hook)
@@ -327,7 +327,7 @@ class ns_identify extends module
 		
 		if ( !isset( $user ) || $user === false )
 			return false;
-			
+		
 		$nick = $connect_data['nick'];
 		// re-allocate it after we know we actually need to use $nick, will shave milliseconds off huge bursts
 		// not amazing but better than nothing.
@@ -348,7 +348,7 @@ class ns_identify extends module
 			services::communicate( core::$config->nickserv->nick, $nick, nickserv::$help->NS_AWAITING_VALIDATION );
 			return false;
 		}
-		elseif ( ( !core::$nicks[$nick]['identified'] && $user->identified == 1 ) && core::get_full_hostname( $nick ) == $user->last_hostmask )
+		elseif ( $user->identified == 1 && strcasecmp( core::get_full_hostname( $nick ), $user->last_hostmask ) == 0 )
 		{
 			ircd::on_user_login( $nick, $user->display );
 			core::$nicks[$nick]['account'] = $user->display;
@@ -449,7 +449,7 @@ class ns_identify extends module
 		{
 			foreach ( nickserv::$help->NS_REGISTERED_NICK as $line )
 				$response[] = services::parse( $line );
-			services::parse( core::$config->nickserv->nick, $nick, $response );
+			services::respond( core::$config->nickserv->nick, $nick, $response );
 		}
 		else
 		{

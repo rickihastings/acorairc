@@ -663,7 +663,7 @@ class cs_levels extends module
 	* on_create (private)
 	* 
 	* @params
-	* $nusers - array from ircd::parse_users()
+	* $nusers - array from ircd_handle::parse_users()
 	* $channel - valid channel array
 	* $create - true for create, false for join.
 	*/
