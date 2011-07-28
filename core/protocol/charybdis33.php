@@ -109,7 +109,7 @@ class ircd implements protocol
 	*/
 	static public function send_burst( $server )
 	{
-		self::send( ':'.self::$sid.' SVINFO 6 6 0 '.core::$network_time );
+		ircd_handle::send( ':'.self::$sid.' SVINFO 6 6 0 '.core::$network_time );
 	}
 	
 	/*
@@ -120,7 +120,7 @@ class ircd implements protocol
 	*/
 	static public function send_squit( $server )
 	{
-		self::send( ':'.$server.' SQUIT :SQUIT' );
+		ircd_handle::send( ':'.$server.' SQUIT :SQUIT' );
 	}
 	
 	/*
@@ -134,9 +134,9 @@ class ircd implements protocol
 	*/
 	static public function init_server( $name, $pass, $desc, $numeric )
 	{
-		self::send( 'PASS '.$pass.' TS 6 '.self::$sid );
-		self::send( 'CAPAB :QS EX CHW IE KLN KNOCK TB UNKLN ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN' );
-		self::send( ':'.self::$sid.' SERVER '.$name.' 0 :'.$desc );
+		ircd_handle::send( 'PASS '.$pass.' TS 6 '.self::$sid );
+		ircd_handle::send( 'CAPAB :QS EX CHW IE KLN KNOCK TB UNKLN ENCAP SERVICES RSFNC SAVE EUID EOPMOD BAN' );
+		ircd_handle::send( ':'.self::$sid.' SERVER '.$name.' 0 :'.$desc );
 		// handle server, bit of trickery for ON CAPAB START etc does on here ;)
 		
 		ircd_handle::init_server( $name, $pass, $desc, $numeric );
@@ -153,7 +153,7 @@ class ircd implements protocol
 	{
 		$nick = str_replace( ':', '', $ircdata[0] );
 	
-		self::send( ':'.self::$sid.' 351 '.$nick.' :acora-'.core::$version.' '.core::$config->server->name.' '.core::$config->server->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+		ircd_handle::send( ':'.self::$sid.' 351 '.$nick.' :acora-'.core::$version.' '.core::$config->server->name.' '.core::$config->server->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
 		// ooh, version?
 	}
 	
@@ -179,7 +179,7 @@ class ircd implements protocol
 			$service_mode = self::$service_modes['service'];
 		// what do we use?
 		
-		self::send( ':'.self::$sid.' EUID '.$nick.' 1 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' * * :'.$gecos );		
+		ircd_handle::send( ':'.self::$sid.' EUID '.$nick.' 1 '.core::$network_time.' '.$service_mode.' '.$ident.' '.$hostname.' '.core::$config->conn->vhost.' '.$uid.' * * :'.$gecos );		
 		
 		ircd_handle::introduce_client( $nick, $uid, $ident, $hostname, $gecos, $enforcer );
 		// handle it
@@ -197,7 +197,7 @@ class ircd implements protocol
 		$uid = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		self::send( ':'.$uid.' QUIT :'.$message );
+		ircd_handle::send( ':'.$uid.' QUIT :'.$message );
 		// as simple as.
 		
 		ircd_handle::remove_client( $nick, $uid, $message );
@@ -216,7 +216,7 @@ class ircd implements protocol
 		if ( core::$config->settings->silent )
 		{
 			$unick = ircd_handle::get_uid( $nick );
-			self::send( ':'.$unick.' WALLOPS :'.$message );
+			ircd_handle::send( ':'.$unick.' WALLOPS :'.$message );
 			// get the uid and send it.
 			
 			ircd_handle::wallops( $nick, $message );
@@ -251,7 +251,7 @@ class ircd implements protocol
 		if ( $what[0] != '#' ) $what = ircd_handle::get_uid( $what );
 		// get the uid.
 		
-		self::send( ':'.$nick.' NOTICE '.$what.' :'.$message );
+		ircd_handle::send( ':'.$nick.' NOTICE '.$what.' :'.$message );
 	}
 	
 	/*
@@ -268,7 +268,7 @@ class ircd implements protocol
 		if ( $what[0] != '#' ) $what = ircd_handle::get_uid( $what );
 		// get the uid.
 		
-		self::send( ':'.$nick.' PRIVMSG '.$what.' :'.$message );
+		ircd_handle::send( ':'.$nick.' PRIVMSG '.$what.' :'.$message );
 	}
 	
 	/*
@@ -288,7 +288,7 @@ class ircd implements protocol
 		$from = ( $boolean ) ? self::$sid : $unick;
 		// check what we send
 		
-		self::send( ':'.$from.' TMODE '.core::$chans[$chan]['timestamp'].' '.$chan.' '.$mode );
+		ircd_handle::send( ':'.$from.' TMODE '.core::$chans[$chan]['timestamp'].' '.$chan.' '.$mode );
 		ircd_handle::mode( $nick, $chan, $mode );
 		// send the mode
 	}
@@ -307,7 +307,7 @@ class ircd implements protocol
 		$uuser = ircd_handle::get_uid( $user );
 		// get the uid.
 		
-		self::send( ':'.$unick.' MODE '.$uuser.' :'.$mode );
+		ircd_handle::send( ':'.$unick.' MODE '.$uuser.' :'.$mode );
 		ircd_handle::umode( $nick, $user, $mode );
 		// send the mode then handle it internally
 	}
@@ -324,7 +324,7 @@ class ircd implements protocol
 		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		self::send( ':'.$unick.' JOIN '.core::$network_time.' '.$chan.' +' );
+		ircd_handle::send( ':'.$unick.' JOIN '.core::$network_time.' '.$chan.' +' );
 		ircd_handle::join_chan( $nick, $chan );
 		// send the join then handle it internally
 	}
@@ -341,7 +341,7 @@ class ircd implements protocol
 		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		self::send( ':'.$unick.' PART '.$chan );
+		ircd_handle::send( ':'.$unick.' PART '.$chan );
 		ircd_handle::part_chan( $nick, $chan );
 		// send the part then handle it internally
 	}
@@ -359,7 +359,7 @@ class ircd implements protocol
 		$unick = ircd_handle::get_uid( $nick );
 		// get the uid.
 		
-		self::send( ':'.$unick.' TOPIC '.$chan.' :'.$topic );
+		ircd_handle::send( ':'.$unick.' TOPIC '.$chan.' :'.$topic );
 		ircd_handle::topic( $nick, $chan, $topic );
 		// send the cmd then handle it internally
 	}
@@ -383,7 +383,7 @@ class ircd implements protocol
 			$uuser = ircd_handle::get_uid( $user );
 			// get the uid.
 			
-			self::send( ':'.$unick.' KICK '.$chan.' '.$uuser.' :'.$reason );
+			ircd_handle::send( ':'.$unick.' KICK '.$chan.' '.$uuser.' :'.$reason );
 			ircd_handle::kick( $nick, $user, $chan, $reason );
 			// send the cmd then handle it internally
 		}
@@ -403,7 +403,7 @@ class ircd implements protocol
 		$uuser = ircd_handle::get_uid( $user );
 		// get the uid.
 			
-		self::send( ':'.$unick.' INVITE '.$uuser.' '.$chan.' '.core::$chans[$chan]['timestamp'] );
+		ircd_handle::send( ':'.$unick.' INVITE '.$uuser.' '.$chan.' '.core::$chans[$chan]['timestamp'] );
 		// send the cmd
 	}
 	
@@ -423,7 +423,7 @@ class ircd implements protocol
 			$unick = ircd_handle::get_uid( $nick );
 			// get the uid.
 			
-			self::send( ':'.$ufrom.' CHGHOST '.$unick.' '.$host );
+			ircd_handle::send( ':'.$ufrom.' CHGHOST '.$unick.' '.$host );
 			ircd_handle::sethost( $from, $nick, $host );
 			// send the cmd then handle it internally
 		}
@@ -455,7 +455,7 @@ class ircd implements protocol
 		$uold_nick = ircd_handle::get_uid( $old_nick );
 		// get the uid.
 		
-		self::send( ':'.self::$sid.' ENCAP * RSFNC '.$uold_nick.' '.$new_nick.' '.$timestamp.' '.$timestamp );
+		ircd_handle::send( ':'.self::$sid.' ENCAP * RSFNC '.$uold_nick.' '.$new_nick.' '.$timestamp.' '.$timestamp );
 		ircd_handle::svsnick( $old_nick, $new_nick, $timestamp );
 		// send the cmd then handle it internally
 	}
@@ -474,7 +474,7 @@ class ircd implements protocol
 		$uuser = ircd_handle::get_uid( $user );
 		// get the uid.
 		
-		self::send( ':'.$unick.' KILL '.$uuser.'  :Killed ('.$nick.' ('.$message.')))' );
+		ircd_handle::send( ':'.$unick.' KILL '.$uuser.'  :Killed ('.$nick.' ('.$message.')))' );
 		ircd_handle::svsnick( $nick, $user, $timestamp );
 		// send the cmd then handle it internally
 	}
@@ -498,7 +498,7 @@ class ircd implements protocol
 		$mask = explode( '@', $mask );
 		// set some vars
 		
-		self::send( ':'.$unick.' ENCAP * KLINE '.$duration.' '.$mask[0].' '.$mask[1].' :'.$message );
+		ircd_handle::send( ':'.$unick.' ENCAP * KLINE '.$duration.' '.$mask[0].' '.$mask[1].' :'.$message );
 		ircd_handle::global_ban( $nick, $mask[0].'@'.$mask[1], $duration, $message );
 		// send the cmd then handle it internally
 	}
@@ -516,7 +516,7 @@ class ircd implements protocol
 		$mask = explode( '@', $mask );
 		// set some vars
 		
-		self::send( ':'.$unick.' ENCAP * UNKLINE '.$mask[0].' '.$mask[1] );
+		ircd_handle::send( ':'.$unick.' ENCAP * UNKLINE '.$mask[0].' '.$mask[1] );
 		// send the cmd then handle it internally
 	}
 	
@@ -529,7 +529,7 @@ class ircd implements protocol
 	*/
 	static public function shutdown( $message, $terminate = false )
 	{
-		self::send( ':'.core::$config->server->name.' SQUIT :'.$message );
+		ircd_handle::send( ':'.core::$config->server->name.' SQUIT :'.$message );
 		ircd_handle::shutdown( $message, $terminate );
 		// send the cmd then handle it internally
 	}
@@ -551,20 +551,9 @@ class ircd implements protocol
 		$message = implode( ' ', $message );
 		// implode the message
 		
-		self::send( ':'.self::$sid.' '.$numeric.' '.$unick.' :'.$message );
+		ircd_handle::send( ':'.self::$sid.' '.$numeric.' '.$unick.' :'.$message );
 		ircd_handle::push( $from, $numeric, $nick, $message );
 		// send the cmd then handle it internally
-	}
-	
-	/*
-	* send
-	*
-	* @params
-	* $command - command to send
-	*/
-	static public function send( $command )
-	{
-		ircd_handle::send( $command );
 	}
 	
 	/*
@@ -590,7 +579,7 @@ class ircd implements protocol
 	static public function on_user_login( $nick, $account )
 	{
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$account );
+		ircd_handle::send( ':'.self::$sid.' ENCAP * SU '.$uid.' :'.$account );
 	}
 	
 	/*
@@ -602,7 +591,7 @@ class ircd implements protocol
 	static public function on_user_logout( $nick )
 	{
 		$uid = ircd_handle::get_uid( $nick );
-		self::send( ':'.self::$sid.' ENCAP * SU '.$uid. ' :' );	
+		ircd_handle::send( ':'.self::$sid.' ENCAP * SU '.$uid. ' :' );	
 	}
 	
 	/*
@@ -970,4 +959,5 @@ class ircd implements protocol
 		self::shutdown( 'ERROR', true );
 	}
 }
+
 // EOF;

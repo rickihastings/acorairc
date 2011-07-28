@@ -57,7 +57,6 @@ interface protocol
 	static public function global_ban( $nick, $user, $duration, $message );
 	static public function shutdown( $message, $terminate = false );
 	static public function push( $from, $numeric, $nick, $message );
-	static public function send( $command );
 	static public function set_registered_mode( $nick, $channel );
 	// ircd functions
 	
