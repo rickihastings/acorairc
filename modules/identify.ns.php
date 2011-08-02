@@ -234,7 +234,7 @@ class ns_identify extends module
 						continue;
 				
 					if ( !$channel = services::chan_exists( $chan, array( 'channel' ) ) )
-						return false;
+						continue;
 					// if the channel doesn't exist we return false, to save us the hassle of wasting
 					// resources on this stuff below.
 				
@@ -251,8 +251,6 @@ class ns_identify extends module
 			// check if mode_on_id is set, also cs_access is enabled, and lets do a remote access gain :D
 			
 			$return_data[CMD_SUCCESS] = true;
-			return $return_data;
-			// return the data back
 		}
 		else
 		{
@@ -269,11 +267,11 @@ class ns_identify extends module
 			if ( core::$nicks[$nick]['failed_attempts'] == 5 )
 				ircd::kill( core::$config->nickserv->nick, $nick, 'Maxmium FAILED login attempts reached.' );
 			// have they reached the failed attempts limit? we gonna fucking KILL mwhaha
-			
-			return $return_data;
-			// return the data back
 		}
 		// invalid password? HAX!!
+		
+		return $return_data;
+		// return the data back
 	}
 	
 	/*

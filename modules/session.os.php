@@ -114,6 +114,15 @@ class os_session extends module
 	}
 	
 	/*
+	 * on_burst_connect (event hook)
+	 */
+	static public function on_burst_connect( $connect_data )
+	{
+		if ( core::$config->operserv->limit_on_connect )
+			self::on_connect( $connect_data );
+	}
+	
+	/*
 	* on_connect (event hook)
 	*/
 	static public function on_connect( $connect_data )

@@ -608,7 +608,7 @@ class core
 	static public function alog( $message, $type = 'CHAN' )
 	{
 		$type = strtolower( $type );
-	
+		
 		if ( $type != 'chan' && ( self::$config->settings->loglevel != 'off' || !isset( self::$config->settings->loglevel ) ) )
 		{
 			if ( in_array( $type, self::$log_levels ) || self::$config->settings->loglevel == 'all' )
@@ -622,7 +622,6 @@ class core
 				// if we're not connected, and in debug mode
 				// just send it out, else they wont actually see the message and
 				// it'll just end up in the log file
-				return false;
 			}
 		}
 		// debug on?
@@ -632,8 +631,7 @@ class core
 				self::$log_data[$type][] = '['.date( 'd/m/Y H:i:s', time() ).'] '.self::$config->global->nick.'/'.self::$config->settings->logchan.': '.$message;
 			// we also log logchan stuff to file, as this can prove very useful.
 			ircd::msg( self::$config->global->nick, self::$config->settings->logchan, $message );
-			// send the message into the logchan		
-			return false;
+			// send the message into the logchan
 		}
 		// logging is enabled, so send the message into the channel.
 	}
