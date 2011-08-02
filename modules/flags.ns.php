@@ -82,7 +82,6 @@ class ns_flags extends module
 		$return_data = self::_set_flags_nick( $input, $nick, $nick, $ircdata[0], core::get_data_after( $ircdata, 0 ), core::get_data_after( $ircdata, 1 ) );
 		// call _set_flags_nick
 		
-		print_r( $return_data );
 		services::respond( core::$config->nickserv->nick, $nick, $return_data[CMD_RESPONSE] );
 		return $return_data[CMD_SUCCESS];
 		// respond and return
