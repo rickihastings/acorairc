@@ -630,7 +630,7 @@ class core
 			if ( !in_array( $message, self::$log_data ) )
 				self::$log_data[$type][] = '['.date( 'd/m/Y H:i:s', time() ).'] '.self::$config->global->nick.'/'.self::$config->settings->logchan.': '.$message;
 			// we also log logchan stuff to file, as this can prove very useful.
-			ircd::notice( self::$config->global->nick, self::$config->settings->logchan, $message );
+			ircd::msg( self::$config->global->nick, self::$config->settings->logchan, $message );
 			// send the message into the logchan
 		}
 		// logging is enabled, so send the message into the channel.
