@@ -15,7 +15,7 @@
 #
 
 run=`ps ux | awk '/php (.*?)services.php/ && !/awk/ {print $2}'`
-version="0.4.5beta+Cymric"
+version="0.6.0beta"
 
 if [ "$1" = "" ]
 then
@@ -30,7 +30,8 @@ then
         	echo "Acora IRC Services are already running."
 		exit
     	else
-       		php -q extra/start.php	
+		echo "Starting Acora IRC Services... Version: $version."
+       		php -q extra/start.php
 		exit
 	fi
 elif [ "$1" = "stop" ]
@@ -62,6 +63,7 @@ then
         	echo "Acora IRC Services are already running."
 			exit
     	else
+		echo "Starting Acora IRC Services... Version: $version."
 		echo "Running in debug mode."
        		php services.php debug	
 		exit
