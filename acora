@@ -31,7 +31,7 @@ then
 		exit
     	else
 		echo "Starting Acora IRC Services... Version: $version."
-       		php -q extra/start.php
+       		php -q services.php > /dev/null &
 		exit
 	fi
 elif [ "$1" = "stop" ]
@@ -50,7 +50,7 @@ then
     	if [ "$run" ]
     	then
        		kill -9 $run
-        	php -q extra/start.php
+        	php -q services.php > /dev/null &
 			exit
     	else
     		echo "Acora IRC Services are not running."
@@ -65,7 +65,7 @@ then
     	else
 		echo "Starting Acora IRC Services... Version: $version."
 		echo "Running in debug mode."
-       		php services.php debug	
+       		php services.php debug
 		exit
 	fi
 elif [ "$1" = "status" ]
