@@ -126,13 +126,13 @@ class os_stats extends module
 	{
 		$return_data = module::$return_data;
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_1, array( 'network' => core::$config->server->network_name ) );
-		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_2, array( 'version' => core::$version ) );
+		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_2, array( 'version' => base64_decode( core::$version ) ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_3, array( 'users' => core::$max_users ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_4, array( 'users' => count( core::$nicks ) ) );
 		$return_data[CMD_RESPONSE][] = services::parse( operserv::$help->OS_STATS_N_5, array( 'chans' => count( core::$chans ) ) );
 		// compile network info response.
 		
-		$return_data[CMD_DATA] = array( 'network' => core::$config->server->network_name, 'version' => core::$version, 'max_users' => core::$max_users, 'users' => count( core::$nicks ), 'chans' => count( core::$chans ) ); 
+		$return_data[CMD_DATA] = array( 'network' => core::$config->server->network_name, 'version' => base64_decode( core::$version ), 'max_users' => core::$max_users, 'users' => count( core::$nicks ), 'chans' => count( core::$chans ) ); 
 		// compile data, for RPC calls
 		
 		$return_data[CMD_SUCCESS] = true;

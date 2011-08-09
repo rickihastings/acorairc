@@ -1,88 +1,117 @@
-#!/bin/sh
+#!/usr/bin/php -q
+<?php
 
-#
-# Acora IRC Services
-# acora: Services remote control file
-#
-# Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
-# Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
-#
-# This project is licensed under the GNU Public License
-#
-# Permission to use, copy, modify, and/or distribute this software for any
-# purpose with or without fee is hereby granted, provided that the above
-# copyright notice and this permission notice appear in all copies.
-#
+/*
+* Acora IRC Services
+* services.php: Boots up the services package.
+* 
+* Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
+* Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
+*
+* This project is licensed under the GNU Public License
+*
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*/
 
-run=`ps ux | awk '/php (.*?)services.php/ && !/awk/ {print $2}'`
-version="0.6.0beta"
+$run = exec( "ps ux | awk '/php (.*?)services.php/ && !/awk/ {print $2}'" );
+$valid = array( 'start', 'stop', 'debug', 'restart', 'status', 'version' );
+$cmd = $argv[1];
+// set some variables
+require( dirname(__FILE__).'/core/core.php' );
+$version = base64_decode( core::$version );
+// include core/core.php to get version string
 
-if [ "$1" = "" ]
-then
-    	echo "Invalid use (start|stop|restart|debug|status|version)"
-	exit
-fi
+if ( !isset( $cmd ) || !in_array( $cmd, $valid ) )
+{
+	print( "Invalid use (start|stop|restart|debug|status|version)\n" );
+	exit;
+}
+// invalid argument
 
-if [ "$1" = "start" ]
-then
-    	if [ "$run" ]
-    		then
-        	echo "Acora IRC Services are already running."
-		exit
-    	else
-		echo "Starting Acora IRC Services... Version: $version."
-       		php -q services.php > /dev/null &
-		exit
-	fi
-elif [ "$1" = "stop" ]
-then
-    	if [ "$run" ]
-    	then
-        	kill -9 $run
-        	echo "Acora IRC Services shutting down."
-       		exit
+switch ( $cmd )
+{
+	case 'start':
+		if ( $run != '' )
+		{
+			print( "Acora IRC Services are already running.\n" );
+			exit;
+		}
+		// acora is already running
 		else
-        	echo "Acora IRC Services are not running."
-        	exit
-		fi
-elif [ "$1" = "restart" ]
-then
-    	if [ "$run" ]
-    	then
-       		kill -9 $run
-        	php -q services.php > /dev/null &
-			exit
-    	else
-    		echo "Acora IRC Services are not running."
-		exit
-    	fi
-elif [ "$1" = "debug" ]
-then
-    	if [ "$run" ]
-    	then
-        	echo "Acora IRC Services are already running."
-			exit
-    	else
-		echo "Starting Acora IRC Services... Version: $version."
-		echo "Running in debug mode."
-       		php services.php debug
-		exit
-	fi
-elif [ "$1" = "status" ]
-then
-	if [ "$run" ]
-    	then
-        	echo "Acora IRC Services are running."
-			exit
-    	else
-        	echo "Acora IRC Services are not running."
-		exit
-    	fi
-elif [ "$1" = "version" ]
-then
-    	echo "Acora IRC Services version $version\033[m"
-	exit
-else
-    	echo "Invalid use (start|stop|restart|debug|status|version)"
-	exit
-fi
+		{
+			print( "Starting Acora IRC Services... Version: $version.\n" );
+	       		exec( "php -q services.php > /dev/null &" );
+			exit;
+		}
+		// it's not running, start it
+	break;
+	case 'stop':
+		if ( $run != '' )
+		{
+			print( "Acora IRC Services shutting down.\n" );
+			exec( "kill -9 $run" );
+	       		exit;
+		}
+		// acora is running, stop it
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it's not running
+	break;
+	case 'restart':
+		if ( $run != '' )
+		{
+			print ( "Restarting Acora IRC Services... Version: $version.\n" );
+			exec( "kill -9 $run && php -q services.php > /dev/null &" );
+			exit;
+		}
+		// acora is running, restart it
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it's not running
+	break;
+	case 'debug':
+		if ( $run != '' )
+		{
+			print( "Acora IRC Services are already running.\n" );
+			exit;
+		}
+		// acora is running
+		else
+		{
+			print( "Starting Acora IRC Services... Version: $version.\n" );
+			print( "Running in debug mode.\n" );
+	       		system( "php services.php debug" );
+			exit;
+		}
+		// it's not running, start in debug
+	break;
+	case 'status':
+		if ( $run != '' )
+		{
+			print( "Acora IRC Services are running.\n" );
+			exit;
+		}
+		// acora is running
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it's not running
+	break;
+	case 'version':
+		print( "Acora IRC Services version $version\n" );
+		exit;
+	break;
+}
+// toggle commands
+
+// EOF;

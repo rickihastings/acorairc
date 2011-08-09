@@ -39,7 +39,7 @@ class commands
 		
 		if ( $part_one == 'VERSION' )
 		{
-			ircd::notice( $who, $nick, 'VERSION acora-'.core::$version.' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+			ircd::notice( $who, $nick, 'VERSION acora-'.base64_decode( core::$version ).' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
 			ircd::notice( $who, $nick, 'VERSION (C) 2009 GamerGrid #acora @ irc.ircnode.org' );
 		}
 		// only reply on version.
@@ -90,7 +90,7 @@ class commands
 			foreach ( $lines as $num => $line )
 			{
 				if ( strpos( $line, '{version}' ) !== false )
-					$line = str_replace( '{version}', core::$version, $line );
+					$line = str_replace( '{version}', base64_decode( core::$version ), $line );
 				if ( strpos( $line, '{uptime}' ) !== false )
 					$line = str_replace( '{uptime}', core::format_time( core::$uptime ), $line );
 				// replaceable variables here.
