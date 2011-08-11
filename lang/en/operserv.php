@@ -367,8 +367,8 @@ $help = (object) array(
 	'OS_STATS_N_4'		=> '  Current users: {users}',
 	'OS_STATS_N_5'		=> '  Current chans: {chans}',
 	// stats NETWORK
-	'OS_STATS_O_T'		=> 'Entry  Hostmask                                          Details',
-	'OS_STATS_O_D'		=> '-----  ------------------------------------------------  -------',
+	'OS_STATS_O_T'		=> 'Entry  Hostmask                                          Sign On / Privs',
+	'OS_STATS_O_D'		=> '-----  ------------------------------------------------  ---------------',
 	'OS_STATS_O_L'		=> '{num} {host}[{time}]{privs}',
 	'OS_STATS_O_B'		=> 'End of list - {num} opers online',
 	// stats OPERS

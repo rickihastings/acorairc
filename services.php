@@ -16,7 +16,7 @@
 */
 
 // define the basepath
-define( 'BASEPATH', dirname(__FILE__) );
+define( 'BASEPATH', dirname( __FILE__ ) );
 define( 'CONFPATH', BASEPATH.'/conf/' );
 
 // Check to see if the version of PHP meets the minimum requirement
