@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/core.php: Core class that initiates everything.
+* src/core.php: Core class that initiates everything.
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
@@ -253,7 +253,7 @@ class core
 	
 		foreach ( self::$service_bots as $bot )
 		{
-			require( BASEPATH.'/core/services/'.$bot.'.php' );
+			require( BASEPATH.'/src/services/'.$bot.'.php' );
 			self::$bots[$bot] = new $bot();
 		}
 		// start our bots up.
@@ -540,7 +540,7 @@ class core
 	*/
 	static public function protocol_init()
 	{
-		if ( !file_exists( BASEPATH.'/core/protocol/'.self::$config->server->ircd.'.php' ) )
+		if ( !file_exists( BASEPATH.'/src/protocol/'.self::$config->server->ircd.'.php' ) )
 		{
 			self::alog( 'protocol_init(): failed to initiate protocol module '.self::$config->server->ircd, 'BASIC' );
 			
@@ -549,7 +549,7 @@ class core
 		}
 		else
 		{
-			require( BASEPATH.'/core/protocol/'.self::$config->server->ircd.'.php' );
+			require( BASEPATH.'/src/protocol/'.self::$config->server->ircd.'.php' );
 			new ircd();
 		}
 		// can we initiate the protocol module? :S

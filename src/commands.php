@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/commands.php: Command and help system handler.
+* src/commands.php: Command and help system handler.
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

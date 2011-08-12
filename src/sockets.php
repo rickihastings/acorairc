@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/sockets.php: Socket engine
+* src/sockets.php: Socket engine
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

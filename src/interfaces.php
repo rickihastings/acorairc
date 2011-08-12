@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/interfaces.php: Interfaces file, keeps everything in one place.
+* src/interfaces.php: Interfaces file, keeps everything in one place.
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/parser.php: Configuration parser
+* src/parser.php: Configuration parser
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

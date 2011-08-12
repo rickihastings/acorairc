@@ -19,9 +19,9 @@ $run = exec( "ps ux | awk '/php (.*?)services.php/ && !/awk/ {print $2}'" );
 $valid = array( 'start', 'stop', 'debug', 'restart', 'status', 'version' );
 $cmd = $argv[1];
 // set some variables
-require( dirname( __FILE__ ).'/core/core.php' );
+require( dirname( __FILE__ ).'/src/core.php' );
 $version = base64_decode( core::$version );
-// include core/core.php to get version string
+// include src/core.php to get version string
 
 if ( !isset( $cmd ) || !in_array( $cmd, $valid ) )
 {

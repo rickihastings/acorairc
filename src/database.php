@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/database.php: Database driver initiation class
+* src/database.php: Database driver initiation class
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
@@ -28,7 +28,7 @@ class database
 	*/
 	static public function factory( $drivers )
 	{
-		if ( require( BASEPATH.'/core/drivers/'.$drivers.'.php' ) )
+		if ( require( BASEPATH.'/src/drivers/'.$drivers.'.php' ) )
 		{
 			core::alog( 'factory(): using '.$drivers.'_driver database driver', 'BASIC' );
 			$driver_class = $drivers.'_driver';

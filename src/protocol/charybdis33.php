@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/protocol/charybdis33.php: Provides support for Charybdis 3.3
+* src/protocol/charybdis33.php: Provides support for Charybdis 3.3
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/modules.php: Class for module handlers
+* src/modules.php: Class for module handlers
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

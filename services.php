@@ -45,22 +45,22 @@ ini_set( 'memory_limit', '64M' );
 error_reporting( E_ALL ^ E_NOTICE );
 
 // include all the core system file
-require( BASEPATH.'/core/core.php' );
+require( BASEPATH.'/src/core.php' );
 
 // set the error handler
 set_error_handler( array( 'core', 'core_error' ) );
 
 // include all the other required classes
-require( BASEPATH.'/core/interfaces.php' );
-require( BASEPATH.'/core/timer.php' );
-require( BASEPATH.'/core/mode.php' );
-require( BASEPATH.'/core/services.php' );
-require( BASEPATH.'/core/commands.php' );
-require( BASEPATH.'/core/modules.php' );
-require( BASEPATH.'/core/parser.php' );
-require( BASEPATH.'/core/database.php' );
-require( BASEPATH.'/core/sockets.php' );
-require( BASEPATH.'/core/ircd.php' );
+require( BASEPATH.'/src/interfaces.php' );
+require( BASEPATH.'/src/timer.php' );
+require( BASEPATH.'/src/mode.php' );
+require( BASEPATH.'/src/services.php' );
+require( BASEPATH.'/src/commands.php' );
+require( BASEPATH.'/src/modules.php' );
+require( BASEPATH.'/src/parser.php' );
+require( BASEPATH.'/src/database.php' );
+require( BASEPATH.'/src/sockets.php' );
+require( BASEPATH.'/src/ircd.php' );
 
 // boot the services.
 new core( $argv );

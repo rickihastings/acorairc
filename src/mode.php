@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/mode.php: Mode parsing class.
+* src/mode.php: Mode parsing class.
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora

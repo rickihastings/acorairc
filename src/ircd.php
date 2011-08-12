@@ -2,7 +2,7 @@
 
 /*
 * Acora IRC Services
-* core/ircd.php: IRCD interface
+* src/ircd.php: IRCD interface
 * 
 * Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
 * Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
