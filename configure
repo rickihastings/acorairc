@@ -1,0 +1,223 @@
+#!/usr/bin/php
+<?php
+
+/*
+* Acora IRC Services
+* configure: Checks for required packages.
+*
+* Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
+* Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
+*
+* This project is licensed under the GNU Public License
+*
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*/
+
+print( "\n" );
+print( "     .d888888                                      dP  888888ba   a88888b.\n" );
+print( "    d8'    88                                      88  88    `8b d8'   `88\n" );
+print( "    88aaaaa88a .d8888b. .d8888b. 88d888b. .d8888b. 88 a88aaaa8P' 88       \n" );
+print( "    88     88  88'  `\"\" 88'  `88 88'  `88 88'  `88 88  88   `8b. 88       \n" );
+print( "    88     88  88.  ... 88.  .88 88       88.  .88 88  88     88 Y8.   .88\n" );
+print( "    88     88  `88888P' `88888P' dP       `88888P8 dP  dP     dP  Y88888P'\n" );
+print( "\n" );
+print( "                                           oo\n" );
+print( "\n" );
+print( "      .d8888b. .d8888b. 88d888b. dP   .dP dP .d8888b. .d8888b. .d8888b.\n" );
+print( "      Y8ooooo. 88ooood8 88'  `88 88   d8' 88 88'  `\"\" 88ooood8 Y8ooooo.\n" );
+print( "            88 88.  ... 88       88 .88'  88 88.  ... 88.  ...       88\n" );
+print( "      `88888P' `88888P' dP       8888P'   dP `88888P' `88888P' `88888P\n" );
+print( "\n" );
+print( "     Welcome to Acora IRC setup wizard, we're just going to run some\n" );
+print( "     checks to see whether your system is capable of running Acora IRC\n" );
+print( "\n" );
+usleep( 250000 );
+
+print( "Checking version..." );
+usleep( 250000 );
+if ( version_compare( '5.3.0', PHP_VERSION, '>' ) )
+{
+	print( " ERROR\n* PHP 5.3.0+ is required\n" );
+        print( "  Current version is: ".PHP_VERSION."\n" );
+	exit;
+}
+// check php version
+print( " OK\n" );
+
+print( "Checking for date..." );
+usleep( 250000 );
+if ( !extension_loaded( 'date' ) )
+{
+        print( " ERROR\n* Cannot find date extension, please check your php.ini.\n" );
+        exit;
+}
+// check for date
+print( " OK\n" );
+
+print( "Checking for sockets..." );
+usleep( 250000 );
+if ( !extension_loaded( 'sockets' ) )
+{
+	print( " ERROR\n* PHP is not compiled with socket support.\n" );
+	print( "  Please compile it with sockets using --enable-sockets.\n" );
+	exit;
+}
+// check for sockets
+print( " OK\n" );
+
+print( "Checking for mysql..." );
+usleep( 250000 );
+if ( !extension_loaded( 'mysql' ) )
+{
+        print( " ERROR\n* PHP is not compiled with mysql support.\n" );
+        print( "  Please compile it with mysql using --with-mysql.\n" );
+        exit;
+}
+// check for mysql
+print( " OK\n" );
+
+print( "Checking for json..." );
+usleep( 250000 );
+if ( !extension_loaded( 'json' ) )
+{
+        print( " ERROR\n* Cannot find json extension, please check your php.ini.\n" );
+        exit;
+}
+// check for json
+print( " OK\n" );
+
+print( "Creating remote control file..." );
+usleep( 250000 );
+
+$handle = @fopen( 'acora', 'w' );
+@fwrite( $handle, '#!/usr/bin/php
+<?php
+
+/*
+* Acora IRC Services
+* acora: Services control file
+* 
+* Copyright (c) 2009 Acora (http://cia.vc/stats/project/acorairc)
+* Written by Ricki, Henry, Shaun and help from others: irc.ircnode.org #acora
+*
+* This project is licensed under the GNU Public License
+*
+* Permission to use, copy, modify, and/or distribute this software for any
+* purpose with or without fee is hereby granted, provided that the above
+* copyright notice and this permission notice appear in all copies.
+*/
+
+$run = exec( "ps ux | awk \'/php (.*?)services.php/ && !/awk/ {print $2}\'" );
+$valid = array( \'start\', \'stop\', \'debug\', \'restart\', \'status\', \'version\' );
+$cmd = $argv[1];
+// set some variables
+require( dirname( __FILE__ ).\'/src/core.php\' );
+$version = base64_decode( core::$version );
+// include src/core.php to get version string
+
+if ( !isset( $cmd ) || !in_array( $cmd, $valid ) )
+{
+	print( "Invalid use (start|stop|restart|debug|status|version)\n" );
+	exit;
+}
+// invalid argument
+
+switch ( $cmd )
+{
+	case \'start\':
+		if ( $run != \'\' )
+		{
+			print( "Acora IRC Services are already running.\n" );
+			exit;
+		}
+		// acora is already running
+		else
+		{
+			print( "Starting Acora IRC Services... Version: $version.\n" );
+	       		exec( "php -q services.php > /dev/null &" );
+			exit;
+		}
+		// it\'s not running, start it
+	break;
+	case \'stop\':
+		if ( $run != \'\' )
+		{
+			print( "Acora IRC Services shutting down.\n" );
+			exec( "kill -9 $run" );
+	       		exit;
+		}
+		// acora is running, stop it
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it\'s not running
+	break;
+	case \'restart\':
+		if ( $run != \'\' )
+		{
+			print ( "Restarting Acora IRC Services... Version: $version.\n" );
+			exec( "kill -9 $run && php -q services.php > /dev/null &" );
+			exit;
+		}
+		// acora is running, restart it
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it\'s not running
+	break;
+	case \'debug\':
+		if ( $run != \'\' )
+		{
+			print( "Acora IRC Services are already running.\n" );
+			exit;
+		}
+		// acora is running
+		else
+		{
+			print( "Starting Acora IRC Services... Version: $version.\n" );
+			print( "Running in debug mode.\n" );
+	       		system( "php services.php debug" );
+			exit;
+		}
+		// it\'s not running, start in debug
+	break;
+	case \'status\':
+		if ( $run != \'\' )
+		{
+			print( "Acora IRC Services are running.\n" );
+			exit;
+		}
+		// acora is running
+		else
+		{
+			print( "Acora IRC Services are not running.\n" );
+			exit;
+		}
+		// it\'s not running
+	break;
+	case \'version\':
+		print( "Acora IRC Services version $version\n" );
+		exit;
+	break;
+}
+// toggle commands
+
+// EOF;' );
+@fclose( $handle );
+@chmod( 'acora', 0777 );
+print( " DONE\n" );
+// writing controller file
+
+@mkdir( 'log' );
+print( "Creating log... DONE\n" );
+// creating log folder
+
+print( "Configure complete, you may now edit conf/services.conf and run acora with ./acora\n" );
+
+// EOF;
