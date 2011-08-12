@@ -17,10 +17,12 @@
 class chanserv extends service
 {
 	
-	const SERV_VERSION = '0.1.0';
+	const SERV_VERSION = '0.1.1';
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
+	static public $flags = array();
+	static public $levels = array();
 	static public $help;
 	// help
 	

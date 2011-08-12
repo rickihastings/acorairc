@@ -153,7 +153,7 @@ class ircd implements protocol
 	{
 		$nick = str_replace( ':', '', $ircdata[0] );
 	
-		ircd_handle::send( ':'.self::$sid.' 351 '.$nick.' :acora-'.base64_decode( core::$version ).' '.core::$config->server->name.' '.core::$config->server->ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
+		ircd_handle::send( ':'.self::$sid.' 351 '.$nick.' :Acora-'.base64_decode( core::$version ).' ('.core::$version.') '.core::$config->server->name.' :[Charybdis] Booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
 		// ooh, version?
 	}
 	

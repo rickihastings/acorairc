@@ -196,7 +196,7 @@ $help = (object) array(
 		'    +I - Enables known-only, any user who does not have access (at least +k)',
 		'         will be kickbanned.',
 		' ',
-		'More than one flag can be set at once, for example "-ros+v". With multiple',
+		'More than one flag can be set at once, for example "-due+F". With multiple',
 		'parameters.',
 		'=---- End of {chanserv} Help ----=',
 	),

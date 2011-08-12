@@ -40,7 +40,7 @@ class commands
 		if ( $part_one == 'VERSION' )
 		{
 			ircd::notice( $who, $nick, 'VERSION acora-'.base64_decode( core::$version ).' '.ircd::$ircd.' booted: '.date( 'F j, Y, g:i a', core::$network_time ).'' );
-			ircd::notice( $who, $nick, 'VERSION (C) 2009 GamerGrid #acora @ irc.ircnode.org' );
+			ircd::notice( $who, $nick, 'VERSION (C) 2009-2011 IRCNode #acora @ irc.ircnode.org' );
 		}
 		// only reply on version.
 		elseif ( $part_one == 'TIME' )

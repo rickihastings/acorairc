@@ -23,6 +23,11 @@ define( 'CMD_SUCCESS', 'SUCCESS' );
 define( 'CMD_FAILCODE', 'FAILCODE' );
 define( 'CMD_RESPONSE', 'RESPONSE' );
 define( 'CMD_DATA', 'DATA' );
+define( 'FLAG_LETTER', 'letter' );
+define( 'FLAG_HELP', 'help' );
+define( 'FLAG_HAS_PARAM', 'has_param' );
+define( 'FLAG_SET_METHOD', 'set_method' );
+define( 'FLAG_UNSET_METHOD', 'unset_method' );
 
 /*
 * protocol (interface)
@@ -34,7 +39,6 @@ interface protocol
 	
 	static public function send_burst( $server );
 	static public function send_squit( $server );
-	//static public function ping( $ircdata );
 	static public function init_server( $name, $pass, $desc, $numeric );
 	static public function send_version( $ircdata );
 	static public function introduce_client( $nick, $ident, $hostname, $gecos, $enforcer = false );
@@ -89,6 +93,15 @@ interface protocol
 abstract class service
 {
 	
+	static public $flag_data = array(
+		FLAG_NAME		=> '',
+		FLAG_HELP		=> '',
+		FLAG_HAS_PARAM		=> false,
+		FLAG_SET_METHOD		=> null,
+		FLAG_UNSET_METHOD	=> null,
+	);
+	// setup an array for flag data
+
 	abstract static public function add_help_fix( $module, $what, $command, $help );
 	abstract static public function add_help( $module, $command, $help, $privs = '' );
 	abstract static public function get_help( $nick, $command );
