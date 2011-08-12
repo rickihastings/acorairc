@@ -136,7 +136,7 @@ switch ( $cmd )
 		else
 		{
 			print( "Starting Acora IRC Services... Version: $version.\n" );
-	       		exec( "php -q services.php > /dev/null &" );
+	       		exec( "php services.php > /dev/null &" );
 			exit;
 		}
 		// it\'s not running, start it
@@ -160,7 +160,7 @@ switch ( $cmd )
 		if ( $run != \'\' )
 		{
 			print ( "Restarting Acora IRC Services... Version: $version.\n" );
-			exec( "kill -9 $run && php -q services.php > /dev/null &" );
+			exec( "kill -9 $run && php services.php > /dev/null &" );
 			exit;
 		}
 		// acora is running, restart it
