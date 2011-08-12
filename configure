@@ -56,6 +56,16 @@ if ( !extension_loaded( 'date' ) )
 // check for date
 print( " OK\n" );
 
+print( "Checking for ctype..." );
+usleep( 250000 );
+if ( !extension_loaded( 'ctype' ) )
+{
+        print( " ERROR\n* Cannot find ctype extension, please check your php.ini.\n" );
+        exit;
+}
+// check for ctype
+print( " OK\n" );
+
 print( "Checking for sockets..." );
 usleep( 250000 );
 if ( !extension_loaded( 'sockets' ) )

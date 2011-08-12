@@ -94,7 +94,7 @@ abstract class service
 {
 	
 	static public $flag_data = array(
-		FLAG_NAME		=> '',
+		FLAG_LETTER		=> '',
 		FLAG_HELP		=> '',
 		FLAG_HAS_PARAM		=> false,
 		FLAG_SET_METHOD		=> null,

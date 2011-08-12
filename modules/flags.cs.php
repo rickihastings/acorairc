@@ -54,7 +54,22 @@ class cs_flags extends module
 		
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
 		// add the command
-		
+
+		services::add_flag( chanserv::$flags, 'd', '' );
+                services::add_flag( chanserv::$flags, 'u', '' );
+                services::add_flag( chanserv::$flags, 'e', '' );
+                services::add_flag( chanserv::$flags, 'w', '' );
+                services::add_flag( chanserv::$flags, 'm', '' );
+                services::add_flag( chanserv::$flags, 't', '' );
+		services::add_flag( chanserv::$flags, 'S', '' );
+                services::add_flag( chanserv::$flags, 'F', '' );
+                services::add_flag( chanserv::$flags, 'G', '' );
+                services::add_flag( chanserv::$flags, 'T', '' );
+                services::add_flag( chanserv::$flags, 'K', '' );
+                services::add_flag( chanserv::$flags, 'L', '' );
+		services::add_flag( chanserv::$flags, 'I', '' );
+		// add our flags :3
+
 		self::$flags = '+-duewmtSFGTKLI';
 		self::$p_flags = 'duewmt';
 		// flags WITH parameters

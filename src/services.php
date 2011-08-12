@@ -15,7 +15,31 @@
 */
 class services
 {
-	
+
+	/*
+	* add_flag
+	*
+	* @params
+	* &$hook - either chanserv::$flags, $levels or nickserv::$flags, etc
+	* $flag - flag, such as 'f', 'G', 'H', etc.
+	* $help - Help document related to it.
+	* $set_method - A reference to a method to call upon setting of flag (static only)
+	* $unset_method - A reference to a method to call upon unsetting of flag (static only)
+	*/
+	static public function add_flag( &$hook, $flag, $help, $set_method = null, $unset_method = null )
+	{
+		$data = service::$flag_data;
+		$data[FLAG_LETTER] = $flag;
+		$data[FLAG_HAS_PARAM] = ( ctype_lower( $flag ) ) ? true : false;
+		$data[FLAG_HELP] = $help;
+		$data[FLAG_SET_METHOD] = $set_method;
+		$data[FLAG_UNSET_METHOD] = $unset_method;
+		// set some variables, then send the flag into $hook
+
+		$hook[$flag] = $data;
+		// send it to our $hook
+	}
+
 	/*
 	* oper_privs
 	*
