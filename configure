@@ -36,7 +36,7 @@ print( "\n" );
 usleep( 250000 );
 
 print( "Checking version..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( version_compare( '5.3.0', PHP_VERSION, '>' ) )
 {
 	print( " ERROR\n* PHP 5.3.0+ is required\n" );
@@ -47,7 +47,7 @@ if ( version_compare( '5.3.0', PHP_VERSION, '>' ) )
 print( " OK\n" );
 
 print( "Checking for date..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( !extension_loaded( 'date' ) )
 {
         print( " ERROR\n* Cannot find date extension, please check your php.ini.\n" );
@@ -57,7 +57,7 @@ if ( !extension_loaded( 'date' ) )
 print( " OK\n" );
 
 print( "Checking for ctype..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( !extension_loaded( 'ctype' ) )
 {
         print( " ERROR\n* Cannot find ctype extension, please check your php.ini.\n" );
@@ -67,7 +67,7 @@ if ( !extension_loaded( 'ctype' ) )
 print( " OK\n" );
 
 print( "Checking for sockets..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( !extension_loaded( 'sockets' ) )
 {
 	print( " ERROR\n* PHP is not compiled with socket support.\n" );
@@ -78,7 +78,7 @@ if ( !extension_loaded( 'sockets' ) )
 print( " OK\n" );
 
 print( "Checking for mysql..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( !extension_loaded( 'mysql' ) )
 {
         print( " ERROR\n* PHP is not compiled with mysql support.\n" );
@@ -89,7 +89,7 @@ if ( !extension_loaded( 'mysql' ) )
 print( " OK\n" );
 
 print( "Checking for json..." );
-usleep( 250000 );
+usleep( 150000 );
 if ( !extension_loaded( 'json' ) )
 {
         print( " ERROR\n* Cannot find json extension, please check your php.ini.\n" );
@@ -99,7 +99,7 @@ if ( !extension_loaded( 'json' ) )
 print( " OK\n" );
 
 print( "Creating remote control file..." );
-usleep( 250000 );
+usleep( 150000 );
 
 $handle = @fopen( 'acora', 'w' );
 @fwrite( $handle, '#!/usr/bin/php
@@ -119,7 +119,9 @@ $handle = @fopen( 'acora', 'w' );
 * copyright notice and this permission notice appear in all copies.
 */
 
-$run = exec( "ps ux | awk \'/php (.*?)services.php/ && !/awk/ {print $2}\'" );
+$run = shell_exec( "ps ux | awk \'/php (.*?)services.php/ && !/awk/ {print $2}\'" );
+$run = explode( "\n", $run );
+$run = implode( \' \', $run );
 $valid = array( \'start\', \'stop\', \'debug\', \'restart\', \'status\', \'version\' );
 $cmd = $argv[1];
 // set some variables
