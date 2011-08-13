@@ -340,15 +340,18 @@ class commands
 		}
 		// display the main stuff
 		
-		sort( $reordered );
-		$privs = '';
-		foreach ( $reordered as $line => $info )
+		if ( $reordered != null )
 		{
-			$privs = $reordered_privs[$line];
-			if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
-				$response[] = services::parse( $info );
+			sort( $reordered );
+			$privs = '';
+			foreach ( $reordered as $line => $info )
+			{
+				$privs = $reordered_privs[$line];
+				if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
+					$response[] = services::parse( $info );
+			}
+			// seems the stuff is reordered
 		}
-		// seems the stuff is reordered
 		
 		if ( isset( self::$suffix[$hook][$command] ) )
 		{

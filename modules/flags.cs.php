@@ -17,7 +17,7 @@
 class cs_flags extends module
 {
 	
-	const MOD_VERSION = '0.1.6';
+	const MOD_VERSION = '0.1.7';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -49,27 +49,30 @@ class cs_flags extends module
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
-		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL );
+		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_PRE );
 		// add the help
 		
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
 		// add the command
 
-		services::add_flag( chanserv::$flags, 'd', '' );
-                services::add_flag( chanserv::$flags, 'u', '' );
-                services::add_flag( chanserv::$flags, 'e', '' );
-                services::add_flag( chanserv::$flags, 'w', '' );
-                services::add_flag( chanserv::$flags, 'm', '' );
-                services::add_flag( chanserv::$flags, 't', '' );
-		services::add_flag( chanserv::$flags, 'S', '' );
-                services::add_flag( chanserv::$flags, 'F', '' );
-                services::add_flag( chanserv::$flags, 'G', '' );
-                services::add_flag( chanserv::$flags, 'T', '' );
-                services::add_flag( chanserv::$flags, 'K', '' );
-                services::add_flag( chanserv::$flags, 'L', '' );
-		services::add_flag( chanserv::$flags, 'I', '' );
+		$structure = array( 'array' => &chanserv::$flags, 'module' => 'cs_flags', 'command' => 'help flags' );
+		services::add_flag( $structure, 'd', chanserv::$help->CS_FLAGS_d );
+		services::add_flag( $structure, 'u', chanserv::$help->CS_FLAGS_u );
+		services::add_flag( $structure, 'e', chanserv::$help->CS_FLAGS_e );
+		services::add_flag( $structure, 'w', chanserv::$help->CS_FLAGS_w );
+		services::add_flag( $structure, 'm', chanserv::$help->CS_FLAGS_m );
+		services::add_flag( $structure, 't', chanserv::$help->CS_FLAGS_t );
+		services::add_flag( $structure, 'S', chanserv::$help->CS_FLAGS_S );
+		services::add_flag( $structure, 'F', chanserv::$help->CS_FLAGS_F );
+		services::add_flag( $structure, 'G', chanserv::$help->CS_FLAGS_G, array( 'cs_flags', '_set_flag_g' ), array( 'cs_flags', '_unset_flag_g' ) );
+		services::add_flag( $structure, 'T', chanserv::$help->CS_FLAGS_T );
+		services::add_flag( $structure, 'K', chanserv::$help->CS_FLAGS_K );
+		services::add_flag( $structure, 'L', chanserv::$help->CS_FLAGS_L, array( 'cs_flags', '_set_flag_l' ), array( 'cs_flags', '_unset_flag_l' )  );
+		services::add_flag( $structure, 'I', chanserv::$help->CS_FLAGS_I, array( 'cs_flags', '_set_flag_i' ) );
 		// add our flags :3
 
+		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_SUF );
+		
 		self::$flags = '+-duewmtSFGTKLI';
 		self::$p_flags = 'duewmt';
 		// flags WITH parameters
@@ -253,150 +256,108 @@ class cs_flags extends module
 	* $nick, $chan, $mode, $params, &$return_data
 	*/
 	public function _set_flags( $nick, $chan, $flag, $mode, $params, &$return_data )
-	{	
-		// ----------- d ----------- //
-		if ( $flag == 'd' )
-		{		
-			self::set_flag( $nick, $chan, $mode.'d', $params['d'], $return_data );
-			// d the target in question
-		}
-		// ----------- d ----------- //
-		
-		// ----------- u ----------- //
-		elseif ( $flag == 'u' )
+	{
+		if ( isset( chanserv::$flags[$flag] ) )
 		{
-			self::set_flag( $nick, $chan, $mode.'u', $params['u'], $return_data );
-			// u the target in question
+			$flag_data = chanserv::$flags[$flag];
+			// get the flag data
+			
+			self::set_flag( $nick, $chan, $mode.$flag, $params[$flag], $return_data );
+			// pass our data to set_flag
+			
+			if ( $mode == '+' && $flag_data[FLAG_SET_METHOD] != null )
+				call_user_func_array( $flag_data[FLAG_SET_METHOD], array( $nick, $chan, $mode, $params, $return_data ) );
+			if ( $mode == '-' && $flag_data[FLAG_UNSET_METHOD] != null )
+				call_user_func_array( $flag_data[FLAG_UNSET_METHOD], array( $nick, $chan, $mode, $params, $return_data ) );
+			// call any set/unset methods
 		}
-		// ----------- u ----------- //
-		
-		// ----------- e ----------- //
-		elseif ( $flag == 'e' )
+		// check if flag exists
+	}
+
+	/*
+	* testcase
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function testcase( $nick, $chan, $mode, $params, &$return_data )
+	{
+		print "test\n";
+	}
+
+	/*
+	* _set_flag_g
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function _set_flag_g( $nick, $chan, $mode, $params, &$return_data )
+	{
+		ircd::part_chan( core::$config->chanserv->nick, $chan );
+		// leave the channel
+	}
+	
+	/*
+	* _unset_flag_g
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function _unset_flag_g( $nick, $chan, $mode, $params, &$return_data )
+	{
+		if ( count( core::$chans[$chan]['users'] ) > 0 )
 		{
-			self::set_flag( $nick, $chan, $mode.'e', $params['e'], $return_data );
-			// e the target in question
+			ircd::join_chan( core::$config->chanserv->nick, $chan );
+			// join the chan.
+			
+			if ( ircd::$protect )
+				mode::set( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
+				// +ao its self.
+			else
+				mode::set( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
+				// +o its self.
 		}
-		// ----------- e ----------- //
-		
-		// ----------- w ----------- //
-		elseif ( $flag == 'w' )
+		// only join if channel has above 0 users in it.
+		// G the target in question
+	}
+	
+	/*
+	* _set_flag_l
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function _set_flag_l( $nick, $chan, $mode, $params, &$return_data )
+	{
+		mode::set( core::$config->chanserv->nick, $chan, '-l' );
+	}
+	
+	/*
+	* _unset_flag_l
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function _unset_flag_l( $nick, $chan, $mode, $params, &$return_data )
+	{
+		self::increase_limit( $chan );
+	}
+	
+	/*
+	* _set_flag_i
+	* 
+	* $nick, $chan, $mode, $params, &$return_data
+	*/
+	public function _set_flag_i( $nick, $chan, $mode, $params, &$return_data )
+	{
+		foreach ( core::$chans[$chan]['users'] as $unick => $mode )
 		{
-			self::set_flag( $nick, $chan, $mode.'w', $params['w'], $return_data );
-			// -w the target in question
-		}
-		// ----------- w ----------- //
+			if ( core::$nicks[$unick]['server'] == core::$config->server->name )
+				continue;
 		
-		// ----------- m ----------- //
-		elseif ( $flag == 'm' )
-		{
-			self::set_flag( $nick, $chan, $mode.'m', $params['m'], $return_data );
-			// -m the target in question
-		}
-		// ----------- m ----------- //
-		
-		// ----------- t ----------- //
-		elseif ( $flag == 't' )
-		{
-			self::set_flag( $nick, $chan, $mode.'t', $params['t'], $return_data );
-			// t the target in question
-		}
-		// ----------- t ----------- //
-		
-		// non paramatized modes go here
-		
-		// ----------- S ----------- //
-		elseif ( $flag == 'S' )
-		{
-			self::set_flag( $nick, $chan, $mode.'S', '', $return_data );
-			// S the target in question
-		}
-		// ----------- S ----------- //
-		
-		// ----------- F ----------- //
-		elseif ( $flag == 'F' )
-		{
-			self::set_flag( $nick, $chan, $mode.'F', '', $return_data );
-			// F the target in question
-		}
-		// ----------- F ----------- //
-		
-		// ----------- G ----------- //
-		elseif ( $flag == 'G' )
-		{
-			$return = self::set_flag( $nick, $chan, $mode.'G', '', $return_data );
-			if ( $return !== false && $mode == '-' )
+			if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
 			{
-				ircd::part_chan( core::$config->chanserv->nick, $chan );
-				// leave the channel
+				mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
+				ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
 			}
-			elseif ( $return !== false && $mode == '+' && count( core::$chans[$chan]['users'] ) > 0 )
-			{
-				ircd::join_chan( core::$config->chanserv->nick, $chan );
-				// join the chan.
-				
-				if ( ircd::$protect )
-					mode::set( core::$config->chanserv->nick, $chan, '+ao '.core::$config->chanserv->nick.' '.core::$config->chanserv->nick, true );
-					// +ao its self.
-				else
-					mode::set( core::$config->chanserv->nick, $chan, '+o '.core::$config->chanserv->nick, true );
-					// +o its self.
-			}
-			// only join if channel has above 0 users in it.
-			// G the target in question
+			// they don't have +k, KICKEM
 		}
-		// ----------- G ----------- //
-		
-		// ----------- T ----------- //
-		elseif ( $flag == 'T' )
-		{
-			self::set_flag( $nick, $chan, $mode.'T', '', $return_data );
-			// T the target in question
-		}
-		// ----------- T ----------- //
-		
-		// ----------- K ----------- //
-		elseif ( $flag == 'K' )
-		{
-			self::set_flag( $nick, $chan, $mode.'K', '', $return_data );
-			// K the target in question
-		}
-		// ----------- K ----------- //
-		
-		// ----------- L ----------- //
-		elseif ( $flag == 'L' )
-		{
-			self::set_flag( $nick, $chan, $mode.'L', '', $return_data );
-			if ( $return !== false && $mode == '-' )
-				mode::set( core::$config->chanserv->nick, $chan, '-l' );
-			elseif ( $return !== false && $mode == '+' )
-				self::increase_limit( $chan );
-			// L the target in question
-		}
-		// ----------- L ----------- //
-		
-		// ----------- -I ----------- //
-		elseif ( $flag == 'I' )
-		{
-			$return = self::set_flag( $nick, $chan, $mode.'I', '', $return_data );
-			if ( $return !== false && $mode == '+' )
-			{
-				foreach ( core::$chans[$chan]['users'] as $unick => $mode )
-				{
-					if ( core::$nicks[$unick]['server'] == core::$config->server->name )
-						continue;
-				
-					if ( chanserv::check_levels( $unick, $chan, array( 'k', 'S', 'F' ), true, false ) === false )
-					{
-						mode::set( core::$config->chanserv->nick, $chan, '+b *@'.core::$nicks[$unick]['host'] );
-						ircd::kick( core::$config->chanserv->nick, $unick, $chan, '+k only channel' );
-					}
-					// they don't have +k, KICKEM
-				}
-				// loop everyone in this chan.
-			}
-			// I the target in question
-		}
-		// ----------- I ----------- //
+		// loop everyone in this chan.
 	}
 	
 	/*

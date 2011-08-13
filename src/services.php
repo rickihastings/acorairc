@@ -20,14 +20,16 @@ class services
 	* add_flag
 	*
 	* @params
-	* &$hook - either chanserv::$flags, $levels or nickserv::$flags, etc
+	* &$input - an array structure containing a few things.
 	* $flag - flag, such as 'f', 'G', 'H', etc.
 	* $help - Help document related to it.
 	* $set_method - A reference to a method to call upon setting of flag (static only)
 	* $unset_method - A reference to a method to call upon unsetting of flag (static only)
 	*/
-	static public function add_flag( &$hook, $flag, $help, $set_method = null, $unset_method = null )
+	static public function add_flag( &$input, $flag, $help, $set_method = null, $unset_method = null )
 	{
+		$hook = &$input['array'];
+		
 		$data = service::$flag_data;
 		$data[FLAG_LETTER] = $flag;
 		$data[FLAG_HAS_PARAM] = ( ctype_lower( $flag ) ) ? true : false;
@@ -38,6 +40,9 @@ class services
 
 		$hook[$flag] = $data;
 		// send it to our $hook
+		
+		chanserv::add_help( $input['module'], $input['command'], $help );
+		// add the help for it :3
 	}
 
 	/*
