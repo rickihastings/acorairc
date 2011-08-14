@@ -21,6 +21,12 @@ class operserv extends service
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
+	static public $nick;
+	static public $user;
+	static public $real;
+	static public $host;
+	// user vars
+	
 	static public $help;
 	static public $session_rows = array();
 	// help
@@ -42,10 +48,10 @@ class operserv extends service
 		
 		if ( isset( core::$config->operserv ) )
 		{
-			core::$config->operserv->nick = ( core::$config->operserv->nick != '' ) ? core::$config->operserv->nick : 'OperServ';
-			core::$config->operserv->user = ( core::$config->operserv->user != '' ) ? core::$config->operserv->user : 'operserv';
-			core::$config->operserv->real = ( core::$config->operserv->real != '' ) ? core::$config->operserv->real : 'Operator Services';
-			core::$config->operserv->host = ( core::$config->operserv->host != '' ) ? core::$config->operserv->host : core::$config->conn->server;
+			self::$nick = core::$config->operserv->nick = ( core::$config->operserv->nick != '' ) ? core::$config->operserv->nick : 'OperServ';
+			self::$user = core::$config->operserv->user = ( core::$config->operserv->user != '' ) ? core::$config->operserv->user : 'operserv';
+			self::$real = core::$config->operserv->real = ( core::$config->operserv->real != '' ) ? core::$config->operserv->real : 'Operator Services';
+			self::$host = core::$config->operserv->host = ( core::$config->operserv->host != '' ) ? core::$config->operserv->host : core::$config->conn->server;
 			// check if nickname and stuff is specified, if not use defaults
 		}
 		// check if nickserv is enabled
@@ -71,6 +77,37 @@ class operserv extends service
 		$query = database::select( 'sessions', array( 'nick', 'ip_address', 'hostmask', 'description', 'limit', 'time', 'expire', 'akill' ) );
 		while ( $session = database::fetch( $query ) )
 			self::$session_rows[] = $session;
+	}
+	
+	/*
+	* on_rehash (event)
+	* 
+	* @params
+	* void
+	*/
+	static public function on_rehash()
+	{
+		if ( isset( core::$config->operserv ) )
+		{
+			core::$config->operserv->nick = ( core::$config->operserv->nick != '' ) ? core::$config->operserv->nick : 'OperServ';
+			core::$config->operserv->user = ( core::$config->operserv->user != '' ) ? core::$config->operserv->user : 'operserv';
+			core::$config->operserv->real = ( core::$config->operserv->real != '' ) ? core::$config->operserv->real : 'Operator Services';
+			core::$config->operserv->host = ( core::$config->operserv->host != '' ) ? core::$config->operserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+			
+			if ( self::$nick != core::$config->operserv->nick || self::$user != core::$config->operserv->user || self::$real != core::$config->operserv->real || self::$host != core::$config->operserv->host )
+			{
+				ircd::remove_client( self::$nick, 'Rehashing' );
+				ircd::introduce_client( core::$config->operserv->nick, core::$config->operserv->user, core::$config->operserv->host, core::$config->operserv->real );
+			}
+			// check for changes and reintroduce the client
+			
+			self::$nick = core::$config->operserv->nick;
+			self::$user = core::$config->operserv->user;
+			self::$real = core::$config->operserv->real;
+			self::$host = core::$config->operserv->host;
+		}
+		// check if operserv is enabled
 	}
 	
 	/*

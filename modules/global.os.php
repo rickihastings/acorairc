@@ -75,7 +75,28 @@ class os_global extends module
 	*/
 	static public function on_rehash()
 	{
-		print 'test';
+		if ( isset( core::$config->global ) )
+		{
+			core::$config->global->nick = ( core::$config->global->nick != '' ) ? core::$config->global->nick : 'Global';
+			core::$config->global->user = ( core::$config->global->user != '' ) ? core::$config->global->user : 'global';
+			core::$config->global->real = ( core::$config->global->real != '' ) ? core::$config->global->real : 'Network Announcements';
+			core::$config->global->host = ( core::$config->global->host != '' ) ? core::$config->global->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+			
+			if ( self::$nick != core::$config->global->nick || self::$user != core::$config->global->user || self::$real != core::$config->global->real || self::$host != core::$config->global->host )
+			{
+				ircd::remove_client( self::$nick, 'Rehashing' );
+				ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
+				self::join_logchan();
+			}
+			// check for changes and reintroduce the client
+			
+			self::$nick = core::$config->global->nick;
+			self::$user = core::$config->global->user;
+			self::$real = core::$config->global->real;
+			self::$host = core::$config->global->host;
+		}
+		// check if global is enabled
 	}
 	
 	/*

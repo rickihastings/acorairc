@@ -70,10 +70,11 @@ class os_rehash extends module
 	* @params
 	* $nick - The nick of the person issuing the command
 	*/
-	static public function _rehash_config( $nick )
+	static public function _rehash_config( $input, $nick )
 	{
 		$return_data = module::$return_data;
 		$parser = new parser( CONFPATH.'services.conf' );
+		parser::check();
 		// load the parser
 		
 		$total_modules_exceptions = array();

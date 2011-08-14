@@ -21,11 +21,18 @@ class chanserv extends service
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
+	static public $nick;
+	static public $user;
+	static public $real;
+	static public $host;
+	// user vars
+	
 	static public $flags = array();
 	static public $levels = array();
 	static public $help;
 	// help
 	
+	static public $chans = array();
 	static public $chan_q = array();
 	// store the last queries in an internal array, cause i've
 	// noticed the same query is being called like 5 times cause the data
@@ -48,10 +55,10 @@ class chanserv extends service
 		
 		if ( isset( core::$config->chanserv ) )
 		{
-			core::$config->chanserv->nick = ( core::$config->chanserv->nick != '' ) ? core::$config->chanserv->nick : 'ChanServ';
-			core::$config->chanserv->user = ( core::$config->chanserv->user != '' ) ? core::$config->chanserv->user : 'chanserv';
-			core::$config->chanserv->real = ( core::$config->chanserv->real != '' ) ? core::$config->chanserv->real : 'Channel Services';
-			core::$config->chanserv->host = ( core::$config->chanserv->host != '' ) ? core::$config->chanserv->host : core::$config->conn->server;
+			self::$nick = core::$config->chanserv->nick = ( core::$config->chanserv->nick != '' ) ? core::$config->chanserv->nick : 'ChanServ';
+			self::$user = core::$config->chanserv->user = ( core::$config->chanserv->user != '' ) ? core::$config->chanserv->user : 'chanserv';
+			self::$real = core::$config->chanserv->real = ( core::$config->chanserv->real != '' ) ? core::$config->chanserv->real : 'Channel Services';
+			self::$host = core::$config->chanserv->host = ( core::$config->chanserv->host != '' ) ? core::$config->chanserv->host : core::$config->conn->server;
 			// check if nickname and stuff is specified, if not use defaults
 		}
 		// check if chanserv is enabled
@@ -65,6 +72,41 @@ class chanserv extends service
 		
 		timer::add( array( 'chanserv', 'check_expire', array() ), 300, 0 );
 		// set a timer!
+	}
+	
+	/*
+	* on_rehash (event)
+	* 
+	* @params
+	* void
+	*/
+	static public function on_rehash()
+	{
+		if ( isset( core::$config->chanserv ) )
+		{
+			core::$config->chanserv->nick = ( core::$config->chanserv->nick != '' ) ? core::$config->chanserv->nick : 'ChanServ';
+			core::$config->chanserv->user = ( core::$config->chanserv->user != '' ) ? core::$config->chanserv->user : 'chanserv';
+			core::$config->chanserv->real = ( core::$config->chanserv->real != '' ) ? core::$config->chanserv->real : 'Channel Services';
+			core::$config->chanserv->host = ( core::$config->chanserv->host != '' ) ? core::$config->chanserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+			
+			if ( self::$nick != core::$config->chanserv->nick || self::$user != core::$config->chanserv->user || self::$real != core::$config->chanserv->real || self::$host != core::$config->chanserv->host )
+			{
+				ircd::remove_client( self::$nick, 'Rehashing' );
+				ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
+				// reintroduce client
+				foreach ( self::$chans as $chan => $channel )
+					self::_join_channel( $channel );
+				// rejoin chans
+			}
+			// check for changes and reintroduce the client
+			
+			self::$nick = core::$config->chanserv->nick;
+			self::$user = core::$config->chanserv->user;
+			self::$real = core::$config->chanserv->real;
+			self::$host = core::$config->chanserv->host;
+		}
+		// check if chanserv is enabled
 	}
 	
 	/*
@@ -90,7 +132,10 @@ class chanserv extends service
 	public function part_chan_callback( $chan )
 	{
 		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
+		{
+			unset( self::$chans[$channel->channel] );
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
+		}
 		// if we're the only person in the channel, leave it.
 	}
 	
@@ -143,8 +188,11 @@ class chanserv extends service
 		while ( list( $chan, $data ) = each( core::$chans ) )
 		{
 			if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
+			{
+				unset( self::$chans[$channel->channel] );
 				ircd::part_chan( core::$config->chanserv->nick, $chan );
 				// leave the channel.
+			}
 			// ok now we check whos left in the channel, if its only us lets leave
 		}
 		// are they in any channels?
@@ -197,6 +245,7 @@ class chanserv extends service
 		
 		if ( count( core::$chans[$chan]['users'] ) == 1 && isset( core::$chans[$chan]['users'][core::$config->chanserv->nick] ) )
 		{
+			unset( self::$chans[$channel->channel] );
 			ircd::part_chan( core::$config->chanserv->nick, $chan );
 			// leave the channel.
 		}
@@ -235,6 +284,7 @@ class chanserv extends service
 				
 			if ( isset( core::$chans[$channel->channel] ) )
 			{
+				unset( self::$chans[$channel->channel] );
 				ircd::part_chan( core::$config->chanserv->nick, $channel->channel );
 				// now lets leave the channel if we're in it
 			}
@@ -253,6 +303,7 @@ class chanserv extends service
 	*/
 	static public function _join_channel( $channel )
 	{
+		self::$chans[$channel->channel] = $channel;
 		database::update( 'chans', array( 'last_timestamp' => core::$network_time ), array( 'channel', '=', $channel->channel ) );
 		// lets update the last used timestamp
 		

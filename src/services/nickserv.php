@@ -21,6 +21,12 @@ class nickserv extends service
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
+	static public $nick;
+	static public $user;
+	static public $real;
+	static public $host;
+	// user vars
+	
 	static public $help;
 	static public $flags;
 	// help
@@ -46,10 +52,10 @@ class nickserv extends service
 		
 		if ( isset( core::$config->nickserv ) )
 		{
-			core::$config->nickserv->nick = ( core::$config->nickserv->nick != '' ) ? core::$config->nickserv->nick : 'NickServ';
-			core::$config->nickserv->user = ( core::$config->nickserv->user != '' ) ? core::$config->nickserv->user : 'nickserv';
-			core::$config->nickserv->real = ( core::$config->nickserv->real != '' ) ? core::$config->nickserv->real : 'Nickname Services';
-			core::$config->nickserv->host = ( core::$config->nickserv->host != '' ) ? core::$config->nickserv->host : core::$config->conn->server;
+			self::$nick = core::$config->nickserv->nick = ( core::$config->nickserv->nick != '' ) ? core::$config->nickserv->nick : 'NickServ';
+			self::$user = core::$config->nickserv->user = ( core::$config->nickserv->user != '' ) ? core::$config->nickserv->user : 'nickserv';
+			self::$real = core::$config->nickserv->real = ( core::$config->nickserv->real != '' ) ? core::$config->nickserv->real : 'Nickname Services';
+			self::$host = core::$config->nickserv->host = ( core::$config->nickserv->host != '' ) ? core::$config->nickserv->host : core::$config->conn->server;
 			// check if nickname and stuff is specified, if not use defaults
 		}
 		// check if nickserv is enabled
@@ -63,6 +69,37 @@ class nickserv extends service
 		
 		timer::add( array( 'nickserv', 'check_expire', array() ), 300, 0 );
 		// set a timer!
+	}
+	
+	/*
+	* on_rehash (event)
+	* 
+	* @params
+	* void
+	*/
+	static public function on_rehash()
+	{
+		if ( isset( core::$config->nickserv ) )
+		{
+			core::$config->nickserv->nick = ( core::$config->nickserv->nick != '' ) ? core::$config->nickserv->nick : 'Nickserv';
+			core::$config->nickserv->user = ( core::$config->nickserv->user != '' ) ? core::$config->nickserv->user : 'nickserv';
+			core::$config->nickserv->real = ( core::$config->nickserv->real != '' ) ? core::$config->nickserv->real : 'Nickname Services';
+			core::$config->nickserv->host = ( core::$config->nickserv->host != '' ) ? core::$config->nickserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+			
+			if ( self::$nick != core::$config->nickserv->nick || self::$user != core::$config->nickserv->user || self::$real != core::$config->nickserv->real || self::$host != core::$config->nickserv->host )
+			{
+				ircd::remove_client( self::$nick, 'Rehashing' );
+				ircd::introduce_client( core::$config->nickserv->nick, core::$config->nickserv->user, core::$config->nickserv->host, core::$config->nickserv->real );
+			}
+			// check for changes and reintroduce the client
+			
+			self::$nick = core::$config->nickserv->nick;
+			self::$user = core::$config->nickserv->user;
+			self::$real = core::$config->nickserv->real;
+			self::$host = core::$config->nickserv->host;
+		}
+		// check if nickserv is enabled
 	}
 	
 	/*
