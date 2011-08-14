@@ -49,13 +49,14 @@ class cs_flags extends module
 		// these are standard in module constructors
 		
 		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
-		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_PRE );
+		chanserv::add_help_fix( 'cs_flags', 'prefix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_PRE );
+		chanserv::add_help_fix( 'cs_flags', 'suffix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_SUF );
 		// add the help
 		
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
 		// add the command
 
-		$structure = array( 'array' => &chanserv::$flags, 'module' => 'cs_flags', 'command' => 'help flags' );
+		$structure = array( 'array' => &chanserv::$flags, 'module' => 'cs_flags', 'command' => 'help flags', 'type' => 'csflags' );
 		services::add_flag( $structure, 'd', chanserv::$help->CS_FLAGS_d );
 		services::add_flag( $structure, 'u', chanserv::$help->CS_FLAGS_u );
 		services::add_flag( $structure, 'e', chanserv::$help->CS_FLAGS_e );
@@ -63,15 +64,12 @@ class cs_flags extends module
 		services::add_flag( $structure, 'm', chanserv::$help->CS_FLAGS_m );
 		services::add_flag( $structure, 't', chanserv::$help->CS_FLAGS_t );
 		services::add_flag( $structure, 'S', chanserv::$help->CS_FLAGS_S );
-		services::add_flag( $structure, 'F', chanserv::$help->CS_FLAGS_F );
 		services::add_flag( $structure, 'G', chanserv::$help->CS_FLAGS_G, array( 'cs_flags', '_set_flag_g' ), array( 'cs_flags', '_unset_flag_g' ) );
 		services::add_flag( $structure, 'T', chanserv::$help->CS_FLAGS_T );
 		services::add_flag( $structure, 'K', chanserv::$help->CS_FLAGS_K );
 		services::add_flag( $structure, 'L', chanserv::$help->CS_FLAGS_L, array( 'cs_flags', '_set_flag_l' ), array( 'cs_flags', '_unset_flag_l' )  );
 		services::add_flag( $structure, 'I', chanserv::$help->CS_FLAGS_I, array( 'cs_flags', '_set_flag_i' ) );
 		// add our flags :3
-
-		chanserv::add_help( 'cs_flags', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_SUF );
 		
 		self::$flags = '+-duewmtSFGTKLI';
 		self::$p_flags = 'duewmt';

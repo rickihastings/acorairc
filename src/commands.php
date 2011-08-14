@@ -216,9 +216,10 @@ class commands
 	* $module - The name of the module.
 	* $command - The command to hook the array to.
 	* $help - The array to hook.
+	* $reorder - true/false whether to alphabetically reorder
 	* $privs - oper privs
 	*/
-	static public function add_help( $hook, $module, $command, $help, $reorder, $privs )
+	static public function add_help( $hook, $module, $command, $help, $reorder = false, $privs = '' )
 	{
 		$command = strtolower( $command );
 		// make it lowercase
@@ -243,7 +244,7 @@ class commands
 					'info' => ( $line == ' ' ) ? '' : $line,
 					'module' => $module,
 					'privs' => $privs,
-					'ordered' => $reorder,
+					'ordered' => $reorder
 				);
 			
 				self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -260,7 +261,7 @@ class commands
 				'info' => ( $help == ' ' ) ? '' : $help,
 				'module' => $module,
 				'privs' => $privs,
-				'ordered' => $reorder,
+				'ordered' => $reorder
 			);
 		
 			self::$helpv[$hook][$command][] = serialize( $meta_data );
@@ -297,6 +298,7 @@ class commands
 			return false;
 		// is it actually a help command? >.<
 		
+		$reordered = array();
 		$count = ( ( isset( self::$prefix[$hook][$command] ) ) ? count( self::$prefix[$hook][$command] ) : 0 ) + ( ( isset( self::$helpv[$hook][$command] ) ) ? count ( self::$helpv[$hook][$command] ) : 0 ) + ( ( isset( self::$suffix[$hook][$command] ) ) ? count( self::$suffix[$hook][$command] ) : 0 );
 		
 		if ( !isset( self::$helpv[$hook][$command] ) || $count == 0 )
@@ -329,9 +331,7 @@ class commands
 			// determine whether we need to reorder, if we do mark that we save the rest for later.
 			
 			if ( $meta['privs'] != '' && services::oper_privs( $nick, $meta['privs'] ) || $meta['privs'] == '' )
-			{
 				$response[] = services::parse( $meta['info'] );
-			}
 			else
 			{
 				services::communicate( $bot, $nick, core::$help->CORE_UNKNOWN_HELP, array( 'command' => $command ) );
@@ -340,18 +340,15 @@ class commands
 		}
 		// display the main stuff
 		
-		if ( $reordered != null )
+		sort( $reordered );
+		$privs = '';
+		foreach ( $reordered as $line => $info )
 		{
-			sort( $reordered );
-			$privs = '';
-			foreach ( $reordered as $line => $info )
-			{
-				$privs = $reordered_privs[$line];
-				if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
-					$response[] = services::parse( $info );
-			}
-			// seems the stuff is reordered
+			$privs = $reordered_privs[$line];
+			if ( $privs != '' && services::oper_privs( $nick, $privs ) || $privs == '' )
+				$response[] = services::parse( $info );
 		}
+		// we need to reorder alphabetically, so we use sort()
 		
 		if ( isset( self::$suffix[$hook][$command] ) )
 		{

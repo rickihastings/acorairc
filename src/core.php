@@ -263,6 +263,9 @@ class core
 		// we load core modules before the bots, incase there
 		// is a module that changes an existing function w/e
 		
+		services::sort_flags( 'csflags' );
+		// sort flags up
+		
 		database::delete( 'ignored_users', array( 'temp', '=', '1' ) );
 		// remove all temp ignore bans, services may have shutdown before the timer removed their ban
 		// leaving them permanently banned.

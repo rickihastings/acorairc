@@ -16,6 +16,8 @@
 class services
 {
 
+	static public $temp_help = array();
+
 	/*
 	* add_flag
 	*
@@ -41,10 +43,41 @@ class services
 		$hook[$flag] = $data;
 		// send it to our $hook
 		
-		chanserv::add_help( $input['module'], $input['command'], $help );
+		self::$temp_help[$input['type']][$flag]['module'] = $input['module'];
+		self::$temp_help[$input['type']][$flag]['command'] = $input['command'];
+		self::$temp_help[$input['type']][$flag]['help'] = $help;
 		// add the help for it :3
 	}
 
+	/*
+	* sort_flags
+	* 
+	* @params
+	* $type - either 'csflags', 'cslevels' or 'nsflags'
+	*/
+	static public function sort_flags( $type )
+	{
+		if ( !isset( self::$temp_help[$type] ) ) 
+			return false;
+		// array doesn't even exist let's go.
+		
+		$uppercase = $lowercase = array();
+		foreach ( self::$temp_help[$type] as $flag => $data )
+		{
+				if ( ctype_lower( $flag ) ) $lowercase[$flag] = $data;
+				else $uppercase[$flag] = $data;
+		}
+		// split arrays into lowercase and uppercase.
+		
+		uksort( $lowercase, 'strcmp' );
+		uksort( $uppercase, 'strcmp' );
+		self::$temp_help[$type] = array_merge( $lowercase, $uppercase );
+		
+		foreach ( self::$temp_help[$type] as $flag => $data )
+			chanserv::add_help( $data['module'], $data['command'], $data['help'] );
+		// after the modules are loaded, we deal with services::$temp_help, because this will be then populated
+	}
+	
 	/*
 	* oper_privs
 	*
