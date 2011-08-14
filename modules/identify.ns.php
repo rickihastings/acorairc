@@ -41,22 +41,22 @@ class ns_identify extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_identify', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1, true );
-		nickserv::add_help( 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
-		nickserv::add_help( 'ns_identify', 'help', nickserv::$help->NS_HELP_LOGOUT_1, true );
-		nickserv::add_help( 'ns_identify', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
+		commands::add_help( 'nickserv', 'ns_identify', 'help', nickserv::$help->NS_HELP_IDENTIFY_1, true );
+		commands::add_help( 'nickserv', 'ns_identify', 'help identify', nickserv::$help->NS_HELP_IDENTIFY_ALL );
+		commands::add_help( 'nickserv', 'ns_identify', 'help', nickserv::$help->NS_HELP_LOGOUT_1, true );
+		commands::add_help( 'nickserv', 'ns_identify', 'help logout', nickserv::$help->NS_HELP_LOGOUT_ALL );
 		// add the help
 		
-		nickserv::add_command( 'identify', 'ns_identify', 'identify_command' );
-		nickserv::add_command( 'logout', 'ns_identify', 'logout_command' );
+		commands::add_command( 'nickserv', 'identify', 'ns_identify', 'identify_command' );
+		commands::add_command( 'nickserv', 'logout', 'ns_identify', 'logout_command' );
 		// add the command
 		
-		nickserv::add_help( 'ns_identify', 'help id', nickserv::$help->NS_HELP_IDENTIFY_ALL );
-		nickserv::add_command( 'id', 'ns_identify', 'identify_command' );
+		commands::add_help( 'nickserv', 'ns_identify', 'help id', nickserv::$help->NS_HELP_IDENTIFY_ALL );
+		commands::add_command( 'nickserv', 'id', 'ns_identify', 'identify_command' );
 		// "id" alias, help and command
 	}
 	

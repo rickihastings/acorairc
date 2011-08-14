@@ -35,15 +35,15 @@ class ns_info extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_info', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_info', 'help', nickserv::$help->NS_HELP_INFO_1, true );
-		nickserv::add_help( 'ns_info', 'help info', nickserv::$help->NS_HELP_INFO_ALL );
+		commands::add_help( 'nickserv', 'ns_info', 'help', nickserv::$help->NS_HELP_INFO_1, true );
+		commands::add_help( 'nickserv', 'ns_info', 'help info', nickserv::$help->NS_HELP_INFO_ALL );
 		// add the help
 		
-		nickserv::add_command( 'info', 'ns_info', 'info_command' );
+		commands::add_command( 'nickserv', 'info', 'ns_info', 'info_command' );
 		// add the info command
 	}
 	

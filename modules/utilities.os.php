@@ -36,21 +36,21 @@ class os_utilities extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_utilities', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_utilities', 'help', operserv::$help->OS_HELP_JUPE_1, true, 'local_op' );
-		operserv::add_help( 'os_utilities', 'help jupe', operserv::$help->OS_HELP_JUPE_ALL, false, 'local_op' );
-		operserv::add_help( 'os_utilities', 'help', operserv::$help->OS_HELP_MODE_1, true, 'local_op' );
-		operserv::add_help( 'os_utilities', 'help mode', operserv::$help->OS_HELP_MODE_ALL, false, 'local_op' );
-		operserv::add_help( 'os_utilities', 'help', operserv::$help->OS_HELP_KICK_1, true, 'local_op' );
-		operserv::add_help( 'os_utilities', 'help kick', operserv::$help->OS_HELP_KICK_ALL, false, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help', operserv::$help->OS_HELP_JUPE_1, true, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help jupe', operserv::$help->OS_HELP_JUPE_ALL, false, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help', operserv::$help->OS_HELP_MODE_1, true, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help mode', operserv::$help->OS_HELP_MODE_ALL, false, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help', operserv::$help->OS_HELP_KICK_1, true, 'local_op' );
+		commands::add_help( 'operserv', 'os_utilities', 'help kick', operserv::$help->OS_HELP_KICK_ALL, false, 'local_op' );
 		// add the help
 		
-		operserv::add_command( 'jupe', 'os_utilities', 'jupe_command' );
-		operserv::add_command( 'mode', 'os_utilities', 'mode_command' );
-		operserv::add_command( 'kick', 'os_utilities', 'kick_command' );
+		commands::add_command( 'operserv', 'jupe', 'os_utilities', 'jupe_command' );
+		commands::add_command( 'operserv', 'mode', 'os_utilities', 'mode_command' );
+		commands::add_command( 'operserv', 'kick', 'os_utilities', 'kick_command' );
 		// add the commands
 	}
 	

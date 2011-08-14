@@ -40,15 +40,15 @@ class cs_register extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_register', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_register', 'help', chanserv::$help->CS_HELP_REGISTER_1, true );
-		chanserv::add_help( 'cs_register', 'help register', chanserv::$help->CS_HELP_REGISTER_ALL );
+		commands::add_help( 'chanserv', 'cs_register', 'help', chanserv::$help->CS_HELP_REGISTER_1, true );
+		commands::add_help( 'chanserv', 'cs_register', 'help register', chanserv::$help->CS_HELP_REGISTER_ALL );
 		// add the help
 		
-		chanserv::add_command( 'register', 'cs_register', 'register_command' );
+		commands::add_command( 'chanserv', 'register', 'cs_register', 'register_command' );
 		// add the command
 	}
 	

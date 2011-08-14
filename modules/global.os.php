@@ -41,7 +41,7 @@ class os_global extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_global', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 	
@@ -59,11 +59,11 @@ class os_global extends module
 		// i decided to change global from a core feature into a module based feature
 		// seen as though global won't do anything really without this module it's going here
 		
-		operserv::add_help( 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, true, 'global_op' );
-		operserv::add_help( 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, false, 'global_op' );
+		commands::add_help( 'operserv', 'os_global', 'help', operserv::$help->OS_HELP_GLOBAL_1, true, 'global_op' );
+		commands::add_help( 'operserv', 'os_global', 'help global', operserv::$help->OS_HELP_GLOBAL_ALL, false, 'global_op' );
 		// add the help
 		
-		operserv::add_command( 'global', 'os_global', 'global_command' );
+		commands::add_command( 'operserv', 'global', 'os_global', 'global_command' );
 		// add the command
 	}
 	

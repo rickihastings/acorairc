@@ -43,18 +43,18 @@ class ns_recover extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_recover', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1, true );
-		nickserv::add_help( 'ns_recover', 'help recover', nickserv::$help->NS_HELP_RECOVER_ALL );
-		nickserv::add_help( 'ns_recover', 'help', nickserv::$help->NS_HELP_RELEASE_1, true );
-		nickserv::add_help( 'ns_recover', 'help release', nickserv::$help->NS_HELP_RELEASE_ALL );
+		commands::add_help( 'nickserv', 'ns_recover', 'help', nickserv::$help->NS_HELP_RECOVER_1, true );
+		commands::add_help( 'nickserv', 'ns_recover', 'help recover', nickserv::$help->NS_HELP_RECOVER_ALL );
+		commands::add_help( 'nickserv', 'ns_recover', 'help', nickserv::$help->NS_HELP_RELEASE_1, true );
+		commands::add_help( 'nickserv', 'ns_recover', 'help release', nickserv::$help->NS_HELP_RELEASE_ALL );
 		// add the help
 		
-		nickserv::add_command( 'recover', 'ns_recover', 'recover_command' );
-		nickserv::add_command( 'release', 'ns_recover', 'release_command' );
+		commands::add_command( 'nickserv', 'recover', 'ns_recover', 'recover_command' );
+		commands::add_command( 'nickserv', 'release', 'ns_recover', 'release_command' );
 		// add the commands
 	}
 	

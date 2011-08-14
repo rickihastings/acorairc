@@ -37,15 +37,15 @@ class os_chanclear extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_chanclear', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, true, 'global_op' );
-		operserv::add_help( 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL, false, 'global_op' );
+		commands::add_help( 'operserv', 'os_chanclear', 'help', operserv::$help->OS_HELP_CHANCLEAR_1, true, 'global_op' );
+		commands::add_help( 'operserv', 'os_chanclear', 'help chanclear', operserv::$help->OS_HELP_CHANCLEAR_ALL, false, 'global_op' );
 		// add the help
 		
-		operserv::add_command( 'chanclear', 'os_chanclear', 'chanclear_command' );
+		commands::add_command( 'operserv', 'chanclear', 'os_chanclear', 'chanclear_command' );
 		// add the command
 	}
 	

@@ -40,7 +40,7 @@ class cs_levels extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_levels', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
@@ -65,12 +65,12 @@ class cs_levels extends module
 			services::add_flag( $level_structure, 'q', chanserv::$help->CS_LEVELS_q, null, null, array( 'f', 'S', 'F' ) );
 		// add any access flags defined by the module
 		
-		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1, true );
-		chanserv::add_help_fix( 'cs_levels', 'prefix', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_PRE );
-		chanserv::add_help_fix( 'cs_levels', 'suffix', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_SUF );
+		commands::add_help( 'chanserv', 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1, true );
+		commands::add_help_fix( 'chanserv', 'cs_levels', 'prefix', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_PRE );
+		commands::add_help_fix( 'chanserv', 'cs_levels', 'suffix', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_SUF );
 		// add the help
 		
-		chanserv::add_command( 'levels', 'cs_levels', 'levels_command' );
+		commands::add_command( 'chanserv', 'levels', 'cs_levels', 'levels_command' );
 		// add the command
 	}
 	

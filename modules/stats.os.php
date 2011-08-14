@@ -29,14 +29,14 @@ class os_stats extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_stats', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_stats', 'help', operserv::$help->OS_HELP_STATS_1, true );
-		operserv::add_help( 'os_stats', 'help stats', operserv::$help->OS_HELP_STATS_ALL );
+		commands::add_help( 'operserv', 'os_stats', 'help', operserv::$help->OS_HELP_STATS_1, true );
+		commands::add_help( 'operserv', 'os_stats', 'help stats', operserv::$help->OS_HELP_STATS_ALL );
 		// add the help
 		
-		operserv::add_command( 'stats', 'os_stats', 'stats_command' );
+		commands::add_command( 'operserv', 'stats', 'os_stats', 'stats_command' );
 		// add the stats command
 	}
 	

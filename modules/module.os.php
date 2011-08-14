@@ -39,21 +39,21 @@ class os_module extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_module', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODULES_1, true );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1, true, 'root' );
-		operserv::add_help( 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1, true, 'root' );
-		operserv::add_help( 'os_module', 'help modlist', operserv::$help->OS_HELP_MODLIST_ALL );
-		operserv::add_help( 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL, false, 'root' );
-		operserv::add_help( 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL, false, 'root' );
+		commands::add_help( 'operserv', 'os_module', 'help', operserv::$help->OS_HELP_MODULES_1, true );
+		commands::add_help( 'operserv', 'os_module', 'help', operserv::$help->OS_HELP_MODLOAD_1, true, 'root' );
+		commands::add_help( 'operserv', 'os_module', 'help', operserv::$help->OS_HELP_MODUNLOAD_1, true, 'root' );
+		commands::add_help( 'operserv', 'os_module', 'help modlist', operserv::$help->OS_HELP_MODLIST_ALL );
+		commands::add_help( 'operserv', 'os_module', 'help modload', operserv::$help->OS_HELP_MODLOAD_ALL, false, 'root' );
+		commands::add_help( 'operserv', 'os_module', 'help modunload', operserv::$help->OS_HELP_MODUNLOAD_ALL, false, 'root' );
 		// add the help
 		
-		operserv::add_command( 'modlist', 'os_module', 'modlist_command' );
-		operserv::add_command( 'modload', 'os_module', 'modload_command' );
-		operserv::add_command( 'modunload', 'os_module', 'modunload_command' );
+		commands::add_command( 'operserv', 'modlist', 'os_module', 'modlist_command' );
+		commands::add_command( 'operserv', 'modload', 'os_module', 'modload_command' );
+		commands::add_command( 'operserv', 'modunload', 'os_module', 'modunload_command' );
 		// add the commands
 	}
 	

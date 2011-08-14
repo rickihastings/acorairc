@@ -29,14 +29,14 @@ class os_rehash extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_rehash', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1, true, 'root' );
-		operserv::add_help( 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL, false, 'root' );
+		commands::add_help( 'operserv', 'os_rehash', 'help', operserv::$help->OS_HELP_REHASH_1, true, 'root' );
+		commands::add_help( 'operserv', 'os_rehash', 'help rehash', operserv::$help->OS_HELP_REHASH_ALL, false, 'root' );
 		// add the help
 		
-		operserv::add_command( 'rehash', 'os_rehash', 'rehash_command' );
+		commands::add_command( 'operserv', 'rehash', 'os_rehash', 'rehash_command' );
 		// add the commands
 	}
 	

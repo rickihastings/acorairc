@@ -28,11 +28,11 @@ class ns_help extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_help', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'static' );
 		// these are standard in module constructors
 		
-		nickserv::add_help_fix( 'ns_help', 'prefix', 'help', nickserv::$help->NS_HELP_PREFIX );
-		nickserv::add_help_fix( 'ns_help', 'suffix', 'help', nickserv::$help->NS_HELP_SUFFIX );
+		commands::add_help_fix( 'nickserv', 'ns_help', 'prefix', 'help', nickserv::$help->NS_HELP_PREFIX );
+		commands::add_help_fix( 'nickserv', 'ns_help', 'suffix', 'help', nickserv::$help->NS_HELP_SUFFIX );
 		// add teh help docs
 	}
 	
@@ -48,7 +48,7 @@ class ns_help extends module
 		// convert to lower case because all the tingy wags are in lowercase
 		$query = strtolower( $query );
 		
-		nickserv::get_help( $nick, $query );
+		commands::get_help( 'nickserv', $nick, $query );
 	}
 }
 

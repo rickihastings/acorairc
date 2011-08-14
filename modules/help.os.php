@@ -28,11 +28,11 @@ class os_help extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_help', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help_fix( 'os_help', 'prefix', 'help', operserv::$help->OS_HELP_PREFIX );
-		operserv::add_help_fix( 'os_help', 'suffix', 'help', operserv::$help->OS_HELP_SUFFIX );
+		commands::add_help_fix( 'operserv', 'os_help', 'prefix', 'help', operserv::$help->OS_HELP_PREFIX );
+		commands::add_help_fix( 'operserv', 'os_help', 'suffix', 'help', operserv::$help->OS_HELP_SUFFIX );
 		// add teh help docs
 	}
 	
@@ -49,7 +49,7 @@ class os_help extends module
 		$query = strtolower( $query );
 		
 		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
-			operserv::get_help( $nick, $query );
+			commands::get_help( 'operserv', $nick, $query );
 	}
 }
 

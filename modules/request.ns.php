@@ -36,15 +36,15 @@ class ns_request extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_request', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_request', 'help', nickserv::$help->NS_HELP_REQUEST_1, true );
-		nickserv::add_help( 'ns_request', 'help request', nickserv::$help->NS_HELP_REQUEST_ALL );
+		commands::add_help( 'nickserv', 'ns_request', 'help', nickserv::$help->NS_HELP_REQUEST_1, true );
+		commands::add_help( 'nickserv', 'ns_request', 'help request', nickserv::$help->NS_HELP_REQUEST_ALL );
 		// add the help
 		
-		nickserv::add_command( 'request', 'ns_request', 'request_command' );
+		commands::add_command( 'nickserv', 'request', 'ns_request', 'request_command' );
 		// add the drop command
 	}
 	

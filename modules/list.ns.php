@@ -35,15 +35,15 @@ class ns_list extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_list', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_list', 'help', nickserv::$help->NS_HELP_LIST_1, true, 'nickserv_op' );
-		nickserv::add_help( 'ns_list', 'help list', nickserv::$help->NS_HELP_LIST_ALL, false, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_list', 'help', nickserv::$help->NS_HELP_LIST_1, true, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_list', 'help list', nickserv::$help->NS_HELP_LIST_ALL, false, 'nickserv_op' );
 		// add the help
 		
-		nickserv::add_command( 'list', 'ns_list', 'list_command' );
+		commands::add_command( 'nickserv', 'list', 'ns_list', 'list_command' );
 		// add the list command
 	}
 	

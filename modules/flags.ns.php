@@ -43,21 +43,21 @@ class ns_flags extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1, true );
-		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, true, 'nickserv_op' );
-		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, false, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1, true );
+		commands::add_help( 'nickserv', 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, true, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, false, 'nickserv_op' );
 		// add the help
 		
-		nickserv::add_help_fix( 'ns_flags', 'prefix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_PRE );
-		nickserv::add_help_fix( 'ns_flags', 'suffix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_SUF );
+		commands::add_help_fix( 'nickserv', 'ns_flags', 'prefix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_PRE );
+		commands::add_help_fix( 'nickserv', 'ns_flags', 'suffix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_SUF );
 		// add help prefixes and stuff
 		
-		nickserv::add_command( 'flags', 'ns_flags', 'flags_command' );
-		nickserv::add_command( 'saflags', 'ns_flags', 'saflags_command' );
+		commands::add_command( 'nickserv', 'flags', 'ns_flags', 'flags_command' );
+		commands::add_command( 'nickserv', 'saflags', 'ns_flags', 'saflags_command' );
 		// add the command
 		
 		$flag_structure = array( 'array' => &nickserv::$flags, 'module' => __CLASS__, 'command' => array( 'help flags' ), 'type' => 'nsflags' );

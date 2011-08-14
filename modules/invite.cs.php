@@ -38,15 +38,15 @@ class cs_invite extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_invite', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_invite', 'help commands', chanserv::$help->CS_HELP_INVITE_1 );
-		chanserv::add_help( 'cs_invite', 'help invite', chanserv::$help->CS_HELP_INVITE_ALL );
+		commands::add_help( 'chanserv', 'cs_invite', 'help commands', chanserv::$help->CS_HELP_INVITE_1 );
+		commands::add_help( 'chanserv', 'cs_invite', 'help invite', chanserv::$help->CS_HELP_INVITE_ALL );
 		// add the help
 		
-		chanserv::add_command( 'invite', 'cs_invite', 'invite_command' );
+		commands::add_command( 'chanserv', 'invite', 'cs_invite', 'invite_command' );
 		// add the invite command
 	}
 	

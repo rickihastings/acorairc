@@ -36,12 +36,12 @@ class cs_topic extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_topic', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1, true );
-		chanserv::add_help( 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
+		commands::add_help( 'chanserv', 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1, true );
+		commands::add_help( 'chanserv', 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
 		// add the help
 		
 		$level_structure = array( 'array' => &chanserv::$levels, 'module' => __CLASS__, 'command' => array( 'help levels' ), 'type' => 'cslevels' );
@@ -54,7 +54,7 @@ class cs_topic extends module
 		services::add_flag( $flag_structure, 'K', chanserv::$help->CS_FLAGS_K );
 		// add flags implemented by the module, t, T and K
 		
-		chanserv::add_command( 'topic', 'cs_topic', 'topic_command' );
+		commands::add_command( 'chanserv', 'topic', 'cs_topic', 'topic_command' );
 		// add the commands
 	}
 	

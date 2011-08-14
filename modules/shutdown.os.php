@@ -29,21 +29,21 @@ class os_shutdown extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_shutdown', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_SHUTDOWN_1, true, 'root' );
-		operserv::add_help( 'os_shutdown', 'help shutdown', operserv::$help->OS_HELP_SHUTDOWN_ALL, false, 'root' );
+		commands::add_help( 'operserv', 'os_shutdown', 'help', operserv::$help->OS_HELP_SHUTDOWN_1, true, 'root' );
+		commands::add_help( 'operserv', 'os_shutdown', 'help shutdown', operserv::$help->OS_HELP_SHUTDOWN_ALL, false, 'root' );
 		// add the help
 		
-		operserv::add_command( 'shutdown', 'os_shutdown', 'shutdown_command' );
+		commands::add_command( 'operserv', 'shutdown', 'os_shutdown', 'shutdown_command' );
 		// add the shutdown command
 		
-		operserv::add_help( 'os_shutdown', 'help', operserv::$help->OS_HELP_RESTART_1, true, 'root' );
-		operserv::add_help( 'os_shutdown', 'help restart', operserv::$help->OS_HELP_RESTART_ALL, false, 'root' );
+		commands::add_help( 'operserv', 'os_shutdown', 'help', operserv::$help->OS_HELP_RESTART_1, true, 'root' );
+		commands::add_help( 'operserv', 'os_shutdown', 'help restart', operserv::$help->OS_HELP_RESTART_ALL, false, 'root' );
 		// add the help
 			
-		operserv::add_command( 'restart', 'os_shutdown', 'restart_command' );
+		commands::add_command( 'operserv', 'restart', 'os_shutdown', 'restart_command' );
 		// add the command
 	}
 	

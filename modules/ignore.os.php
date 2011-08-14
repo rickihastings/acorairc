@@ -38,15 +38,15 @@ class os_ignore extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_ignore', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, true );
-		operserv::add_help( 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL, false );
+		commands::add_help( 'operserv', 'os_ignore', 'help', operserv::$help->OS_HELP_IGNORE_1, true );
+		commands::add_help( 'operserv', 'os_ignore', 'help ignore', operserv::$help->OS_HELP_IGNORE_ALL, false );
 		// add the help
 		
-		operserv::add_command( 'ignore', 'os_ignore', 'ignore_command' );
+		commands::add_command( 'operserv', 'ignore', 'os_ignore', 'ignore_command' );
 		// add the ignore command
 	}
 	

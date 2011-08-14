@@ -192,7 +192,7 @@ class operserv extends service
 		// logchan it
 		
 		if ( core::$nicks[$nick]['ircop'] && core::$nicks[$nick]['identified'] )
-			self::get_command( $nick, $command );
+			commands::get_command( 'operserv', $nick, $command );
 		else
 			services::communicate( core::$config->operserv->nick, $nick, self::$help->OS_DENIED_ACCESS );
 		// theyre an oper.
@@ -205,69 +205,6 @@ class operserv extends service
 	{
 		core::alog( core::$config->operserv->nick.': OPER UP from ('.core::get_full_hostname( $nick ).')' );
 		// log the oper up.
-	}
-	
-	/*
-	* add_help_prefix
-	* 
-	* @params
-	* $command - The command to add a prefix for.
-	* $module - The name of the module.
-	* $help - The prefix to add.
-	*/
-	static public function add_help_fix( $module, $what, $command, $help )
-	{
-		commands::add_help_fix( 'operserv', $module, $what, $command, $help );
-	}
-	
-	/*
-	* add_help
-	* 
-	* @params
-	* $command - The command to hook the array to.
-	* $module - The name of the module.
-	* $help - The array to hook.
-	*/
-	static public function add_help( $module, $command, $help, $reorder = false, $privs = '' )
-	{
-		commands::add_help( 'operserv', $module, $command, $help, $reorder, $privs );
-	}
-	
-	/*
-	* get_help
-	* 
-	* @params
-	* $nick - Who to send the help too?
-	* $command - The command to get the help for.
-	*/
-	static public function get_help( $nick, $command )
-	{
-		commands::get_help( 'operserv', $nick, $command );
-	}
-	
-	/*
-	* add_command
-	* 
-	* @params
-	* $command - The command to hook to
-	* $class - The class the callback is in
-	* $function - The function name of the callback
-	*/
-	static public function add_command( $command, $class, $function )
-	{
-		commands::add_command( 'operserv', $command, $class, $function );
-	}
-	
-	/*
-	* get_command
-	* 
-	* @params
-	* $nick - The nick requesting the command
-	* $command - The command to hook to
-	*/
-	static public function get_command( $nick, $command )
-	{
-		commands::get_command( 'operserv', $nick, $command );
 	}
 }
 

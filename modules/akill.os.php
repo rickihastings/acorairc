@@ -37,15 +37,15 @@ class os_akill extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_akill', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_akill', 'help', operserv::$help->OS_HELP_AKILL_1, true );
-		operserv::add_help( 'os_akill', 'help akill', operserv::$help->OS_HELP_AKILL_ALL );
+		commands::add_help( 'operserv', 'os_akill', 'help', operserv::$help->OS_HELP_AKILL_1, true );
+		commands::add_help( 'operserv', 'os_akill', 'help akill', operserv::$help->OS_HELP_AKILL_ALL );
 		// add the help
 		
-		operserv::add_command( 'akill', 'os_akill', 'akill_command' );
+		commands::add_command( 'operserv', 'akill', 'os_akill', 'akill_command' );
 		// add the command
 		
 		$check_record_q = database::select( 'sessions', array( 'nick', 'hostmask', 'expire', 'time' ), array( 'akill', '=', 1 ) );

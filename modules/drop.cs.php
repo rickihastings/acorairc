@@ -39,15 +39,15 @@ class cs_drop extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_drop', 'help', chanserv::$help->CS_HELP_DROP_1, true );
-		chanserv::add_help( 'cs_drop', 'help drop', chanserv::$help->CS_HELP_DROP_ALL );
+		commands::add_help( 'chanserv', 'cs_drop', 'help', chanserv::$help->CS_HELP_DROP_1, true );
+		commands::add_help( 'chanserv', 'cs_drop', 'help drop', chanserv::$help->CS_HELP_DROP_ALL );
 		// add the help
 		
-		chanserv::add_command( 'drop', 'cs_drop', 'drop_command' );
+		commands::add_command( 'chanserv', 'drop', 'cs_drop', 'drop_command' );
 		// add the drop command
 	}
 	

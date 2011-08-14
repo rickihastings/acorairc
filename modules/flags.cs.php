@@ -40,16 +40,16 @@ class cs_flags extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_flags', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		chanserv::add_help( 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
-		chanserv::add_help_fix( 'cs_flags', 'prefix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_PRE );
-		chanserv::add_help_fix( 'cs_flags', 'suffix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_SUF );
+		commands::add_help( 'chanserv', 'cs_flags', 'help', chanserv::$help->CS_HELP_FLAGS_1, true );
+		commands::add_help_fix( 'chanserv', 'cs_flags', 'prefix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_PRE );
+		commands::add_help_fix( 'chanserv', 'cs_flags', 'suffix', 'help flags', chanserv::$help->CS_HELP_FLAGS_ALL_SUF );
 		// add the help
 		
-		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
+		commands::add_command( 'chanserv', 'flags', 'cs_flags', 'flags_command' );
 		// add the command
 
 		$level_structure = array( 'array' => &chanserv::$levels, 'module' => __CLASS__, 'command' => array( 'help levels' ), 'type' => 'cslevels' );

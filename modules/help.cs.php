@@ -28,11 +28,11 @@ class cs_help extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_help', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'static' );
 		// these are standard in module constructors
 		
-		chanserv::add_help_fix( 'cs_help', 'prefix', 'help', chanserv::$help->CS_HELP_PREFIX );
-		chanserv::add_help_fix( 'cs_help', 'suffix', 'help', chanserv::$help->CS_HELP_SUFFIX );
+		commands::add_help_fix( 'chanserv', 'cs_help', 'prefix', 'help', chanserv::$help->CS_HELP_PREFIX );
+		commands::add_help_fix( 'chanserv', 'cs_help', 'suffix', 'help', chanserv::$help->CS_HELP_SUFFIX );
 		// add teh help docs
 	}
 	
@@ -48,7 +48,7 @@ class cs_help extends module
 		// convert to lower case because all the tingy wags are in lowercase
 		$query = strtolower( $query );
 		
-		chanserv::get_help( $nick, $query );
+		commands::get_help( 'chanserv', $nick, $query );
 	}
 }
 

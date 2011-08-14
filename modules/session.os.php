@@ -37,15 +37,15 @@ class os_session extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_session', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_session', 'help', operserv::$help->OS_HELP_SESSION_1, true );
-		operserv::add_help( 'os_session', 'help session', operserv::$help->OS_HELP_SESSION_ALL );
+		commands::add_help( 'operserv', 'os_session', 'help', operserv::$help->OS_HELP_SESSION_1, true );
+		commands::add_help( 'operserv', 'os_session', 'help session', operserv::$help->OS_HELP_SESSION_ALL );
 		// add the help
 		
-		operserv::add_command( 'session', 'os_session', 'session_command' );
+		commands::add_command( 'operserv', 'session', 'os_session', 'session_command' );
 		// add the command
 	}
 	

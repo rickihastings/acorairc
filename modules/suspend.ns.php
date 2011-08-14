@@ -37,18 +37,18 @@ class ns_suspend extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_suspend', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, true, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, false, 'nickserv_op' );
-		nickserv::add_help( 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, false, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_suspend', 'help', nickserv::$help->NS_HELP_SUSPEND_1, true, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_suspend', 'help', nickserv::$help->NS_HELP_UNSUSPEND_1, true, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_suspend', 'help suspend', nickserv::$help->NS_HELP_SUSPEND_ALL, false, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_suspend', 'help unsuspend', nickserv::$help->NS_HELP_UNSUSPEND_ALL, false, 'nickserv_op' );
 		// add the help
 		
-		nickserv::add_command( 'suspend', 'ns_suspend', 'suspend_command' );
-		nickserv::add_command( 'unsuspend', 'ns_suspend', 'unsuspend_command' );
+		commands::add_command( 'nickserv', 'suspend', 'ns_suspend', 'suspend_command' );
+		commands::add_command( 'nickserv', 'unsuspend', 'ns_suspend', 'unsuspend_command' );
 		// add the commands
 	}
 	

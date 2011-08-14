@@ -38,18 +38,18 @@ class ns_drop extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'ns_drop', self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'nickserv', 'default' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1, true );
-		nickserv::add_help( 'ns_drop', 'help drop', nickserv::$help->NS_HELP_DROP_ALL );
-		nickserv::add_help( 'ns_drop', 'help', nickserv::$help->NS_HELP_SADROP_1, true, 'nickserv_op' );
-		nickserv::add_help( 'ns_drop', 'help sadrop', nickserv::$help->NS_HELP_SADROP_ALL, false, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_drop', 'help', nickserv::$help->NS_HELP_DROP_1, true );
+		commands::add_help( 'nickserv', 'ns_drop', 'help drop', nickserv::$help->NS_HELP_DROP_ALL );
+		commands::add_help( 'nickserv', 'ns_drop', 'help', nickserv::$help->NS_HELP_SADROP_1, true, 'nickserv_op' );
+		commands::add_help( 'nickserv', 'ns_drop', 'help sadrop', nickserv::$help->NS_HELP_SADROP_ALL, false, 'nickserv_op' );
 		// add the help
 		
-		nickserv::add_command( 'drop', 'ns_drop', 'drop_command' );
-		nickserv::add_command( 'sadrop', 'ns_drop', 'sadrop_command' );
+		commands::add_command( 'nickserv', 'drop', 'ns_drop', 'drop_command' );
+		commands::add_command( 'nickserv', 'sadrop', 'ns_drop', 'sadrop_command' );
 		// add the drop command
 	}
 	

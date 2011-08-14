@@ -38,15 +38,15 @@ class os_vhost extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'os_vhost', self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'operserv', 'static' );
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
-		operserv::add_help( 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, true, 'local_op' );
-		operserv::add_help( 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL, false, 'local_op' );
+		commands::add_help( 'operserv', 'os_vhost', 'help', operserv::$help->OS_HELP_VHOST_1, true, 'local_op' );
+		commands::add_help( 'operserv', 'os_vhost', 'help vhost', operserv::$help->OS_HELP_VHOST_ALL, false, 'local_op' );
 		// add the help
 		
-		operserv::add_command( 'vhost', 'os_vhost', 'vhost_command' );
+		commands::add_command( 'operserv', 'vhost', 'os_vhost', 'vhost_command' );
 		// add the vhost command
 	}
 

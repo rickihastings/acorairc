@@ -28,7 +28,7 @@ class cs_fantasy extends module
 	*/
 	static public function modload()
 	{
-		modules::init_module( 'cs_fantasy', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
+		modules::init_module( __CLASS__, self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
 		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => array( 'help flags' ), 'type' => 'csflags' );
@@ -87,7 +87,7 @@ class cs_fantasy extends module
 			$query = strtolower( $query );
 			// convert to lower case because all the tingy wags are in lowercase
 			
-			chanserv::get_help( $nick, $query );
+			commands::get_help( 'chanserv', $nick, $query );
 			// send help eh.
 		}
 		// !help command (with queries)
