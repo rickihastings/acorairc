@@ -17,7 +17,7 @@
 class cs_levels extends module
 {
 	
-	const MOD_VERSION = '0.1.7';
+	const MOD_VERSION = '0.1.8';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -47,10 +47,13 @@ class cs_levels extends module
 		self::$return_codes = (object) self::$return_codes;
 		// these are standard in module constructors
 		
+		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
+		services::add_flag( $structure, 'S', chanserv::$help->CS_FLAGS_S );
+		// add any flags defined by the module
+		
 		chanserv::add_help( 'cs_levels', 'help', chanserv::$help->CS_HELP_LEVELS_1, true );
-		// add the help
-			
 		chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL );
+		// add the help
 		
 		if ( ircd::$halfop ) 
 			chanserv::add_help( 'cs_levels', 'help levels', chanserv::$help->CS_HELP_LEVELS_ALL_HOP );

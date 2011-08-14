@@ -17,7 +17,7 @@
 class cs_topic extends module
 {
 	
-	const MOD_VERSION = '0.1.4';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -43,6 +43,12 @@ class cs_topic extends module
 		chanserv::add_help( 'cs_topic', 'help commands', chanserv::$help->CS_HELP_TOPIC_1, true );
 		chanserv::add_help( 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
 		// add the help
+		
+		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
+		services::add_flag( $structure, 't', chanserv::$help->CS_FLAGS_t );
+		services::add_flag( $structure, 'T', chanserv::$help->CS_FLAGS_T );
+		services::add_flag( $structure, 'K', chanserv::$help->CS_FLAGS_K );
+		// add flags implemented by the module, t, T and K
 		
 		chanserv::add_command( 'topic', 'cs_topic', 'topic_command' );
 		// add the commands

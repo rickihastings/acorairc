@@ -56,24 +56,16 @@ class cs_flags extends module
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
 		// add the command
 
-		$structure = array( 'array' => &chanserv::$flags, 'module' => 'cs_flags', 'command' => 'help flags', 'type' => 'csflags' );
+		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
 		services::add_flag( $structure, 'd', chanserv::$help->CS_FLAGS_d );
 		services::add_flag( $structure, 'u', chanserv::$help->CS_FLAGS_u );
 		services::add_flag( $structure, 'e', chanserv::$help->CS_FLAGS_e );
 		services::add_flag( $structure, 'w', chanserv::$help->CS_FLAGS_w );
 		services::add_flag( $structure, 'm', chanserv::$help->CS_FLAGS_m );
-		services::add_flag( $structure, 't', chanserv::$help->CS_FLAGS_t );
-		services::add_flag( $structure, 'S', chanserv::$help->CS_FLAGS_S );
-		services::add_flag( $structure, 'G', chanserv::$help->CS_FLAGS_G, array( 'cs_flags', '_set_flag_g' ), array( 'cs_flags', '_unset_flag_g' ) );
-		services::add_flag( $structure, 'T', chanserv::$help->CS_FLAGS_T );
-		services::add_flag( $structure, 'K', chanserv::$help->CS_FLAGS_K );
-		services::add_flag( $structure, 'L', chanserv::$help->CS_FLAGS_L, array( 'cs_flags', '_set_flag_l' ), array( 'cs_flags', '_unset_flag_l' )  );
-		services::add_flag( $structure, 'I', chanserv::$help->CS_FLAGS_I, array( 'cs_flags', '_set_flag_i' ) );
+		services::add_flag( $structure, 'G', chanserv::$help->CS_FLAGS_G, array( __CLASS__, '_set_flag_g' ), array( __CLASS__, '_unset_flag_g' ) );
+		services::add_flag( $structure, 'L', chanserv::$help->CS_FLAGS_L, array( __CLASS__, '_set_flag_l' ), array( __CLASS__, '_unset_flag_l' )  );
+		services::add_flag( $structure, 'I', chanserv::$help->CS_FLAGS_I, array( __CLASS__, '_set_flag_i' ) );
 		// add our flags :3
-		
-		self::$flags = '+-duewmtSFGTKLI';
-		self::$p_flags = 'duewmt';
-		// flags WITH parameters
 	}
 	
 	/*
@@ -153,7 +145,7 @@ class cs_flags extends module
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )
 		{
-			if ( strpos( self::$flags, $flag ) === false )
+			if ( $flag != '-' && $flag != '+' && !isset( chanserv::$flags[$flag] ) )
 			{
 				$return_data[CMD_RESPONSE][] = services::parse( chanserv::$help->CS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
 				$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_FLAG;
@@ -181,7 +173,7 @@ class cs_flags extends module
 		$param_num = 0;
 		foreach ( str_split( $flags ) as $flag )
 		{
-			if ( strpos( self::$p_flags, $flag ) === false )
+			if ( ctype_upper( $flag ) )
 				continue;
 			// not a parameter-ized flag
 			
@@ -550,7 +542,7 @@ class cs_flags extends module
 		$r_flag = $flag[1];
 		// get the real flag, eg. V, v and mode
 		
-		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
+		if ( ctype_lower( $r_flag ) && $param == '' && $mode == '+' )
 		{
 			$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
@@ -572,7 +564,7 @@ class cs_flags extends module
 			$param_field = 'topicmask';
 		// translate. some craq.
 		
-		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $mode == '+' )
+		if ( ctype_lower( $r_flag ) && $mode == '+' )
 		{
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
@@ -617,7 +609,7 @@ class cs_flags extends module
 				
 				$new_chan_flags = str_replace( $r_flag, '', $chan_flag->flags );
 				
-				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( ctype_lower( $r_flag ) )
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
 				// update the row with the new flags.
 				else
@@ -631,7 +623,7 @@ class cs_flags extends module
 			
 			if ( $mode == '+' )
 			{
-				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( ctype_upper( $r_flag ) )
 				{
 					self::$already_set[$chan] .= $r_flag;
 					// some magic :O
@@ -670,7 +662,7 @@ class cs_flags extends module
 				
 				$new_chan_flags = $chan_flag->flags.$r_flag;
 				
-				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( ctype_upper( $r_flag ) )
 				{
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.

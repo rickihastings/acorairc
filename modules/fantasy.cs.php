@@ -31,7 +31,7 @@ class cs_fantasy extends module
 		modules::init_module( 'cs_fantasy', self::MOD_VERSION, self::MOD_AUTHOR, 'chanserv', 'default' );
 		// these are standard in module constructors
 		
-		$structure = array( 'array' => &chanserv::$flags, 'module' => 'cs_fantasy', 'command' => 'help flags', 'type' => 'csflags' );
+		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
 		services::add_flag( $structure, 'F', chanserv::$help->CS_FLAGS_F );
 	}
 	
