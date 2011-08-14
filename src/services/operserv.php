@@ -17,7 +17,7 @@
 class operserv extends service
 {
 	
-	const SERV_VERSION = '0.1.0';
+	const SERV_VERSION = '0.1.1';
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
@@ -41,9 +41,16 @@ class operserv extends service
 		// load the help file
 		
 		if ( isset( core::$config->operserv ) )
-			ircd::introduce_client( core::$config->operserv->nick, core::$config->operserv->user, core::$config->operserv->host, core::$config->operserv->real );
-		else
-			return;
+		{
+			core::$config->operserv->nick = ( core::$config->operserv->nick != '' ) ? core::$config->operserv->nick : 'OperServ';
+			core::$config->operserv->user = ( core::$config->operserv->user != '' ) ? core::$config->operserv->user : 'operserv';
+			core::$config->operserv->real = ( core::$config->operserv->real != '' ) ? core::$config->operserv->real : 'Operator Services';
+			core::$config->operserv->host = ( core::$config->operserv->host != '' ) ? core::$config->operserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+		}
+		// check if nickserv is enabled
+		
+		ircd::introduce_client( core::$config->operserv->nick, core::$config->operserv->user, core::$config->operserv->host, core::$config->operserv->real );
 		// connect the bot
 		
 		foreach ( core::$config->operserv_modules as $id => $module )

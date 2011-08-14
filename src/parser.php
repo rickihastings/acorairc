@@ -27,7 +27,7 @@ class parser
 	// some vars.
 	
 	static public $required = array( 
-		'server', 'uplink', 'ulined_servers', 'settings', 'database', 'root'
+		'server', 'uplink', 'ulined_servers', 'settings', 'database', 'opers'
 	);
 	// required
 	
@@ -42,7 +42,7 @@ class parser
 	* @params
 	* void
 	*/
-	public function __construct( $filename = '', $check = true )
+	public function __construct( $filename = '' )
 	{
 		if ( $filename != '' )
 		{
@@ -50,12 +50,6 @@ class parser
 			
 			self::parse();
 			// init the parser
-			
-			if ( $check )
-			{
-				self::check();
-				// check values.
-			}
 			
 			self::$config = (array) self::array_to_object( self::$config );
 			core::$config = (object) array_merge( (array) core::$config, self::$config );
@@ -219,33 +213,6 @@ class parser
 			// parse the data inside of { };
 		}
 		// loooop
-	}
-	
-	/*
-	* check
-	* 
-	* @params
-	* void
-	*/
-	static public function check()
-	{
-		foreach ( self::$required as $var => $value )
-		{
-			if ( !isset( self::$config[$value] ) )
-			{
-				core::alog( 'ERROR: '.$value.' is REQUIRED, startup halted', 'BASIC' );
-				core::save_logs();
-				// force a log save.
-			}
-		}
-		// check for required vars
-		
-		if ( is_array( self::$config['chanserv_exception_modules'] ) && !in_array( 'cs_fantasy', self::$config['chanserv_exception_modules'] ) )
-		{
-			if ( !isset( self::$config['fantasy_prefix'] ) )
-				self::$config['fantasy_prefix'] = '!';
-		}
-		// check for undefined vars.
 		
 		foreach ( self::$config as $var => $values )
 		{
@@ -265,6 +232,34 @@ class parser
 			}
 		}
 		// convert 'yes', 'true', '1' and their opposites to booleans
+	}
+	
+	/*
+	* check
+	* 
+	* @params
+	* void
+	*/
+	static public function check()
+	{
+		foreach ( self::$required as $var => $value )
+		{
+			if ( !isset( core::$config->$value ) )
+			{
+				core::alog( 'ERROR: '.$value.' is REQUIRED, startup halted', 'BASIC' );
+				core::save_logs();
+				// force a log save.
+				ircd_handle::shutdown( 'ERROR: '.$value.' is REQUIRED, startup halted', true );
+			}
+		}
+		// check for required vars
+		
+		if ( is_array( core::$config->chanserv_modules ) && in_array( 'cs_fantasy', core::$config->chanserv_modules ) )
+		{
+			if ( !isset( core::$config->chanserv->fantasy_prefix ) )
+				core::$config->chanserv->fantasy_prefix = '!';
+		}
+		// check for undefined vars.
 	}
 	
 	/*

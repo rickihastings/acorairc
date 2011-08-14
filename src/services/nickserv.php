@@ -17,7 +17,7 @@
 class nickserv extends service
 {
 	
-	const SERV_VERSION = '0.1.0';
+	const SERV_VERSION = '0.1.1';
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
@@ -45,9 +45,16 @@ class nickserv extends service
 		self::$help = $help;
 		
 		if ( isset( core::$config->nickserv ) )
-			ircd::introduce_client( core::$config->nickserv->nick, core::$config->nickserv->user, core::$config->nickserv->host, core::$config->nickserv->real );
-		else
-			return;
+		{
+			core::$config->nickserv->nick = ( core::$config->nickserv->nick != '' ) ? core::$config->nickserv->nick : 'NickServ';
+			core::$config->nickserv->user = ( core::$config->nickserv->user != '' ) ? core::$config->nickserv->user : 'nickserv';
+			core::$config->nickserv->real = ( core::$config->nickserv->real != '' ) ? core::$config->nickserv->real : 'Nickname Services';
+			core::$config->nickserv->host = ( core::$config->nickserv->host != '' ) ? core::$config->nickserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+		}
+		// check if nickserv is enabled
+		
+		ircd::introduce_client( core::$config->nickserv->nick, core::$config->nickserv->user, core::$config->nickserv->host, core::$config->nickserv->real );
 		// connect the bot
 		
 		foreach ( core::$config->nickserv_modules as $id => $module )

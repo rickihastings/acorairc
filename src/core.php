@@ -88,6 +88,9 @@ class core
 		// immediately populate log data with some values that will be written to the files first
 		// just a date/divider etc
 		
+		parser::check();
+		// check for required vars etc
+		
 		if ( isset( self::$config->operserv ) ) self::$service_bots[] = 'operserv';
 		if ( isset( self::$config->nickserv ) ) self::$service_bots[] = 'nickserv';
 		if ( isset( self::$config->chanserv ) ) self::$service_bots[] = 'chanserv';

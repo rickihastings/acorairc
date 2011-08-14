@@ -17,7 +17,7 @@
 class chanserv extends service
 {
 	
-	const SERV_VERSION = '0.1.1';
+	const SERV_VERSION = '0.1.2';
 	const SERV_AUTHOR = 'Acora';
 	// service info
 	
@@ -47,9 +47,16 @@ class chanserv extends service
 		// load the help file
 		
 		if ( isset( core::$config->chanserv ) )
-			ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
-		else
-			return;
+		{
+			core::$config->chanserv->nick = ( core::$config->chanserv->nick != '' ) ? core::$config->chanserv->nick : 'ChanServ';
+			core::$config->chanserv->user = ( core::$config->chanserv->user != '' ) ? core::$config->chanserv->user : 'chanserv';
+			core::$config->chanserv->real = ( core::$config->chanserv->real != '' ) ? core::$config->chanserv->real : 'Channel Services';
+			core::$config->chanserv->host = ( core::$config->chanserv->host != '' ) ? core::$config->chanserv->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+		}
+		// check if chanserv is enabled
+		
+		ircd::introduce_client( core::$config->chanserv->nick, core::$config->chanserv->user, core::$config->chanserv->host, core::$config->chanserv->real );
 		// connect the bot
 		
 		foreach ( core::$config->chanserv_modules as $id => $module )

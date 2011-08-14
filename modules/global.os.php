@@ -17,9 +17,15 @@
 class os_global extends module
 {
 	
-	const MOD_VERSION = '0.1.4';
+	const MOD_VERSION = '0.1.5';
 	const MOD_AUTHOR = 'Acora';
 	// module info
+	
+	static public $nick;
+	static public $user;
+	static public $real;
+	static public $host;
+	// user vars
 	
 	static public $return_codes = array(
 		'INVALID_SYNTAX'	=> 1,
@@ -40,7 +46,16 @@ class os_global extends module
 		// these are standard in module constructors
 	
 		if ( isset( core::$config->global ) )
-			ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
+		{
+			self::$nick = core::$config->global->nick = ( core::$config->global->nick != '' ) ? core::$config->global->nick : 'Global';
+			self::$user = core::$config->global->user = ( core::$config->global->user != '' ) ? core::$config->global->user : 'global';
+			self::$real = core::$config->global->real = ( core::$config->global->real != '' ) ? core::$config->global->real : 'Network Announcements';
+			self::$host = core::$config->global->host = ( core::$config->global->host != '' ) ? core::$config->global->host : core::$config->conn->server;
+			// check if nickname and stuff is specified, if not use defaults
+		}
+		// check if global is enabled
+		
+		ircd::introduce_client( core::$config->global->nick, core::$config->global->user, core::$config->global->host, core::$config->global->real );
 		// i decided to change global from a core feature into a module based feature
 		// seen as though global won't do anything really without this module it's going here
 		
@@ -50,6 +65,30 @@ class os_global extends module
 		
 		operserv::add_command( 'global', 'os_global', 'global_command' );
 		// add the command
+	}
+	
+	/*
+	* on_rehash (event)
+	* 
+	* @params
+	* void
+	*/
+	static public function on_rehash()
+	{
+		print 'test';
+	}
+	
+	/*
+	* modunload (private)
+	* 
+	* @params
+	* void
+	*/
+	static public function modunload()
+	{
+		if ( isset( core::$config->global->nick ) || core::$config->global->nick != null )
+			ircd::remove_client( core::$config->global->nick, 'module unloaded' );
+		// remove our global client.
 	}
 	
 	/*
@@ -65,19 +104,6 @@ class os_global extends module
 		
 		core::alog( 'Now sending log messages to '.core::$config->settings->logchan );
 		// tell the chan we're logging shit.
-	}
-	
-	/*
-	* modunload (private)
-	* 
-	* @params
-	* void
-	*/
-	static public function modunload()
-	{
-		if ( isset( core::$config->global->nick ) || core::$config->global->nick != null )
-			ircd::remove_client( core::$config->global->nick, 'module unloaded' );
-		// remove our global client.
 	}
 	
 	/*
