@@ -27,8 +27,9 @@ class services
 	* $help - Help document related to it.
 	* $set_method - A reference to a method to call upon setting of flag (static only)
 	* $unset_method - A reference to a method to call upon unsetting of flag (static only)
+	* $access_privs - An access array, such as array( 'h', 'o', 'a', 'q', 'f', 'S', 'F' )
 	*/
-	static public function add_flag( &$input, $flag, $help, $set_method = null, $unset_method = null )
+	static public function add_flag( &$input, $flag, $help, $set_method = null, $unset_method = null, $access_privs = null )
 	{
 		$hook = &$input['array'];
 		
@@ -38,6 +39,7 @@ class services
 		$data[FLAG_HELP] = $help;
 		$data[FLAG_SET_METHOD] = $set_method;
 		$data[FLAG_UNSET_METHOD] = $unset_method;
+		$data[FLAG_ACCESS_PRIVS] = $access_privs;
 		// set some variables, then send the flag into $hook
 
 		$hook[$flag] = $data;
@@ -53,9 +55,10 @@ class services
 	* sort_flags
 	* 
 	* @params
+	* $hook - either 'chanserv' or 'nickserv'
 	* $type - either 'csflags', 'cslevels' or 'nsflags'
 	*/
-	static public function sort_flags( $type )
+	static public function sort_flags( $hook, $type )
 	{
 		if ( !isset( self::$temp_help[$type] ) ) 
 			return false;
@@ -74,7 +77,10 @@ class services
 		self::$temp_help[$type] = array_merge( $lowercase, $uppercase );
 		
 		foreach ( self::$temp_help[$type] as $flag => $data )
-			chanserv::add_help( $data['module'], $data['command'], $data['help'] );
+		{
+			foreach ( $data['command'] as $command )
+				$hook::add_help( $data['module'], $command, $data['help'] );
+		}
 		// after the modules are loaded, we deal with services::$temp_help, because this will be then populated
 	}
 	

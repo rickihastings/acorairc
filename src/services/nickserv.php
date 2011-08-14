@@ -22,6 +22,7 @@ class nickserv extends service
 	// service info
 	
 	static public $help;
+	static public $flags;
 	// help
 
 	static public $nick_q = array();

@@ -17,7 +17,7 @@
 class ns_flags extends module
 {
 	
-	const MOD_VERSION = '0.1.5';
+	const MOD_VERSION = '0.1.6';
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
@@ -48,18 +48,26 @@ class ns_flags extends module
 		// these are standard in module constructors
 		
 		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_FLAGS_1, true );
-		nickserv::add_help( 'ns_flags', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL );
 		nickserv::add_help( 'ns_flags', 'help', nickserv::$help->NS_HELP_SAFLAGS_1, true, 'nickserv_op' );
 		nickserv::add_help( 'ns_flags', 'help saflags', nickserv::$help->NS_HELP_SAFLAGS_ALL, false, 'nickserv_op' );
 		// add the help
+		
+		nickserv::add_help_fix( 'ns_flags', 'prefix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_PRE );
+		nickserv::add_help_fix( 'ns_flags', 'suffix', 'help flags', nickserv::$help->NS_HELP_FLAGS_ALL_SUF );
+		// add help prefixes and stuff
 		
 		nickserv::add_command( 'flags', 'ns_flags', 'flags_command' );
 		nickserv::add_command( 'saflags', 'ns_flags', 'saflags_command' );
 		// add the command
 		
-		self::$flags = '+-eusSPH';
-		self::$p_flags = 'eus';
-		// flags WITH parameters
+		$flag_structure = array( 'array' => &nickserv::$flags, 'module' => __CLASS__, 'command' => array( 'help flags' ), 'type' => 'nsflags' );
+		services::add_flag( $flag_structure, 'e', nickserv::$help->NS_FLAGS_e );
+		services::add_flag( $flag_structure, 'u', nickserv::$help->NS_FLAGS_u );
+		services::add_flag( $flag_structure, 's', nickserv::$help->NS_FLAGS_s );
+		services::add_flag( $flag_structure, 'S', nickserv::$help->NS_FLAGS_S );
+		services::add_flag( $flag_structure, 'P', nickserv::$help->NS_FLAGS_P );
+		services::add_flag( $flag_structure, 'H', nickserv::$help->NS_FLAGS_H );
+		// add flags
 	}
 	
 	/*
@@ -162,7 +170,7 @@ class ns_flags extends module
 		$flag_a = array();
 		foreach ( str_split( $flags ) as $flag )
 		{
-			if ( strpos( self::$flags, $flag ) === false )
+			if ( $flag != '-' && $flag != '+' && !isset( nickserv::$flags[$flag] ) )
 			{
 				$return_data[CMD_RESPONSE][] = services::parse( nickserv::$help->NS_FLAGS_UNKNOWN, array( 'flag' => $flag ) );
 				$return_data[CMD_FAILCODE] = self::$return_codes->INVALID_FLAG;
@@ -190,7 +198,7 @@ class ns_flags extends module
 		$param_num = 0;
 		foreach ( str_split( $flags ) as $flag )
 		{
-			if ( strpos( self::$p_flags, $flag ) === false )
+			if ( !nickserv::$flags[$flag]['has_param'] )
 				continue;
 			// not a parameter-ized flag
 			
@@ -254,57 +262,21 @@ class ns_flags extends module
 	*/
 	public function _set_flags( $nick, $unick, $flag, $mode, $params, &$return_data )
 	{
-		// paramtized flags (lowercase) ones come first
-	
-		// ----------- e ----------- //
-		if ( $flag == 'e' )
+		if ( isset( nickserv::$flags[$flag] ) )
 		{
-			self::set_flag( $nick, $unick, $mode.'e', $params['e'], $return_data );
-			// e the target in question
+			$flag_data = nickserv::$flags[$flag];
+			// get the flag data
+			
+			self::set_flag( $nick, $unick, $mode.$flag, $params[$flag], $return_data );
+			// pass our data to set_flag
+			
+			if ( $mode == '+' && $flag_data[FLAG_SET_METHOD] != null )
+				call_user_func_array( $flag_data[FLAG_SET_METHOD], array( $nick, $unick, $flag, $mode, $params, $return_data ) );
+			if ( $mode == '-' && $flag_data[FLAG_UNSET_METHOD] != null )
+				call_user_func_array( $flag_data[FLAG_UNSET_METHOD], array( $nick, $unick, $flag, $mode, $params, $return_data ) );
+			// call any set/unset methods
 		}
-		// ----------- e ----------- //
-		
-		// ----------- u ----------- //
-		elseif ( $flag == 'u' )
-		{
-			self::set_flag( $nick, $unick, $mode.'u', $params['u'], $return_data );
-			// u the target in question
-		}
-		// ----------- u ----------- //
-		
-		// ----------- s ----------- //
-		elseif ( $flag == 's' )
-		{
-			self::set_flag( $nick, $unick, $mode.'s', $params['s'], $return_data );
-			// s the target in question
-		}
-		// ----------- s ----------- //
-		
-		// non paramatized flags (uppercase)
-		
-		// ----------- S ----------- //
-		elseif ( $flag == 'S' )
-		{
-			self::set_flag( $nick, $unick, $mode.'S', '', $return_data );
-			// S the target in question
-		}
-		// ----------- S ----------- //
-		
-		// ----------- P ----------- //
-		elseif ( $flag == 'P' )
-		{
-			self::set_flag( $nick, $unick, $mode.'P', '', $return_data );
-			// P the target in question
-		}
-		// ----------- P ----------- //
-		
-		// ----------- H ----------- //
-		elseif ( $flag == 'H' )
-		{
-			self::set_flag( $nick, $unick, $mode.'H', '', $return_data );
-			// H the target in question
-		}
-		// ----------- H ----------- //
+		// check if flag exists
 	}
 	
 	/*
@@ -323,7 +295,7 @@ class ns_flags extends module
 		$r_flag = $flag[1];
 		// get the real flag, eg. V, v and mode
 		
-		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $param == '' && $mode == '+' )
+		if ( nickserv::$flags[$r_flag]['has_param'] && $param == '' && $mode == '+' )
 		{
 			$return_data['FALSE_RESPONSE'] = services::parse( nickserv::$help->NS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
@@ -346,7 +318,7 @@ class ns_flags extends module
 		}
 		// we're not allowed to let +e be unset
 		
-		if ( in_array( $r_flag, str_split( self::$p_flags ) ) && $mode == '+' )
+		if ( nickserv::$flags[$r_flag]['has_param'] && $mode == '+' )
 		{
 			$check_e = database::select( 'users_flags', array( 'id', 'email' ), array( 'email', '=', $param ) );
 			
@@ -388,7 +360,7 @@ class ns_flags extends module
 				
 				$new_nick_flags = str_replace( $r_flag, '', $nick_flag->flags );
 				
-				if ( in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( nickserv::$flags[$r_flag]['has_param'] )
 				{
 					database::update( 'users_flags', array( 'flags' => $new_nick_flags, $param_field => $param ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.
@@ -406,7 +378,7 @@ class ns_flags extends module
 			
 			if ( $mode == '+' )
 			{
-				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( !nickserv::$flags[$r_flag]['has_param'] )
 				{
 					self::$already_set[$target] .= $r_flag;
 					// some magic :O
@@ -445,7 +417,7 @@ class ns_flags extends module
 				
 				$new_nick_flags = $nick_flag->flags.$r_flag;
 				
-				if ( !in_array( $r_flag, str_split( self::$p_flags ) ) )
+				if ( !nickserv::$flags[$r_flag]['has_param'] )
 				{
 					database::update( 'users_flags', array( 'flags' => $new_nick_flags ), array( 'nickname', '=', core::$nicks[$target]['account'] ) );	
 					// update the row with the new flags.

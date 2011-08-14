@@ -21,10 +21,6 @@ class cs_flags extends module
 	const MOD_AUTHOR = 'Acora';
 	// module info
 	
-	static public $flags;
-	static public $p_flags;
-	// valid flags.
-	
 	static public $set = array();
 	static public $not_set = array();
 	static public $already_set = array();
@@ -56,15 +52,19 @@ class cs_flags extends module
 		chanserv::add_command( 'flags', 'cs_flags', 'flags_command' );
 		// add the command
 
-		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
-		services::add_flag( $structure, 'd', chanserv::$help->CS_FLAGS_d );
-		services::add_flag( $structure, 'u', chanserv::$help->CS_FLAGS_u );
-		services::add_flag( $structure, 'e', chanserv::$help->CS_FLAGS_e );
-		services::add_flag( $structure, 'w', chanserv::$help->CS_FLAGS_w );
-		services::add_flag( $structure, 'm', chanserv::$help->CS_FLAGS_m );
-		services::add_flag( $structure, 'G', chanserv::$help->CS_FLAGS_G, array( __CLASS__, '_set_flag_g' ), array( __CLASS__, '_unset_flag_g' ) );
-		services::add_flag( $structure, 'L', chanserv::$help->CS_FLAGS_L, array( __CLASS__, '_set_flag_l' ), array( __CLASS__, '_unset_flag_l' )  );
-		services::add_flag( $structure, 'I', chanserv::$help->CS_FLAGS_I, array( __CLASS__, '_set_flag_i' ) );
+		$level_structure = array( 'array' => &chanserv::$levels, 'module' => __CLASS__, 'command' => array( 'help levels' ), 'type' => 'cslevels' );
+		services::add_flag( $level_structure, 's', chanserv::$help->CS_LEVELS_s, null, null, array( 'S', 'F' ) );
+		// add our access flags
+		
+		$flag_structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => array( 'help flags' ), 'type' => 'csflags' );
+		services::add_flag( $flag_structure, 'd', chanserv::$help->CS_FLAGS_d );
+		services::add_flag( $flag_structure, 'u', chanserv::$help->CS_FLAGS_u );
+		services::add_flag( $flag_structure, 'e', chanserv::$help->CS_FLAGS_e );
+		services::add_flag( $flag_structure, 'w', chanserv::$help->CS_FLAGS_w );
+		services::add_flag( $flag_structure, 'm', chanserv::$help->CS_FLAGS_m );
+		services::add_flag( $flag_structure, 'G', chanserv::$help->CS_FLAGS_G, array( __CLASS__, '_set_flag_g' ), array( __CLASS__, '_unset_flag_g' ) );
+		services::add_flag( $flag_structure, 'L', chanserv::$help->CS_FLAGS_L, array( __CLASS__, '_set_flag_l' ), array( __CLASS__, '_unset_flag_l' )  );
+		services::add_flag( $flag_structure, 'I', chanserv::$help->CS_FLAGS_I, array( __CLASS__, '_set_flag_i' ) );
 		// add our flags :3
 	}
 	
@@ -173,7 +173,7 @@ class cs_flags extends module
 		$param_num = 0;
 		foreach ( str_split( $flags ) as $flag )
 		{
-			if ( ctype_upper( $flag ) )
+			if ( !chanserv::$flags[$flag]['has_param'] )
 				continue;
 			// not a parameter-ized flag
 			
@@ -262,16 +262,6 @@ class cs_flags extends module
 			// call any set/unset methods
 		}
 		// check if flag exists
-	}
-
-	/*
-	* testcase
-	* 
-	* $nick, $chan, $mode, $params, &$return_data
-	*/
-	public function testcase( $nick, $chan, $mode, $params, &$return_data )
-	{
-		print "test\n";
 	}
 
 	/*
@@ -542,7 +532,7 @@ class cs_flags extends module
 		$r_flag = $flag[1];
 		// get the real flag, eg. V, v and mode
 		
-		if ( ctype_lower( $r_flag ) && $param == '' && $mode == '+' )
+		if ( chanserv::$flags[$r_flag]['has_param'] && $param == '' && $mode == '+' )
 		{
 			$return_data['FALSE_RESPONSE'] = services::parse( chanserv::$help->CS_FLAGS_NEEDS_PARAM, array( 'flag' => $flag ) );
 			return false;
@@ -564,7 +554,7 @@ class cs_flags extends module
 			$param_field = 'topicmask';
 		// translate. some craq.
 		
-		if ( ctype_lower( $r_flag ) && $mode == '+' )
+		if ( chanserv::$flags[$r_flag]['has_param'] && $mode == '+' )
 		{
 			if ( $r_flag == 'e' && services::valid_email( $param ) === false )
 			{
@@ -609,7 +599,7 @@ class cs_flags extends module
 				
 				$new_chan_flags = str_replace( $r_flag, '', $chan_flag->flags );
 				
-				if ( ctype_lower( $r_flag ) )
+				if ( chanserv::$flags[$r_flag]['has_param'] )
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags, $param_field => $param ), array( 'channel', '=', $chan ) );	
 				// update the row with the new flags.
 				else
@@ -623,12 +613,12 @@ class cs_flags extends module
 			
 			if ( $mode == '+' )
 			{
-				if ( ctype_upper( $r_flag ) )
+				if ( !chanserv::$flags[$r_flag]['has_param'] )
 				{
 					self::$already_set[$chan] .= $r_flag;
-					// some magic :O
 					return false;
 				}
+				// if it doesn't need a param and is being +'d and its already set..
 				
 				if ( strpos( self::$set[$chan], '+' ) === false )
 					self::$set[$chan] .= '+';
@@ -662,7 +652,7 @@ class cs_flags extends module
 				
 				$new_chan_flags = $chan_flag->flags.$r_flag;
 				
-				if ( ctype_upper( $r_flag ) )
+				if ( !chanserv::$flags[$r_flag]['has_param'] )
 				{
 					database::update( 'chans_flags', array( 'flags' => $new_chan_flags ), array( 'channel', '=', $chan ) );	
 					// update the row with the new flags.

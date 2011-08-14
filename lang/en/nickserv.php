@@ -59,7 +59,7 @@ $help = (object) array(
 	),
 	// SUFFIX
 	
-	'NS_HELP_FLAGS_ALL'		=> array(
+	'NS_HELP_FLAGS_ALL_PRE'		=> array(
 		'=---- {nickserv} Help ----=',
 		'Syntax: FLAGS flags [params]',
 		' ',
@@ -72,21 +72,26 @@ $help = (object) array(
 		'and can only be changed.',
 		' ',
 		'Nickname flags:',
-		'    +u - Associates a url with the nickname.',
-		'    +e - Associates an email address with the nickname.',
-		'    +s - Amount of time it takes before nick protection is enabled, the default',
-		'         is specified in the config file by services admins.',
-		'    +S - Enables nickname security features, which means you must identify',
-		'         within a certain amount of time, settable by +s or your nickname',
-		'         will be changed.',
-		'    +P - When enabled services will send messages to you instead of noticing.',
-		'         you.',
-		'    +H - Whether or not to enable a cloaked hostname, if one is set.',
+	),
+	
+	'NS_HELP_FLAGS_ALL_SUF'	=> array(
 		' ',
 		'More than one flag can be set at once, for example "-P+S". With multiple',
 		'parameters.',
 		'=---- End of {nickserv} Help ----=',
 	),
+	// FLAGS PREFIX & SUFFIX
+	
+	'NS_FLAGS_u' =>			'    +u - Associates a url with the nickname.',
+	'NS_FLAGS_e' =>			'    +e - Associates an email address with the nickname.',
+	'NS_FLAGS_s' =>	array(  '    +s - Amount of time it takes before nick protection is enabled, the default',
+							'         is specified in the config file by services admins.' ),
+	'NS_FLAGS_S' =>	array(  '    +S - Enables nickname security features, which means you must identify',
+							'         within a certain amount of time, settable by +s or your nickname',
+							'         will be changed.' ),
+	'NS_FLAGS_P' =>	array(  '    +P - When enabled services will send messages to you instead of noticing.',
+							'         you.' ),
+	'NS_FLAGS_H' =>			'    +H - Whether or not to enable a cloaked hostname, if one is set.',
 	// NS FLAGS
 	
 	'NS_HELP_SAFLAGS_ALL'		=> array(

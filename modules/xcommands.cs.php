@@ -17,7 +17,7 @@
 class cs_xcommands extends module
 {
 	
-	const MOD_VERSION = '0.1.5';
+	const MOD_VERSION = '0.1.6';
 	const MOD_AUTHOR = 'Acora';
 	
 	static public $return_codes = array(
@@ -151,6 +151,12 @@ class cs_xcommands extends module
 		chanserv::add_command( 'mode', 'cs_xcommands', 'mode_command' );
 		chanserv::add_command( 'sync', 'cs_xcommands', 'sync_command' );
 		// and the rest, voice & mode & sync.
+		
+		$level_structure = array( 'array' => &chanserv::$levels, 'module' => __CLASS__, 'command' => array( 'help levels' ), 'type' => 'cslevels' );
+		services::add_flag( $level_structure, 'i', chanserv::$help->CS_LEVELS_i, null, null, array( 'S', 'F' ) );
+		services::add_flag( $level_structure, 'R', chanserv::$help->CS_LEVELS_R, null, null, array( 'S', 'F' ) );
+		services::add_flag( $level_structure, 'r', chanserv::$help->CS_LEVELS_r, null, null, array( 'S', 'F' ) );
+		// and finally add any flags
 	}
 	
 	/*

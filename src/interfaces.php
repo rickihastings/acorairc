@@ -28,6 +28,7 @@ define( 'FLAG_HELP', 'help' );
 define( 'FLAG_HAS_PARAM', 'has_param' );
 define( 'FLAG_SET_METHOD', 'set_method' );
 define( 'FLAG_UNSET_METHOD', 'unset_method' );
+define( 'FLAG_ACCESS_METHOD', 'access_method' );
 
 /*
 * protocol (interface)
@@ -99,6 +100,7 @@ abstract class service
 		FLAG_HAS_PARAM		=> false,
 		FLAG_SET_METHOD		=> null,
 		FLAG_UNSET_METHOD	=> null,
+		FLAG_ACCESS_PRIVS	=> null,
 	);
 	// setup an array for flag data
 

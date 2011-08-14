@@ -263,7 +263,9 @@ class core
 		// we load core modules before the bots, incase there
 		// is a module that changes an existing function w/e
 		
-		services::sort_flags( 'csflags' );
+		services::sort_flags( 'chanserv', 'csflags' );
+		services::sort_flags( 'chanserv', 'cslevels' );
+		services::sort_flags( 'nickserv', 'nsflags' );
 		// sort flags up
 		
 		database::delete( 'ignored_users', array( 'temp', '=', '1' ) );
@@ -723,9 +725,7 @@ class core
 		$new_ircdata = $ircdata;
 		
 		for ( $i = 0; $i < $number; $i++ )
-		{
 			unset( $new_ircdata[$i] );
-		}
 		// the for loop lets us determine where to go, how many to get etc.. so hard to explain
 		// but so easy to understand when your working with it :P
 		// we reset the variable and unset everything that isnt needed

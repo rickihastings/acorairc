@@ -207,7 +207,7 @@ $help = (object) array(
 						   '         will be kickbanned.' ),
 	// CS FLAGS OTHER
 	
-	'CS_HELP_LEVELS_ALL' 	=> array(
+	'CS_HELP_LEVELS_ALL_PRE' 	=> array(
 		'=---- {chanserv} Help ----=',
 		'Syntax: LEVELS channel flags { nickname | hostmask }',
 		'        LEVELS channel flags { nickname | hostmask } expiry reason',
@@ -226,47 +226,32 @@ $help = (object) array(
 		'channel flags will be displayed.',
 		' ',
 		'Access flags:',
-		'    +k - Grants known-user access.',
-		'    +v - Enables automatic voice.',
 	),
-	// LEVELS START
 	
-	'CS_HELP_LEVELS_ALL_HOP' 	=> array(
-		'    +h - Enables automatic halfop.',
-	),
-	// LEVELS ALL_HOP
-	
-	'CS_HELP_LEVELS_ALL_OP' 	=> array(
-		'    +o - Enables automatic op.',
-	),
-	// LEVELS ALL_OP
-	
-	'CS_HELP_LEVELS_ALL_PRO' 	=> array(
-		'    +a - Enables automatic protect.',
-	),
-	// LEVELS ALL_PRO
-	
-	'CS_HELP_LEVELS_ALL_OWN' 	=> array(
-		'    +q - Enables automatic owner.',
-	),
-	// LEVELS ALL_OWN
-	
-	'CS_HELP_LEVELS_ALL2' 	=> array(
-		'    +s - Enables use of the flags command.',
-		'    +r - Enables use of the kick, kickban, ban and unban commands.',
-		'    +f - Enables modification of channel access lists.',
-		'    +t - Enables use of the topic command.',
-		'    +i - Enables use of the invite command.',
-		'    +R - Enables use of the clear command.',
-		'    +S - Marks user as a sucessor.',
-		'    +F - Grants full founder access.',
-		'    +b - Enables automatic kickban.',
+	'CS_HELP_LEVELS_ALL_SUF'	=> array(
 		' ',
 		'More than one flag can be set at once, for example "-ros+v".',
 		'Only one target can be specified for this command.',
 		'=---- End of {chanserv} Help ----=',
 	),
-	// LEVELS END
+	// LEVELS PREFIX & SUFFIX
+
+	'CS_LEVELS_k'	=> '    +k - Grants known-user access.',
+	'CS_LEVELS_v'	=> '    +v - Enables automatic voice.',
+	'CS_LEVELS_h' 	=> '    +h - Enables automatic halfop.',
+	'CS_LEVELS_o' 	=> '    +o - Enables automatic op.',
+	'CS_LEVELS_a' 	=> '    +a - Enables automatic protect.',
+	'CS_LEVELS_q' 	=> '    +q - Enables automatic owner.',
+	'CS_LEVELS_s' 	=> '    +s - Enables use of the flags command.',
+	'CS_LEVELS_r' 	=> '    +r - Enables use of the kick, kickban, ban and unban commands.',
+	'CS_LEVELS_f' 	=> '    +f - Enables modification of channel access lists.',
+	'CS_LEVELS_t' 	=> '    +t - Enables use of the topic command.',
+	'CS_LEVELS_i' 	=> '    +i - Enables use of the invite command.',
+	'CS_LEVELS_R' 	=> '    +R - Enables use of the clear command.',
+	'CS_LEVELS_S' 	=> '    +S - Marks user as a sucessor.',
+	'CS_LEVELS_F' 	=> '    +F - Grants full founder access.',
+	'CS_LEVELS_b' 	=> '    +b - Enables automatic kickban.',
+	// LEVELS FLAGS
 	
 	'CS_HELP_LIST_ALL' 		=> array(
 		'=---- {chanserv} Help ----=',

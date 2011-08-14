@@ -44,10 +44,14 @@ class cs_topic extends module
 		chanserv::add_help( 'cs_topic', 'help topic', chanserv::$help->CS_HELP_TOPIC_ALL );
 		// add the help
 		
-		$structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => 'help flags', 'type' => 'csflags' );
-		services::add_flag( $structure, 't', chanserv::$help->CS_FLAGS_t );
-		services::add_flag( $structure, 'T', chanserv::$help->CS_FLAGS_T );
-		services::add_flag( $structure, 'K', chanserv::$help->CS_FLAGS_K );
+		$level_structure = array( 'array' => &chanserv::$levels, 'module' => __CLASS__, 'command' => array( 'help levels' ), 'type' => 'cslevels' );
+		services::add_flag( $level_structure, 't', chanserv::$help->CS_LEVELS_t, null, null, array( 'S', 'F' ) );
+		// add our access flags
+		
+		$flag_structure = array( 'array' => &chanserv::$flags, 'module' => __CLASS__, 'command' => array( 'help flags' ), 'type' => 'csflags' );
+		services::add_flag( $flag_structure, 't', chanserv::$help->CS_FLAGS_t );
+		services::add_flag( $flag_structure, 'T', chanserv::$help->CS_FLAGS_T );
+		services::add_flag( $flag_structure, 'K', chanserv::$help->CS_FLAGS_K );
 		// add flags implemented by the module, t, T and K
 		
 		chanserv::add_command( 'topic', 'cs_topic', 'topic_command' );
