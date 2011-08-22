@@ -131,13 +131,9 @@ class timer
 					if ( is_callable( array( $class, $method ), true ) && method_exists( $class, $method ) )
 					{
 						if ( $params == '' )
-						{
 							call_user_func_array( array( $class, $method ) );
-						}
 						else
-						{
 							call_user_func_array( array( $class, $method ), $params );
-						}
 					}
 					// execute the callback, with parameters if defined.
 					
