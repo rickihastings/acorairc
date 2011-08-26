@@ -166,15 +166,12 @@ foreach ( $contents as $line => $data )
 }
 // loop data
 
-print count( $data_users )."\r\n";
+/*print count( $data_users )."\r\n";
 print count( $data_user_flags )."\r\n";
 print count( $data_channels )."\r\n";
 print count( $data_chan_flags )."\r\n";
-print count( $data_chan_levels )."\r\n";
+print count( $data_chan_levels )."\r\n";*/
 
-/*mysql_close( $dblink );
-/*mysql_close( $dblink );
-// close our connection to the anope datbase
 $dblink = mysql_connect( $mysql_host, $mysql_user, $mysql_pass );
 mysql_select_db( $acora_db, $dblink );
 // connect to the acora database.
@@ -219,6 +216,6 @@ foreach ( $data_chan_flags as $channel => $array )
 }
 // insert our access
 
-mysql_close( $dblink );*/
+mysql_close( $dblink );
 
 // EOF;
